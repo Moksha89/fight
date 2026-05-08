@@ -187,7 +187,7 @@ a[title="Reset Password"] { background: #F3F4F6 !important; color: #374151 !impo
 input, select, textarea {
     background: #FFFFFF !important; border: 1px solid #D1D5DB !important;
     color: #1a1a1a !important; border-radius: 6px !important;
-    padding: 10px 14px !important; font-size: 14px !important;
+    padding: 7px 10px !important; font-size: 13px !important;
     height: auto !important;
 }
 input:focus, select:focus, textarea:focus {
@@ -419,7 +419,7 @@ input[type="search"]::placeholder, input[name="q"]::placeholder,
 input.validate::placeholder, #icon_prefix::placeholder {
     color: #9CA3AF !important;
 }
-.input-field { margin-top: 8px !important; margin-bottom: 8px !important; }
+.input-field { margin-top: 4px !important; margin-bottom: 4px !important; }
 .input-field label { color: #6B7280 !important; font-size: 13px !important; }
 .input-field label.active { color: #C5930A !important; transform: translateY(-14px) scale(0.8) !important; }
 .input-field input:focus { border-bottom: none !important; box-shadow: none !important; }
@@ -565,11 +565,40 @@ fieldset {
     padding: 0 !important;
 }
 fieldset .form-row, fieldset .field-box {
-    padding: 14px 20px !important; border-bottom: 1px solid #F3F4F6 !important;
+    padding: 10px 20px !important; border-bottom: 1px solid #F3F4F6 !important;
+    display: flex !important; flex-wrap: wrap !important; gap: 12px !important;
+    align-items: flex-start !important;
+}
+fieldset .form-row > .input-field,
+fieldset .form-row > .field-box,
+fieldset .form-row > div {
+    flex: 1 1 200px !important; min-width: 0 !important;
+}
+fieldset .form-row > .input-field.checkbox-row {
+    flex: 0 0 auto !important;
+}
+fieldset .form-row input[type="text"],
+fieldset .form-row input[type="number"],
+fieldset .form-row input[type="url"],
+fieldset .form-row input[type="email"],
+fieldset .form-row input[type="password"],
+fieldset .form-row textarea,
+fieldset .form-row select {
+    width: 100% !important; box-sizing: border-box !important;
 }
 fieldset label {
-    color: #374151 !important; font-size: 13px !important;
-    font-weight: 500 !important;
+    color: #374151 !important; font-size: 12px !important;
+    font-weight: 500 !important; margin-bottom: 3px !important;
+    display: block !important;
+}
+fieldset .form-row .help {
+    font-size: 11px !important; color: #9CA3AF !important;
+    margin-top: 2px !important;
+}
+@media (max-width: 768px) {
+    fieldset .form-row { flex-direction: column !important; }
+    fieldset .form-row > .input-field,
+    fieldset .form-row > div { flex: 1 1 100% !important; }
 }
 
 /* ============ SELECT2 ============ */
