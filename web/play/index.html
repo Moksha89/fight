@@ -6,6 +6,7 @@
     <title>Kokoroko - Play</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -823,6 +824,23 @@
         }
         .wo-loser-rooster.left { left: 15%; top: 40%; }
         .wo-loser-rooster.right { right: 15%; top: 40%; }
+        /* Lottie Winner Animation */
+        .lottie-winner-overlay {
+            position: fixed; inset: 0; z-index: 99998;
+            background: rgba(0,0,0,0.88); backdrop-filter: blur(6px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            animation: overlayFadeIn 0.3s ease;
+            cursor: pointer;
+        }
+        .lottie-winner-container {
+            width: min(85vw, 480px); aspect-ratio: 1/1;
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 20px 80px rgba(212,168,67,0.2), 0 0 0 2px rgba(212,168,67,0.3);
+        }
+        .lottie-winner-label {
+            margin-top: 16px; font-size: 14px; color: rgba(255,255,255,0.4);
+            letter-spacing: 1px;
+        }
         /* Confetti */
         .confetti-piece {
             position: fixed; width: 10px; height: 10px; z-index: 10000;
@@ -1916,17 +1934,22 @@
     function showWinnerCelebration(winTeam, fightNum) {
         const names = {1:'Meron', 2:'Wala', 3:'Draw'};
         const cls = {1:'meron', 2:'wala', 3:'draw'};
-        const loser = winTeam === 1 ? 2 : winTeam === 2 ? 1 : 0;
         const winName = names[winTeam] || 'Unknown';
-        const winCls = cls[winTeam] || '';
-        const loserCls = cls[loser] || '';
-        const winImg = winTeam === 1 ? '/static/red_roaster.png' : winTeam === 2 ? '/static/blue_roaster.png' : '';
-        const loseImg = loser === 1 ? '/static/red_roaster.png' : loser === 2 ? '/static/blue_roaster.png' : '';
 
         // Spawn confetti
         spawnConfetti(winTeam);
 
-        // Create overlay
+        // Red (Meron) wins — show Lottie animation
+        if (winTeam === 1 && typeof lottie !== 'undefined') {
+            showLottieWinner(fightNum);
+            return;
+        }
+
+        // Blue/Draw — use original overlay
+        const loser = winTeam === 1 ? 2 : winTeam === 2 ? 1 : 0;
+        const winCls = cls[winTeam] || '';
+        const winImg = winTeam === 2 ? '/static/blue_roaster.png' : '';
+        const loseImg = loser === 1 ? '/static/red_roaster.png' : loser === 2 ? '/static/blue_roaster.png' : '';
         const overlay = document.createElement('div');
         overlay.className = 'winner-overlay';
         overlay.onclick = () => { overlay.remove(); };
@@ -1942,12 +1965,34 @@
             </div>
         `;
         document.body.appendChild(overlay);
-
-        // Spark burst effect
         spawnSparks(winTeam);
-
-        // Auto-dismiss after 5 seconds
         setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 5000);
+    }
+
+    function showLottieWinner(fightNum) {
+        const overlay = document.createElement('div');
+        overlay.className = 'lottie-winner-overlay';
+        const container = document.createElement('div');
+        container.className = 'lottie-winner-container';
+        overlay.appendChild(container);
+        const label = document.createElement('div');
+        label.className = 'lottie-winner-label';
+        label.textContent = `Fight #${fightNum || '?'} — Tap to dismiss`;
+        overlay.appendChild(label);
+        overlay.onclick = () => { anim.destroy(); overlay.remove(); };
+        document.body.appendChild(overlay);
+        const anim = lottie.loadAnimation({
+            container: container,
+            renderer: 'svg',
+            loop: false,
+            autoplay: true,
+            path: '/static/rooster_fight_lottie.json'
+        });
+        anim.addEventListener('complete', () => {
+            setTimeout(() => { if (overlay.parentNode) { anim.destroy(); overlay.remove(); } }, 2000);
+        });
+        // Fallback auto-dismiss after 8 seconds
+        setTimeout(() => { if (overlay.parentNode) { anim.destroy(); overlay.remove(); } }, 8000);
     }
 
     function spawnConfetti(winTeam) {
