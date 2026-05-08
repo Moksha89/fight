@@ -112,6 +112,9 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
 .sb-item:hover i { opacity: 1; color: #FFF; }
 .sb-item.active i { opacity: 1; color: #C5930A; }
 .sb-divider { height: 1px; background: #222; margin: 8px 16px; }
+.sb-badge { display: none; margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 10px; font-weight: 700; line-height: 18px; text-align: center; color: #FFF; background: #ef4444; }
+.sb-badge.sb-badge-green { background: #10b981; }
+.sb-badge.has-count { display: inline-block; }
 
 /* ============ HEADER (White) ============ */
 .header-title { color: #111; font-size: 20px; font-weight: 600; }
@@ -1072,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<div class="sb-section">' +
         '<div class="sb-title">Management</div>' +
         '<a href="/userManager/user/?is_staff__exact=0" class="sb-item" data-path="/userManager/user/"><i>people</i>Users</a>' +
-        '<a href="/cockfightManager/cockfightmatch/" class="sb-item" data-path="/cockfightManager/cockfightmatch/"><i>live_tv</i>Cockfight Matches</a>' +
+        '<a href="/cockfightManager/cockfightmatch/" class="sb-item" data-path="/cockfightManager/cockfightmatch/"><i>live_tv</i>Cockfight Matches<span class="sb-badge sb-badge-green" id="badge-live"></span></a>' +
         '<a href="/cockfightManager/cockfightautomatch/" class="sb-item" data-path="/cockfightManager/cockfightautomatch/"><i>public</i>China Market</a>' +
         '<a href="/cockfightManager/livesession/" class="sb-item" data-path="/cockfightManager/livesession/"><i>videocam</i>Live Sessions</a>' +
         '<a href="/cockfightManager/oddsconfig/" class="sb-item" data-path="/cockfightManager/oddsconfig/"><i>trending_up</i>Odds Config</a>' +
@@ -1084,8 +1087,8 @@ document.addEventListener('DOMContentLoaded', function() {
         '<div class="sb-section">' +
         '<div class="sb-title">Finance</div>' +
         '<a href="/wallet/wallet/" class="sb-item" data-path="/wallet/wallet/"><i>account_balance_wallet</i>Wallets</a>' +
-        '<a href="/wallet/depositrequest/" class="sb-item" data-path="/wallet/depositrequest/"><i>savings</i>Deposit Requests</a>' +
-        '<a href="/wallet/withdrawalrequest/" class="sb-item" data-path="/wallet/withdrawalrequest/"><i>payments</i>Withdrawal Requests</a>' +
+        '<a href="/wallet/depositrequest/" class="sb-item" data-path="/wallet/depositrequest/"><i>savings</i>Deposit Requests<span class="sb-badge" id="badge-dep"></span></a>' +
+        '<a href="/wallet/withdrawalrequest/" class="sb-item" data-path="/wallet/withdrawalrequest/"><i>payments</i>Withdrawal Requests<span class="sb-badge" id="badge-wd"></span></a>' +
         '<a href="/wallet/wallethistory/" class="sb-item" data-path="/wallet/wallethistory/"><i>history</i>Transactions</a>' +
         '<a href="/wallet/paymentqr/" class="sb-item" data-path="/wallet/paymentqr/"><i>qr_code</i>QR Manager</a>' +
         '<a href="/wallet/paymentbankaccount/" class="sb-item" data-path="/wallet/paymentbankaccount/"><i>account_balance</i>Bank Accounts</a>' +
@@ -1105,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         '<div class="sb-section">' +
         '<div class="sb-title">Reports</div>' +
-        '<a href="/cockfightManager/cockfightmatchbet/" class="sb-item" data-path="/cockfightManager/cockfightmatchbet/"><i>analytics</i>Bet History</a>' +
+        '<a href="/cockfightManager/cockfightmatchbet/" class="sb-item" data-path="/cockfightManager/cockfightmatchbet/"><i>analytics</i>Bet History<span class="sb-badge" id="badge-bets"></span></a>' +
         '<a href="/wallet/bonusrange/" class="sb-item" data-path="/wallet/bonusrange/"><i>redeem</i>Bonus Ranges</a>' +
         '</div>' +
 
@@ -1395,5 +1398,163 @@ function toggleSidebar() {
     sb.classList.toggle('open');
     if (bd) bd.classList.toggle('show');
 }
+
+// ===== REAL-TIME AUTO-REFRESH FOR ALL ADMIN PAGES =====
+document.addEventListener('DOMContentLoaded', function() {
+(function() {
+    var REFRESH_INTERVAL = 10000; // 10 seconds
+    var DASHBOARD_INTERVAL = 8000; // 8 seconds for dashboard stats
+
+    // Pulse animation
+    var pulseStyle = document.createElement('style');
+    pulseStyle.textContent = '@keyframes livePulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }';
+    document.head.appendChild(pulseStyle);
+
+    // Create refresh indicator
+    var indicator = document.createElement('div');
+    indicator.id = 'live-refresh-indicator';
+    indicator.style.cssText = 'position:fixed;top:8px;right:8px;z-index:99999;background:#10b981;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;display:flex;align-items:center;gap:5px;opacity:0.85;pointer-events:none;transition:opacity 0.3s;';
+    indicator.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;animation:livePulse 1.5s infinite;"></span> LIVE';
+    document.body.appendChild(indicator);
+
+    // Flash indicator on refresh
+    function flashIndicator() {
+        indicator.style.opacity = '1';
+        indicator.style.background = '#C5930A';
+        setTimeout(function() { indicator.style.background = '#10b981'; indicator.style.opacity = '0.85'; }, 400);
+    }
+
+    // Sidebar badge counts - fetch and update
+    function updateSidebarCounts() {
+        fetch('/admin-api/sidebar-counts/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                function setBadge(id, count) {
+                    var el = document.getElementById(id);
+                    if (!el) return;
+                    if (count > 0) {
+                        el.textContent = count;
+                        el.classList.add('has-count');
+                    } else {
+                        el.textContent = '';
+                        el.classList.remove('has-count');
+                    }
+                }
+                setBadge('badge-dep', data.pending_deposits || 0);
+                setBadge('badge-wd', data.pending_withdrawals || 0);
+                setBadge('badge-live', data.live_matches || 0);
+                setBadge('badge-bets', data.pending_bets || 0);
+            })
+            .catch(function() {});
+    }
+    updateSidebarCounts();
+    setInterval(updateSidebarCounts, 10000);
+
+    // Auto-refresh ALL list pages (deposit requests, withdrawal requests, bets, matches, wallets, etc.)
+    // Detect list pages: has result_list, changelist-form, or is a list URL (no /add/ or /change/)
+    var resultTable = document.getElementById('result_list');
+    var changelistForm = document.getElementById('changelist-form');
+    var path = window.location.pathname;
+    var isListPage = resultTable || changelistForm || (path.match(/^\/[^/]+\/[^/]+\/$/) && !path.includes('/add/') && !path.includes('/change/'));
+    if (isListPage) {
+        setInterval(function() {
+            var url = window.location.href;
+            fetch(url, { credentials: 'same-origin' })
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    // Update the results table if it exists
+                    var newTable = doc.getElementById('result_list');
+                    var curTable = document.getElementById('result_list');
+                    if (newTable && curTable) {
+                        curTable.innerHTML = newTable.innerHTML;
+                    } else if (!curTable && newTable) {
+                        // Table appeared (new items came in) — update the full content area
+                        var newContent = doc.getElementById('content') || doc.getElementById('content-main');
+                        var curContent = document.getElementById('content') || document.getElementById('content-main');
+                        if (newContent && curContent) curContent.innerHTML = newContent.innerHTML;
+                    }
+                    // Update result count/pagination
+                    var newPag = doc.querySelector('.paginator');
+                    var curPag = document.querySelector('.paginator');
+                    if (newPag && curPag) curPag.innerHTML = newPag.innerHTML;
+                    // Update action counters if present
+                    var newCount = doc.querySelector('.actions .action-counter');
+                    var curCount = document.querySelector('.actions .action-counter');
+                    if (newCount && curCount) curCount.textContent = newCount.textContent;
+                    // Update changelist content area for empty → non-empty transitions
+                    var newCLForm = doc.getElementById('changelist-form');
+                    var curCLForm = document.getElementById('changelist-form');
+                    if (newCLForm && curCLForm) curCLForm.innerHTML = newCLForm.innerHTML;
+                    else if (newCLForm && !curCLForm) {
+                        var newC = doc.getElementById('content') || doc.getElementById('content-main');
+                        var curC = document.getElementById('content') || document.getElementById('content-main');
+                        if (newC && curC) curC.innerHTML = newC.innerHTML;
+                    }
+                    flashIndicator();
+                })
+                .catch(function() {});
+        }, REFRESH_INTERVAL);
+    }
+
+    // Auto-refresh dashboard stats
+    var dashEl = document.getElementById('stat-users');
+    if (dashEl && typeof loadDashboardStats === 'function') {
+        setInterval(function() {
+            var activeBtn = document.querySelector('.filter-btn.active');
+            var days = activeBtn ? activeBtn.getAttribute('data-days') : '7';
+            loadDashboardStats(days || '7');
+            flashIndicator();
+        }, DASHBOARD_INTERVAL);
+    }
+
+    // Auto-refresh change_form pages (individual edit pages) — update action log, readonly fields
+    var changeForm = document.getElementById('content-main');
+    var isChangeForm = changeForm && !resultTable && window.location.pathname.indexOf('/change') !== -1;
+    if (isChangeForm) {
+        setInterval(function() {
+            fetch(window.location.href, { credentials: 'same-origin' })
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    // Update readonly fields and action log
+                    var newLog = doc.querySelector('.object-history, .timeline');
+                    var curLog = document.querySelector('.object-history, .timeline');
+                    if (newLog && curLog) curLog.innerHTML = newLog.innerHTML;
+                    // Update readonly/display fields
+                    doc.querySelectorAll('.readonly, .field-status .readonly').forEach(function(newEl) {
+                        var fieldName = newEl.closest('.form-row, .field-box');
+                        if (fieldName) {
+                            var cls = fieldName.className;
+                            var cur = document.querySelector('.' + cls.split(' ').join('.') + ' .readonly');
+                            if (cur) cur.innerHTML = newEl.innerHTML;
+                        }
+                    });
+                    flashIndicator();
+                })
+                .catch(function() {});
+        }, REFRESH_INTERVAL);
+    }
+
+    // Auto-refresh the odds config page
+    if (window.location.pathname.indexOf('oddsconfig') !== -1) {
+        setInterval(function() {
+            fetch(window.location.href, { credentials: 'same-origin' })
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var newContent = doc.getElementById('kokoroko-content') || doc.getElementById('content-main');
+                    var curContent = document.getElementById('kokoroko-content') || document.getElementById('content-main');
+                    if (newContent && curContent) curContent.innerHTML = newContent.innerHTML;
+                    flashIndicator();
+                })
+                .catch(function() {});
+        }, 15000);
+    }
+})();
+});
 </script>
 {% endblock %}
