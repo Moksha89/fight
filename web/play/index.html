@@ -1000,8 +1000,11 @@
                 z-index: 94; display: none;
             }
             .sidebar-overlay.show { display: block; }
-            .banner-carousel { height: 150px; }
-            .banner-content h3 { font-size: 18px; }
+            .banner-carousel { height: 140px; border-radius: 10px; }
+            .banner-slide { padding: 14px 16px; }
+            .banner-content h3 { font-size: 15px; margin-bottom: 4px; }
+            .banner-content p { font-size: 11px; }
+            .banner-content .banner-cta { padding: 6px 14px; font-size: 11px; margin-top: 6px; }
             .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 8px; }
             .quick-action { padding: 10px 4px; }
             .quick-action .qa-icon { width: 36px; height: 36px; font-size: 18px; }
@@ -1023,6 +1026,45 @@
             box-shadow: var(--shadow-sm);
         }
         .info-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Custom Confirm Modal */
+        .confirm-overlay {
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            animation: confirmFadeIn 0.2s ease;
+        }
+        @keyframes confirmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .confirm-box {
+            background: #1e1e1e; border: 1px solid rgba(212,168,67,0.3);
+            border-radius: 16px; padding: 28px 24px 20px; width: 90%; max-width: 380px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(212,168,67,0.08);
+            animation: confirmSlideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            text-align: center;
+        }
+        @keyframes confirmSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .confirm-icon { font-size: 40px; margin-bottom: 12px; }
+        .confirm-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .confirm-msg { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5; margin-bottom: 24px; }
+        .confirm-btns { display: flex; gap: 10px; }
+        .confirm-btn {
+            flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+            cursor: pointer; border: none; transition: all .15s; letter-spacing: 0.3px;
+        }
+        .confirm-btn.cancel {
+            background: #2a2a2a; color: rgba(255,255,255,0.7); border: 1px solid #333;
+        }
+        .confirm-btn.cancel:hover { background: #333; color: #fff; }
+        .confirm-btn.ok {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+        }
+        .confirm-btn.ok:hover { filter: brightness(1.1); }
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+        }
+        .confirm-btn.danger:hover { filter: brightness(1.1); }
     </style>
 </head>
 <body>
@@ -1255,7 +1297,7 @@
                         <div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">
                             <span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>
                             <img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>
-                            <img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));transform:scaleX(-1);margin-left:-8px;"/>
+                            <img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>
                         </div>
                         <div class="game-card-body">
                             <h4>Cockfight Betting</h4>
@@ -1609,6 +1651,27 @@
     </a>
 
     <script>
+    // Custom confirm modal (replaces browser confirm())
+    function customConfirm(message, {title = 'Confirm', icon = '⚡', okText = 'Confirm', cancelText = 'Cancel', danger = false} = {}) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'confirm-overlay';
+            overlay.innerHTML = `<div class="confirm-box">
+                <div class="confirm-icon">${icon}</div>
+                <div class="confirm-title">${title}</div>
+                <div class="confirm-msg">${message}</div>
+                <div class="confirm-btns">
+                    <button class="confirm-btn cancel" id="cmod-cancel">${cancelText}</button>
+                    <button class="confirm-btn ${danger ? 'danger' : 'ok'}" id="cmod-ok">${okText}</button>
+                </div>
+            </div>`;
+            document.body.appendChild(overlay);
+            overlay.querySelector('#cmod-ok').onclick = () => { overlay.remove(); resolve(true); };
+            overlay.querySelector('#cmod-cancel').onclick = () => { overlay.remove(); resolve(false); };
+            overlay.onclick = (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } };
+        });
+    }
+
     const API = '/api';
     let token = localStorage.getItem('access_token');
     let userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
@@ -2238,7 +2301,7 @@
         if (!amount || parseFloat(amount) < 10) { showToast('Minimum bet is ₹10', 'error'); return; }
         const slider = document.getElementById('auto-ratio-slider');
         const ratio = slider ? parseFloat(slider.value) : 0.80;
-        if (!confirm(`Place ₹${amount} bet on ${selectedBets['auto'].teamName} at ${ratio}x?`)) return;
+        if (!await customConfirm(`Place <b>₹${amount}</b> bet on <b>${selectedBets['auto'].teamName}</b> at <b>${ratio}x</b>?`, {title: 'Place Bet', icon: '🎰', okText: 'Place Bet'})) return;
         try {
             const res = await fetch(`${API}/cockfight/bets/place-bet/`, {
                 method: 'POST',
@@ -2423,7 +2486,7 @@
         if (!selectedBets[matchId]) { showToast('Select a team first', 'error'); return; }
         const amount = document.getElementById(`bet-amt-${matchId}`).value;
         if (!amount || amount < 10) { showToast('Minimum bet is ₹10', 'error'); return; }
-        if (!confirm(`Place ₹${amount} bet on ${selectedBets[matchId].teamName}?`)) return;
+        if (!await customConfirm(`Place <b>₹${amount}</b> bet on <b>${selectedBets[matchId].teamName}</b>?`, {title: 'Place Bet', icon: '🎰', okText: 'Place Bet'})) return;
         try {
             const res = await fetch(`${API}/cockfight/bets/place-bet/`, {
                 method: 'POST',
@@ -2641,7 +2704,7 @@
         } catch(e) {}
     }
     async function cancelDeposit() {
-        if (!confirm('Cancel your pending deposit request?')) return;
+        if (!await customConfirm('Cancel your pending deposit request?', {title: 'Cancel Deposit', icon: '⚠️', okText: 'Yes, Cancel', danger: true})) return;
         try {
             await fetch(`${API}/wallet/deposit/current/`, {method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
             showToast('Deposit request cancelled', 'success');
@@ -2777,7 +2840,7 @@
         } catch(e) {}
     }
     async function cancelWithdraw() {
-        if (!confirm('Cancel your withdrawal? Amount will be refunded to wallet.')) return;
+        if (!await customConfirm('Cancel your withdrawal? Amount will be refunded to wallet.', {title: 'Cancel Withdrawal', icon: '⚠️', okText: 'Yes, Cancel', danger: true})) return;
         try {
             await fetch(`${API}/wallet/withdrawal/current/`, {method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
             showToast('Withdrawal cancelled, amount refunded', 'success');
@@ -2799,7 +2862,7 @@
             body.ifsc_code = document.getElementById('wd-ifsc').value.trim();
             if (!body.account_holder_name || !body.account_number || !body.ifsc_code) { showToast('Fill all bank details', 'error'); return; }
         }
-        if (!confirm(`Withdraw ₹${amount} via ${wdType==='U'?'UPI':'Bank Transfer'}?`)) return;
+        if (!await customConfirm(`Withdraw <b>₹${amount}</b> via <b>${wdType==='U'?'UPI':'Bank Transfer'}</b>?`, {title: 'Confirm Withdrawal', icon: '💸', okText: 'Withdraw'})) return;
         try {
             const res = await fetch(`${API}/wallet/withdrawal/`, {method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
             const data = await res.json();
@@ -2897,7 +2960,7 @@
         if (!selectedDice[matchId]) { showToast('Select a dice face', 'error'); return; }
         const amount = document.getElementById('bet-amt-dice-'+matchId).value;
         if (!amount || amount < 10) { showToast('Minimum bet ₹10', 'error'); return; }
-        if (!confirm(`Place ₹${amount} on dice face ${selectedDice[matchId]}?`)) return;
+        if (!await customConfirm(`Place <b>₹${amount}</b> on dice face <b>${selectedDice[matchId]}</b>?`, {title: 'Place Dice Bet', icon: '🎲', okText: 'Place Bet'})) return;
         try {
             const res = await fetch(`${API}/dice-play/bets/place-bet/`, {
                 method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
@@ -2933,9 +2996,10 @@
             let result = 'pending', resultCls = 'pending';
             if (b.matchWinStatus === 1) { result = 'Won'; resultCls = 'won'; }
             else if (b.matchWinStatus === 2) { result = 'Lost'; resultCls = 'lost'; }
+            const fightNum = b.matchNumber || b.match_number || b.matchId || '';
             html += `<div class="bet-item">
                 <div class="bet-team ${cls}">${team}</div>
-                <div class="bet-info">₹${b.amount} at ${b.betRatio}x${b.matchType==='A'?' (China)':''}</div>
+                <div class="bet-info">${fightNum ? `#${fightNum} · ` : ''}₹${b.amount} at ${b.betRatio}x${b.matchType==='A'?' (China)':''}</div>
                 <div class="bet-result ${resultCls}">${result}</div>
             </div>`;
         });
