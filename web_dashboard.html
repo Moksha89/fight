@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kokoroko - Play</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --gold: #d4a843;
+            --gold-dark: #b8922e;
+            --gold-light: #f0d78c;
+            --gold-bg: #fdf8ec;
+            --black: #1a1a1a;
+            --black-light: #2d2d2d;
+            --bg: #f5f5f5;
+            --bg-white: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --border: #e5e7eb;
+            --border-light: #f0f0f0;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+            --sidebar-width: 240px;
+            --header-height: 60px;
+        }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .hidden { display: none !important; }
+
+        /* ===== AUTH ===== */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #fdf8ec 0%, #f5f5f5 50%, #fff 100%);
+        }
+        .auth-card {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: 36px 28px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+        }
+        .auth-logo { text-align: center; margin-bottom: 28px; }
+        .auth-logo img { width: 56px; height: 56px; border-radius: 14px; margin-bottom: 12px; }
+        .auth-logo h1 { font-size: 22px; font-weight: 800; color: var(--black); letter-spacing: -0.5px; }
+        .auth-logo p { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 24px;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 3px;
+        }
+        .auth-tab {
+            flex: 1; padding: 10px; text-align: center; border-radius: 8px;
+            cursor: pointer; font-size: 13px; font-weight: 600;
+            color: var(--text-secondary); transition: all 0.25s;
+        }
+        .auth-tab.active {
+            background: var(--black);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block; font-size: 11px; font-weight: 600;
+            color: var(--text-secondary); margin-bottom: 5px;
+            text-transform: uppercase; letter-spacing: 0.8px;
+        }
+        .form-group input {
+            width: 100%; padding: 12px 14px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text-primary);
+            font-size: 14px; font-family: inherit;
+            transition: border 0.2s; outline: none;
+        }
+        .form-group input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212,168,67,0.15);
+        }
+        .form-group input::placeholder { color: var(--text-muted); }
+
+        .auth-btn {
+            width: 100%; padding: 13px;
+            background: var(--black);
+            color: white; border: none; border-radius: 10px;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            font-family: inherit; margin-top: 8px;
+        }
+        .auth-btn:hover { background: var(--black-light); transform: translateY(-1px); box-shadow: var(--shadow); }
+
+        .auth-error {
+            background: #fef2f2; border: 1px solid #fecaca;
+            color: var(--danger); padding: 10px 14px;
+            border-radius: 8px; font-size: 12px;
+            margin-bottom: 14px; display: none;
+        }
+        .otp-section { margin-top: 14px; }
+        .otp-row { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+        .otp-row input {
+            width: 42px; height: 46px; text-align: center;
+            font-size: 18px; font-weight: 600;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text-primary); outline: none;
+        }
+        .otp-row input:focus { border-color: var(--gold); }
+
+        /* ===== APP LAYOUT ===== */
+        #app-screen { display: none; }
+
+        /* Header */
+        .app-header {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 100; height: var(--header-height);
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .sidebar-toggle {
+            display: none; background: none; border: none;
+            cursor: pointer; padding: 4px; color: var(--text-primary);
+        }
+        .sidebar-toggle .material-icons { font-size: 24px; }
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .header-brand img { width: 36px; height: 36px; border-radius: 8px; }
+        .header-brand h2 { font-size: 18px; font-weight: 800; color: var(--black); letter-spacing: -0.5px; }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .header-wallet {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--gold-bg); border: 1px solid var(--gold-light);
+            border-radius: 20px; padding: 6px 14px 6px 10px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .header-wallet:hover { background: var(--gold-light); }
+        .header-wallet .material-icons { font-size: 18px; color: var(--gold-dark); }
+        .header-wallet span:last-child { font-size: 13px; font-weight: 700; color: var(--black); }
+
+        .header-profile {
+            width: 36px; height: 36px;
+            background: var(--black); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        .header-profile:hover { background: var(--black-light); }
+        .header-profile .material-icons { font-size: 20px; color: white; }
+        .profile-dropdown {
+            position: absolute; top: 44px; right: 0;
+            background: var(--bg-white); border: 1px solid var(--border);
+            border-radius: var(--radius); box-shadow: var(--shadow-lg);
+            min-width: 200px; padding: 8px 0;
+            display: none; z-index: 200;
+        }
+        .profile-dropdown.show { display: block; }
+        .profile-dropdown .pd-header {
+            padding: 12px 16px; border-bottom: 1px solid var(--border-light);
+        }
+        .profile-dropdown .pd-header .pd-name { font-size: 14px; font-weight: 600; }
+        .profile-dropdown .pd-header .pd-phone { font-size: 12px; color: var(--text-muted); }
+        .profile-dropdown a, .profile-dropdown button {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 10px 16px;
+            font-size: 13px; font-weight: 500;
+            color: var(--text-primary); cursor: pointer;
+            background: none; border: none; text-decoration: none;
+            font-family: inherit; transition: background 0.15s;
+        }
+        .profile-dropdown a:hover, .profile-dropdown button:hover { background: var(--bg); }
+        .profile-dropdown .material-icons { font-size: 18px; color: var(--text-secondary); }
+        .profile-dropdown .danger { color: var(--danger); }
+        .profile-dropdown .danger .material-icons { color: var(--danger); }
+
+        /* Sidebar */
+        .app-sidebar {
+            position: fixed; top: var(--header-height); left: 0;
+            bottom: 0; width: var(--sidebar-width);
+            background: var(--bg-white);
+            border-right: 1px solid var(--border);
+            padding: 16px 0;
+            overflow-y: auto;
+            z-index: 90;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-section { margin-bottom: 20px; }
+        .sidebar-section-title {
+            padding: 0 20px; margin-bottom: 6px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.2px;
+            color: var(--text-muted);
+        }
+        .sidebar-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 20px; cursor: pointer;
+            color: var(--text-secondary); font-size: 13px; font-weight: 500;
+            transition: all 0.15s; border-left: 3px solid transparent;
+        }
+        .sidebar-item:hover { background: var(--bg); color: var(--text-primary); }
+        .sidebar-item.active {
+            background: var(--gold-bg);
+            color: var(--gold-dark);
+            border-left-color: var(--gold);
+            font-weight: 600;
+        }
+        .sidebar-item .material-icons { font-size: 20px; }
+        .sidebar-item.active .material-icons { color: var(--gold-dark); }
+        .sidebar-item .badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* Main content */
+        .app-main {
+            margin-top: var(--header-height);
+            margin-left: var(--sidebar-width);
+            padding: 24px;
+            min-height: calc(100vh - var(--header-height));
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Bottom nav (mobile only) */
+        .bottom-nav {
+            display: none;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            z-index: 100; background: var(--bg-white);
+            border-top: 1px solid var(--border);
+            justify-content: space-around;
+            padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 2px; cursor: pointer; padding: 4px 10px;
+            border-radius: 10px; transition: all 0.2s;
+        }
+        .nav-item .material-icons { font-size: 22px; color: var(--text-muted); transition: color 0.2s; }
+        .nav-item span:last-child { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+        .nav-item.active .material-icons { color: var(--gold-dark); }
+        .nav-item.active span:last-child { color: var(--gold-dark); font-weight: 600; }
+
+        /* Sections */
+        .section { display: none; }
+        .section.active { display: block; animation: fadeUp 0.2s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Page title */
+        .page-title {
+            font-size: 20px; font-weight: 700; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .page-title .material-icons { font-size: 24px; color: var(--gold-dark); }
+
+        /* ===== HOME SECTION ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--black) 0%, #2d2d2d 50%, var(--black) 100%);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            margin-bottom: 24px;
+            position: relative; overflow: hidden;
+            color: white;
+        }
+        .hero-banner::before {
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(212,168,67,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-banner h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; position: relative; }
+        .hero-banner p { font-size: 13px; color: rgba(255,255,255,0.7); position: relative; }
+        .hero-stats {
+            display: flex; gap: 20px; margin-top: 16px; position: relative;
+        }
+        .hero-stat { display: flex; align-items: center; gap: 6px; }
+        .hero-stat .material-icons { font-size: 16px; color: var(--gold); }
+        .hero-stat span { font-size: 12px; color: rgba(255,255,255,0.8); }
+
+        .section-label {
+            font-size: 15px; font-weight: 700; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+            color: var(--text-primary);
+        }
+        .section-label .material-icons { font-size: 20px; color: var(--gold-dark); }
+
+        /* ===== MATCH CARDS ===== */
+        .match-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s;
+        }
+        .match-card:hover { box-shadow: var(--shadow); }
+        .match-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .match-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .match-live {
+            display: flex; align-items: center; gap: 4px;
+            font-size: 11px; font-weight: 700;
+            color: var(--success); background: #f0fdf4;
+            padding: 4px 10px; border-radius: 12px;
+        }
+        .match-closed {
+            font-size: 11px; color: var(--text-muted); font-weight: 500;
+        }
+        .stream-container {
+            width: 100%; aspect-ratio: 16/9;
+            background: var(--black);
+        }
+        .stream-container iframe {
+            width: 100%; height: 100%; border: none;
+        }
+        .match-teams {
+            display: flex; align-items: center;
+            justify-content: space-around; padding: 20px;
+        }
+        .team { text-align: center; flex: 1; }
+        .team img {
+            width: 56px; height: 56px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--border);
+            margin-bottom: 8px;
+        }
+        .team-name { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+        .team-odds { font-size: 12px; color: var(--gold-dark); font-weight: 600; }
+        .vs-badge {
+            width: 40px; height: 40px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800;
+            color: var(--text-muted); flex-shrink: 0;
+        }
+
+        /* Bet Panel */
+        .bet-panel {
+            padding: 14px 18px 18px;
+            border-top: 1px solid var(--border-light);
+            background: #fafafa;
+        }
+        .bet-buttons { display: flex; gap: 8px; margin-bottom: 10px; }
+        .bet-btn {
+            flex: 1; padding: 10px 6px; text-align: center;
+            border-radius: 8px; font-size: 12px; font-weight: 600;
+            cursor: pointer; border: 1px solid var(--border);
+            background: var(--bg-white); color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .bet-btn:hover { border-color: var(--gold); color: var(--text-primary); }
+        .bet-btn.selected {
+            background: var(--black); border-color: var(--black);
+            color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .quick-chips {
+            display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;
+        }
+        .chip {
+            padding: 6px 12px; border-radius: 16px;
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; border: 1px solid var(--border);
+            background: var(--bg-white); color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .chip:hover { border-color: var(--gold); color: var(--gold-dark); background: var(--gold-bg); }
+        .bet-amount-row { display: flex; gap: 8px; }
+        .bet-amount-row input {
+            flex: 1; padding: 10px 12px;
+            background: var(--bg-white); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-primary);
+            font-size: 14px; font-family: inherit; outline: none;
+        }
+        .bet-amount-row input:focus { border-color: var(--gold); }
+        .bet-submit {
+            padding: 10px 20px; background: var(--gold);
+            color: white; border: none; border-radius: 8px;
+            font-weight: 700; font-size: 13px;
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+            white-space: nowrap;
+        }
+        .bet-submit:hover { background: var(--gold-dark); }
+
+        /* ===== WALLET ===== */
+        .wallet-card {
+            background: linear-gradient(135deg, var(--black) 0%, #333 100%);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px; color: white;
+            margin-bottom: 20px;
+        }
+        .wallet-label { font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+        .wallet-amount { font-size: 36px; font-weight: 800; margin: 8px 0 16px; }
+        .wallet-actions { display: flex; gap: 10px; }
+        .wallet-action-btn {
+            flex: 1; padding: 11px; border-radius: 10px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer; border: none;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .wallet-action-btn.deposit {
+            background: var(--gold); color: white;
+        }
+        .wallet-action-btn.deposit:hover { background: var(--gold-dark); }
+        .wallet-action-btn.withdraw {
+            background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .wallet-action-btn.withdraw:hover { background: rgba(255,255,255,0.25); }
+
+        /* ===== STATEMENTS ===== */
+        .stmt-tabs {
+            display: flex; gap: 4px;
+            background: var(--bg); border-radius: 10px;
+            padding: 3px; margin-bottom: 16px;
+        }
+        .stmt-tab {
+            flex: 1; padding: 8px; text-align: center;
+            border-radius: 8px; cursor: pointer;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .stmt-tab.active { background: var(--bg-white); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+
+        .txn-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius); margin-bottom: 8px;
+            transition: box-shadow 0.15s;
+        }
+        .txn-item:hover { box-shadow: var(--shadow-sm); }
+        .txn-icon {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .txn-icon.credit { background: #f0fdf4; }
+        .txn-icon.credit .material-icons { font-size: 18px; color: var(--success); }
+        .txn-icon.debit { background: #fef2f2; }
+        .txn-icon.debit .material-icons { font-size: 18px; color: var(--danger); }
+        .txn-details { flex: 1; min-width: 0; }
+        .txn-desc { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .txn-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        .txn-hash { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+        .txn-amount { font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .txn-amount.credit { color: var(--success); }
+        .txn-amount.debit { color: var(--danger); }
+
+        /* ===== PROFILE ===== */
+        .profile-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 24px; text-align: center;
+            margin-bottom: 20px; box-shadow: var(--shadow-sm);
+        }
+        .profile-avatar {
+            width: 72px; height: 72px; margin: 0 auto 12px;
+            background: var(--black); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .profile-avatar .material-icons { font-size: 32px; color: white; }
+        .profile-name { font-size: 18px; font-weight: 700; }
+        .profile-phone { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+        .profile-menu { margin-top: 16px; }
+        .profile-menu-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius); margin-bottom: 8px;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .profile-menu-item:hover { background: var(--bg); }
+        .profile-menu-item .material-icons { font-size: 20px; color: var(--text-secondary); }
+        .profile-menu-item span:nth-child(2) { flex: 1; font-size: 14px; font-weight: 500; }
+        .profile-menu-item .arrow { color: var(--text-muted); }
+        .profile-menu-item.danger { color: var(--danger); }
+        .profile-menu-item.danger .material-icons { color: var(--danger); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 48px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state .material-icons { font-size: 48px; color: var(--border); margin-bottom: 12px; }
+        .empty-state p { font-size: 14px; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
+            padding: 12px 24px; border-radius: 10px;
+            font-size: 13px; font-weight: 500;
+            z-index: 1000; opacity: 0;
+            transition: all 0.3s; pointer-events: none;
+            background: var(--black); color: white;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error { background: var(--danger); }
+        .toast.success { background: var(--success); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: 28px; width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+        }
+        .modal-close {
+            position: absolute; top: 12px; right: 12px;
+            background: var(--bg); border: none;
+            width: 32px; height: 32px; border-radius: 50%;
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .modal-close .material-icons { font-size: 18px; color: var(--text-secondary); }
+        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .app-sidebar { transform: translateX(-100%); z-index: 95; }
+            .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
+            .sidebar-toggle { display: flex; }
+            .app-main { margin-left: 0; padding: 16px; padding-bottom: 80px; }
+            .bottom-nav { display: flex; }
+            .sidebar-overlay {
+                position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+                z-index: 94; display: none;
+            }
+            .sidebar-overlay.show { display: block; }
+            .hero-banner { padding: 20px; }
+            .hero-banner h3 { font-size: 17px; }
+            .match-teams { padding: 14px; }
+            .team img { width: 48px; height: 48px; }
+        }
+
+        @media (min-width: 769px) {
+            .bottom-nav { display: none !important; }
+        }
+
+        /* Info card */
+        .info-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .info-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <!-- AUTH -->
+    <div id="auth-screen" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <img src="/static/logo.png" alt="Kokoroko" onerror="this.style.display='none'">
+                <h1>Kokoroko</h1>
+                <p id="auth-subtitle">Welcome back</p>
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
+                <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
+            </div>
+            <div id="auth-error" class="auth-error"></div>
+            <div id="login-form">
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" id="login-identifier" placeholder="Enter mobile number">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="Enter password">
+                </div>
+                <div id="login-otp-section" class="otp-section hidden">
+                    <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;">Enter OTP</label>
+                    <div class="otp-row">
+                        <input class="login-otp-input" type="text" maxlength="1" data-idx="0">
+                        <input class="login-otp-input" type="text" maxlength="1" data-idx="1">
+                        <input class="login-otp-input" type="text" maxlength="1" data-idx="2">
+                        <input class="login-otp-input" type="text" maxlength="1" data-idx="3">
+                        <input class="login-otp-input" type="text" maxlength="1" data-idx="4">
+                        <input class="login-otp-input" type="text" maxlength="1" data-idx="5">
+                    </div>
+                </div>
+                <button class="auth-btn" id="login-btn" onclick="handleLogin()">Send OTP & Login</button>
+            </div>
+            <div id="register-form" class="hidden">
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" id="reg-mobile" placeholder="10-digit mobile number">
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="reg-username" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" placeholder="Min 6 characters">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="reg-confirm" placeholder="Re-enter password">
+                </div>
+                <div id="reg-otp-section" class="otp-section hidden">
+                    <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;">Enter OTP</label>
+                    <div class="otp-row">
+                        <input class="reg-otp-input" type="text" maxlength="1" data-idx="0">
+                        <input class="reg-otp-input" type="text" maxlength="1" data-idx="1">
+                        <input class="reg-otp-input" type="text" maxlength="1" data-idx="2">
+                        <input class="reg-otp-input" type="text" maxlength="1" data-idx="3">
+                        <input class="reg-otp-input" type="text" maxlength="1" data-idx="4">
+                        <input class="reg-otp-input" type="text" maxlength="1" data-idx="5">
+                    </div>
+                </div>
+                <button class="auth-btn" id="reg-btn" onclick="handleRegister()">Send OTP & Register</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app-screen">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <span class="material-icons">menu</span>
+                </button>
+                <div class="header-brand">
+                    <img src="/static/logo.png" alt="K" onerror="this.outerHTML='<div style=&quot;width:36px;height:36px;background:var(--black);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:16px&quot;>K</div>'">
+                    <h2>Kokoroko</h2>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-wallet" onclick="navigate('sec-wallet')">
+                    <span class="material-icons">account_balance_wallet</span>
+                    <span>₹<span id="wallet-balance">0.00</span></span>
+                </div>
+                <div class="header-profile" onclick="toggleProfileDropdown(event)">
+                    <span class="material-icons">person</span>
+                    <div class="profile-dropdown" id="profile-dropdown">
+                        <div class="pd-header">
+                            <div class="pd-name" id="pd-name">User</div>
+                            <div class="pd-phone" id="pd-phone"></div>
+                        </div>
+                        <a onclick="navigate('sec-profile'); closeDropdown();">
+                            <span class="material-icons">person</span> My Profile
+                        </a>
+                        <a onclick="navigate('sec-wallet'); closeDropdown();">
+                            <span class="material-icons">account_balance_wallet</span> Wallet
+                        </a>
+                        <a onclick="navigate('sec-statement'); closeDropdown();">
+                            <span class="material-icons">receipt_long</span> Statements
+                        </a>
+                        <a onclick="showPasswordModal(); closeDropdown();">
+                            <span class="material-icons">lock</span> Change Password
+                        </a>
+                        <button class="danger" onclick="logout()">
+                            <span class="material-icons">logout</span> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+        <!-- Sidebar -->
+        <div class="app-sidebar" id="app-sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Main</div>
+                <div class="sidebar-item active" onclick="navigateSidebar('sec-home')">
+                    <span class="material-icons">home</span> Home
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Games</div>
+                <div class="sidebar-item" onclick="navigateSidebar('sec-cockfight')">
+                    <span class="material-icons">sports_mma</span> Cockfight Betting
+                    <span class="badge" id="live-count" style="display:none">0</span>
+                </div>
+                <div class="sidebar-item" onclick="navigateSidebar('sec-dice')">
+                    <span class="material-icons">casino</span> Dice Games
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Account</div>
+                <div class="sidebar-item" onclick="navigateSidebar('sec-wallet')">
+                    <span class="material-icons">account_balance_wallet</span> Wallet
+                </div>
+                <div class="sidebar-item" onclick="navigateSidebar('sec-statement')">
+                    <span class="material-icons">receipt_long</span> Statements
+                </div>
+                <div class="sidebar-item" onclick="navigateSidebar('sec-profile')">
+                    <span class="material-icons">person</span> Profile
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="app-main">
+            <!-- HOME -->
+            <div id="sec-home" class="section active">
+                <div class="hero-banner">
+                    <h3>Welcome to Kokoroko</h3>
+                    <p>Place bets on live cockfight matches and win big</p>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <span class="material-icons">live_tv</span>
+                            <span>24/7 Live</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="material-icons">bolt</span>
+                            <span>Instant Payout</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="material-icons">shield</span>
+                            <span>Secure</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-label">
+                    <span class="material-icons">sports_mma</span>
+                    Live Matches
+                </div>
+                <div id="matches-container">
+                    <div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches at the moment</p></div>
+                </div>
+            </div>
+
+            <!-- COCKFIGHT -->
+            <div id="sec-cockfight" class="section">
+                <div class="page-title">
+                    <span class="material-icons">sports_mma</span>
+                    Cockfight Matches
+                </div>
+                <div id="cockfight-container">
+                    <div class="empty-state"><span class="material-icons">sports_mma</span><p>Loading matches...</p></div>
+                </div>
+            </div>
+
+            <!-- DICE -->
+            <div id="sec-dice" class="section">
+                <div class="page-title">
+                    <span class="material-icons">casino</span>
+                    Dice Games
+                </div>
+                <div class="empty-state">
+                    <span class="material-icons">casino</span>
+                    <p>Dice games coming soon</p>
+                </div>
+            </div>
+
+            <!-- STATEMENT -->
+            <div id="sec-statement" class="section">
+                <div class="page-title">
+                    <span class="material-icons">receipt_long</span>
+                    Transaction History
+                </div>
+                <div class="stmt-tabs">
+                    <div class="stmt-tab active" onclick="filterStatement('all')">All</div>
+                    <div class="stmt-tab" onclick="filterStatement('deposit')">Deposits</div>
+                    <div class="stmt-tab" onclick="filterStatement('withdraw')">Withdrawals</div>
+                    <div class="stmt-tab" onclick="filterStatement('bet')">Bets</div>
+                </div>
+                <div id="statement-list">
+                    <div class="empty-state"><span class="material-icons">receipt_long</span><p>No transactions yet</p></div>
+                </div>
+            </div>
+
+            <!-- WALLET -->
+            <div id="sec-wallet" class="section">
+                <div class="page-title">
+                    <span class="material-icons">account_balance_wallet</span>
+                    Wallet
+                </div>
+                <div class="wallet-card">
+                    <div class="wallet-label">Available Balance</div>
+                    <div class="wallet-amount">₹<span id="wallet-balance-large">0.00</span></div>
+                    <div class="wallet-actions">
+                        <button class="wallet-action-btn deposit" onclick="showToast('Contact admin for deposits', 'success')">Deposit</button>
+                        <button class="wallet-action-btn withdraw" onclick="showToast('Contact admin for withdrawals', 'success')">Withdraw</button>
+                    </div>
+                </div>
+                <div class="section-label">
+                    <span class="material-icons">info</span>
+                    How it works
+                </div>
+                <div class="info-card">
+                    <p>Deposits and withdrawals are processed by our admin team. Contact support to add or withdraw funds from your wallet.</p>
+                </div>
+            </div>
+
+            <!-- PROFILE -->
+            <div id="sec-profile" class="section">
+                <div class="page-title">
+                    <span class="material-icons">person</span>
+                    Profile
+                </div>
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        <span class="material-icons">person</span>
+                    </div>
+                    <div class="profile-name" id="profile-name">User</div>
+                    <div class="profile-phone" id="profile-phone"></div>
+                </div>
+                <div class="profile-menu">
+                    <div class="profile-menu-item" onclick="navigate('sec-wallet')">
+                        <span class="material-icons">account_balance_wallet</span>
+                        <span>Wallet</span>
+                        <span class="material-icons arrow">chevron_right</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="navigate('sec-statement')">
+                        <span class="material-icons">receipt_long</span>
+                        <span>Statements</span>
+                        <span class="material-icons arrow">chevron_right</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="showPasswordModal()">
+                        <span class="material-icons">lock</span>
+                        <span>Change Password</span>
+                        <span class="material-icons arrow">chevron_right</span>
+                    </div>
+                    <div class="profile-menu-item danger" onclick="logout()">
+                        <span class="material-icons">logout</span>
+                        <span>Logout</span>
+                        <span class="material-icons arrow">chevron_right</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Nav (mobile) -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="navigate('sec-home')">
+                <span class="material-icons">home</span>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="navigate('sec-cockfight')">
+                <span class="material-icons">sports_mma</span>
+                <span>Live</span>
+            </div>
+            <div class="nav-item" onclick="navigate('sec-statement')">
+                <span class="material-icons">receipt_long</span>
+                <span>History</span>
+            </div>
+            <div class="nav-item" onclick="navigate('sec-wallet')">
+                <span class="material-icons">account_balance_wallet</span>
+                <span>Wallet</span>
+            </div>
+            <div class="nav-item" onclick="navigate('sec-profile')">
+                <span class="material-icons">person</span>
+                <span>Profile</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal-overlay" id="password-modal">
+        <div class="modal-content" style="position:relative;">
+            <button class="modal-close" onclick="closePasswordModal()"><span class="material-icons">close</span></button>
+            <div class="modal-title">Change Password</div>
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="cp-current" placeholder="Enter current password">
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="cp-new" placeholder="Min 6 characters">
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="cp-confirm" placeholder="Re-enter new password">
+            </div>
+            <button class="auth-btn" onclick="changePassword()">Update Password</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+    const API = '/api';
+    let token = localStorage.getItem('access_token');
+    let userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    let loginStep = 'credentials';
+    let regStep = 'form';
+    let loginMobile = '';
+
+    if (token) showApp();
+
+    function switchAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+        document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+        document.getElementById('auth-subtitle').textContent = tab === 'login' ? 'Welcome back' : 'Create your account';
+        hideError();
+        loginStep = 'credentials';
+        regStep = 'form';
+        document.getElementById('login-otp-section').classList.add('hidden');
+        document.getElementById('reg-otp-section').classList.add('hidden');
+        document.getElementById('login-btn').textContent = 'Send OTP & Login';
+        document.getElementById('reg-btn').textContent = 'Send OTP & Register';
+    }
+
+    async function handleLogin() {
+        const identifier = document.getElementById('login-identifier').value.trim();
+        const password = document.getElementById('login-password').value;
+        if (!identifier || !password) { showError('Please enter username/mobile and password'); return; }
+
+        if (loginStep === 'credentials') {
+            let mobile = identifier;
+            try {
+                const res = await fetch(`${API}/user/getotp/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({mobile})
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    loginStep = 'otp';
+                    loginMobile = mobile;
+                    document.getElementById('login-otp-section').classList.remove('hidden');
+                    document.getElementById('login-btn').textContent = 'Verify & Login';
+                    hideError();
+                    showToast('OTP sent! Use 123456', 'success');
+                } else {
+                    showError(data.message || data.error || 'Failed to send OTP');
+                }
+            } catch(e) { showError('Network error. Try again.'); }
+        } else {
+            const otpInputs = document.querySelectorAll('.login-otp-input');
+            const otp = Array.from(otpInputs).map(i => i.value).join('');
+            if (otp.length !== 6) { showError('Enter the 6-digit OTP'); return; }
+            try {
+                const res = await fetch(`${API}/user/login/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({identifier, password, otp})
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    token = data.access_token;
+                    localStorage.setItem('access_token', token);
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                    localStorage.setItem('userInfo', JSON.stringify(data.user || {}));
+                    userInfo = data.user || {};
+                    showApp();
+                } else { showError(data.error || 'Login failed'); }
+            } catch(e) { showError('Network error'); }
+        }
+    }
+
+    async function handleRegister() {
+        const mobile = document.getElementById('reg-mobile').value.trim();
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const confirm = document.getElementById('reg-confirm').value;
+        if (!mobile || !username || !password || !confirm) { showError('Please fill all fields'); return; }
+        if (!/^\d{10}$/.test(mobile)) { showError('Enter a valid 10-digit mobile number'); return; }
+        if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
+        if (password !== confirm) { showError('Passwords do not match'); return; }
+
+        if (regStep === 'form') {
+            try {
+                const res = await fetch(`${API}/user/getotp/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({mobile})
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    regStep = 'otp';
+                    document.getElementById('reg-otp-section').classList.remove('hidden');
+                    document.getElementById('reg-btn').textContent = 'Verify & Register';
+                    hideError();
+                    showToast('OTP sent! Use 123456', 'success');
+                } else { showError(data.message || data.error || 'Failed to send OTP'); }
+            } catch(e) { showError('Network error'); }
+        } else {
+            const otpInputs = document.querySelectorAll('.reg-otp-input');
+            const otp = Array.from(otpInputs).map(i => i.value).join('');
+            if (otp.length !== 6) { showError('Enter the 6-digit OTP'); return; }
+            try {
+                const res = await fetch(`${API}/user/register/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({mobile, username, password, confirmPassword: confirm, otp})
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    token = data.access_token;
+                    localStorage.setItem('access_token', token);
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                    userInfo = {username, phoneNumber: mobile};
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    showApp();
+                    showToast('Registration successful!', 'success');
+                } else {
+                    const errMsg = data.error || data.mobile?.[0] || data.username?.[0] || 'Registration failed';
+                    showError(typeof errMsg === 'object' ? JSON.stringify(errMsg) : errMsg);
+                }
+            } catch(e) { showError('Network error'); }
+        }
+    }
+
+    function showApp() {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        loadUserInfo();
+        loadMatches();
+        loadStatement();
+    }
+
+    async function loadUserInfo() {
+        try {
+            const res = await fetch(`${API}/user/me/`, { headers: {'Authorization': `Bearer ${token}`} });
+            if (res.ok) {
+                const data = await res.json();
+                userInfo = data;
+                localStorage.setItem('userInfo', JSON.stringify(data));
+                document.getElementById('wallet-balance').textContent = parseFloat(data.wallet_balance || 0).toFixed(2);
+                document.getElementById('wallet-balance-large').textContent = parseFloat(data.wallet_balance || 0).toFixed(2);
+                document.getElementById('profile-name').textContent = data.username || 'User';
+                document.getElementById('profile-phone').textContent = data.phoneNumber || '';
+                document.getElementById('pd-name').textContent = data.username || 'User';
+                document.getElementById('pd-phone').textContent = data.phoneNumber || '';
+            } else if (res.status === 401) { logout(); }
+        } catch(e) {}
+    }
+
+    async function loadMatches() {
+        try {
+            const res = await fetch(`${API}/cockfight/manual-history/`, { headers: {'Authorization': `Bearer ${token}`} });
+            if (res.ok) {
+                const data = await res.json();
+                renderMatches(data.results || data);
+            }
+        } catch(e) {}
+    }
+
+    function renderMatches(zones) {
+        const container = document.getElementById('matches-container');
+        const cockfightContainer = document.getElementById('cockfight-container');
+        let html = '';
+        let liveCount = 0;
+        if (!zones || zones.length === 0) {
+            container.innerHTML = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches at the moment</p></div>';
+            cockfightContainer.innerHTML = container.innerHTML;
+            return;
+        }
+        zones.forEach(zone => {
+            if (!zone.matches) return;
+            ((zone.matches.results || zone.matches) instanceof Array ? (zone.matches.results || zone.matches) : []).forEach(match => {
+                if (!match.isLive) return;
+                liveCount++;
+                const teamAName = match.teamAName || 'Meron';
+                const teamBName = match.teamBName || 'Wala';
+                const teamAIcon = match.teamAIcon ? (match.teamAIcon.startsWith('http') ? match.teamAIcon : `http://155.117.46.249:8080${match.teamAIcon}`) : '';
+                const teamBIcon = match.teamBIcon ? (match.teamBIcon.startsWith('http') ? match.teamBIcon : `http://155.117.46.249:8080${match.teamBIcon}`) : '';
+                const minA = match.minThresholdTeamA || '0.75';
+                const maxA = match.maxThresholdTeamA || '0.85';
+                const minB = match.minThresholdTeamB || '0.75';
+                const maxB = match.maxThresholdTeamB || '0.85';
+                const ytLink = match.youtubeLiveLink || '';
+                let streamHtml = '';
+                if (ytLink) {
+                    let videoId = '';
+                    if (ytLink.includes('youtu.be/')) videoId = ytLink.split('youtu.be/')[1].split('?')[0];
+                    else if (ytLink.includes('v=')) videoId = ytLink.split('v=')[1].split('&')[0];
+                    if (videoId) streamHtml = `<div class="stream-container"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0" allowfullscreen></iframe></div>`;
+                }
+
+                html += `
+                <div class="match-card">
+                    <div class="match-header">
+                        <div class="match-title">${match.title || zone.name}</div>
+                        ${match.isBettingEnabled ? '<span class="match-live">● LIVE</span>' : '<span class="match-closed">Betting Closed</span>'}
+                    </div>
+                    ${streamHtml}
+                    <div class="match-teams">
+                        <div class="team">
+                            ${teamAIcon ? `<img src="${teamAIcon}" alt="${teamAName}">` : `<img src="/static/red_roaster.png" alt="${teamAName}" style="width:48px;height:48px;object-fit:contain;">`}
+                            <div class="team-name">${teamAName}</div>
+                            <div class="team-odds">${minA}x - ${maxA}x</div>
+                        </div>
+                        <div class="vs-badge">VS</div>
+                        <div class="team">
+                            ${teamBIcon ? `<img src="${teamBIcon}" alt="${teamBName}">` : `<img src="/static/blue_roaster.png" alt="${teamBName}" style="width:48px;height:48px;object-fit:contain;">`}
+                            <div class="team-name">${teamBName}</div>
+                            <div class="team-odds">${minB}x - ${maxB}x</div>
+                        </div>
+                    </div>
+                    ${match.isBettingEnabled ? `
+                    <div class="bet-panel">
+                        <div class="bet-buttons">
+                            <div class="bet-btn" onclick="selectBet(this, ${match.id}, 1, '${teamAName}')">${teamAName}</div>
+                            <div class="bet-btn" onclick="selectBet(this, ${match.id}, 2, '${teamBName}')">${teamBName}</div>
+                            <div class="bet-btn" onclick="selectBet(this, ${match.id}, 3, 'Draw')">Draw</div>
+                        </div>
+                        <div class="quick-chips">
+                            <div class="chip" onclick="setAmount(${match.id}, 100)">₹100</div>
+                            <div class="chip" onclick="setAmount(${match.id}, 500)">₹500</div>
+                            <div class="chip" onclick="setAmount(${match.id}, 1000)">₹1K</div>
+                            <div class="chip" onclick="setAmount(${match.id}, 5000)">₹5K</div>
+                            <div class="chip" onclick="setAmount(${match.id}, 10000)">₹10K</div>
+                        </div>
+                        <div class="bet-amount-row">
+                            <input type="number" placeholder="Enter amount" id="bet-amt-${match.id}" min="10">
+                            <button class="bet-submit" onclick="placeBet(${match.id})">Place Bet</button>
+                        </div>
+                    </div>` : ''}
+                </div>`;
+            });
+        });
+        if (!html) html = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches at the moment</p></div>';
+        container.innerHTML = html;
+        cockfightContainer.innerHTML = html;
+
+        // Update live badge
+        const badge = document.getElementById('live-count');
+        if (liveCount > 0) { badge.textContent = liveCount; badge.style.display = 'inline'; }
+        else { badge.style.display = 'none'; }
+    }
+
+    function setAmount(matchId, amount) {
+        document.getElementById(`bet-amt-${matchId}`).value = amount;
+    }
+
+    let selectedBets = {};
+    function selectBet(el, matchId, team, teamName) {
+        const parent = el.parentElement;
+        parent.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedBets[matchId] = {team, teamName};
+    }
+
+    async function placeBet(matchId) {
+        if (!selectedBets[matchId]) { showToast('Select a team first', 'error'); return; }
+        const amount = document.getElementById(`bet-amt-${matchId}`).value;
+        if (!amount || amount < 10) { showToast('Minimum bet is ₹10', 'error'); return; }
+        if (!confirm(`Place ₹${amount} bet on ${selectedBets[matchId].teamName}?`)) return;
+        try {
+            const res = await fetch(`${API}/cockfight/bets/place_bet/`, {
+                method: 'POST',
+                headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
+                body: JSON.stringify({matchId, matchType: 'M', betTeam: selectedBets[matchId].team, amount: parseFloat(amount), betRatio: 0.80})
+            });
+            const data = await res.json();
+            if (res.ok || res.status === 201) {
+                showToast('Bet placed successfully!', 'success');
+                loadUserInfo();
+            } else { showToast(data.error || data.detail || 'Bet failed', 'error'); }
+        } catch(e) { showToast('Network error', 'error'); }
+    }
+
+    let allTransactions = [];
+    async function loadStatement() {
+        try {
+            const res = await fetch(`${API}/user/statement/`, { headers: {'Authorization': `Bearer ${token}`} });
+            if (res.ok) {
+                const data = await res.json();
+                allTransactions = data.transactions || [];
+                renderStatement(allTransactions);
+            }
+        } catch(e) {}
+    }
+
+    function filterStatement(type) {
+        document.querySelectorAll('.stmt-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        let filtered = allTransactions;
+        if (type === 'deposit') filtered = allTransactions.filter(t => t.type === 'Funds In' || t.description.toLowerCase().includes('deposit'));
+        else if (type === 'withdraw') filtered = allTransactions.filter(t => t.type === 'Funds Out' || t.description.toLowerCase().includes('withdraw'));
+        else if (type === 'bet') filtered = allTransactions.filter(t => t.description.toLowerCase().includes('bet') || t.description.toLowerCase().includes('cockfight'));
+        renderStatement(filtered);
+    }
+
+    function renderStatement(txns) {
+        const container = document.getElementById('statement-list');
+        if (!txns || txns.length === 0) {
+            container.innerHTML = '<div class="empty-state"><span class="material-icons">receipt_long</span><p>No transactions found</p></div>';
+            return;
+        }
+        let html = '';
+        txns.forEach(t => {
+            const isCredit = t.type === 'Funds In' || t.description.includes('win') || t.description.includes('refund') || t.description.includes('deposit');
+            html += `
+            <div class="txn-item">
+                <div class="txn-icon ${isCredit ? 'credit' : 'debit'}">
+                    <span class="material-icons">${isCredit ? 'arrow_downward' : 'arrow_upward'}</span>
+                </div>
+                <div class="txn-details">
+                    <div class="txn-desc">${t.description}</div>
+                    <div class="txn-date">${t.date}</div>
+                    ${t.hash ? `<div class="txn-hash">#${t.hash}</div>` : ''}
+                </div>
+                <div class="txn-amount ${isCredit ? 'credit' : 'debit'}">
+                    ${isCredit ? '+' : '-'}₹${t.amount}
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // Navigation
+    function navigate(sectionId) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+
+        // Update bottom nav
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        const navItems = document.querySelectorAll('.nav-item');
+        const map = {'sec-home': 0, 'sec-cockfight': 1, 'sec-statement': 2, 'sec-wallet': 3, 'sec-profile': 4};
+        if (map[sectionId] !== undefined) navItems[map[sectionId]].classList.add('active');
+
+        // Update sidebar
+        document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+        const sidebarMap = {
+            'sec-home': 0, 'sec-cockfight': 1, 'sec-dice': 2,
+            'sec-wallet': 3, 'sec-statement': 4, 'sec-profile': 5
+        };
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        if (sidebarMap[sectionId] !== undefined && sidebarItems[sidebarMap[sectionId]]) {
+            sidebarItems[sidebarMap[sectionId]].classList.add('active');
+        }
+
+        if (sectionId === 'sec-statement') loadStatement();
+        if (sectionId === 'sec-home' || sectionId === 'sec-cockfight') loadMatches();
+        window.scrollTo(0, 0);
+    }
+
+    function navigateSidebar(sectionId) {
+        navigate(sectionId);
+        closeSidebar();
+    }
+
+    // Sidebar toggle (mobile)
+    function toggleSidebar() {
+        document.getElementById('app-sidebar').classList.toggle('open');
+        document.getElementById('sidebar-overlay').classList.toggle('show');
+    }
+    function closeSidebar() {
+        document.getElementById('app-sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('show');
+    }
+
+    // Profile dropdown
+    function toggleProfileDropdown(e) {
+        e.stopPropagation();
+        document.getElementById('profile-dropdown').classList.toggle('show');
+    }
+    function closeDropdown() {
+        document.getElementById('profile-dropdown').classList.remove('show');
+    }
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.header-profile')) closeDropdown();
+    });
+
+    // Password
+    function showPasswordModal() { document.getElementById('password-modal').classList.add('show'); }
+    function closePasswordModal() { document.getElementById('password-modal').classList.remove('show'); }
+    async function changePassword() {
+        const current = document.getElementById('cp-current').value;
+        const newPass = document.getElementById('cp-new').value;
+        const confirm = document.getElementById('cp-confirm').value;
+        if (!current || !newPass || !confirm) { showToast('Fill all fields', 'error'); return; }
+        if (newPass !== confirm) { showToast('Passwords do not match', 'error'); return; }
+        if (newPass.length < 6) { showToast('Min 6 characters', 'error'); return; }
+        try {
+            const res = await fetch(`${API}/user/change-password/`, {
+                method: 'POST',
+                headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
+                body: JSON.stringify({currentPassword: current, newPassword: newPass, confirmPassword: confirm})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showToast('Password changed!', 'success');
+                closePasswordModal();
+                document.getElementById('cp-current').value = '';
+                document.getElementById('cp-new').value = '';
+                document.getElementById('cp-confirm').value = '';
+            } else { showToast(data.error || 'Failed', 'error'); }
+        } catch(e) { showToast('Network error', 'error'); }
+    }
+
+    function logout() {
+        localStorage.clear();
+        token = null;
+        userInfo = null;
+        document.getElementById('app-screen').style.display = 'none';
+        document.getElementById('auth-screen').style.display = 'flex';
+        loginStep = 'credentials';
+        regStep = 'form';
+        closeDropdown();
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('auth-error');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+    function hideError() { document.getElementById('auth-error').style.display = 'none'; }
+
+    function showToast(msg, type) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = 'toast show ' + (type || '');
+        setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // OTP auto-focus
+    document.addEventListener('input', e => {
+        if (e.target.classList.contains('login-otp-input') || e.target.classList.contains('reg-otp-input')) {
+            if (e.target.value.length === 1) {
+                const idx = parseInt(e.target.dataset.idx);
+                const siblings = e.target.parentElement.querySelectorAll('input');
+                if (idx < 5) siblings[idx + 1].focus();
+            }
+        }
+    });
+    document.addEventListener('keydown', e => {
+        if ((e.target.classList.contains('login-otp-input') || e.target.classList.contains('reg-otp-input')) && e.key === 'Backspace' && !e.target.value) {
+            const idx = parseInt(e.target.dataset.idx);
+            const siblings = e.target.parentElement.querySelectorAll('input');
+            if (idx > 0) siblings[idx - 1].focus();
+        }
+    });
+    </script>
+</body>
+</html>
