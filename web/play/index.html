@@ -1587,7 +1587,7 @@
             <div id="wd-form">
                 <div class="form-group">
                     <label>Withdrawal Amount</label>
-                    <input type="number" id="wd-amount" placeholder="Enter amount" min="1">
+                    <input type="number" id="wd-amount" placeholder="Enter amount (min ₹100)" min="100">
                 </div>
                 <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Withdrawal Method</div>
                 <div style="display:flex;gap:8px;margin-bottom:14px;">
@@ -2634,10 +2634,20 @@
         document.getElementById('deposit-modal').classList.add('show');
         depGoToStep(1);
         depMethodType = null;
+        depSelectedOption = null;
+        depFile = null;
         document.getElementById('dep-type-upi').style.background = 'var(--bg)';
         document.getElementById('dep-type-upi').style.color = 'var(--text-primary)';
         document.getElementById('dep-type-bank').style.background = 'var(--bg)';
         document.getElementById('dep-type-bank').style.color = 'var(--text-primary)';
+        document.getElementById('dep-amount').value = '';
+        document.getElementById('dep-utr').value = '';
+        const fileUpload = document.getElementById('dep-file-upload');
+        if (fileUpload) { fileUpload.classList.remove('has-file'); fileUpload.innerHTML = '<span class="material-icons">cloud_upload</span><p>Click to upload payment screenshot</p>'; }
+        document.getElementById('dep-selected-details').innerHTML = '';
+        document.getElementById('dep-options-list').innerHTML = '';
+        const qrPreview = document.getElementById('dep-qr-preview');
+        if (qrPreview) qrPreview.style.display = 'none';
         checkPendingDeposit();
     }
     function closeDeposit() { document.getElementById('deposit-modal').classList.remove('show'); }
@@ -2680,7 +2690,7 @@
     }
     async function loadPaymentOptions() {
         const amount = document.getElementById('dep-amount').value;
-        if (!amount || amount < 1) { showToast('Enter a valid amount', 'error'); return; }
+        if (!amount || parseFloat(amount) < 100) { showToast('Minimum deposit is ₹100', 'error'); return; }
         if (!depMethodType) { showToast('Select UPI/QR or Bank Transfer first', 'error'); return; }
         try {
             const res = await fetch(`${API}/wallet/deposit/payment-options/?amount=${amount}&type=${depMethodType}`, {headers:{'Authorization':`Bearer ${token}`}});
@@ -2817,7 +2827,7 @@
     }
     async function submitWithdraw() {
         const amount = document.getElementById('wd-amount').value;
-        if (!amount || amount < 1) { showToast('Enter amount', 'error'); return; }
+        if (!amount || parseFloat(amount) < 100) { showToast('Minimum withdrawal is ₹100', 'error'); return; }
         if (!wdType) { showToast('Select UPI or Bank Transfer', 'error'); return; }
         const body = {withdrawal_amount: parseFloat(amount), withdrawal_type: wdType};
         if (wdType === 'U') {
