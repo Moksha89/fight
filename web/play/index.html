@@ -361,6 +361,7 @@
             position: absolute; top: 8px; left: 8px; padding: 3px 10px;
             border-radius: 12px; font-size: 10px; font-weight: 700; color: white;
             text-transform: uppercase; letter-spacing: 0.5px;
+            width: fit-content; display: inline-flex; align-items: center;
         }
         .game-card-body { padding: 12px; }
         .game-card-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
@@ -1292,7 +1293,7 @@
                 <div class="game-cards">
                     <div class="game-card" onclick="navigate('sec-cockfight')">
                         <div id="cockfight-card-img" class="game-card-img" style="background:linear-gradient(135deg,#e8e8e8,#c0c0c0);display:flex;align-items:center;justify-content:center;position:relative;">
-                            <span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>
+                            <span class="game-badge" style="background:#ef4444;z-index:2;"><span class="live-dot" style="margin-right:3px;"></span>LIVE</span>
                             <img src="/static/red_roaster.png?v=2" style="width:55px;height:55px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));"/>
                             <img src="/static/blue_roaster.png?v=2" style="width:45px;height:45px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));margin-left:-8px;"/>
                         </div>
