@@ -1295,10 +1295,10 @@
                 </div>
                 <div class="game-cards">
                     <div class="game-card" onclick="navigate('sec-cockfight')">
-                        <div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">
+                        <div id="cockfight-card-img" class="game-card-img" style="background:linear-gradient(135deg,#e8e8e8,#c0c0c0);display:flex;align-items:center;justify-content:center;position:relative;">
                             <span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>
-                            <img src="/static/red_roaster.png?v=2" style="width:55px;height:55px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>
-                            <img src="/static/blue_roaster.png?v=2" style="width:45px;height:45px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>
+                            <img src="/static/red_roaster.png?v=2" style="width:55px;height:55px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));"/>
+                            <img src="/static/blue_roaster.png?v=2" style="width:45px;height:45px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));margin-left:-8px;"/>
                         </div>
                         <div class="game-card-body">
                             <h4>Cockfight Betting</h4>
@@ -1306,8 +1306,8 @@
                         </div>
                     </div>
                     <div class="game-card" onclick="navigate('sec-dice')">
-                        <div class="game-card-img" style="background:linear-gradient(135deg,#312e81,#6d28d9);display:flex;align-items:center;justify-content:center;">
-                            <span class="material-icons" style="font-size:52px;color:#c4b5fd;">casino</span>
+                        <div id="dice-card-img" class="game-card-img" style="background:linear-gradient(135deg,#e8e8e8,#c0c0c0);display:flex;align-items:center;justify-content:center;">
+                            <span class="material-icons" style="font-size:52px;color:#6d28d9;text-shadow:0 2px 8px rgba(0,0,0,0.15);">casino</span>
                         </div>
                         <div class="game-card-body">
                             <h4>Dice Play (Gundata)</h4>
@@ -3184,30 +3184,56 @@
             const data = await res.json();
             const banners = data.results || data || [];
             if (banners.length === 0) return;
-            const track = document.getElementById('banner-track');
-            const dotsC = document.getElementById('banner-dots');
-            let trackHtml = '';
-            let dotsHtml = '';
-            banners.forEach((b, i) => {
-                let bannerUrl = b.banner || '';
-                // Fix media URLs to use current host
-                if (bannerUrl && !bannerUrl.startsWith('http')) {
-                    bannerUrl = location.origin + bannerUrl;
-                } else if (bannerUrl) {
-                    try {
-                        const u = new URL(bannerUrl);
-                        bannerUrl = location.origin + u.pathname;
-                    } catch(e) {}
+
+            function fixUrl(url) {
+                if (!url) return '';
+                if (!url.startsWith('http')) return location.origin + url;
+                try { return location.origin + new URL(url).pathname; } catch(e) { return url; }
+            }
+
+            // Carousel banners (placement C or D)
+            const carouselBanners = banners.filter(b => b.placement === 'C' || b.placement === 'D');
+            if (carouselBanners.length > 0) {
+                const track = document.getElementById('banner-track');
+                const dotsC = document.getElementById('banner-dots');
+                let trackHtml = '';
+                let dotsHtml = '';
+                carouselBanners.forEach((b, i) => {
+                    const bannerUrl = fixUrl(b.banner);
+                    const bgImg = bannerUrl ? `url(${bannerUrl})` : 'linear-gradient(135deg,#1a1a1a,#2a1f0e)';
+                    const catLabels = {S:'Cockfight',P:'Promotion',D:'Dice Play',W:'Wallet',V:'Videos'};
+                    const label = catLabels[b.category] || 'Kokoroko';
+                    trackHtml += `<div class="banner-slide" style="background-image:${bgImg};background-size:cover;background-position:center;"><div class="banner-content"><h3>${label}</h3></div></div>`;
+                    dotsHtml += `<div class="banner-dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
+                });
+                track.innerHTML = trackHtml;
+                dotsC.innerHTML = dotsHtml;
+                bannerIndex = 0;
+            }
+
+            // Game card banners (placement F = Cockfight, G = Dice)
+            const cockfightCardBanner = banners.find(b => b.placement === 'F');
+            if (cockfightCardBanner) {
+                const el = document.getElementById('cockfight-card-img');
+                if (el) {
+                    const url = fixUrl(cockfightCardBanner.banner);
+                    el.style.backgroundImage = `url(${url})`;
+                    el.style.backgroundSize = 'cover';
+                    el.style.backgroundPosition = 'center';
+                    el.querySelectorAll('img').forEach(img => img.style.display = 'none');
                 }
-                const bgImg = bannerUrl ? `url(${bannerUrl})` : 'linear-gradient(135deg,#1a1a1a,#2a1f0e)';
-                const catLabels = {S:'Cockfight',P:'Promotion',D:'Dice Play',W:'Wallet',V:'Videos'};
-                const label = catLabels[b.category] || 'Kokoroko';
-                trackHtml += `<div class="banner-slide" style="background-image:${bgImg};background-size:cover;background-position:center;"><div class="banner-content"><h3>${label}</h3></div></div>`;
-                dotsHtml += `<div class="banner-dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
-            });
-            track.innerHTML = trackHtml;
-            dotsC.innerHTML = dotsHtml;
-            bannerIndex = 0;
+            }
+            const diceCardBanner = banners.find(b => b.placement === 'G');
+            if (diceCardBanner) {
+                const el = document.getElementById('dice-card-img');
+                if (el) {
+                    const url = fixUrl(diceCardBanner.banner);
+                    el.style.backgroundImage = `url(${url})`;
+                    el.style.backgroundSize = 'cover';
+                    el.style.backgroundPosition = 'center';
+                    el.querySelectorAll('.material-icons').forEach(ic => ic.style.display = 'none');
+                }
+            }
         } catch(e) {}
     }
     loadBanners();
