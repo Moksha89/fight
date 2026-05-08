@@ -3039,9 +3039,10 @@
         recentBets.forEach(b => {
             const team = teamNames[b.betTeam] || 'Unknown';
             const cls = teamClasses[b.betTeam] || '';
-            let result = 'pending', resultCls = 'pending';
-            if (b.matchWinStatus === 1) { result = 'Won'; resultCls = 'won'; }
-            else if (b.matchWinStatus === 2) { result = 'Lost'; resultCls = 'lost'; }
+            let result = 'Pending', resultCls = 'pending';
+            if (b.matchWinStatus === 4) { result = 'Cancelled'; resultCls = 'pending'; }
+            else if (b.matchWinStatus > 0 && b.matchWinStatus === b.betTeam) { result = 'Won'; resultCls = 'won'; }
+            else if (b.matchWinStatus > 0 && b.matchWinStatus !== b.betTeam) { result = 'Lost'; resultCls = 'lost'; }
             const fightNum = b.matchNumber || b.match_number || b.matchId || '';
             html += `<div class="bet-item">
                 <div class="bet-team ${cls}">${team}</div>
