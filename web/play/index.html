@@ -538,8 +538,7 @@
             animation: mascotIdle 2s ease-in-out infinite;
         }
         @keyframes mascotIdle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-        @keyframes mascotIdleFlip { 0%, 100% { transform: translateY(0) scaleX(-1); } 50% { transform: translateY(-4px) scaleX(-1); } }
-        .mascot-side:last-child img { animation: mascotIdleFlip 2s ease-in-out infinite; animation-delay: 1s; }
+        .mascot-side:last-child img { animation-delay: 1s; }
         .mascot-label { font-size: 16px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
         .mascot-label.meron { color: #ef4444; text-shadow: 0 0 12px rgba(239,68,68,0.4); }
         .mascot-label.wala { color: #3b82f6; text-shadow: 0 0 12px rgba(59,130,246,0.4); }
@@ -1263,7 +1262,7 @@
                 <!-- Quick Actions -->
                 <div class="quick-actions">
                     <div class="quick-action" onclick="navigate('sec-cockfight')">
-                        <div class="qa-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);"><img src="/static/red_roaster.png" style="width:28px;height:28px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"/></div>
+                        <div class="qa-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);"><img src="/static/red_roaster.png?v=2" style="width:28px;height:28px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"/></div>
                         <div class="qa-label">Cockfight</div>
                     </div>
                     <div class="quick-action" onclick="navigate('sec-dice')">
@@ -1298,8 +1297,8 @@
                     <div class="game-card" onclick="navigate('sec-cockfight')">
                         <div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">
                             <span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>
-                            <img src="/static/red_roaster.png" style="width:55px;height:55px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>
-                            <img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;transform:scaleX(-1);"/>
+                            <img src="/static/red_roaster.png?v=2" style="width:55px;height:55px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>
+                            <img src="/static/blue_roaster.png?v=2" style="width:45px;height:45px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>
                         </div>
                         <div class="game-card-body">
                             <h4>Cockfight Betting</h4>
@@ -2081,12 +2080,12 @@
                     <!-- Mascots -->
                     <div class="mascot-row">
                         <div class="mascot-side">
-                            <img src="/static/red_roaster.png" alt="Meron">
+                            <img src="/static/red_roaster.png?v=2" alt="Meron">
                             <div class="mascot-label meron">Meron</div>
                         </div>
                         <div class="vs-badge">VS</div>
                         <div class="mascot-side" style="flex-direction:row-reverse;">
-                            <img src="/static/blue_roaster.png" alt="Wala" style="transform:scaleX(-1);">
+                            <img src="/static/blue_roaster.png?v=2" alt="Wala">
                             <div class="mascot-label wala">Wala</div>
                         </div>
                     </div>
@@ -2234,13 +2233,13 @@
                 ${streamHtml}
                 <div class="match-teams">
                     <div class="team">
-                        ${teamAIcon ? `<img src="${teamAIcon}" alt="${teamAName}">` : `<img src="/static/red_roaster.png" alt="${teamAName}" style="width:48px;height:48px;object-fit:contain;">`}
+                        ${teamAIcon ? `<img src="${teamAIcon}" alt="${teamAName}">` : `<img src="/static/red_roaster.png?v=2" alt="${teamAName}" style="width:48px;height:48px;object-fit:contain;">`}
                         <div class="team-name">${teamAName}</div>
                         <div class="team-odds">${minA}x - ${maxA}x</div>
                     </div>
                     <div class="vs-badge">VS</div>
                     <div class="team">
-                        ${teamBIcon ? `<img src="${teamBIcon}" alt="${teamBName}" style="transform:scaleX(-1);">` : `<img src="/static/blue_roaster.png" alt="${teamBName}" style="width:48px;height:48px;object-fit:contain;transform:scaleX(-1);">`}
+                        ${teamBIcon ? `<img src="${teamBIcon}" alt="${teamBName}">` : `<img src="/static/blue_roaster.png?v=2" alt="${teamBName}" style="width:48px;height:48px;object-fit:contain;">`}
                         <div class="team-name">${teamBName}</div>
                         <div class="team-odds">${minB}x - ${maxB}x</div>
                     </div>
@@ -2422,12 +2421,12 @@
                 </div>
                 <div class="live-strip-teams">
                     <div class="live-strip-team">
-                        <img src="/static/red_roaster.png" alt="Meron">
+                        <img src="/static/red_roaster.png?v=2" alt="Meron">
                         <span>Meron</span>
                     </div>
                     <div class="live-strip-vs">VS</div>
                     <div class="live-strip-team">
-                        <img src="/static/blue_roaster.png" alt="Wala" style="transform:scaleX(-1);">
+                        <img src="/static/blue_roaster.png?v=2" alt="Wala">
                         <span>Wala</span>
                     </div>
                 </div>
