@@ -2019,75 +2019,122 @@
         if (inp) inp.value = amount;
     }
 
+    let autoMatchRenderedId = null;
+    let autoMatchRenderedUrl = null;
     function renderAutoMatch() {
         const container = document.getElementById('auto-match-container');
         if (!autoMatchData) {
             container.innerHTML = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>Connecting to China Market...</p></div>';
+            autoMatchRenderedId = null;
+            autoMatchRenderedUrl = null;
             return;
         }
         const d = autoMatchData;
         const isAccepting = d.isAcceptingBet;
         const matchNum = d.matchNumber || '?';
         const liveUrl = d.liveUrl || '';
-        let streamHtml = '';
-        if (liveUrl) {
-            streamHtml = `<div class="stream-container">
-                <iframe src="${liveUrl}" allowfullscreen></iframe>
-            </div>`;
-        }
-        const oddsMin = currentOdds.meron_min || '0.50';
         const oddsMax = currentOdds.wala_max || '0.95';
         const meronMax = currentOdds.meron_max || '0.95';
-        const walaMin = currentOdds.wala_min || '0.50';
-        const drawMin = currentOdds.draw_min || '3.00';
         const drawMax = currentOdds.draw_max || '10.00';
-        const oddsSystem = currentOdds.system || 'manual';
 
-        container.innerHTML = `
-        ${getLastMatchResultHtml()}
-        <div class="cockfight-layout">
-            <div class="cockfight-left">
-                <div class="match-card">
-                    <div class="match-header">
-                        <div class="match-title">
-                            <span class="live-dot"></span>
-                            Fight #${matchNum}
+        // Full render only on first load or when match/stream changes
+        const needsFullRender = !autoMatchRenderedId || autoMatchRenderedId !== d.matchId || autoMatchRenderedUrl !== liveUrl;
+        if (needsFullRender) {
+            autoMatchRenderedId = d.matchId;
+            autoMatchRenderedUrl = liveUrl;
+            let streamHtml = '';
+            if (liveUrl) {
+                streamHtml = `<div class="stream-container">
+                    <iframe src="${liveUrl}" allowfullscreen></iframe>
+                </div>`;
+            }
+            container.innerHTML = `
+            ${getLastMatchResultHtml()}
+            <div class="cockfight-layout">
+                <div class="cockfight-left">
+                    <div class="match-card">
+                        <div class="match-header">
+                            <div class="match-title">
+                                <span class="live-dot"></span>
+                                <span id="am-fight-num">Fight #${matchNum}</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span id="am-timer">${getMatchTimerHtml()}</span>
+                                <span id="am-bet-status">${isAccepting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>'}</span>
+                            </div>
                         </div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            ${getMatchTimerHtml()}
-                            ${isAccepting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>'}
+                        ${streamHtml}
+                        <!-- Odds Display -->
+                        <div class="odds-display">
+                            <div class="odds-col" id="odds-meron" onclick="selectOddsTeam(this, 1, 'Meron')">
+                                <div class="odds-value meron" id="am-odds-meron">${meronMax}x</div>
+                                <div class="odds-team meron">🔴 Meron</div>
+                            </div>
+                            <div class="odds-col" id="odds-draw" onclick="selectOddsTeam(this, 3, 'Draw')">
+                                <div class="odds-value draw" id="am-odds-draw">${drawMax}x</div>
+                                <div class="odds-team draw">⚡ BDD</div>
+                            </div>
+                            <div class="odds-col" id="odds-wala" onclick="selectOddsTeam(this, 2, 'Wala')">
+                                <div class="odds-value wala" id="am-odds-wala">${oddsMax}x</div>
+                                <div class="odds-team wala">🔵 Wala</div>
+                            </div>
+                        </div>
+                        <!-- Mascots -->
+                        <div class="mascot-row">
+                            <div class="mascot-side">
+                                <img src="/static/red_roaster.png?v=2" alt="Meron">
+                                <div class="mascot-label meron">Meron</div>
+                            </div>
+                            <div class="vs-badge">VS</div>
+                            <div class="mascot-side" style="flex-direction:row-reverse;">
+                                <img src="/static/blue_roaster.png?v=2" alt="Wala">
+                                <div class="mascot-label wala">Wala</div>
+                            </div>
+                        </div>
+                        <div id="am-betting-area"></div>
+                        <div id="am-bet-history"></div>
+                    </div>
+                </div>
+                <div class="cockfight-right">
+                    <div class="match-history-card">
+                        <div class="mhc-header">
+                            <div class="mhc-title"><span class="material-icons">videocam</span> Match Results & Proof</div>
+                        </div>
+                        <div class="mh-table-header">
+                            <div>Fight</div>
+                            <div>Winner</div>
+                            <div>Date</div>
+                            <div style="text-align:right">Proof</div>
+                        </div>
+                        <div class="match-history-scroll">
+                            <div id="match-history-list"><div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">Loading...</div></div>
                         </div>
                     </div>
-                    ${streamHtml}
-                    <!-- Odds Display -->
-                    <div class="odds-display">
-                        <div class="odds-col" id="odds-meron" onclick="${isAccepting ? "selectOddsTeam(this, 1, 'Meron')" : ''}">
-                            <div class="odds-value meron">${meronMax}x</div>
-                            <div class="odds-team meron">🔴 Meron</div>
-                        </div>
-                        <div class="odds-col" id="odds-draw" onclick="${isAccepting ? "selectOddsTeam(this, 3, 'Draw')" : ''}">
-                            <div class="odds-value draw">${drawMax}x</div>
-                            <div class="odds-team draw">⚡ BDD</div>
-                        </div>
-                        <div class="odds-col" id="odds-wala" onclick="${isAccepting ? "selectOddsTeam(this, 2, 'Wala')" : ''}">
-                            <div class="odds-value wala">${oddsMax}x</div>
-                            <div class="odds-team wala">🔵 Wala</div>
-                        </div>
-                    </div>
-                    <!-- Mascots -->
-                    <div class="mascot-row">
-                        <div class="mascot-side">
-                            <img src="/static/red_roaster.png?v=2" alt="Meron">
-                            <div class="mascot-label meron">Meron</div>
-                        </div>
-                        <div class="vs-badge">VS</div>
-                        <div class="mascot-side" style="flex-direction:row-reverse;">
-                            <img src="/static/blue_roaster.png?v=2" alt="Wala">
-                            <div class="mascot-label wala">Wala</div>
-                        </div>
-                    </div>
-                    ${isAccepting ? `
-                    <!-- Chips -->
+                </div>
+            </div>`;
+            setTimeout(loadMatchHistory, 100);
+        }
+
+        // In-place updates (no iframe recreation)
+        const fightEl = document.getElementById('am-fight-num');
+        if (fightEl) fightEl.textContent = 'Fight #' + matchNum;
+        const timerEl = document.getElementById('am-timer');
+        if (timerEl) timerEl.innerHTML = getMatchTimerHtml();
+        const statusEl = document.getElementById('am-bet-status');
+        if (statusEl) statusEl.innerHTML = isAccepting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>';
+        const omEl = document.getElementById('am-odds-meron');
+        if (omEl) omEl.textContent = meronMax + 'x';
+        const odEl = document.getElementById('am-odds-draw');
+        if (odEl) odEl.textContent = drawMax + 'x';
+        const owEl = document.getElementById('am-odds-wala');
+        if (owEl) owEl.textContent = oddsMax + 'x';
+
+        // Update betting area only if status changed
+        const bettingArea = document.getElementById('am-betting-area');
+        if (bettingArea) {
+            const currentlyShowingBet = bettingArea.querySelector('.bet-actions') !== null;
+            if (isAccepting && !currentlyShowingBet) {
+                bettingArea.innerHTML = `
                     <div class="chips-row">
                         <div class="chip" onclick="selectChip(this, 50)">₹50</div>
                         <div class="chip" onclick="selectChip(this, 100)">₹100</div>
@@ -2095,39 +2142,20 @@
                         <div class="chip" onclick="selectChip(this, 1000)">₹1K</div>
                         <div class="chip" onclick="selectChip(this, 5000)">₹5K</div>
                     </div>
-                    <!-- Selected odds display -->
                     <div id="auto-ratio-row" style="display:none;padding:8px 16px;background:#161616;text-align:center;">
                         <span style="font-size:13px;color:var(--text-secondary);">Betting at </span><span style="color:var(--gold);font-weight:700;font-size:15px;"><span id="auto-ratio-display">0.80</span>x</span>
                     </div>
-                    <!-- Bet Actions -->
                     <div class="bet-actions">
                         <input type="number" class="bet-amount-input" placeholder="Enter amount or select chip" id="bet-amt-auto" min="10">
                         <button class="bet-submit" onclick="placeAutoBet()">✓ BET</button>
                         <button class="bet-cancel" onclick="clearAutoBet()">✕</button>
-                    </div>` : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>'}
-                    
-                    ${renderBetHistory()}
-                </div>
-            </div>
-            <div class="cockfight-right">
-                <div class="match-history-card">
-                    <div class="mhc-header">
-                        <div class="mhc-title"><span class="material-icons">videocam</span> Match Results & Proof</div>
-                    </div>
-                    <div class="mh-table-header">
-                        <div>Fight</div>
-                        <div>Winner</div>
-                        <div>Date</div>
-                        <div style="text-align:right">Proof</div>
-                    </div>
-                    <div class="match-history-scroll">
-                        <div id="match-history-list"><div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">Loading...</div></div>
-                    </div>
-                </div>
-            </div>
-        </div>`;
-        // Load match history after render
-        setTimeout(loadMatchHistory, 100);
+                    </div>`;
+            } else if (!isAccepting && currentlyShowingBet) {
+                bettingArea.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>';
+            }
+        }
+        const betHistEl = document.getElementById('am-bet-history');
+        if (betHistEl && betHistEl.innerHTML === '') betHistEl.innerHTML = renderBetHistory();
     }
 
     let selectedAutoRatio = 0.80;
@@ -2957,7 +2985,8 @@
             if (res.ok) {
                 const data = await res.json();
                 userBets = data.results || data || [];
-                if (currentChannel === 'auto' && autoMatchData) renderAutoMatch();
+                const betHistEl = document.getElementById('am-bet-history');
+                if (betHistEl) betHistEl.innerHTML = renderBetHistory();
             }
         } catch(e) {}
     }
