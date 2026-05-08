@@ -12,26 +12,31 @@
             --gold: #d4a843;
             --gold-dark: #b8922e;
             --gold-light: #f0d78c;
-            --gold-bg: #fdf8ec;
-            --black: #1a1a1a;
-            --black-light: #2d2d2d;
-            --bg: #f5f5f5;
-            --bg-white: #ffffff;
-            --bg-card: #ffffff;
-            --text-primary: #1a1a1a;
-            --text-secondary: #6b7280;
-            --text-muted: #9ca3af;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --border: #e5e7eb;
-            --border-light: #f0f0f0;
+            --gold-bg: rgba(212,168,67,0.08);
+            --black: #0d0d0d;
+            --black-light: #1a1a1a;
+            --bg: #111111;
+            --bg-white: #1a1a1a;
+            --bg-card: #1e1e1e;
+            --bg-card-hover: #252525;
+            --bg-surface: #161616;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --border: #2a2a2a;
+            --border-light: #222222;
             --radius: 12px;
             --radius-lg: 16px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-            --shadow: 0 2px 8px rgba(0,0,0,0.08);
-            --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow: 0 2px 8px rgba(0,0,0,0.4);
+            --shadow-lg: 0 4px 16px rgba(0,0,0,0.5);
             --sidebar-width: 240px;
             --header-height: 60px;
+            --meron: #ef4444;
+            --wala: #3b82f6;
+            --draw: #a855f7;
         }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -42,7 +47,7 @@
         }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         .hidden { display: none !important; }
 
         /* ===== AUTH ===== */
@@ -52,7 +57,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background: linear-gradient(135deg, #fdf8ec 0%, #f5f5f5 50%, #fff 100%);
+            background: linear-gradient(135deg, #111 0%, #1a1a1a 50%, #111 100%);
         }
         .auth-card {
             background: var(--bg-white);
@@ -65,7 +70,7 @@
         }
         .auth-logo { text-align: center; margin-bottom: 28px; }
         .auth-logo img { width: 56px; height: 56px; border-radius: 14px; margin-bottom: 12px; }
-        .auth-logo h1 { font-size: 22px; font-weight: 800; color: var(--black); letter-spacing: -0.5px; }
+        .auth-logo h1 { font-size: 22px; font-weight: 800; color: var(--gold); letter-spacing: -0.5px; }
         .auth-logo p { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
 
         .auth-tabs {
@@ -81,9 +86,9 @@
             color: var(--text-secondary); transition: all 0.25s;
         }
         .auth-tab.active {
-            background: var(--black);
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 2px 8px rgba(212,168,67,0.3);
         }
 
         .form-group { margin-bottom: 14px; }
@@ -107,16 +112,16 @@
 
         .auth-btn {
             width: 100%; padding: 13px;
-            background: var(--black);
-            color: white; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000; border: none; border-radius: 10px;
             font-size: 14px; font-weight: 600;
             cursor: pointer; transition: all 0.2s;
             font-family: inherit; margin-top: 8px;
         }
-        .auth-btn:hover { background: var(--black-light); transform: translateY(-1px); box-shadow: var(--shadow); }
+        .auth-btn:hover { background: var(--gold-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,168,67,0.3); }
 
         .auth-error {
-            background: #fef2f2; border: 1px solid #fecaca;
+            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
             color: var(--danger); padding: 10px 14px;
             border-radius: 8px; font-size: 12px;
             margin-bottom: 14px; display: none;
@@ -151,18 +156,18 @@
         .sidebar-toggle .material-icons { font-size: 24px; }
         .header-brand { display: flex; align-items: center; gap: 10px; }
         .header-brand img { width: 36px; height: 36px; border-radius: 8px; }
-        .header-brand h2 { font-size: 18px; font-weight: 800; color: var(--black); letter-spacing: -0.5px; }
+        .header-brand h2 { font-size: 18px; font-weight: 800; color: var(--gold); letter-spacing: -0.5px; }
 
         .header-right { display: flex; align-items: center; gap: 12px; }
         .header-wallet {
             display: flex; align-items: center; gap: 6px;
-            background: var(--gold-bg); border: 1px solid var(--gold-light);
+            background: rgba(212,168,67,0.1); border: 1px solid rgba(212,168,67,0.3);
             border-radius: 20px; padding: 6px 14px 6px 10px;
             cursor: pointer; transition: all 0.2s;
         }
-        .header-wallet:hover { background: var(--gold-light); }
+        .header-wallet:hover { background: rgba(212,168,67,0.15); }
         .header-wallet .material-icons { font-size: 18px; color: var(--gold-dark); }
-        .header-wallet span:last-child { font-size: 13px; font-weight: 700; color: var(--black); }
+        .header-wallet span:last-child { font-size: 13px; font-weight: 700; color: var(--gold); }
 
         .header-profile {
             width: 36px; height: 36px;
@@ -170,7 +175,7 @@
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; position: relative;
         }
-        .header-profile:hover { background: var(--black-light); }
+        .header-profile:hover { background: #333; }
         .header-profile .material-icons { font-size: 20px; color: white; }
         .profile-dropdown {
             position: absolute; top: 44px; right: 0;
@@ -286,7 +291,8 @@
         /* ===== BANNER CAROUSEL ===== */
         .banner-carousel {
             position: relative; border-radius: var(--radius-lg); overflow: hidden;
-            margin-bottom: 20px; height: 180px; background: #1a1a1a;
+            margin-bottom: 20px; height: 200px; background: #1a1a1a;
+            border: 1px solid rgba(212,168,67,0.15);
         }
         .banner-track { display: flex; transition: transform 0.5s ease; height: 100%; }
         .banner-slide {
@@ -299,7 +305,7 @@
             background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.3) 100%);
         }
         .banner-content { position: relative; z-index: 1; color: white; }
-        .banner-content h3 { font-size: 22px; font-weight: 800; margin-bottom: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .banner-content h3 { font-size: 24px; font-weight: 800; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); letter-spacing: -0.3px; }
         .banner-content p { font-size: 13px; color: rgba(255,255,255,0.85); }
         .banner-content .banner-cta {
             display: inline-block; margin-top: 10px; padding: 8px 20px;
@@ -335,7 +341,7 @@
             background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden;
             border: 1px solid var(--border); cursor: pointer; transition: all .2s;
         }
-        .game-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .game-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,168,67,0.1); }
         .game-card-img {
             height: 100px; background-size: cover; background-position: center;
             position: relative;
@@ -351,22 +357,29 @@
 
         /* ===== LIVE MATCH STRIP ===== */
         .live-strip {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            border-radius: var(--radius-lg); padding: 16px; margin-bottom: 20px;
-            color: white; cursor: pointer; transition: all .2s;
-            border: 1px solid rgba(212,168,67,0.2);
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
+            border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 16px;
+            color: white; cursor: pointer; transition: all .25s;
+            border: 1px solid rgba(212,168,67,0.15);
+            position: relative; overflow: hidden;
         }
-        .live-strip:hover { border-color: var(--gold); }
-        .live-strip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .live-strip-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-        .live-strip-status { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
-        .live-strip-status.open { background: rgba(34,197,94,0.15); color: #22c55e; }
-        .live-strip-status.closed { background: rgba(239,68,68,0.15); color: #ef4444; }
-        .live-strip-teams { display: flex; justify-content: space-around; align-items: center; }
+        .live-strip::before {
+            content: ''; position: absolute; top: -50%; right: -10%;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(212,168,67,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .live-strip:hover { border-color: var(--gold); box-shadow: 0 4px 20px rgba(212,168,67,0.1); }
+        .live-strip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; position: relative; }
+        .live-strip-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .live-strip-status { font-size: 11px; padding: 4px 12px; border-radius: 12px; font-weight: 700; letter-spacing: 0.3px; }
+        .live-strip-status.open { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+        .live-strip-status.closed { background: rgba(239,68,68,0.12); color: #ef4444; }
+        .live-strip-teams { display: flex; justify-content: space-around; align-items: center; position: relative; }
         .live-strip-team { text-align: center; }
-        .live-strip-team img { width: 40px; height: 40px; object-fit: contain; }
-        .live-strip-team span { display: block; font-size: 12px; font-weight: 600; margin-top: 4px; }
-        .live-strip-vs { font-size: 14px; font-weight: 800; color: var(--gold); }
+        .live-strip-team img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); }
+        .live-strip-team span { display: block; font-size: 13px; font-weight: 700; margin-top: 6px; letter-spacing: 0.5px; }
+        .live-strip-vs { font-size: 16px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px rgba(212,168,67,0.3); }
 
         /* ===== STATS BAR ===== */
         .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -406,7 +419,7 @@
         .match-live {
             display: flex; align-items: center; gap: 4px;
             font-size: 11px; font-weight: 700;
-            color: var(--success); background: #f0fdf4;
+            color: var(--success); background: rgba(34,197,94,0.12);
             padding: 4px 10px; border-radius: 12px;
         }
         .match-closed {
@@ -444,7 +457,7 @@
         .bet-panel {
             padding: 14px 18px 18px;
             border-top: 1px solid var(--border-light);
-            background: #fafafa;
+            background: var(--bg-surface);
         }
         .bet-buttons { display: flex; gap: 8px; margin-bottom: 10px; }
         .bet-btn {
@@ -456,8 +469,8 @@
         }
         .bet-btn:hover { border-color: var(--gold); color: var(--text-primary); }
         .bet-btn.selected {
-            background: var(--black); border-color: var(--black);
-            color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background: var(--gold); border-color: var(--gold);
+            color: #000; box-shadow: 0 2px 12px rgba(212,168,67,0.3);
         }
         .quick-chips {
             display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;
@@ -534,14 +547,14 @@
         .dep-file-upload:hover { border-color: var(--gold); background: var(--gold-bg); }
         .dep-file-upload .material-icons { font-size: 32px; color: var(--text-muted); }
         .dep-file-upload p { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-        .dep-file-upload.has-file { border-color: var(--success); background: #f0fdf4; }
+        .dep-file-upload.has-file { border-color: var(--success); background: rgba(34,197,94,0.1); }
         .dep-file-upload.has-file .material-icons { color: var(--success); }
         .dep-pending-banner {
-            background: #fffbeb; border: 1px solid #fbbf24; border-radius: var(--radius);
+            background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: var(--radius);
             padding: 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
         }
         .dep-pending-banner .material-icons { color: #d97706; font-size: 20px; }
-        .dep-pending-banner span { font-size: 13px; color: #92400e; }
+        .dep-pending-banner span { font-size: 13px; color: var(--gold-light); }
         .dep-pending-banner button { margin-left: auto; background: #dc2626; color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 600; }
         /* Wallet Summary */
         .wallet-summary { display: flex; gap: 8px; margin-top: 16px; margin-bottom: 12px; }
@@ -562,9 +575,9 @@
         .bet-item .bet-team.draw { color: #7c3aed; }
         .bet-item .bet-info { flex: 1; font-size: 12px; color: var(--text-secondary); }
         .bet-item .bet-result { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
-        .bet-item .bet-result.won { background: #dcfce7; color: #16a34a; }
-        .bet-item .bet-result.lost { background: #fee2e2; color: #dc2626; }
-        .bet-item .bet-result.pending { background: #fef3c7; color: #d97706; }
+        .bet-item .bet-result.won { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .bet-item .bet-result.lost { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .bet-item .bet-result.pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
         /* Match Result Banner */
         .match-result-banner {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
@@ -632,9 +645,9 @@
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
-        .txn-icon.credit { background: #f0fdf4; }
+        .txn-icon.credit { background: rgba(34,197,94,0.12); }
         .txn-icon.credit .material-icons { font-size: 18px; color: var(--success); }
-        .txn-icon.debit { background: #fef2f2; }
+        .txn-icon.debit { background: rgba(239,68,68,0.12); }
         .txn-icon.debit .material-icons { font-size: 18px; color: var(--danger); }
         .txn-details { flex: 1; min-width: 0; }
         .txn-desc { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -652,10 +665,10 @@
         }
         .profile-avatar {
             width: 72px; height: 72px; margin: 0 auto 12px;
-            background: var(--black); border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
         }
-        .profile-avatar .material-icons { font-size: 32px; color: white; }
+        .profile-avatar .material-icons { font-size: 32px; color: #000; }
         .profile-name { font-size: 18px; font-weight: 700; }
         .profile-phone { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
@@ -699,7 +712,7 @@
         /* Modal */
         .modal-overlay {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.7);
             display: none; align-items: center; justify-content: center;
             z-index: 1000; padding: 20px;
             backdrop-filter: blur(4px);
@@ -1025,7 +1038,7 @@
                 </div>
                 <!-- Channel Tabs -->
                 <div id="channel-tabs" style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;">
-                    <div class="channel-tab active" data-channel="auto" onclick="switchChannel('auto')" style="padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;background:var(--gold);color:#fff;border:2px solid var(--gold);transition:all .2s;">🌏 24/7 China Market</div>
+                    <div class="channel-tab active" data-channel="auto" onclick="switchChannel('auto')" style="padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;background:var(--gold);color:#000;border:2px solid var(--gold);transition:all .2s;letter-spacing:0.3px;">🌏 24/7</div>
                 </div>
                 <!-- Auto Match Card (China Market) -->
                 <div id="auto-match-container" style="display:block;">
@@ -1522,9 +1535,9 @@
             ${isAccepting ? `
             <div class="bet-panel">
                 <div class="bet-buttons">
-                    <div class="bet-btn" onclick="selectAutoBet(this, 1, 'Meron')">Meron</div>
-                    <div class="bet-btn" onclick="selectAutoBet(this, 2, 'Wala')">Wala</div>
-                    <div class="bet-btn" onclick="selectAutoBet(this, 3, 'Draw')">Draw</div>
+                    <div class="bet-btn" onclick="selectAutoBet(this, 1, 'Meron')" style="border-color:rgba(239,68,68,0.3);color:#ef4444;">🔴 Meron</div>
+                    <div class="bet-btn" onclick="selectAutoBet(this, 2, 'Wala')" style="border-color:rgba(59,130,246,0.3);color:#3b82f6;">🔵 Wala</div>
+                    <div class="bet-btn" onclick="selectAutoBet(this, 3, 'Draw')" style="border-color:rgba(168,85,247,0.3);color:#a855f7;">⚡ Draw</div>
                 </div>
                 <div id="auto-ratio-row" style="display:none;margin:8px 0;padding:0 4px;">
                     <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;">Bet Ratio: <span id="auto-ratio-display">0.80</span>x</label>
