@@ -158,7 +158,18 @@
         .header-brand img { width: 36px; height: 36px; border-radius: 8px; }
         .header-brand h2 { font-size: 18px; font-weight: 800; color: var(--gold); letter-spacing: -0.5px; }
 
-        .header-right { display: flex; align-items: center; gap: 12px; }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .header-action-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 50%;
+            cursor: pointer; transition: all 0.2s; border: none; background: none;
+        }
+        .header-action-btn.deposit-btn { background: rgba(16,185,129,0.15); }
+        .header-action-btn.deposit-btn .material-icons { color: #10b981; font-size: 20px; }
+        .header-action-btn.deposit-btn:hover { background: rgba(16,185,129,0.3); }
+        .header-action-btn.withdraw-btn { background: rgba(239,68,68,0.15); }
+        .header-action-btn.withdraw-btn .material-icons { color: #ef4444; font-size: 20px; }
+        .header-action-btn.withdraw-btn:hover { background: rgba(239,68,68,0.3); }
         .header-wallet {
             display: flex; align-items: center; gap: 6px;
             background: rgba(212,168,67,0.1); border: 1px solid rgba(212,168,67,0.3);
@@ -1013,6 +1024,12 @@
                 </div>
             </div>
             <div class="header-right">
+                <button class="header-action-btn deposit-btn" onclick="openDeposit()" title="Deposit">
+                    <span class="material-icons">add_circle</span>
+                </button>
+                <button class="header-action-btn withdraw-btn" onclick="openWithdraw()" title="Withdraw">
+                    <span class="material-icons">remove_circle</span>
+                </button>
                 <div class="header-wallet" onclick="navigate('sec-wallet')">
                     <span class="material-icons">account_balance_wallet</span>
                     <span>₹<span id="wallet-balance">0.00</span></span>

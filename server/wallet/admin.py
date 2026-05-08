@@ -253,27 +253,19 @@ class PaymentQRAdmin(admin.ModelAdmin):
     list_per_page = 20
 
     fieldsets = (
-        ('QR Details', {
+        (None, {
             'fields': (
                 ('display_name', 'upi_id'),
-                ('qr_image',),
-            ),
-        }),
-        ('Amount Limits', {
-            'fields': (
+                'qr_image',
                 ('min_deposit', 'max_deposit'),
+                ('daily_limit', 'auto_disable_on_limit', 'is_active'),
             ),
+            'description': 'Daily limit: 0 = unlimited. Auto-disable hides QR when limit reached; re-enables after 24hrs.',
         }),
-        ('Daily Credit Limit (24hr)', {
+        ('Advanced', {
+            'classes': ('collapse',),
             'fields': (
-                ('daily_limit', 'daily_credited'),
-                ('auto_disable_on_limit',),
-            ),
-            'description': 'Set daily_limit to 0 for unlimited. When limit is reached and auto-disable is on, this QR will be hidden from users. It auto-resets after 24hrs.',
-        }),
-        ('Rotation & Status', {
-            'fields': (
-                ('rotation_priority', 'is_active'),
+                ('daily_credited', 'rotation_priority'),
             ),
         }),
     )
@@ -327,28 +319,19 @@ class PaymentBankAccountAdmin(admin.ModelAdmin):
     list_per_page = 20
 
     fieldsets = (
-        ('Account Details', {
+        (None, {
             'fields': (
                 ('account_holder_name', 'bank_name'),
                 ('account_number', 'ifsc_code'),
-                ('account_type',),
+                ('account_type', 'min_deposit', 'max_deposit'),
+                ('daily_limit', 'auto_disable_on_limit', 'is_active'),
             ),
+            'description': 'Daily limit: 0 = unlimited. Auto-disable hides account when limit reached; re-enables after 24hrs.',
         }),
-        ('Amount Limits', {
+        ('Advanced', {
+            'classes': ('collapse',),
             'fields': (
-                ('min_deposit', 'max_deposit'),
-            ),
-        }),
-        ('Daily Credit Limit (24hr)', {
-            'fields': (
-                ('daily_limit', 'daily_credited'),
-                ('auto_disable_on_limit',),
-            ),
-            'description': 'Set daily_limit to 0 for unlimited. When limit is reached and auto-disable is on, this account will be hidden from users. It auto-resets after 24hrs.',
-        }),
-        ('Rotation & Status', {
-            'fields': (
-                ('rotation_priority', 'is_active'),
+                ('daily_credited', 'rotation_priority'),
             ),
         }),
     )
