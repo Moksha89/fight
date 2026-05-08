@@ -640,11 +640,7 @@
         .win-counter .dot.draw { background: #22c55e; }
         .win-counter span { color: var(--text-secondary); }
 
-        /* Ratio Slider */
-        .ratio-section {
-            padding: 8px 16px; background: #161616;
-            border-top: 1px solid var(--border);
-        }
+        /* Ratio Display */
 
         /* ===== WALLET ===== */
         .wallet-card {
@@ -2098,15 +2094,9 @@
                         <div class="chip" onclick="selectChip(this, 1000)">₹1K</div>
                         <div class="chip" onclick="selectChip(this, 5000)">₹5K</div>
                     </div>
-                    <!-- Ratio Slider -->
-                    <div class="ratio-section">
-                        <div id="auto-ratio-row" style="display:none;">
-                            <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px;">
-                                <span>Bet Ratio</span> <span style="color:var(--gold);font-weight:700;"><span id="auto-ratio-display">0.80</span>x</span>
-                            </label>
-                            <input type="range" id="auto-ratio-slider" min="0.50" max="0.95" step="0.01" value="0.80" style="width:100%;accent-color:var(--gold);" oninput="document.getElementById('auto-ratio-display').textContent=this.value">
-                            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);"><span id="auto-ratio-min">0.50x</span><span id="auto-ratio-max">0.95x</span></div>
-                        </div>
+                    <!-- Selected odds display -->
+                    <div id="auto-ratio-row" style="display:none;padding:8px 16px;background:#161616;text-align:center;">
+                        <span style="font-size:13px;color:var(--text-secondary);">Betting at </span><span style="color:var(--gold);font-weight:700;font-size:15px;"><span id="auto-ratio-display">0.80</span>x</span>
                     </div>
                     <!-- Bet Actions -->
                     <div class="bet-actions">
@@ -2139,41 +2129,25 @@
         setTimeout(loadMatchHistory, 100);
     }
 
+    let selectedAutoRatio = 0.80;
     function selectOddsTeam(el, team, name) {
         document.querySelectorAll('.odds-col').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
         selectedAutoTeam = team;
         selectedAutoTeamName = name;
         selectedBets['auto'] = {team, teamName: name};
-        document.getElementById('auto-ratio-row').style.display = 'block';
-        const slider = document.getElementById('auto-ratio-slider');
-        const display = document.getElementById('auto-ratio-display');
         const o = currentOdds;
         if (team === 3) {
-            const dMin = o.draw_min || '3.00';
-            const dMax = o.draw_max || '10.00';
-            const dMid = (parseFloat(dMin) + parseFloat(dMax)) / 2;
-            slider.min = dMin; slider.max = dMax; slider.step = '0.10'; slider.value = dMid.toFixed(2);
-            display.textContent = dMid.toFixed(2);
-            document.getElementById('auto-ratio-min').textContent = dMin + 'x';
-            document.getElementById('auto-ratio-max').textContent = dMax + 'x';
+            selectedAutoRatio = parseFloat(o.draw_max || '10.00');
         } else if (team === 1) {
-            const mMin = o.meron_min || '0.50';
-            const mMax = o.meron_max || '0.95';
-            const mMid = (parseFloat(mMin) + parseFloat(mMax)) / 2;
-            slider.min = mMin; slider.max = mMax; slider.step = '0.01'; slider.value = mMid.toFixed(2);
-            display.textContent = mMid.toFixed(2);
-            document.getElementById('auto-ratio-min').textContent = mMin + 'x';
-            document.getElementById('auto-ratio-max').textContent = mMax + 'x';
+            selectedAutoRatio = parseFloat(o.meron_max || '0.95');
         } else {
-            const wMin = o.wala_min || '0.50';
-            const wMax = o.wala_max || '0.95';
-            const wMid = (parseFloat(wMin) + parseFloat(wMax)) / 2;
-            slider.min = wMin; slider.max = wMax; slider.step = '0.01'; slider.value = wMid.toFixed(2);
-            display.textContent = wMid.toFixed(2);
-            document.getElementById('auto-ratio-min').textContent = wMin + 'x';
-            document.getElementById('auto-ratio-max').textContent = wMax + 'x';
+            selectedAutoRatio = parseFloat(o.wala_max || '0.95');
         }
+        const row = document.getElementById('auto-ratio-row');
+        const display = document.getElementById('auto-ratio-display');
+        if (row) row.style.display = 'block';
+        if (display) display.textContent = selectedAutoRatio.toFixed(2);
     }
 
     function clearAutoBet() {
@@ -2274,29 +2248,25 @@
         parent.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected'));
         el.classList.add('selected');
         selectedBets['auto'] = {team, teamName};
-        const ratioRow = document.getElementById('auto-ratio-row');
-        if (ratioRow) {
-            ratioRow.style.display = 'block';
-            const slider = document.getElementById('auto-ratio-slider');
-            const minEl = document.getElementById('auto-ratio-min');
-            const maxEl = document.getElementById('auto-ratio-max');
-            if (team === 3) {
-                slider.min = '3.00'; slider.max = '10.00'; slider.step = '0.10'; slider.value = '5.00';
-                minEl.textContent = '3.00x'; maxEl.textContent = '10.00x';
-            } else {
-                slider.min = '0.50'; slider.max = '0.95'; slider.step = '0.01'; slider.value = '0.80';
-                minEl.textContent = '0.50x'; maxEl.textContent = '0.95x';
-            }
-            document.getElementById('auto-ratio-display').textContent = slider.value;
+        const o = currentOdds;
+        if (team === 3) {
+            selectedAutoRatio = parseFloat(o.draw_max || '10.00');
+        } else if (team === 1) {
+            selectedAutoRatio = parseFloat(o.meron_max || '0.95');
+        } else {
+            selectedAutoRatio = parseFloat(o.wala_max || '0.95');
         }
+        const row = document.getElementById('auto-ratio-row');
+        const display = document.getElementById('auto-ratio-display');
+        if (row) row.style.display = 'block';
+        if (display) display.textContent = selectedAutoRatio.toFixed(2);
     }
 
     async function placeAutoBet() {
         if (!selectedBets['auto']) { showToast('Select a team first (Meron, Wala, or Draw)', 'error'); return; }
         const amount = document.getElementById('bet-amt-auto').value;
         if (!amount || parseFloat(amount) < 10) { showToast('Minimum bet is ₹10', 'error'); return; }
-        const slider = document.getElementById('auto-ratio-slider');
-        const ratio = slider ? parseFloat(slider.value) : 0.80;
+        const ratio = selectedAutoRatio;
         if (!await customConfirm(`Place <b>₹${amount}</b> bet on <b>${selectedBets['auto'].teamName}</b> at <b>${ratio}x</b>?`, {title: 'Place Bet', icon: '🎰', okText: 'Place Bet'})) return;
         try {
             const res = await fetch(`${API}/cockfight/bets/place-bet/`, {
