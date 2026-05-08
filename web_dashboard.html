@@ -283,29 +283,101 @@
         }
         .page-title .material-icons { font-size: 24px; color: var(--gold-dark); }
 
-        /* ===== HOME SECTION ===== */
-        .hero-banner {
-            background: linear-gradient(135deg, var(--black) 0%, #2d2d2d 50%, var(--black) 100%);
-            border-radius: var(--radius-lg);
-            padding: 28px 24px;
-            margin-bottom: 24px;
-            position: relative; overflow: hidden;
-            color: white;
+        /* ===== BANNER CAROUSEL ===== */
+        .banner-carousel {
+            position: relative; border-radius: var(--radius-lg); overflow: hidden;
+            margin-bottom: 20px; height: 180px; background: #1a1a1a;
         }
-        .hero-banner::before {
-            content: ''; position: absolute; top: -50%; right: -20%;
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(212,168,67,0.15) 0%, transparent 70%);
-            border-radius: 50%;
+        .banner-track { display: flex; transition: transform 0.5s ease; height: 100%; }
+        .banner-slide {
+            min-width: 100%; height: 100%; position: relative;
+            background-size: cover; background-position: center;
+            display: flex; align-items: flex-end; padding: 20px 24px;
         }
-        .hero-banner h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; position: relative; }
-        .hero-banner p { font-size: 13px; color: rgba(255,255,255,0.7); position: relative; }
-        .hero-stats {
-            display: flex; gap: 20px; margin-top: 16px; position: relative;
+        .banner-slide::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.3) 100%);
         }
-        .hero-stat { display: flex; align-items: center; gap: 6px; }
-        .hero-stat .material-icons { font-size: 16px; color: var(--gold); }
-        .hero-stat span { font-size: 12px; color: rgba(255,255,255,0.8); }
+        .banner-content { position: relative; z-index: 1; color: white; }
+        .banner-content h3 { font-size: 22px; font-weight: 800; margin-bottom: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .banner-content p { font-size: 13px; color: rgba(255,255,255,0.85); }
+        .banner-content .banner-cta {
+            display: inline-block; margin-top: 10px; padding: 8px 20px;
+            background: var(--gold); color: #000; font-weight: 700; font-size: 13px;
+            border-radius: 20px; cursor: pointer; text-decoration: none;
+        }
+        .banner-dots { position: absolute; bottom: 10px; right: 16px; display: flex; gap: 6px; z-index: 2; }
+        .banner-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: all .3s; }
+        .banner-dot.active { background: var(--gold); width: 20px; border-radius: 4px; }
+
+        /* ===== QUICK ACTIONS ===== */
+        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .quick-action {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 14px 8px; background: var(--bg-card); border-radius: var(--radius);
+            border: 1px solid var(--border); cursor: pointer; transition: all .2s;
+            text-decoration: none; color: var(--text-primary);
+        }
+        .quick-action:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(212,168,67,0.15); }
+        .quick-action .qa-icon {
+            width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+        }
+        .quick-action .qa-label { font-size: 11px; font-weight: 600; text-align: center; }
+
+        /* ===== LIVE PULSE ===== */
+        @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; display: inline-block; animation: livePulse 1.5s infinite; margin-right: 4px; }
+
+        /* ===== GAME CARDS ===== */
+        .game-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 20px; }
+        .game-card {
+            background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden;
+            border: 1px solid var(--border); cursor: pointer; transition: all .2s;
+        }
+        .game-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .game-card-img {
+            height: 100px; background-size: cover; background-position: center;
+            position: relative;
+        }
+        .game-card-img .game-badge {
+            position: absolute; top: 8px; left: 8px; padding: 3px 10px;
+            border-radius: 12px; font-size: 10px; font-weight: 700; color: white;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .game-card-body { padding: 12px; }
+        .game-card-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .game-card-body p { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+        /* ===== LIVE MATCH STRIP ===== */
+        .live-strip {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: var(--radius-lg); padding: 16px; margin-bottom: 20px;
+            color: white; cursor: pointer; transition: all .2s;
+            border: 1px solid rgba(212,168,67,0.2);
+        }
+        .live-strip:hover { border-color: var(--gold); }
+        .live-strip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .live-strip-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .live-strip-status { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+        .live-strip-status.open { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .live-strip-status.closed { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .live-strip-teams { display: flex; justify-content: space-around; align-items: center; }
+        .live-strip-team { text-align: center; }
+        .live-strip-team img { width: 40px; height: 40px; object-fit: contain; }
+        .live-strip-team span { display: block; font-size: 12px; font-weight: 600; margin-top: 4px; }
+        .live-strip-vs { font-size: 14px; font-weight: 800; color: var(--gold); }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card {
+            background: var(--bg-card); border-radius: var(--radius); padding: 14px;
+            border: 1px solid var(--border); text-align: center;
+        }
+        .stat-card .stat-value { font-size: 20px; font-weight: 800; color: var(--gold); }
+        .stat-card .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        .hero-banner { display: none; }
 
         .section-label {
             font-size: 15px; font-weight: 700; margin-bottom: 14px;
@@ -662,8 +734,14 @@
                 z-index: 94; display: none;
             }
             .sidebar-overlay.show { display: block; }
-            .hero-banner { padding: 20px; }
-            .hero-banner h3 { font-size: 17px; }
+            .banner-carousel { height: 150px; }
+            .banner-content h3 { font-size: 18px; }
+            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .quick-action { padding: 10px 4px; }
+            .quick-action .qa-icon { width: 36px; height: 36px; font-size: 18px; }
+            .quick-action .qa-label { font-size: 10px; }
+            .game-cards { grid-template-columns: 1fr; }
+            .stats-bar { grid-template-columns: repeat(3, 1fr); gap: 8px; }
             .match-teams { padding: 14px; }
             .team img { width: 48px; height: 48px; }
         }
@@ -834,30 +912,108 @@
         <div class="app-main">
             <!-- HOME -->
             <div id="sec-home" class="section active">
-                <div class="hero-banner">
-                    <h3>Welcome to Kokoroko</h3>
-                    <p>Place bets on live cockfight matches and win big</p>
-                    <div class="hero-stats">
-                        <div class="hero-stat">
-                            <span class="material-icons">live_tv</span>
-                            <span>24/7 Live</span>
+                <!-- Banner Carousel -->
+                <div class="banner-carousel" id="banner-carousel">
+                    <div class="banner-track" id="banner-track">
+                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #1a1a1a 0%, #2a1f0e 50%, #1a1a1a 100%);">
+                            <div class="banner-content">
+                                <h3>🐓 Live Cockfight Betting</h3>
+                                <p>24/7 live matches from China Market. Bet on Meron or Wala!</p>
+                                <span class="banner-cta" onclick="navigate('sec-cockfight')">Bet Now →</span>
+                            </div>
                         </div>
-                        <div class="hero-stat">
-                            <span class="material-icons">bolt</span>
-                            <span>Instant Payout</span>
+                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);">
+                            <div class="banner-content">
+                                <h3>🎲 Dice Play — Gundata</h3>
+                                <p>Pick a face, place your bet. Instant results!</p>
+                                <span class="banner-cta" onclick="navigate('sec-dice')">Play Now →</span>
+                            </div>
                         </div>
-                        <div class="hero-stat">
-                            <span class="material-icons">shield</span>
-                            <span>Secure</span>
+                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #1a1a1a 0%, #14532d 50%, #1a1a1a 100%);">
+                            <div class="banner-content">
+                                <h3>💰 Instant Deposits & Withdrawals</h3>
+                                <p>Add funds via UPI or bank. Withdraw winnings anytime.</p>
+                                <span class="banner-cta" onclick="navigate('sec-wallet')">Add Funds →</span>
+                            </div>
                         </div>
                     </div>
+                    <div class="banner-dots" id="banner-dots">
+                        <div class="banner-dot active" onclick="goToSlide(0)"></div>
+                        <div class="banner-dot" onclick="goToSlide(1)"></div>
+                        <div class="banner-dot" onclick="goToSlide(2)"></div>
+                    </div>
                 </div>
-                <div class="section-label">
-                    <span class="material-icons">sports_mma</span>
-                    Live Matches
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="navigate('sec-cockfight')">
+                        <div class="qa-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);">🐓</div>
+                        <div class="qa-label">Cockfight</div>
+                    </div>
+                    <div class="quick-action" onclick="navigate('sec-dice')">
+                        <div class="qa-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">🎲</div>
+                        <div class="qa-label">Dice Play</div>
+                    </div>
+                    <div class="quick-action" onclick="openDeposit()">
+                        <div class="qa-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a);">💳</div>
+                        <div class="qa-label">Deposit</div>
+                    </div>
+                    <div class="quick-action" onclick="openWithdraw()">
+                        <div class="qa-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">🏦</div>
+                        <div class="qa-label">Withdraw</div>
+                    </div>
+                </div>
+
+                <!-- Live Now Section -->
+                <div class="section-label" style="margin-bottom:12px;">
+                    <span class="live-dot"></span>
+                    <span style="font-weight:700;">Live Now</span>
                 </div>
                 <div id="matches-container">
                     <div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches at the moment</p></div>
+                </div>
+
+                <!-- Games Section -->
+                <div class="section-label" style="margin-top:24px;margin-bottom:12px;">
+                    <span class="material-icons">casino</span>
+                    <span style="font-weight:700;">Games</span>
+                </div>
+                <div class="game-cards">
+                    <div class="game-card" onclick="navigate('sec-cockfight')">
+                        <div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;">
+                            <span class="game-badge" style="background:#ef4444;position:static;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>
+                            <span style="font-size:48px;position:absolute;">🐓</span>
+                        </div>
+                        <div class="game-card-body">
+                            <h4>Cockfight Betting</h4>
+                            <p>24/7 live matches. Pick Meron or Wala and win big with real-time odds.</p>
+                        </div>
+                    </div>
+                    <div class="game-card" onclick="navigate('sec-dice')">
+                        <div class="game-card-img" style="background:linear-gradient(135deg,#312e81,#6d28d9);display:flex;align-items:center;justify-content:center;">
+                            <span style="font-size:48px;">🎲</span>
+                        </div>
+                        <div class="game-card-body">
+                            <h4>Dice Play (Gundata)</h4>
+                            <p>Pick a dice face from 1 to 6. Match the roll and multiply your bet!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div class="stats-bar" style="margin-top:20px;">
+                    <div class="stat-card">
+                        <div class="stat-value">24/7</div>
+                        <div class="stat-label">Live Matches</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Instant</div>
+                        <div class="stat-label">Payouts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Secure</div>
+                        <div class="stat-label">Platform</div>
+                    </div>
                 </div>
             </div>
 
@@ -1551,21 +1707,22 @@
         if (autoMatchData) {
             liveCount++;
             const d = autoMatchData;
+            const isOpen = d.isAcceptingBet;
             html += `
-            <div class="match-card" onclick="navigate('sec-cockfight');switchChannel('auto');" style="cursor:pointer;">
-                <div class="match-header">
-                    <div class="match-title">🌏 China Market — Fight #${d.matchNumber||'?'}</div>
-                    ${d.isAcceptingBet ? '<span class="match-live">● BETTING OPEN</span>' : '<span class="match-closed">In Progress</span>'}
+            <div class="live-strip" onclick="navigate('sec-cockfight');switchChannel('auto');">
+                <div class="live-strip-header">
+                    <div class="live-strip-title"><span class="live-dot"></span> China Market — Fight #${d.matchNumber||'?'}</div>
+                    <span class="live-strip-status ${isOpen ? 'open' : 'closed'}">${isOpen ? 'BETTING OPEN' : 'IN PROGRESS'}</span>
                 </div>
-                <div class="match-teams">
-                    <div class="team">
-                        <img src="/static/red_roaster.png" alt="Meron" style="width:48px;height:48px;object-fit:contain;">
-                        <div class="team-name">Meron</div>
+                <div class="live-strip-teams">
+                    <div class="live-strip-team">
+                        <img src="/static/red_roaster.png" alt="Meron">
+                        <span>Meron</span>
                     </div>
-                    <div class="vs-badge">VS</div>
-                    <div class="team">
-                        <img src="/static/blue_roaster.png" alt="Wala" style="width:48px;height:48px;object-fit:contain;">
-                        <div class="team-name">Wala</div>
+                    <div class="live-strip-vs">VS</div>
+                    <div class="live-strip-team">
+                        <img src="/static/blue_roaster.png" alt="Wala">
+                        <span>Wala</span>
                     </div>
                 </div>
             </div>`;
@@ -1579,16 +1736,17 @@
                     liveCount++;
                     const teamAName = match.teamAName || 'Meron';
                     const teamBName = match.teamBName || 'Wala';
+                    const isOpen = match.isBettingEnabled;
                     html += `
-                    <div class="match-card" onclick="navigate('sec-cockfight');switchChannel('zone-${zone.id}');" style="cursor:pointer;">
-                        <div class="match-header">
-                            <div class="match-title">${match.title || zone.name}</div>
-                            ${match.isBettingEnabled ? '<span class="match-live">● LIVE</span>' : '<span class="match-closed">Betting Closed</span>'}
+                    <div class="live-strip" onclick="navigate('sec-cockfight');switchChannel('zone-${zone.id}');">
+                        <div class="live-strip-header">
+                            <div class="live-strip-title"><span class="live-dot"></span> ${match.title || zone.name}</div>
+                            <span class="live-strip-status ${isOpen ? 'open' : 'closed'}">${isOpen ? 'BETTING OPEN' : 'CLOSED'}</span>
                         </div>
-                        <div class="match-teams">
-                            <div class="team"><div class="team-name">${teamAName}</div></div>
-                            <div class="vs-badge">VS</div>
-                            <div class="team"><div class="team-name">${teamBName}</div></div>
+                        <div class="live-strip-teams">
+                            <div class="live-strip-team"><span>${teamAName}</span></div>
+                            <div class="live-strip-vs">VS</div>
+                            <div class="live-strip-team"><span>${teamBName}</span></div>
                         </div>
                     </div>`;
                 });
@@ -2197,6 +2355,45 @@
     });
     // Match timer refresh
     setInterval(() => { if (autoMatchData && currentChannel === 'auto') { const timerEl = document.querySelector('.match-timer'); if (timerEl && matchStartTime) { const elapsed = Math.floor((Date.now() - matchStartTime)/1000); timerEl.innerHTML = `<span class="material-icons">timer</span>${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`; } } }, 1000);
+
+    // ===== BANNER CAROUSEL =====
+    let bannerIndex = 0;
+    function goToSlide(i) {
+        bannerIndex = i;
+        const track = document.getElementById('banner-track');
+        if (track) track.style.transform = `translateX(-${i * 100}%)`;
+        document.querySelectorAll('.banner-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+    }
+    setInterval(() => {
+        const dots = document.querySelectorAll('.banner-dot');
+        if (dots.length > 0) { goToSlide((bannerIndex + 1) % dots.length); }
+    }, 4000);
+
+    // Load banners from API (if any exist, replace defaults)
+    async function loadBanners() {
+        try {
+            const res = await fetch(`${API}/banners/`, {headers:{'Authorization':`Bearer ${token}`}});
+            if (!res.ok) return;
+            const data = await res.json();
+            const banners = data.results || data || [];
+            if (banners.length === 0) return;
+            const track = document.getElementById('banner-track');
+            const dotsC = document.getElementById('banner-dots');
+            let trackHtml = '';
+            let dotsHtml = '';
+            banners.forEach((b, i) => {
+                const bgImg = b.banner ? `url(${b.banner})` : 'linear-gradient(135deg,#1a1a1a,#2a1f0e)';
+                const catLabels = {S:'Cockfight',P:'Promotion',D:'Dice Play',W:'Wallet',V:'Videos'};
+                const label = catLabels[b.category] || 'Kokoroko';
+                trackHtml += `<div class="banner-slide" style="background-image:${bgImg};"><div class="banner-content"><h3>${label}</h3></div></div>`;
+                dotsHtml += `<div class="banner-dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
+            });
+            track.innerHTML = trackHtml;
+            dotsC.innerHTML = dotsHtml;
+            bannerIndex = 0;
+        } catch(e) {}
+    }
+    loadBanners();
     </script>
 </body>
 </html>
