@@ -3247,6 +3247,58 @@
         } catch(e) {}
     }
     loadBanners();
+
+    // ===== REAL-TIME AUTO-REFRESH (EVERYTHING) =====
+    // Wallet balance + exposure + profile: every 10s
+    setInterval(() => { if (token) loadUserInfo(); }, 10000);
+
+    // Bet results: every 15s
+    setInterval(() => { if (token) loadUserBets(); }, 15000);
+
+    // Deposit/withdrawal request status + tracking: every 12s
+    setInterval(() => {
+        if (token) {
+            loadRequestTracking();
+            const depModal = document.getElementById('deposit-modal');
+            if (depModal && depModal.classList.contains('show')) checkPendingDeposit();
+            const wdModal = document.getElementById('withdraw-modal');
+            if (wdModal && wdModal.classList.contains('show')) checkPendingWithdraw();
+        }
+    }, 12000);
+
+    // Match history + results proof: every 30s
+    setInterval(() => {
+        if (token && currentChannel === 'auto') {
+            const histEl = document.getElementById('match-history-list');
+            if (histEl) loadMatchHistory();
+        }
+    }, 30000);
+
+    // Statements/transactions: every 20s (if on wallet/statement page)
+    setInterval(() => {
+        if (token) {
+            const stmtEl = document.getElementById('statement-list');
+            if (stmtEl && stmtEl.offsetParent !== null) loadStatement();
+        }
+    }, 20000);
+
+    // Odds: every 15s
+    setInterval(() => { if (token) loadOdds(); }, 15000);
+
+    // Banners: every 60s
+    setInterval(() => { if (token) loadBanners(); }, 60000);
+
+    // Social links: every 60s
+    setInterval(() => { if (token) loadSocialLinks(); }, 60000);
+
+    // Dice games: every 20s (if on dice page)
+    setInterval(() => {
+        if (token) {
+            const diceEl = document.getElementById('sec-dice');
+            if (diceEl && diceEl.offsetParent !== null) loadDiceGames();
+        }
+    }, 20000);
+
     </script>
 </body>
 </html>
