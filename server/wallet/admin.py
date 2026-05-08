@@ -258,9 +258,16 @@ class PaymentQRAdmin(admin.ModelAdmin):
                 ('display_name', 'upi_id'),
                 'qr_image',
                 ('min_deposit', 'max_deposit'),
-                ('daily_limit', 'auto_disable_on_limit', 'is_active'),
+                'is_active',
             ),
-            'description': 'Daily limit: 0 = unlimited. Auto-disable hides QR when limit reached; re-enables after 24hrs.',
+        }),
+        ('Daily Credit Limit', {
+            'classes': ('collapse',),
+            'fields': (
+                'daily_limit',
+                'auto_disable_on_limit',
+            ),
+            'description': 'Set max amount that can be credited in 24hrs. 0 = unlimited. Auto-disable hides QR when limit reached; re-enables after 24hrs.',
         }),
         ('Advanced', {
             'classes': ('collapse',),
@@ -324,9 +331,16 @@ class PaymentBankAccountAdmin(admin.ModelAdmin):
                 ('account_holder_name', 'bank_name'),
                 ('account_number', 'ifsc_code'),
                 ('account_type', 'min_deposit', 'max_deposit'),
-                ('daily_limit', 'auto_disable_on_limit', 'is_active'),
+                'is_active',
             ),
-            'description': 'Daily limit: 0 = unlimited. Auto-disable hides account when limit reached; re-enables after 24hrs.',
+        }),
+        ('Daily Credit Limit', {
+            'classes': ('collapse',),
+            'fields': (
+                'daily_limit',
+                'auto_disable_on_limit',
+            ),
+            'description': 'Set max amount that can be credited in 24hrs. 0 = unlimited. Auto-disable hides account when limit reached; re-enables after 24hrs.',
         }),
         ('Advanced', {
             'classes': ('collapse',),
