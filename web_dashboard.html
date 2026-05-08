@@ -697,13 +697,21 @@
         .bet-item .bet-result.won { background: rgba(34,197,94,0.15); color: #22c55e; }
         .bet-item .bet-result.lost { background: rgba(239,68,68,0.15); color: #ef4444; }
         .bet-item .bet-result.pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        /* Cockfight Two-Column Layout */
+        .cockfight-layout { display: flex; gap: 16px; align-items: flex-start; }
+        .cockfight-layout .cockfight-left { flex: 1; min-width: 0; }
+        .cockfight-layout .cockfight-right { width: 380px; flex-shrink: 0; }
+        @media(max-width:900px) {
+            .cockfight-layout { flex-direction: column; }
+            .cockfight-layout .cockfight-right { width: 100%; }
+        }
         /* Match History List (with proof) */
-        .match-history-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); margin-top: 16px; overflow: hidden; }
+        .match-history-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
         .match-history-card .mhc-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
         .match-history-card .mhc-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); display: flex; align-items: center; gap: 6px; }
         .match-history-card .mhc-title .material-icons { font-size: 18px; }
-        .mh-table-header { display: grid; grid-template-columns: 60px 80px 1fr 90px; gap: 8px; padding: 8px 16px; background: rgba(212,168,67,0.08); border-bottom: 1px solid var(--border-light); font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-        .mh-row { display: grid; grid-template-columns: 60px 80px 1fr 90px; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border-light); align-items: center; transition: background 0.2s; }
+        .mh-table-header { display: grid; grid-template-columns: 50px 65px 1fr 70px; gap: 6px; padding: 8px 12px; background: rgba(212,168,67,0.08); border-bottom: 1px solid var(--border-light); font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        .mh-row { display: grid; grid-template-columns: 50px 65px 1fr 70px; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--border-light); align-items: center; transition: background 0.2s; }
         .mh-row:hover { background: rgba(212,168,67,0.05); }
         .mh-row:last-child { border-bottom: none; }
         .mh-fight { font-weight: 700; font-size: 13px; color: var(--gold); }
@@ -711,18 +719,22 @@
         .mh-winner.meron { color: #ef4444; }
         .mh-winner.wala { color: #3b82f6; }
         .mh-winner.draw { color: #a855f7; }
-        .mh-date { font-size: 12px; color: var(--text-muted); }
-        .mh-proof { display: flex; gap: 6px; justify-content: flex-end; }
-        .proof-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-size: 16px; text-decoration: none; transition: all 0.2s; }
+        .mh-date { font-size: 11px; color: var(--text-muted); }
+        .mh-proof { display: flex; gap: 4px; justify-content: flex-end; }
+        .proof-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; font-size: 14px; text-decoration: none; transition: all 0.2s; }
         .proof-btn.video { background: rgba(239,68,68,0.15); color: #ef4444; }
         .proof-btn.video:hover { background: rgba(239,68,68,0.3); transform: scale(1.1); }
         .proof-btn.shot { background: rgba(59,130,246,0.15); color: #3b82f6; }
         .proof-btn.shot:hover { background: rgba(59,130,246,0.3); transform: scale(1.1); }
         .no-proof { color: var(--text-muted); font-size: 12px; }
+        .match-history-scroll { max-height: 600px; overflow-y: auto; }
+        .match-history-scroll::-webkit-scrollbar { width: 4px; }
+        .match-history-scroll::-webkit-scrollbar-track { background: transparent; }
+        .match-history-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         @media(max-width:600px) {
-            .mh-table-header, .mh-row { grid-template-columns: 50px 65px 1fr 80px; padding: 8px 10px; }
+            .mh-table-header, .mh-row { grid-template-columns: 45px 55px 1fr 65px; padding: 8px 10px; }
             .mh-fight, .mh-winner { font-size: 12px; }
-            .proof-btn { width: 28px; height: 28px; font-size: 14px; }
+            .proof-btn { width: 26px; height: 26px; font-size: 13px; }
         }
         /* Match Result Banner */
         .match-result-banner {
@@ -1763,85 +1775,93 @@
 
         container.innerHTML = `
         ${getLastMatchResultHtml()}
-        <div class="match-card">
-            <div class="match-header">
-                <div class="match-title">
-                    <span class="live-dot"></span>
-                    Fight #${matchNum}
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    ${getMatchTimerHtml()}
-                    ${isAccepting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>'}
+        <div class="cockfight-layout">
+            <div class="cockfight-left">
+                <div class="match-card">
+                    <div class="match-header">
+                        <div class="match-title">
+                            <span class="live-dot"></span>
+                            Fight #${matchNum}
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            ${getMatchTimerHtml()}
+                            ${isAccepting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>'}
+                        </div>
+                    </div>
+                    ${streamHtml}
+                    <!-- Odds Display -->
+                    <div class="odds-display">
+                        <div class="odds-col" id="odds-meron" onclick="${isAccepting ? "selectOddsTeam(this, 1, 'Meron')" : ''}">
+                            <div class="odds-value meron">${oddsMin}x</div>
+                            <div class="odds-team meron">🔴 Meron</div>
+                        </div>
+                        <div class="odds-col" id="odds-draw" onclick="${isAccepting ? "selectOddsTeam(this, 3, 'Draw')" : ''}">
+                            <div class="odds-value draw">${drawMin}x</div>
+                            <div class="odds-team draw">⚡ BDD</div>
+                        </div>
+                        <div class="odds-col" id="odds-wala" onclick="${isAccepting ? "selectOddsTeam(this, 2, 'Wala')" : ''}">
+                            <div class="odds-value wala">${oddsMax}x</div>
+                            <div class="odds-team wala">🔵 Wala</div>
+                        </div>
+                    </div>
+                    <!-- Mascots -->
+                    <div class="mascot-row">
+                        <div class="mascot-side">
+                            <img src="/static/red_roaster.png" alt="Meron">
+                            <div class="mascot-label meron">Meron</div>
+                        </div>
+                        <div class="vs-badge">VS</div>
+                        <div class="mascot-side" style="flex-direction:row-reverse;">
+                            <img src="/static/blue_roaster.png" alt="Wala">
+                            <div class="mascot-label wala">Wala</div>
+                        </div>
+                    </div>
+                    ${isAccepting ? `
+                    <!-- Chips -->
+                    <div class="chips-row">
+                        <div class="chip" onclick="selectChip(this, 50)">₹50</div>
+                        <div class="chip" onclick="selectChip(this, 100)">₹100</div>
+                        <div class="chip" onclick="selectChip(this, 500)">₹500</div>
+                        <div class="chip" onclick="selectChip(this, 1000)">₹1K</div>
+                        <div class="chip" onclick="selectChip(this, 5000)">₹5K</div>
+                    </div>
+                    <!-- Ratio Slider -->
+                    <div class="ratio-section">
+                        <div id="auto-ratio-row" style="display:none;">
+                            <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span>Bet Ratio</span> <span style="color:var(--gold);font-weight:700;"><span id="auto-ratio-display">0.80</span>x</span>
+                            </label>
+                            <input type="range" id="auto-ratio-slider" min="0.50" max="0.95" step="0.01" value="0.80" style="width:100%;accent-color:var(--gold);" oninput="document.getElementById('auto-ratio-display').textContent=this.value">
+                            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);"><span id="auto-ratio-min">0.50x</span><span id="auto-ratio-max">0.95x</span></div>
+                        </div>
+                    </div>
+                    <!-- Bet Actions -->
+                    <div class="bet-actions">
+                        <input type="number" class="bet-amount-input" placeholder="Enter amount or select chip" id="bet-amt-auto" min="10">
+                        <button class="bet-submit" onclick="placeAutoBet()">✓ BET</button>
+                        <button class="bet-cancel" onclick="clearAutoBet()">✕</button>
+                    </div>` : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>'}
+                    <!-- Bead Road -->
+                    ${renderBeadRoad()}
+                    ${renderBetHistory()}
                 </div>
             </div>
-            ${streamHtml}
-            <!-- Odds Display -->
-            <div class="odds-display">
-                <div class="odds-col ${isAccepting ? '' : ''}" id="odds-meron" onclick="${isAccepting ? "selectOddsTeam(this, 1, 'Meron')" : ''}">
-                    <div class="odds-value meron">${oddsMin}x</div>
-                    <div class="odds-team meron">🔴 Meron</div>
-                </div>
-                <div class="odds-col" id="odds-draw" onclick="${isAccepting ? "selectOddsTeam(this, 3, 'Draw')" : ''}">
-                    <div class="odds-value draw">${drawMin}x</div>
-                    <div class="odds-team draw">⚡ BDD</div>
-                </div>
-                <div class="odds-col" id="odds-wala" onclick="${isAccepting ? "selectOddsTeam(this, 2, 'Wala')" : ''}">
-                    <div class="odds-value wala">${oddsMax}x</div>
-                    <div class="odds-team wala">🔵 Wala</div>
-                </div>
-            </div>
-            <!-- Mascots -->
-            <div class="mascot-row">
-                <div class="mascot-side">
-                    <img src="/static/red_roaster.png" alt="Meron">
-                    <div class="mascot-label meron">Meron</div>
-                </div>
-                <div class="vs-badge">VS</div>
-                <div class="mascot-side" style="flex-direction:row-reverse;">
-                    <img src="/static/blue_roaster.png" alt="Wala">
-                    <div class="mascot-label wala">Wala</div>
+            <div class="cockfight-right">
+                <div class="match-history-card">
+                    <div class="mhc-header">
+                        <div class="mhc-title"><span class="material-icons">videocam</span> Match Results & Proof</div>
+                    </div>
+                    <div class="mh-table-header">
+                        <div>Fight</div>
+                        <div>Winner</div>
+                        <div>Date</div>
+                        <div style="text-align:right">Proof</div>
+                    </div>
+                    <div class="match-history-scroll">
+                        <div id="match-history-list"><div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">Loading...</div></div>
+                    </div>
                 </div>
             </div>
-            ${isAccepting ? `
-            <!-- Chips -->
-            <div class="chips-row">
-                <div class="chip" onclick="selectChip(this, 50)">₹50</div>
-                <div class="chip" onclick="selectChip(this, 100)">₹100</div>
-                <div class="chip" onclick="selectChip(this, 500)">₹500</div>
-                <div class="chip" onclick="selectChip(this, 1000)">₹1K</div>
-                <div class="chip" onclick="selectChip(this, 5000)">₹5K</div>
-            </div>
-            <!-- Ratio Slider -->
-            <div class="ratio-section">
-                <div id="auto-ratio-row" style="display:none;">
-                    <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px;">
-                        <span>Bet Ratio</span> <span style="color:var(--gold);font-weight:700;"><span id="auto-ratio-display">0.80</span>x</span>
-                    </label>
-                    <input type="range" id="auto-ratio-slider" min="0.50" max="0.95" step="0.01" value="0.80" style="width:100%;accent-color:var(--gold);" oninput="document.getElementById('auto-ratio-display').textContent=this.value">
-                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);"><span id="auto-ratio-min">0.50x</span><span id="auto-ratio-max">0.95x</span></div>
-                </div>
-            </div>
-            <!-- Bet Actions -->
-            <div class="bet-actions">
-                <input type="number" class="bet-amount-input" placeholder="Enter amount or select chip" id="bet-amt-auto" min="10">
-                <button class="bet-submit" onclick="placeAutoBet()">✓ BET</button>
-                <button class="bet-cancel" onclick="clearAutoBet()">✕</button>
-            </div>` : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>'}
-            <!-- Bead Road -->
-            ${renderBeadRoad()}
-            ${renderBetHistory()}
-        </div>
-        <div class="match-history-card">
-            <div class="mhc-header">
-                <div class="mhc-title"><span class="material-icons">videocam</span> Match Results & Proof</div>
-            </div>
-            <div class="mh-table-header">
-                <div>Fight</div>
-                <div>Winner</div>
-                <div>Date</div>
-                <div style="text-align:right">Proof</div>
-            </div>
-            <div id="match-history-list"><div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">Loading...</div></div>
         </div>`;
         // Load match history after render
         setTimeout(loadMatchHistory, 100);
