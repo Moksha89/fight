@@ -419,7 +419,7 @@ class OddsConfig(models.Model):
     dynamic_lookback = models.PositiveIntegerField(default=50, help_text='Number of past matches to analyze')
     dynamic_house_edge = models.DecimalField(max_digits=4, decimal_places=2, default=Decimal('0.05'), help_text='House edge e.g. 0.05 = 5%')
     dynamic_min_ratio = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.50'), help_text='Floor for Meron/Wala ratios')
-    dynamic_max_ratio = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('1.50'), help_text='Cap for Meron/Wala ratios')
+    dynamic_max_ratio = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.95'), help_text='Cap for Meron/Wala ratios')
     dynamic_draw_min = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('3.00'))
     dynamic_draw_max = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('10.00'))
 
