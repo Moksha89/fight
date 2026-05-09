@@ -1,8 +1,10 @@
 """
-Kokoroko Error Handling Middleware
-==================================
-Catches unhandled exceptions in non-DRF views (admin, static, etc.)
-and adds request context for structured logging.
+Kokoroko Middleware Stack
+=========================
+- ErrorHandlingMiddleware: Catches unhandled exceptions
+- RequestLoggingMiddleware: Logs API requests
+- SecurityHeadersMiddleware: Adds security response headers
+- AdminSessionSecurityMiddleware: Admin session timeout & IP logging
 """
 
 import json
@@ -12,9 +14,11 @@ import uuid
 import time
 
 from django.http import JsonResponse
+from django.utils import timezone
 
 logger = logging.getLogger("kokoroko.errors")
 request_logger = logging.getLogger("kokoroko.requests")
+security_logger = logging.getLogger("kokoroko.security")
 
 
 class ErrorHandlingMiddleware:
@@ -104,3 +108,94 @@ class RequestLoggingMiddleware:
                 pass
 
         return response
+
+
+class SecurityHeadersMiddleware:
+    """
+    Adds security headers to all responses:
+    - Content-Security-Policy
+    - X-Content-Type-Options
+    - Referrer-Policy
+    - Permissions-Policy
+    - Cache-Control for sensitive responses
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+
+        if request.path.startswith("/api/"):
+            response["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+            response["Pragma"] = "no-cache"
+
+        if not response.get("Content-Security-Policy"):
+            response["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: blob: https:; "
+                "font-src 'self' data: https:; "
+                "connect-src 'self' ws: wss: http: https:; "
+                "frame-ancestors 'none';"
+            )
+
+        return response
+
+
+class AdminSessionSecurityMiddleware:
+    """
+    Admin session security:
+    - Log admin access with IP
+    - Enforce session timeout for admin users
+    - Track last activity timestamp
+    """
+
+    ADMIN_SESSION_TIMEOUT = 8 * 3600  # 8 hours
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if not request.path.startswith(("/admin", "/login", "/userManager")):
+            return self.get_response(request)
+
+        user = getattr(request, "user", None)
+        if user and user.is_authenticated and user.is_staff:
+            last_activity = request.session.get("admin_last_activity")
+            now = timezone.now().timestamp()
+
+            if last_activity:
+                idle = now - last_activity
+                if idle > self.ADMIN_SESSION_TIMEOUT:
+                    from django.contrib.auth import logout
+                    security_logger.warning(
+                        "Admin session expired: user=%s idle=%.0fs ip=%s",
+                        user, idle, self._get_ip(request),
+                    )
+                    logout(request)
+                    from django.shortcuts import redirect
+                    return redirect("/login/")
+
+            request.session["admin_last_activity"] = now
+
+            if not request.session.get("admin_ip_logged"):
+                security_logger.info(
+                    "Admin access: user=%s ip=%s path=%s",
+                    user, self._get_ip(request), request.path,
+                )
+                request.session["admin_ip_logged"] = True
+
+        return self.get_response(request)
+
+    @staticmethod
+    def _get_ip(request):
+        forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        return request.META.get("REMOTE_ADDR", "unknown")

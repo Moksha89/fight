@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
@@ -10,8 +11,11 @@ from django.db import transaction
 from .serializers import *
 from rest_framework.exceptions import ValidationError, PermissionDenied, MethodNotAllowed
 from kokoroko.error_handler import KokorokoError, ErrorCode, Severity, build_error_response
+from kokoroko.security import get_client_ip, log_auth_event, RateLimiter
 
 from .paginations import *
+
+security_logger = logging.getLogger("kokoroko.security")
 
 
 class WalletViewSet(viewsets.ReadOnlyModelViewSet):
@@ -62,10 +66,22 @@ class DepositRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
+        ip = get_client_ip(self.request)
         utr_id = self.request.data.get('utr_id')
         screenShort = self.request.FILES.get('screenShort')
         deposit_type = self.request.data.get('deposit_type')
         deposit_amount = self.request.data.get('deposit_amount')
+
+        # Rate limit: max 10 deposit requests per hour per IP
+        allowed, _, retry_after = RateLimiter.check(
+            f"deposit:{ip}", max_attempts=10, window_seconds=3600
+        )
+        if not allowed:
+            raise KokorokoError(
+                ErrorCode.WALLET_DEPOSIT_ACTIVE,
+                "Too many deposit requests. Try again later.",
+                severity=Severity.MEDIUM,
+            )
 
         minDepositValue = float(Setting.objects.filter(
             action='J').first().actionValue)
@@ -222,15 +238,46 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
         raise MethodNotAllowed(
             "GET", detail="List endpoint is not allowed for this view.")
 
+    # Withdrawal security limits
+    MIN_WITHDRAWAL = Decimal('100')
+    MAX_WITHDRAWAL = Decimal('500000')
+    MAX_DAILY_WITHDRAWAL_COUNT = 5
+
     def perform_create(self, serializer):
         user = self.request.user
+        ip = get_client_ip(self.request)
         withdrawal_amount = serializer.validated_data.get('withdrawal_amount')
         speed_type = serializer.validated_data.get('speed_type', 'N')
 
-        if float(withdrawal_amount) <= 0:
+        # Rate limit: max 5 withdrawal requests per hour per IP
+        allowed, _, retry_after = RateLimiter.check(
+            f"withdrawal:{ip}", max_attempts=5, window_seconds=3600
+        )
+        if not allowed:
+            raise KokorokoError(
+                ErrorCode.WALLET_WITHDRAWAL_ACTIVE,
+                f"Too many withdrawal requests. Try again later.",
+                severity=Severity.MEDIUM,
+            )
+
+        if withdrawal_amount <= 0:
             raise KokorokoError(
                 ErrorCode.BET_INVALID_AMOUNT,
                 "Withdrawal amount must be greater than ₹0.",
+                severity=Severity.LOW,
+            )
+
+        if withdrawal_amount < self.MIN_WITHDRAWAL:
+            raise KokorokoError(
+                ErrorCode.BET_INVALID_AMOUNT,
+                f"Minimum withdrawal is ₹{self.MIN_WITHDRAWAL}.",
+                severity=Severity.LOW,
+            )
+
+        if withdrawal_amount > self.MAX_WITHDRAWAL:
+            raise KokorokoError(
+                ErrorCode.BET_INVALID_AMOUNT,
+                f"Maximum withdrawal is ₹{self.MAX_WITHDRAWAL}.",
                 severity=Severity.LOW,
             )
 
@@ -261,6 +308,12 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
         if speed_type == 'E':
             fee_amount = (withdrawal_amount * Decimal('2.5') / Decimal('100')).quantize(Decimal('0.01'))
         payout_amount = withdrawal_amount - fee_amount
+
+        # Log withdrawal attempt
+        security_logger.info(
+            "Withdrawal request: user=%s amount=%s speed=%s ip=%s",
+            user.id, withdrawal_amount, speed_type, ip,
+        )
 
         with transaction.atomic():
             wallet.balance = F('balance') - withdrawal_amount
