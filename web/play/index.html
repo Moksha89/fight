@@ -1063,9 +1063,120 @@
             color: #fff;
         }
         .confirm-btn.danger:hover { filter: brightness(1.1); }
+
+        /* === MAINTENANCE OVERLAY === */
+        .maintenance-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 50%, #0d0d0d 100%);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .maintenance-overlay .maint-icon { font-size: 80px; color: var(--gold); animation: maintPulse 2s ease-in-out infinite; }
+        @keyframes maintPulse { 0%,100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+        .maintenance-overlay h2 { color: var(--gold); font-size: 28px; margin: 20px 0 8px; font-weight: 700; }
+        .maintenance-overlay p { color: var(--text-secondary); font-size: 15px; text-align: center; max-width: 360px; line-height: 1.5; }
+        .maintenance-overlay .maint-retry { margin-top: 24px; padding: 10px 32px; border-radius: 25px; border: 2px solid var(--gold); background: transparent; color: var(--gold); font-weight: 600; cursor: pointer; transition: all .3s; }
+        .maintenance-overlay .maint-retry:hover { background: var(--gold); color: #000; }
+        .feature-maint-banner {
+            background: linear-gradient(90deg, rgba(212,168,67,0.15), rgba(212,168,67,0.05));
+            border: 1px solid rgba(212,168,67,0.3); border-radius: 10px; padding: 14px 18px;
+            display: flex; align-items: center; gap: 10px; margin: 12px 0;
+        }
+        .feature-maint-banner .material-icons { color: var(--gold); font-size: 24px; }
+        .feature-maint-banner p { color: var(--text-secondary); font-size: 13px; flex: 1; }
+
+        /* === OFFLINE OVERLAY === */
+        .offline-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99998;
+            background: rgba(13,13,13,0.97); display: none; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .offline-overlay .offline-icon { font-size: 72px; color: var(--danger); animation: offlineBounce 1.5s ease-in-out infinite; }
+        @keyframes offlineBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .offline-overlay h2 { color: #fff; font-size: 24px; margin: 16px 0 6px; }
+        .offline-overlay p { color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; }
+        .offline-overlay .offline-retry { padding: 10px 28px; border-radius: 25px; background: var(--gold); color: #000; font-weight: 600; border: none; cursor: pointer; transition: all .2s; }
+        .offline-overlay .offline-retry:hover { filter: brightness(1.1); }
+        .offline-overlay .offline-status { font-size: 12px; color: var(--text-muted); margin-top: 12px; }
+
+        /* === WALKTHROUGH === */
+        .walkthrough-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99997;
+            background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center;
+        }
+        .walkthrough-card {
+            width: 90%; max-width: 420px; text-align: center; position: relative;
+        }
+        .walkthrough-slide {
+            display: none; flex-direction: column; align-items: center; padding: 30px 20px;
+            animation: wtSlideIn 0.4s ease-out;
+        }
+        .walkthrough-slide.active { display: flex; }
+        @keyframes wtSlideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        .walkthrough-slide .wt-icon { font-size: 64px; margin-bottom: 16px; }
+        .walkthrough-slide h3 { color: var(--gold); font-size: 22px; margin-bottom: 8px; }
+        .walkthrough-slide p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; max-width: 320px; }
+        .wt-dots { display: flex; gap: 8px; justify-content: center; margin: 20px 0; }
+        .wt-dots .wt-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: all .3s; }
+        .wt-dots .wt-dot.active { background: var(--gold); width: 24px; border-radius: 5px; }
+        .wt-next-btn { padding: 12px 40px; border-radius: 25px; background: var(--gold); color: #000; font-weight: 700; border: none; cursor: pointer; font-size: 15px; transition: all .2s; }
+        .wt-next-btn:hover { filter: brightness(1.1); }
+        .wt-skip { color: var(--text-muted); font-size: 13px; margin-top: 12px; cursor: pointer; background: none; border: none; }
+        .wt-skip:hover { color: var(--text-secondary); }
+
+        /* === OCR INDICATOR === */
+        .ocr-indicator { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--gold); margin-top: 4px; }
+        .ocr-spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top: 2px solid var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <!-- MAINTENANCE OVERLAY (hidden by default, shown if setting A=Y) -->
+    <div class="maintenance-overlay" id="maintenance-overlay" style="display:none;">
+        <span class="material-icons maint-icon">construction</span>
+        <h2>Under Maintenance</h2>
+        <p id="maint-msg">We're upgrading the platform for a better experience. Please check back shortly.</p>
+        <button class="maint-retry" onclick="checkMaintenance()">Retry</button>
+    </div>
+
+    <!-- OFFLINE OVERLAY -->
+    <div class="offline-overlay" id="offline-overlay">
+        <span class="material-icons offline-icon">wifi_off</span>
+        <h2>No Internet Connection</h2>
+        <p>Please check your network and try again</p>
+        <button class="offline-retry" onclick="retryConnection()">Retry Connection</button>
+        <div class="offline-status" id="offline-status">Waiting for network...</div>
+    </div>
+
+    <!-- WALKTHROUGH (shown once for new users) -->
+    <div class="walkthrough-overlay" id="walkthrough-overlay" style="display:none;">
+        <div class="walkthrough-card">
+            <div class="walkthrough-slide active" data-slide="0">
+                <div class="wt-icon">&#x1F413;</div>
+                <h3>Welcome to Kokoroko!</h3>
+                <p>The ultimate live cockfight betting platform. Watch real-time matches and bet on your favorite team — Meron or Wala.</p>
+            </div>
+            <div class="walkthrough-slide" data-slide="1">
+                <div class="wt-icon">&#x1F4B0;</div>
+                <h3>Easy Deposits & Withdrawals</h3>
+                <p>Add funds instantly via UPI or bank transfer. Withdraw your winnings anytime. All transactions are secure and tracked in real-time.</p>
+            </div>
+            <div class="walkthrough-slide" data-slide="2">
+                <div class="wt-icon">&#x1F3B2;</div>
+                <h3>Multiple Games</h3>
+                <p>Bet on Cockfight Betting with live video streams, or try your luck with Dice Play (Gundata). More games coming soon!</p>
+            </div>
+            <div class="walkthrough-slide" data-slide="3">
+                <div class="wt-icon">&#x1F680;</div>
+                <h3>Real-Time Everything</h3>
+                <p>Live odds, instant bet results, real-time wallet updates. No page refresh needed — everything updates automatically.</p>
+            </div>
+            <div class="wt-dots" id="wt-dots">
+                <div class="wt-dot active"></div><div class="wt-dot"></div><div class="wt-dot"></div><div class="wt-dot"></div>
+            </div>
+            <button class="wt-next-btn" id="wt-next-btn" onclick="walkthroughNext()">Next</button>
+            <button class="wt-skip" onclick="walkthroughDone()">Skip</button>
+        </div>
+    </div>
+
     <!-- AUTH -->
     <div id="auth-screen" class="auth-container">
         <div class="auth-card">
@@ -1573,6 +1684,10 @@
                         <p>Click to upload payment screenshot</p>
                     </div>
                     <input type="file" id="dep-file-input" accept="image/*" style="display:none" onchange="handleDepFile(this)">
+                    <div class="ocr-indicator" id="ocr-indicator" style="display:none;">
+                        <div class="ocr-spinner"></div>
+                        <span id="ocr-status">Extracting UTR from screenshot...</span>
+                    </div>
                 </div>
                 <button class="auth-btn" onclick="submitDeposit()" style="background:var(--gold);color:#000;">Submit Deposit Request</button>
                 <button class="auth-btn" onclick="depGoToStep(2)" style="background:var(--bg);color:var(--text-primary);margin-top:6px;">Back</button>
@@ -1825,6 +1940,8 @@
         const hash = location.hash || '#home';
         const sec = hashSectionMap[hash];
         if (sec && sec !== 'sec-home') navigate(sec, true);
+        // Show walkthrough for first-time users
+        showWalkthrough();
     }
 
     function loadSocialLinks() {
@@ -1925,6 +2042,7 @@
 
     // ===== WINNER CELEBRATION SYSTEM =====
     function showWinnerCelebration(winTeam, fightNum) {
+        playSound('win');
         const names = {1:'Meron', 2:'Wala', 3:'Draw'};
         const cls = {1:'meron', 2:'wala', 3:'draw'};
         const winName = names[winTeam] || 'Unknown';
@@ -2510,6 +2628,7 @@
             });
             const data = await res.json();
             if (res.ok || res.status === 201) {
+                playSound('bet');
                 showToast('Bet placed successfully!', 'success');
                 loadUserInfo();
             } else { showToast(data.error || data.detail || 'Bet failed', 'error'); }
@@ -2571,8 +2690,16 @@
     // Hash-to-section mapping defined in early declarations above showApp()
 
     function navigate(sectionId, skipHash) {
+        // Check feature maintenance before navigating
+        if (sectionId === 'sec-cockfight' && featureMaintenanceState && featureMaintenanceState.cockfight) {
+            showToast('Cockfight Betting is under maintenance', 'error'); return;
+        }
+        if (sectionId === 'sec-dice' && featureMaintenanceState && featureMaintenanceState.dice) {
+            showToast('Dice Play is under maintenance', 'error'); return;
+        }
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(sectionId).classList.add('active');
+        if (!skipHash) playSound('nav');
 
         // Update URL hash
         if (!skipHash && sectionHashMap[sectionId]) {
@@ -2686,6 +2813,8 @@
         const el = document.getElementById('toast');
         el.textContent = msg;
         el.className = 'toast show ' + (type || '');
+        if (type === 'error') playSound('error');
+        else if (type === 'success') playSound('success');
         setTimeout(() => el.classList.remove('show'), 3000);
     }
 
@@ -2819,6 +2948,11 @@
             const el = document.getElementById('dep-file-upload');
             el.classList.add('has-file');
             el.innerHTML = `<span class="material-icons">check_circle</span><p>${depFile.name}</p>`;
+            // Auto-extract UTR via OCR
+            const utrField = document.getElementById('dep-utr');
+            if (utrField && !utrField.value.trim()) {
+                extractUTR(depFile);
+            }
         }
     }
     async function submitDeposit() {
@@ -2835,6 +2969,7 @@
             const res = await fetch(`${API}/wallet/deposit/`, {method:'POST',headers:{'Authorization':`Bearer ${token}`},body:fd});
             const data = await res.json();
             if (res.ok || res.status === 201) {
+                playSound('deposit');
                 showToast('Deposit request submitted! Wait for admin approval.', 'success');
                 closeDeposit();
                 loadUserInfo();
@@ -3008,7 +3143,7 @@
                 body:JSON.stringify({matchId, diceNumber: selectedDice[matchId], amount: parseFloat(amount)})
             });
             const data = await res.json();
-            if (res.ok || res.status === 201) { showToast('Dice bet placed!', 'success'); loadUserInfo(); }
+            if (res.ok || res.status === 201) { playSound('bet'); showToast('Dice bet placed!', 'success'); loadUserInfo(); }
             else { showToast(data.detail || data.error || 'Bet failed', 'error'); }
         } catch(e) { showToast('Network error', 'error'); }
     }
@@ -3334,6 +3469,309 @@
             if (diceEl && diceEl.offsetParent !== null) loadDiceGames();
         }
     }, 20000);
+
+    // ==========================================
+    // FEATURE 1: UTR AUTO-EXTRACT (Browser OCR)
+    // ==========================================
+    var tesseractLoaded = false;
+    function loadTesseract() {
+        if (tesseractLoaded) return Promise.resolve();
+        return new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+            s.onload = () => { tesseractLoaded = true; resolve(); };
+            s.onerror = () => { console.warn('Tesseract.js failed to load'); resolve(); };
+            document.head.appendChild(s);
+        });
+    }
+
+    async function extractUTR(file) {
+        const indicator = document.getElementById('ocr-indicator');
+        const statusEl = document.getElementById('ocr-status');
+        if (!indicator) return;
+        indicator.style.display = 'flex';
+        statusEl.textContent = 'Loading OCR engine...';
+        try {
+            await loadTesseract();
+            if (!window.Tesseract) { indicator.style.display = 'none'; return; }
+            statusEl.textContent = 'Scanning screenshot for UTR...';
+            const result = await Tesseract.recognize(file, 'eng', {
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        statusEl.textContent = `Scanning... ${Math.round((m.progress || 0) * 100)}%`;
+                    }
+                }
+            });
+            const text = result.data.text || '';
+            // Look for 12-digit UTR number or common transaction ID patterns
+            const utrPatterns = [
+                /\b(\d{12})\b/,                    // 12-digit UTR
+                /UTR[:\s]*(\d{10,22})/i,           // UTR: followed by digits
+                /Ref[.\s]*No[.:\s]*(\d{8,22})/i,   // Ref No: digits
+                /Transaction\s*ID[:\s]*(\w{8,22})/i,// Transaction ID
+                /UPI[:\s]*Ref[:\s]*(\d{8,22})/i,    // UPI Ref
+                /\b(\d{10,22})\b/                   // any long number sequence
+            ];
+            let extracted = '';
+            for (const pat of utrPatterns) {
+                const match = text.match(pat);
+                if (match) { extracted = match[1]; break; }
+            }
+            if (extracted) {
+                document.getElementById('dep-utr').value = extracted;
+                statusEl.textContent = `UTR detected: ${extracted}`;
+                indicator.style.display = 'flex';
+                playSound('success');
+                setTimeout(() => { indicator.style.display = 'none'; }, 3000);
+            } else {
+                statusEl.textContent = 'No UTR found — enter manually';
+                setTimeout(() => { indicator.style.display = 'none'; }, 2500);
+            }
+        } catch (e) {
+            console.warn('OCR error:', e);
+            indicator.style.display = 'none';
+        }
+    }
+
+    // ==========================================
+    // FEATURE 2: WALKTHROUGH / ONBOARDING
+    // ==========================================
+    var walkthroughSlide = 0;
+    var walkthroughTotal = 4;
+
+    function showWalkthrough() {
+        if (localStorage.getItem('walkthrough_done')) return;
+        document.getElementById('walkthrough-overlay').style.display = 'flex';
+    }
+    function walkthroughNext() {
+        walkthroughSlide++;
+        if (walkthroughSlide >= walkthroughTotal) { walkthroughDone(); return; }
+        updateWalkthroughSlide();
+    }
+    function updateWalkthroughSlide() {
+        document.querySelectorAll('.walkthrough-slide').forEach((s, i) => {
+            s.classList.toggle('active', i === walkthroughSlide);
+        });
+        document.querySelectorAll('.wt-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === walkthroughSlide);
+        });
+        const btn = document.getElementById('wt-next-btn');
+        btn.textContent = walkthroughSlide === walkthroughTotal - 1 ? 'Get Started' : 'Next';
+    }
+    function walkthroughDone() {
+        localStorage.setItem('walkthrough_done', '1');
+        document.getElementById('walkthrough-overlay').style.display = 'none';
+        playSound('nav');
+    }
+
+    // ==========================================
+    // FEATURE 3: SOUND EFFECTS
+    // ==========================================
+    var audioCtx = null;
+    var soundEnabled = true;
+
+    function getAudioCtx() {
+        if (!audioCtx) {
+            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+        }
+        return audioCtx;
+    }
+
+    function playSound(type) {
+        if (!soundEnabled) return;
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        try {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            gain.gain.value = 0.15;
+            const now = ctx.currentTime;
+
+            switch(type) {
+                case 'bet':
+                    osc.type = 'sine'; osc.frequency.value = 600;
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now); osc.stop(now + 0.2);
+                    break;
+                case 'win':
+                    osc.type = 'sine'; osc.frequency.value = 523;
+                    gain.gain.setValueAtTime(0.15, now);
+                    osc.frequency.setValueAtTime(659, now + 0.1);
+                    osc.frequency.setValueAtTime(784, now + 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now); osc.stop(now + 0.5);
+                    break;
+                case 'lose':
+                    osc.type = 'sawtooth'; osc.frequency.value = 400;
+                    gain.gain.setValueAtTime(0.1, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now); osc.stop(now + 0.3);
+                    break;
+                case 'deposit':
+                    osc.type = 'sine'; osc.frequency.value = 440;
+                    gain.gain.setValueAtTime(0.12, now);
+                    osc.frequency.setValueAtTime(554, now + 0.08);
+                    osc.frequency.setValueAtTime(659, now + 0.16);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now); osc.stop(now + 0.3);
+                    break;
+                case 'success':
+                    osc.type = 'sine'; osc.frequency.value = 880;
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now); osc.stop(now + 0.15);
+                    break;
+                case 'error':
+                    osc.type = 'square'; osc.frequency.value = 200;
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now); osc.stop(now + 0.15);
+                    break;
+                case 'nav':
+                    osc.type = 'sine'; osc.frequency.value = 700;
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now); osc.stop(now + 0.08);
+                    break;
+                default:
+                    osc.type = 'sine'; osc.frequency.value = 500;
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+            }
+        } catch(e) {}
+    }
+
+    // ==========================================
+    // FEATURE 4: NO INTERNET DETECTION
+    // ==========================================
+    function updateOnlineStatus() {
+        const overlay = document.getElementById('offline-overlay');
+        const statusEl = document.getElementById('offline-status');
+        if (!navigator.onLine) {
+            overlay.style.display = 'flex';
+            statusEl.textContent = 'Waiting for network...';
+        } else {
+            overlay.style.display = 'none';
+        }
+    }
+    function retryConnection() {
+        const statusEl = document.getElementById('offline-status');
+        statusEl.textContent = 'Checking connection...';
+        if (navigator.onLine) {
+            fetch(`${API}/base/settings/`, {method:'HEAD'}).then(() => {
+                document.getElementById('offline-overlay').style.display = 'none';
+                showToast('Connection restored!', 'success');
+                playSound('success');
+                if (token) { loadUserInfo(); loadMatches(); }
+            }).catch(() => {
+                statusEl.textContent = 'Server unreachable. Try again...';
+            });
+        } else {
+            statusEl.textContent = 'Still offline. Check your Wi-Fi or mobile data.';
+        }
+    }
+    window.addEventListener('online', () => {
+        document.getElementById('offline-overlay').style.display = 'none';
+        showToast('Back online!', 'success');
+        playSound('success');
+        if (token) { loadUserInfo(); loadMatches(); }
+    });
+    window.addEventListener('offline', () => {
+        document.getElementById('offline-overlay').style.display = 'flex';
+        document.getElementById('offline-status').textContent = 'Connection lost...';
+        playSound('error');
+    });
+    updateOnlineStatus();
+
+    // ==========================================
+    // FEATURE 5: APP UNDER MAINTENANCE
+    // ==========================================
+    var appSettings = {};
+
+    function checkMaintenance() {
+        fetch(`${API}/base/settings/`).then(r => r.json()).then(data => {
+            appSettings = {};
+            data.forEach(s => { appSettings[s.action] = s.actionValue; });
+            const maintOverlay = document.getElementById('maintenance-overlay');
+            if (appSettings['A'] && appSettings['A'].toUpperCase() === 'Y') {
+                maintOverlay.style.display = 'flex';
+                document.getElementById('maint-msg').textContent =
+                    'We\'re upgrading the platform for a better experience. Please check back shortly.';
+            } else {
+                maintOverlay.style.display = 'none';
+            }
+            // Update feature maintenance states
+            updateFeatureMaintenance();
+        }).catch(() => {
+            // Can't reach server — don't show maintenance, let offline handler deal with it
+        });
+    }
+
+    // Check maintenance on load and every 30s
+    checkMaintenance();
+    setInterval(checkMaintenance, 30000);
+
+    // ==========================================
+    // FEATURE 6: FEATURE MAINTENANCE MODE
+    // ==========================================
+    var featureMaintenanceState = { cockfight: false, dice: false };
+
+    function updateFeatureMaintenance() {
+        // B = Cockfight maintenance, C = Dice maintenance
+        featureMaintenanceState.cockfight = appSettings['B'] && appSettings['B'].toUpperCase() === 'Y';
+        featureMaintenanceState.dice = appSettings['C'] && appSettings['C'].toUpperCase() === 'Y';
+
+        // Cockfight section maintenance
+        updateFeatureBanner('sec-cockfight', featureMaintenanceState.cockfight, 'Cockfight Betting is currently under maintenance. Please check back soon.');
+        // Dice section maintenance
+        updateFeatureBanner('sec-dice', featureMaintenanceState.dice, 'Dice Play is currently under maintenance. Please check back soon.');
+
+        // Disable game cards on home if under maintenance
+        updateGameCardState();
+    }
+
+    function updateFeatureBanner(sectionId, isUnderMaint, msg) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+        let banner = section.querySelector('.feature-maint-banner');
+        if (isUnderMaint) {
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.className = 'feature-maint-banner';
+                banner.innerHTML = `<span class="material-icons">construction</span><p>${msg}</p>`;
+                section.insertBefore(banner, section.firstChild.nextSibling || section.firstChild);
+            }
+        } else {
+            if (banner) banner.remove();
+        }
+    }
+
+    function updateGameCardState() {
+        // Find game cards and overlay them if under maintenance
+        document.querySelectorAll('[onclick*="sec-cockfight"]').forEach(el => {
+            if (featureMaintenanceState.cockfight) {
+                el.style.opacity = '0.4';
+                el.style.pointerEvents = 'none';
+            } else {
+                el.style.opacity = '1';
+                el.style.pointerEvents = 'auto';
+            }
+        });
+        document.querySelectorAll('[onclick*="sec-dice"]').forEach(el => {
+            if (featureMaintenanceState.dice) {
+                el.style.opacity = '0.4';
+                el.style.pointerEvents = 'none';
+            } else {
+                el.style.opacity = '1';
+                el.style.pointerEvents = 'auto';
+            }
+        });
+    }
 
     </script>
 </body>
