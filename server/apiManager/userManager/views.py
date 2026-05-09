@@ -36,8 +36,10 @@ logger = logging.getLogger("kokoroko.security")
 
 
 def _generate_otp():
-    """Generate a secure 6-digit OTP."""
-    return str(random.randint(100000, 999999))
+    """Generate OTP. Uses static '123456' until real SMS gateway is integrated."""
+    # TODO: Switch to random OTP once SMS gateway is live:
+    # return str(random.randint(100000, 999999))
+    return "123456"
 
 
 class SubscriptionViewSet(viewsets.ViewSet):

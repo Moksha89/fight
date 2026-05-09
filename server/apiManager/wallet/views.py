@@ -11,7 +11,7 @@ from django.db import transaction
 from .serializers import *
 from rest_framework.exceptions import ValidationError, PermissionDenied, MethodNotAllowed
 from kokoroko.error_handler import KokorokoError, ErrorCode, Severity, build_error_response
-from kokoroko.security import get_client_ip, log_auth_event, RateLimiter
+from kokoroko.security import get_client_ip, log_auth_event, RateLimiter, validate_file_upload
 
 from .paginations import *
 
@@ -82,6 +82,16 @@ class DepositRequestViewSet(viewsets.ModelViewSet):
                 "Too many deposit requests. Try again later.",
                 severity=Severity.MEDIUM,
             )
+
+        # Validate uploaded screenshot
+        if screenShort:
+            valid, file_error = validate_file_upload(screenShort)
+            if not valid:
+                raise KokorokoError(
+                    ErrorCode.VALIDATION_REQUIRED_FIELD,
+                    f"Invalid file upload: {file_error}",
+                    severity=Severity.LOW,
+                )
 
         minDepositValue = float(Setting.objects.filter(
             action='J').first().actionValue)
