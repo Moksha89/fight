@@ -290,6 +290,7 @@ def manage_virtual_dice_rounds():
                 if elapsed >= betting_secs:
                     # Time's up - roll dice and enter shuffling phase
                     auto_roll_virtual_match(active_match.id)
+                    _broadcast_phase_change(active_match, "shuffling", board.virtual_shuffle_seconds or 30)
                     results.append(f"{board.name}: Game #{active_match.daily_match_number} -> shuffling")
 
             elif phase == "shuffling":
@@ -297,6 +298,7 @@ def manage_virtual_dice_rounds():
                 if elapsed >= shuffle_secs:
                     # Shuffle done - declare result
                     declare_virtual_match_result(active_match.id)
+                    _broadcast_phase_change(active_match, "result", board.virtual_result_seconds or 15)
                     results.append(f"{board.name}: Game #{active_match.daily_match_number} -> result")
 
             elif phase == "result":
@@ -315,4 +317,27 @@ def manage_virtual_dice_rounds():
             create_next_virtual_round(board.id)
             results.append(f"{board.name}: no active match, creating round")
 
+    # Broadcast timer sync to all connected clients
+    try:
+        from kokoroko.ws_broadcast import broadcast_dice_timer_sync
+        broadcast_dice_timer_sync()
+    except Exception:
+        pass
+
     return "; ".join(results) if results else "No action needed"
+
+
+def _broadcast_phase_change(match, new_phase, duration):
+    """Helper to broadcast phase change event."""
+    try:
+        from kokoroko.ws_broadcast import broadcast_dice_phase_change
+        broadcast_dice_phase_change(
+            match_id=match.id,
+            board_id=match.board_id,
+            game_number=match.daily_match_number,
+            new_phase=new_phase,
+            phase_duration=duration,
+            phase_started_at=timezone.now(),
+        )
+    except Exception:
+        pass

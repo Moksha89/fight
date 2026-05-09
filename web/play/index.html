@@ -2443,6 +2443,8 @@
         loadDiceGames();
         loadUserBets();
         connectMatchWebSocket();
+        connectWalletWebSocket();
+        connectNotificationWebSocket();
         loadSocialLinks();
         // Periodic API fallback if WS fails to deliver data
         setInterval(() => { if (!autoMatchData) loadMatches(); }, 8000);
@@ -2452,6 +2454,132 @@
         if (sec && sec !== 'sec-home') navigate(sec, true);
         // Show walkthrough for first-time users
         showWalkthrough();
+    }
+
+    // ===== Real-Time Wallet Balance WebSocket =====
+    let walletWs = null;
+    function connectWalletWebSocket() {
+        if (!token) return;
+        const wsBase = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const wsHost = '155.117.46.249:8000';
+        if (walletWs) { try { walletWs.close(); } catch(e) {} }
+        walletWs = new WebSocket(`${wsBase}${wsHost}/ws/user/?token=${token}`);
+        walletWs.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'wallet_update' && msg.balance != null) {
+                    const bal = parseFloat(msg.balance);
+                    document.getElementById('wallet-balance').textContent = formatIndianAmount(bal);
+                    document.getElementById('wallet-balance-large').textContent = formatIndianFull(bal);
+                    if (userInfo) userInfo.wallet_balance = bal;
+                }
+            } catch(e) {}
+        };
+        walletWs.onclose = () => { setTimeout(connectWalletWebSocket, 5000); };
+    }
+
+    // ===== Real-Time Notifications WebSocket =====
+    let notifWs = null;
+    let unreadNotifCount = 0;
+    function connectNotificationWebSocket() {
+        if (!token) return;
+        const wsBase = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const wsHost = '155.117.46.249:8000';
+        if (notifWs) { try { notifWs.close(); } catch(e) {} }
+        notifWs = new WebSocket(`${wsBase}${wsHost}/ws/notifications/?token=${token}`);
+        notifWs.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'notification_init') {
+                    unreadNotifCount = msg.unread_count || 0;
+                    updateNotifBadge();
+                } else if (msg.type === 'new_notification') {
+                    unreadNotifCount++;
+                    updateNotifBadge();
+                    const notif = msg.data;
+                    if (notif && notif.title) {
+                        showToast(notif.title + (notif.body ? ': ' + notif.body : ''), 'info');
+                    }
+                } else if (msg.type === 'notification_count') {
+                    unreadNotifCount = msg.unread_count || 0;
+                    updateNotifBadge();
+                }
+            } catch(e) {}
+        };
+        notifWs.onclose = () => { setTimeout(connectNotificationWebSocket, 5000); };
+    }
+
+    function updateNotifBadge() {
+        let badge = document.getElementById('notif-badge');
+        if (!badge) {
+            const profileBtn = document.querySelector('.nav-item[onclick*="profile"]');
+            if (profileBtn) {
+                badge = document.createElement('span');
+                badge.id = 'notif-badge';
+                badge.style.cssText = 'position:absolute;top:2px;right:2px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;border-radius:50%;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;';
+                profileBtn.style.position = 'relative';
+                profileBtn.appendChild(badge);
+            }
+        }
+        if (badge) {
+            badge.textContent = unreadNotifCount > 0 ? (unreadNotifCount > 99 ? '99+' : unreadNotifCount) : '';
+            badge.style.display = unreadNotifCount > 0 ? 'flex' : 'none';
+        }
+    }
+
+    // ===== Dice Timer WebSocket (server-authoritative countdown) =====
+    let diceTimerWs = null;
+    let serverTimeOffset = 0; // difference between server time and client time (ms)
+    function connectDiceTimerWebSocket() {
+        if (!token) return;
+        const wsBase = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const wsHost = '155.117.46.249:8000';
+        if (diceTimerWs) { try { diceTimerWs.close(); } catch(e) {} }
+        diceTimerWs = new WebSocket(`${wsBase}${wsHost}/ws/dice-timer/?token=${token}`);
+        diceTimerWs.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'timer_sync' && msg.data) {
+                    const serverTime = new Date(msg.data.server_time).getTime();
+                    serverTimeOffset = serverTime - Date.now();
+                    // Update countdown displays based on server timers
+                    if (msg.data.timers && msg.data.timers.length > 0) {
+                        msg.data.timers.forEach(timer => {
+                            updateDiceCountdownFromServer(timer);
+                        });
+                    }
+                } else if (msg.type === 'phase_change' && msg.data) {
+                    const serverTime = new Date(msg.data.server_time).getTime();
+                    serverTimeOffset = serverTime - Date.now();
+                    handleServerPhaseChange(msg.data);
+                }
+            } catch(e) {}
+        };
+        diceTimerWs.onclose = () => { setTimeout(connectDiceTimerWebSocket, 5000); };
+    }
+
+    function getServerNow() {
+        return Date.now() + serverTimeOffset;
+    }
+
+    function updateDiceCountdownFromServer(timer) {
+        const countdownEl = document.getElementById('dice-countdown-display');
+        if (!countdownEl) return;
+        if (timer.phase === 'betting' && timer.remaining > 0) {
+            const mins = Math.floor(timer.remaining / 60);
+            const secs = Math.floor(timer.remaining % 60);
+            countdownEl.textContent = `Betting closes in ${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+    }
+
+    function handleServerPhaseChange(data) {
+        // Update dice display based on server-authoritative phase change
+        const match = getActiveDiceMatch();
+        if (!match || match.id !== data.match_id) return;
+        // Force UI phase update
+        match.virtual_phase = data.phase;
+        match.phase_started_at = data.phase_started_at;
+        updateDiceInPlace();
     }
 
     var socialLinks = {};
@@ -3296,7 +3424,7 @@
 
         if (sectionId === 'sec-statement') loadStatement();
         if (sectionId === 'sec-home' || sectionId === 'sec-cockfight') { loadMatches(); loadUserBets(); }
-        if (sectionId === 'sec-dice') { loadDiceGames(); loadDiceUserBets(); connectDiceWebSockets(); } else { disconnectDiceWebSockets(); }
+        if (sectionId === 'sec-dice') { loadDiceGames(); loadDiceUserBets(); connectDiceWebSockets(); connectDiceTimerWebSocket(); } else { disconnectDiceWebSockets(); if (diceTimerWs) { diceTimerWs.close(); diceTimerWs = null; } }
         if (sectionId === 'sec-wallet') { loadStatement(); }
         window.scrollTo(0, 0);
     }

@@ -204,19 +204,21 @@ def create_admin_notification(notification_type, data=None):
     return notification
 
 
+def mark_all_read(user):
+    """Mark all notifications as read for a user."""
+    from django.core.cache import cache
+    cache_key = f"notifications:{user.id}"
+    notifications = cache.get(cache_key, [])
+    for n in notifications:
+        n["read"] = True
+    cache.set(cache_key, notifications, timeout=30 * 24 * 3600)
+    return True
+
+
 def _broadcast_notification(user_id, notification):
     """Send notification via WebSocket channel (if channels is available)."""
     try:
-        from channels.layers import get_channel_layer
-        from asgiref.sync import async_to_sync
-        channel_layer = get_channel_layer()
-        if channel_layer:
-            async_to_sync(channel_layer.group_send)(
-                f"user_{user_id}",
-                {
-                    "type": "notification.send",
-                    "notification": notification,
-                },
-            )
+        from kokoroko.ws_broadcast import broadcast_notification
+        broadcast_notification(user_id, notification)
     except (ImportError, Exception):
         pass
