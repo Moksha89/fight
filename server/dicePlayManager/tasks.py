@@ -66,7 +66,7 @@ def process_single_dice_winning_bet(bet_id: int, payout: int):
                 transaction_type="I",
                 change=amount_decimal,
                 isSuccess=True,
-                description=f"Dice Game #{bet.match.daily_match_number} win: {bet.amount} on face {bet.diceNumber} (x{bet.rolled_count} = {payout})",
+                description=f"Dice Game #{bet.match.daily_match_number} win: {bet.amount} on face {bet.diceNumber} (x{bet.rolled_count} + bet returned = {payout})",
             )
     except Exception as e:
         return str(e)
@@ -76,7 +76,9 @@ def process_single_dice_winning_bet(bet_id: int, payout: int):
 def process_dice_play_match_result(match_id: int):
     """
     After winner is declared: for each bet on a dice number N, if totalNRolled >= 2,
-    payout = rolled_count * amount. Mark bet won (1) or lost (2).
+    payout = bet_amount + (rolled_count * bet_amount).
+    The original bet is returned plus winnings (bet × appearances).
+    Mark bet won (1) or lost (2).
     """
     try:
         match = DicePlayMatch.objects.get(id=match_id)
@@ -89,7 +91,7 @@ def process_dice_play_match_result(match_id: int):
             rolled = get_rolled_count(match, bet.diceNumber)
             bet.rolled_count = rolled
             if rolled >= 2:
-                payout = rolled * bet.amount
+                payout = bet.amount + (rolled * bet.amount)
                 bet.matchWinStatus = 1
                 bet.save(update_fields=["matchWinStatus", "rolled_count", "updatedDate"])
                 process_single_dice_winning_bet.delay(bet.id, payout)

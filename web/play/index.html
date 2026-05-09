@@ -3882,7 +3882,7 @@
                         </div>
                         <!-- Payout Info -->
                         <div style="text-align:center;padding:6px 16px;background:var(--bg);font-size:11px;color:var(--text-muted);">
-                            Win = bet × times your number appears (min 2× to win) | E.g. ₹100 on 3, appears 4 times = ₹400
+                            Win = bet returned + bet × times your number appears (min 2× to win) | E.g. ₹100 on 3, appears 4 times = ₹100 + ₹400 = ₹500
                         </div>
                         <!-- Bet Actions -->
                         <div id="dice-betting-area">
@@ -4148,7 +4148,7 @@
             let status = 'Pending', cls = 'pending';
             if (b.matchWinStatus === 1) { status = 'Won'; cls = 'won'; }
             else if (b.matchWinStatus === 2) { status = 'Lost'; cls = 'lost'; }
-            const payout = b.matchWinStatus === 1 && b.rolled_count ? `+₹${(b.rolled_count * b.amount).toLocaleString('en-IN')}` : '';
+            const payout = b.matchWinStatus === 1 && b.rolled_count ? `+₹${(b.amount + b.rolled_count * b.amount).toLocaleString('en-IN')}` : '';
 
             // Show individual dice results if available
             let diceResultHtml = '';

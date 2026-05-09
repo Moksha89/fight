@@ -21,11 +21,11 @@ const getColor = (matchWinStatus) => {
   return '#BA2343';
 };
 
-// Total payout when won: rolled_count * amount (new formula)
+// Total payout when won: bet returned + rolled_count * amount
 const getWinTotal = (item) => {
   const count = item.rolled_count;
   if (count != null && count >= 2) {
-    return count * item.amount;
+    return item.amount + count * item.amount;
   }
   return 0;
 };
@@ -79,7 +79,7 @@ const BetHistoryModal = ({bets, setBets, visible, onClose}) => {
       item.rolled_count != null &&
       item.rolled_count >= 2;
     const titleText = hasRolledCount
-      ? `#${item.diceNumber} × ${item.rolled_count} × ₹${item.amount} = ₹${item.rolled_count * item.amount}`
+      ? `#${item.diceNumber} × ${item.rolled_count} × ₹${item.amount} + ₹${item.amount} = ₹${item.amount + item.rolled_count * item.amount}`
       : `#${item.diceNumber} — ₹${item.amount}`;
 
     return (
