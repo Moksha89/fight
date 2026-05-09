@@ -49,6 +49,8 @@ body, html {
     background: var(--bg-main) !important;
     color: var(--text-primary) !important;
     font-family: 'Inter', -apple-system, sans-serif !important;
+    width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
     font-size: 14px;
 }
@@ -89,6 +91,8 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     margin-left: 220px;
     flex: 1;
     min-height: 100vh;
+    min-width: 0;
+    max-width: calc(100vw - 220px);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -177,17 +181,98 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
 }
 
 /* ============ CONTENT AREA ============ */
-#container { margin-left: 220px !important; width: calc(100% - 220px) !important; padding: 0 !important; background: var(--bg-main) !important; }
+#container { margin-left: 220px !important; width: auto !important; max-width: calc(100vw - 220px) !important; min-width: 0 !important; padding: 0 !important; background: var(--bg-main) !important; }
 #container .indent { margin-left: 0 !important; width: 100% !important; }
-#content, #content-main { padding: 20px 24px !important; background: var(--bg-main) !important; width: 100% !important; max-width: 100% !important; }
+#content, #content-main { padding: 20px 24px !important; background: var(--bg-main) !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+#changelist, #changelist-form { min-width: 0 !important; max-width: 100% !important; }
 #content h1, #content-main h1 { display: none !important; }
 
 /* ============ TABLES (Dark, premium) ============ */
-#result_list, .results { width: 100% !important; overflow-x: auto !important; }
+#result_list, .results { width: 100% !important; }
 #result_list table, .results table {
     background: var(--bg-card) !important; border-radius: 12px !important;
     border: 1px solid var(--gold-border) !important; overflow: hidden;
-    width: 100% !important; border-collapse: collapse !important;
+    width: 100% !important; min-width: max-content !important; border-collapse: collapse !important;
+}
+
+/* ============ TABLE SCROLL WRAPPER ============ */
+.table-scroll-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid var(--gold-border);
+    border-radius: 12px;
+    background: var(--bg-card);
+}
+.table-scroll-wrapper table {
+    min-width: max-content;
+    width: 100%;
+    border-collapse: collapse;
+    border: none !important;
+    border-radius: 0 !important;
+}
+.table-scroll-wrapper::-webkit-scrollbar { height: 8px; }
+.table-scroll-wrapper::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 8px; }
+.table-scroll-wrapper::-webkit-scrollbar-track { background: var(--bg-elevated); }
+
+/* ============ STICKY TABLE HEADER ============ */
+.table-scroll-wrapper thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-elevated) !important;
+}
+
+/* ============ ACTION DROPDOWN (More...) ============ */
+.action-more-wrap { position: relative; display: inline-block; }
+.action-more-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 8px;
+    font-size: 18px; font-weight: 700; text-decoration: none;
+    cursor: pointer; background: var(--bg-elevated); color: var(--text-secondary);
+    border: 1px solid var(--border); transition: all 0.2s;
+    line-height: 1;
+}
+.action-more-btn:hover { background: var(--gold-bg); color: var(--gold); border-color: var(--gold-border); }
+.action-more-dropdown {
+    display: none; position: absolute; right: 0; top: 34px;
+    background: var(--bg-card); border: 1px solid var(--gold-border);
+    border-radius: 10px; box-shadow: var(--shadow); z-index: 500;
+    min-width: 160px; padding: 6px 0;
+}
+.action-more-dropdown.show { display: block; }
+.action-more-dropdown a {
+    display: flex !important; align-items: center; gap: 8px;
+    padding: 8px 14px !important; font-size: 13px !important;
+    color: var(--text-secondary) !important; text-decoration: none !important;
+    width: auto !important; height: auto !important; border-radius: 0 !important;
+    border: none !important; background: transparent !important;
+    margin: 0 !important; white-space: nowrap;
+}
+.action-more-dropdown a:hover {
+    background: var(--gold-bg-hover) !important; color: var(--gold) !important;
+}
+.action-more-dropdown a .more-icon {
+    width: 22px; height: 22px; border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+}
+.action-more-dropdown a[title="Statement"] .more-icon { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
+.action-more-dropdown a[title="Bet History"] .more-icon { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
+.action-more-dropdown a[title="Blacklist"] .more-icon { background: rgba(239,68,68,0.12); color: var(--danger); }
+.action-more-dropdown a[title="Whitelist"] .more-icon { background: rgba(34,197,94,0.12); color: var(--success); }
+.action-more-dropdown a[title="Reset Password"] .more-icon { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
+
+/* ============ RESPONSIVE COLUMN HIDING ============ */
+@media (max-width: 1200px) {
+    .col-hide-1200 { display: none !important; }
+}
+@media (max-width: 1024px) {
+    .col-hide-1024 { display: none !important; }
+}
+@media (max-width: 768px) {
+    .col-hide-768 { display: none !important; }
 }
 #result_list th, .results th {
     background: var(--bg-elevated) !important; color: var(--text-muted) !important;
@@ -799,11 +884,7 @@ a.btn-floating { background: var(--gold) !important; color: #000 !important; }
 td svg { width: 20px !important; height: 20px !important; opacity: 0.7; }
 td img[src*="icon-yes"], td img[src*="icon-no"] { width: 18px !important; height: 18px !important; }
 
-/* Horizontal scroll on tables */
-.results, #result_list { overflow-x: auto !important; }
-.results::-webkit-scrollbar, #result_list::-webkit-scrollbar { height: 6px; }
-.results::-webkit-scrollbar-thumb, #result_list::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-.results::-webkit-scrollbar-track, #result_list::-webkit-scrollbar-track { background: var(--bg-elevated); }
+/* Horizontal scroll on tables - handled by .table-scroll-wrapper now */
 
 /* Tabs (user list) */
 .custom-tabs a, .user-tabs .tab-btn {
@@ -1058,10 +1139,11 @@ div.breadcrumbs { display: none !important; }
 @media (max-width: 1024px) {
     #kokoroko-sidebar { transform: translateX(-100%); transition: transform 0.3s; }
     #kokoroko-sidebar.open { transform: translateX(0); }
-    #kokoroko-main, #container { margin-left: 0 !important; width: 100% !important; }
+    #kokoroko-main, #container { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; }
     .mobile-toggle { display: block !important; }
     .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8999; }
     .sidebar-backdrop.show { display: block; }
+    #content, #content-main { padding: 16px !important; }
 }
 .mobile-toggle {
     display: none; background: none; border: none; color: var(--text-primary);
@@ -1071,10 +1153,24 @@ div.breadcrumbs { display: none !important; }
     .dash-grid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 @media (max-width: 768px) {
-    #kokoroko-header { padding: 10px 14px; }
-    #content, #content-main { padding: 14px !important; }
+    #kokoroko-header { padding: 10px 14px; gap: 12px; }
+    .header-btn { display: none !important; }
+    .header-user span { display: none !important; }
+    .header-title { font-size: 16px !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #content, #content-main { padding: 12px !important; }
     .dash-grid { grid-template-columns: repeat(2, 1fr) !important; }
-    #changelist-filter { flex-direction: column !important; align-items: stretch !important; }
+    #changelist-filter, .changelist-filter-wrapper, [id*="changelist-filter"],
+    .card-content#changelist-filter {
+        flex-direction: column !important; align-items: stretch !important;
+    }
+    .user-tabs { display: grid !important; grid-template-columns: 1fr 1fr !important; }
+    .user-tabs a, .user-tabs .tab-btn { width: 100% !important; min-width: 0 !important; text-align: center !important; }
+}
+@media (max-width: 600px) {
+    .dash-grid { grid-template-columns: 1fr !important; }
+    #kokoroko-header { padding: 8px 12px; }
+    #content, #content-main { padding: 10px !important; }
+    .user-tabs { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
 }
 
 /* ============ SCROLLBAR GLOBAL ============ */
@@ -1166,6 +1262,14 @@ document.addEventListener('DOMContentLoaded', function() {
         '</div>';
 
     document.body.insertAdjacentElement('afterbegin', sidebar);
+
+    // Add sidebar backdrop for mobile
+    if (!document.querySelector('.sidebar-backdrop')) {
+        var backdrop = document.createElement('div');
+        backdrop.className = 'sidebar-backdrop';
+        backdrop.addEventListener('click', function() { toggleSidebar(); });
+        document.body.appendChild(backdrop);
+    }
 
     // ====== BUILD HEADER ======
     var container = document.getElementById('container') || document.querySelector('#container');
@@ -1433,7 +1537,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleSidebar() {
     var sb = document.getElementById('kokoroko-sidebar');
     var bd = document.querySelector('.sidebar-backdrop');
-    sb.classList.toggle('open');
+    if (sb) sb.classList.toggle('open');
     if (bd) bd.classList.toggle('show');
 }
 
@@ -1554,7 +1658,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     var newTable = doc.getElementById('result_list');
                     var curTable = document.getElementById('result_list');
                     if (newTable && curTable) {
-                        curTable.innerHTML = newTable.innerHTML;
+                        var curInner = curTable.querySelector('table') || curTable;
+                        var newInner = newTable.querySelector('table') || newTable;
+                        if (curInner.tagName === 'TABLE' && newInner.tagName === 'TABLE') {
+                            curInner.innerHTML = newInner.innerHTML;
+                        } else {
+                            curTable.innerHTML = newTable.innerHTML;
+                        }
                     } else if (!curTable && newTable) {
                         var newContent = doc.getElementById('content') || doc.getElementById('content-main');
                         var curContent = document.getElementById('content') || document.getElementById('content-main');
@@ -1568,13 +1678,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (newCount && curCount) curCount.textContent = newCount.textContent;
                     var newCLForm = doc.getElementById('changelist-form');
                     var curCLForm = document.getElementById('changelist-form');
-                    if (newCLForm && curCLForm) curCLForm.innerHTML = newCLForm.innerHTML;
+                    if (!curTable && newCLForm && curCLForm) curCLForm.innerHTML = newCLForm.innerHTML;
                     else if (newCLForm && !curCLForm) {
                         var newC = doc.getElementById('content') || doc.getElementById('content-main');
                         var curC = document.getElementById('content') || document.getElementById('content-main');
                         if (newC && curC) curC.innerHTML = newC.innerHTML;
                     }
                     flashIndicator();
+                    // Re-apply responsive wrappers after auto-refresh
+                    if (typeof wrapTablesInScrollWrapper === 'function') wrapTablesInScrollWrapper();
+                    if (typeof collapseActionButtons === 'function') collapseActionButtons();
+                    if (typeof tagResponsiveColumns === 'function') tagResponsiveColumns();
                 })
                 .catch(function() {});
         }, REFRESH_INTERVAL);
@@ -1632,6 +1746,111 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 15000);
     }
 })();
+});
+
+// ====== RESPONSIVE LAYOUT FUNCTIONS (separate scope) ======
+function wrapTablesInScrollWrapper() {
+    var tables = [];
+    var rl = document.getElementById('result_list');
+    if (rl && rl.tagName === 'TABLE') {
+        tables.push(rl);
+    } else if (rl) {
+        rl.querySelectorAll('table').forEach(function(t) { tables.push(t); });
+    }
+    document.querySelectorAll('.results table, .dash-table table').forEach(function(t) {
+        if (tables.indexOf(t) === -1) tables.push(t);
+    });
+    tables.forEach(function(table) {
+        if (table.closest('.table-scroll-wrapper')) return;
+        var wrapper = document.createElement('div');
+        wrapper.className = 'table-scroll-wrapper';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+    });
+}
+
+function collapseActionButtons() {
+    var secondaryTitles = ['Statement', 'Bet History', 'Blacklist', 'Whitelist', 'Reset Password'];
+    var titleLabels = {
+        'Statement': 'S', 'Bet History': 'BH', 'Blacklist': 'BL',
+        'Whitelist': 'WL', 'Reset Password': 'PR'
+    };
+    document.querySelectorAll('td').forEach(function(td) {
+        if (td.querySelector('.action-more-wrap')) return;
+        var links = td.querySelectorAll('a[title]');
+        if (links.length <= 3) return;
+        var secondaryLinks = [];
+        links.forEach(function(a) {
+            if (secondaryTitles.indexOf(a.title) !== -1) {
+                secondaryLinks.push(a);
+            }
+        });
+        if (secondaryLinks.length === 0) return;
+        var wrap = document.createElement('span');
+        wrap.className = 'action-more-wrap';
+        var btn = document.createElement('span');
+        btn.className = 'action-more-btn';
+        btn.innerHTML = '&#8942;';
+        btn.title = 'More actions';
+        var dropdown = document.createElement('div');
+        dropdown.className = 'action-more-dropdown';
+        secondaryLinks.forEach(function(a) {
+            var clone = a.cloneNode(true);
+            var label = titleLabels[a.title] || a.textContent.trim();
+            clone.innerHTML = '<span class="more-icon">' + label + '</span> ' + a.title;
+            dropdown.appendChild(clone);
+            a.style.display = 'none';
+        });
+        wrap.appendChild(btn);
+        wrap.appendChild(dropdown);
+        td.appendChild(wrap);
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isOpen = dropdown.classList.contains('show');
+            document.querySelectorAll('.action-more-dropdown.show').forEach(function(d) { d.classList.remove('show'); });
+            if (!isOpen) dropdown.classList.add('show');
+        });
+    });
+}
+
+function tagResponsiveColumns() {
+    var table = document.getElementById('result_list');
+    if (!table) table = document.querySelector('.results table');
+    if (!table) return;
+    if (table.tagName !== 'TABLE') {
+        table = table.querySelector('table');
+        if (!table) return;
+    }
+    var headerCells = table.querySelectorAll('thead th');
+    var hideMap = {};
+    headerCells.forEach(function(th, idx) {
+        var txt = (th.textContent || '').trim().toLowerCase();
+        if (txt.indexOf('date') !== -1 || txt.indexOf('joined') !== -1 || txt.indexOf('created') !== -1) {
+            hideMap[idx] = 'col-hide-1200';
+        }
+        if (txt.indexOf('phone') !== -1 || txt.indexOf('mobile') !== -1) {
+            hideMap[idx] = 'col-hide-768';
+        }
+    });
+    if (Object.keys(hideMap).length === 0) return;
+    table.querySelectorAll('tr').forEach(function(row) {
+        var cells = row.querySelectorAll('th, td');
+        cells.forEach(function(cell, idx) {
+            if (hideMap[idx]) {
+                cell.classList.add(hideMap[idx]);
+            }
+        });
+    });
+}
+
+// Run responsive functions after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    wrapTablesInScrollWrapper();
+    collapseActionButtons();
+    tagResponsiveColumns();
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.action-more-dropdown.show').forEach(function(d) { d.classList.remove('show'); });
+    });
 });
 </script>
 {% endblock %}
