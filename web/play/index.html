@@ -2516,8 +2516,13 @@
             autoMatchRenderedUrl = liveUrl;
             let streamHtml = '';
             if (liveUrl) {
-                streamHtml = `<div class="stream-container">
+                streamHtml = `<div class="stream-container" style="position:relative;">
                     <iframe src="${liveUrl}" allowfullscreen></iframe>
+                    <div id="stream-status" style="position:absolute;top:8px;right:8px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;display:none;z-index:5;"></div>
+                </div>`;
+            } else {
+                streamHtml = `<div class="stream-container" style="display:flex;align-items:center;justify-content:center;background:#111;min-height:200px;border-radius:8px;">
+                    <div style="text-align:center;color:#666;"><span class="material-icons" style="font-size:40px;">videocam_off</span><p style="margin:8px 0 0;font-size:12px;">No live stream available</p></div>
                 </div>`;
             }
             container.innerHTML = `
