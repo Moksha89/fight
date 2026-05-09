@@ -2208,9 +2208,30 @@
                     <div style="font-size:24px;font-weight:800;color:var(--gold);margin:4px 0;" id="wd-available-bal">₹0.00</div>
                     <div style="font-size:11px;color:var(--text-secondary);">Minimum withdrawal: ₹100</div>
                 </div>
+                <div class="section-subtitle" style="margin-bottom:10px;">Withdrawal Speed</div>
+                <div style="display:flex;gap:8px;margin-bottom:14px;">
+                    <button class="btn btn-primary" onclick="setWdSpeed('N')" id="wd-speed-normal" style="flex:1;position:relative;">
+                        <span style="display:block;font-weight:700;">Normal</span>
+                        <span style="display:block;font-size:10px;opacity:0.8;">Up to 6 hours</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="setWdSpeed('E')" id="wd-speed-express" style="flex:1;position:relative;">
+                        <span style="display:block;font-weight:700;">⚡ Express</span>
+                        <span style="display:block;font-size:10px;opacity:0.8;">~30 mins | 2.5% fee</span>
+                    </button>
+                </div>
                 <div class="form-group">
                     <label>Withdrawal Amount</label>
-                    <input type="number" id="wd-amount" placeholder="Enter amount (min ₹100)" min="100">
+                    <input type="number" id="wd-amount" placeholder="Enter amount (min ₹100)" min="100" oninput="updateWdFeePreview()">
+                </div>
+                <div id="wd-fee-preview" style="display:none;background:var(--bg-elevated);border:1px solid var(--gold-border);border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                        <span style="color:var(--text-secondary);">Express Fee (2.5%)</span>
+                        <span style="color:#ef4444;font-weight:600;" id="wd-fee-amount">-₹0</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--text-secondary);">You'll receive</span>
+                        <span style="color:#10b981;font-weight:700;" id="wd-payout-amount">₹0</span>
+                    </div>
                 </div>
                 <div class="section-subtitle" style="margin-bottom:10px;">Withdrawal Method</div>
                 <div style="display:flex;gap:8px;margin-bottom:14px;">
@@ -2238,7 +2259,7 @@
                     </div>
                 </div>
                 <button class="btn btn-primary" onclick="submitWithdraw()" style="width:100%;margin-top:8px;">Request Withdrawal</button>
-                <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:10px;">Expected processing time: 10–30 minutes</div>
+                <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:10px;" id="wd-processing-note">Normal: up to 6 hours | Express: ~30 minutes (2.5% fee)</div>
             </div>
         </div>
     </div>
@@ -3721,6 +3742,27 @@
         checkPendingWithdraw();
     }
     function closeWithdraw() { document.getElementById('withdraw-modal').classList.remove('show'); }
+    var wdSpeed = 'N';
+    function setWdSpeed(speed) {
+        wdSpeed = speed;
+        document.querySelectorAll('#wd-speed-normal, #wd-speed-express').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-secondary'); });
+        var activeBtn = speed === 'N' ? document.getElementById('wd-speed-normal') : document.getElementById('wd-speed-express');
+        activeBtn.classList.remove('btn-secondary'); activeBtn.classList.add('btn-primary');
+        updateWdFeePreview();
+    }
+    function updateWdFeePreview() {
+        var amount = parseFloat(document.getElementById('wd-amount').value) || 0;
+        var feeBox = document.getElementById('wd-fee-preview');
+        if (wdSpeed === 'E' && amount > 0) {
+            var fee = (amount * 2.5 / 100);
+            var payout = amount - fee;
+            document.getElementById('wd-fee-amount').textContent = '-₹' + fee.toLocaleString('en-IN', {maximumFractionDigits:2});
+            document.getElementById('wd-payout-amount').textContent = '₹' + payout.toLocaleString('en-IN', {maximumFractionDigits:2});
+            feeBox.style.display = 'block';
+        } else {
+            feeBox.style.display = 'none';
+        }
+    }
     function setWdType(type) {
         wdType = type;
         document.querySelectorAll('#wd-type-upi, #wd-type-bank').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-secondary'); });
@@ -3735,10 +3777,12 @@
             if (res.ok) {
                 const data = await res.json();
                 if (data && data.withdrawal_amount) {
+                    var speedLabel = data.speed_type === 'E' ? '⚡ Express' : 'Normal';
+                    var feeInfo = data.fee_amount > 0 ? ` (Fee: ₹${data.fee_amount}, Payout: ₹${data.payout_amount})` : '';
                     document.getElementById('wd-pending-check').innerHTML = `
                     <div class="dep-pending-banner">
                         <span class="material-icons">hourglass_top</span>
-                        <span>Pending withdrawal of ₹${data.withdrawal_amount}. Wait for processing or cancel.</span>
+                        <span>Pending ${speedLabel} withdrawal of ₹${data.withdrawal_amount}${feeInfo}. Wait for processing or cancel.</span>
                         <button onclick="cancelWithdraw()">Cancel</button>
                     </div>`;
                 } else { document.getElementById('wd-pending-check').innerHTML = ''; }
@@ -3758,7 +3802,7 @@
         const amount = document.getElementById('wd-amount').value;
         if (!amount || parseFloat(amount) < 100) { showToast('Minimum withdrawal is ₹100', 'error'); return; }
         if (!wdType) { showToast('Select UPI or Bank Transfer', 'error'); return; }
-        const body = {withdrawal_amount: parseFloat(amount), withdrawal_type: wdType};
+        const body = {withdrawal_amount: parseFloat(amount), withdrawal_type: wdType, speed_type: wdSpeed};
         if (wdType === 'U') {
             body.upi_id = document.getElementById('wd-upi-id').value.trim();
             if (!body.upi_id) { showToast('Enter UPI ID', 'error'); return; }
@@ -3768,7 +3812,14 @@
             body.ifsc_code = document.getElementById('wd-ifsc').value.trim();
             if (!body.account_holder_name || !body.account_number || !body.ifsc_code) { showToast('Fill all bank details', 'error'); return; }
         }
-        if (!await customConfirm(`Withdraw <b>₹${amount}</b> via <b>${wdType==='U'?'UPI':'Bank Transfer'}</b>?`, {title: 'Confirm Withdrawal', icon: '💸', okText: 'Withdraw'})) return;
+        var feeNote = '';
+        if (wdSpeed === 'E') {
+            var fee = (parseFloat(amount) * 2.5 / 100).toFixed(2);
+            var payout = (parseFloat(amount) - fee).toFixed(2);
+            feeNote = `<br><small style="color:#ef4444;">Express fee: ₹${fee} | You receive: ₹${payout}</small>`;
+        }
+        var speedLabel = wdSpeed === 'E' ? '⚡ Express (~30 min)' : 'Normal (~6 hrs)';
+        if (!await customConfirm(`Withdraw <b>₹${amount}</b> via <b>${wdType==='U'?'UPI':'Bank Transfer'}</b><br>Speed: <b>${speedLabel}</b>${feeNote}`, {title: 'Confirm Withdrawal', icon: '💸', okText: 'Withdraw'})) return;
         try {
             const res = await fetch(`${API}/wallet/withdrawal/`, {method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
             const data = await res.json();

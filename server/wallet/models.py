@@ -318,17 +318,32 @@ class WithdrawalRequest(models.Model):
         ('U', 'UPI ID'),
         ('B', 'Bank Account'),
     )
+    SPEED_TYPE_CHOICES = (
+        ('N', 'Normal'),
+        ('E', 'Express'),
+    )
     STATUS_CHOICES = (
         ('P', 'Pending'),
         ('A', 'Accepted'),
         ('R', 'Rejected'),
     )
+    EXPRESS_FEE_PERCENT = Decimal('2.5')
+
     customer = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='P', db_index=True)
     withdrawal_type = models.CharField(
         max_length=1, choices=WITHDRAWAL_TYPE_CHOICES)
+    speed_type = models.CharField(
+        max_length=1, choices=SPEED_TYPE_CHOICES, default='N',
+        help_text='Normal: up to 6hrs, Express: up to 30mins (2.5% fee)')
     withdrawal_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    fee_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        help_text='Fee deducted for Express withdrawal (2.5%)')
+    payout_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        help_text='Amount user receives after fee deduction')
     upi_id = models.CharField(max_length=100, blank=True, null=True)
     account_number = models.CharField(max_length=50, blank=True, null=True)
     ifsc_code = models.CharField(max_length=20, blank=True, null=True)
@@ -343,6 +358,15 @@ class WithdrawalRequest(models.Model):
     infoNote = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def calculate_fee(self):
+        if self.speed_type == 'E':
+            return (self.withdrawal_amount * self.EXPRESS_FEE_PERCENT / Decimal('100')).quantize(Decimal('0.01'))
+        return Decimal('0.00')
+
+    @property
+    def processing_time(self):
+        return '30 minutes' if self.speed_type == 'E' else '6 hours'
 
     class Meta:
         verbose_name = "Withdrawal Request"

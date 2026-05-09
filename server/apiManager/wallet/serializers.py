@@ -41,13 +41,17 @@ class DepositRequestSerializer(serializers.ModelSerializer):
 
 
 class WithdrawalRequestSerializer(serializers.ModelSerializer):
+    processing_time = serializers.CharField(read_only=True)
+
     class Meta:
         model = WithdrawalRequest
         fields = [
-            'customer', 'status', 'withdrawal_type', 'withdrawal_amount', 'upi_id', 'account_number',
+            'customer', 'status', 'withdrawal_type', 'speed_type',
+            'withdrawal_amount', 'fee_amount', 'payout_amount',
+            'processing_time', 'upi_id', 'account_number',
             'ifsc_code', 'account_holder_name', 'infoNote', 'updated_at', 'created_at'
         ]
-        read_only_fields = ['customer', 'status', 'updated_at', 'created_at']
+        read_only_fields = ['customer', 'status', 'fee_amount', 'payout_amount', 'processing_time', 'updated_at', 'created_at']
 
     def validate(self, attrs):
         withdrawal_type = attrs.get('withdrawal_type')

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
@@ -224,6 +225,7 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         withdrawal_amount = serializer.validated_data.get('withdrawal_amount')
+        speed_type = serializer.validated_data.get('speed_type', 'N')
 
         if float(withdrawal_amount) <= 0:
             raise KokorokoError(
@@ -254,11 +256,21 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
                 severity=Severity.MEDIUM,
             )
 
+        # Calculate fee for Express withdrawals
+        fee_amount = Decimal('0.00')
+        if speed_type == 'E':
+            fee_amount = (withdrawal_amount * Decimal('2.5') / Decimal('100')).quantize(Decimal('0.01'))
+        payout_amount = withdrawal_amount - fee_amount
+
         with transaction.atomic():
             wallet.balance = F('balance') - withdrawal_amount
             wallet.save()
 
-            serializer.save(customer=user)
+            serializer.save(
+                customer=user,
+                fee_amount=fee_amount,
+                payout_amount=payout_amount,
+            )
 
     @action(detail=False, methods=['get', 'delete'])
     def current(self, request):

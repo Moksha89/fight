@@ -490,16 +490,33 @@ const DepositWithdrawl = ({navigation}) => {
               </View>
             </>
           )}
+          <View style={styles.paymentInformation}>
+            <AppText style={{width: wp(40)}}>Speed</AppText>
+            <AppText style={{fontWeight: '700', color: currentWithdrawal?.speed_type === 'E' ? '#f59e0b' : '#3b82f6'}}>
+              {currentWithdrawal?.speed_type === 'E' ? '⚡ Express' : 'Normal'}
+            </AppText>
+          </View>
+          {currentWithdrawal?.fee_amount > 0 && (
+            <View style={styles.paymentInformation}>
+              <AppText style={{width: wp(40)}}>Fee (2.5%)</AppText>
+              <AppText style={{color: '#ef4444'}}>-₹{currentWithdrawal.fee_amount}</AppText>
+            </View>
+          )}
           <View style={[styles.paymentInformation, {marginTop: hp(5)}]}>
             <Image source={require('../../../assets/icons/info.png')} />
             <AppText style={{fontSize: fp(1.7), marginLeft: wp(2)}}>
-              Expected Withdrawal time 45 Min
+              {currentWithdrawal?.speed_type === 'E' ? 'Expected: ~30 minutes' : 'Expected: up to 6 hours'}
             </AppText>
           </View>
           <View style={styles.amount}>
             <AppText style={styles.amounttext}>
-              ₹ {currentWithdrawal?.withdrawal_amount}
+              ₹ {currentWithdrawal?.payout_amount > 0 ? currentWithdrawal.payout_amount : currentWithdrawal?.withdrawal_amount}
             </AppText>
+            {currentWithdrawal?.fee_amount > 0 && (
+              <AppText style={{fontSize: fp(1.4), color: '#999', textAlign: 'center'}}>
+                (₹{currentWithdrawal.withdrawal_amount} - ₹{currentWithdrawal.fee_amount} fee)
+              </AppText>
+            )}
           </View>
           <AppButton
             textStyle={{fontSize: fp(1.8), fontWeight: '400'}}

@@ -658,8 +658,11 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
     list_display = [
         'customer',
         'status_badge',
+        'speed_type_badge',
         'customer_real_balance_link',
         'withdrawal_amount',
+        'fee_display',
+        'payout_display',
         'customer_details',
         'handling_by',
         'utr_id',
@@ -668,7 +671,7 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
         'updated_at'
     ]
     search_fields = ['upi_id', 'account_number', 'customer__username']
-    list_filter = ['status', 'withdrawal_type']
+    list_filter = ['status', 'withdrawal_type', 'speed_type']
     list_display_links = None
     list_per_page = 5
     list_editable = ['utr_id', 'infoNote']
@@ -710,20 +713,47 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
         return format_html('<span style="color:{};font-weight:bold;">{}</span>', color, label)
     status_badge.short_description = 'Status'
 
+    def speed_type_badge(self, obj):
+        speed = getattr(obj, 'speed_type', 'N') or 'N'
+        if speed == 'E':
+            return format_html(
+                '<span style="background:#f59e0b;color:#000;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold;">\u26A1 Express</span>'
+                '<br><small style="color:#a8a29e;">~30 mins | 2.5% fee</small>'
+            )
+        return format_html(
+            '<span style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold;">Normal</span>'
+            '<br><small style="color:#a8a29e;">~6 hours</small>'
+        )
+    speed_type_badge.short_description = 'Speed'
+
+    def fee_display(self, obj):
+        fee = getattr(obj, 'fee_amount', 0) or 0
+        if fee > 0:
+            return format_html('<span style="color:#ef4444;">-\u20B9{}</span>', fee)
+        return format_html('<span style="color:#6b7280;">\u20B90</span>')
+    fee_display.short_description = 'Fee'
+
+    def payout_display(self, obj):
+        payout = getattr(obj, 'payout_amount', 0) or 0
+        if payout > 0:
+            return format_html('<span style="color:#10b981;font-weight:bold;">\u20B9{}</span>', payout)
+        return format_html('\u20B9{}', obj.withdrawal_amount)
+    payout_display.short_description = 'Payout'
+
     def customer_details(self, obj):
         if obj.withdrawal_type == 'U':
             return format_html(
                 "<strong>UPI ID:</strong><br>{}",
-                obj.upi_id or "—"
+                obj.upi_id or "\u2014"
             )
         elif obj.withdrawal_type == 'B':
             return format_html(
                 "<strong>Account Number:</strong> {}<br>"
                 "<strong>IFSC Code:</strong> {}<br>"
                 "<strong>Account Holder:</strong> {}",
-                obj.account_number or "—",
-                obj.ifsc_code or "—",
-                obj.account_holder_name or "—"
+                obj.account_number or "\u2014",
+                obj.ifsc_code or "\u2014",
+                obj.account_holder_name or "\u2014"
             )
         return "-"
     customer_details.short_description = "Customer Details"

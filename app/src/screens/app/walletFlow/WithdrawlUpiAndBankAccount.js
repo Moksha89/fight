@@ -30,11 +30,19 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
   const {wallet} = useAuth();
 
   const [activeTab, setActiveTab] = useState('upi');
+  const [speedType, setSpeedType] = useState('N');
   const [withdrawalAmount, setWithdrawalAmount] = useState(0);
   const [upiId, setUpiId] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [ifscCode, setIfscCode] = useState('');
   const [accountHolderName, setAccountHolderName] = useState('');
+
+  const expressFee = speedType === 'E' && parseFloat(withdrawalAmount) > 0
+    ? (parseFloat(withdrawalAmount) * 2.5 / 100).toFixed(2)
+    : '0.00';
+  const payoutAmount = speedType === 'E' && parseFloat(withdrawalAmount) > 0
+    ? (parseFloat(withdrawalAmount) - parseFloat(expressFee)).toFixed(2)
+    : withdrawalAmount;
 
   useEffect(() => {
     if (route.params) {
@@ -74,6 +82,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
     try {
       const response = await createWithdrawal({
         withdrawal_type: activeTab == 'upi' ? 'U' : 'B',
+        speed_type: speedType,
         withdrawal_amount: withdrawalAmount,
         upi_id: upiId,
         account_number: accountNumber,
@@ -111,7 +120,45 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
       />
 
       <View style={styles.container}>
-        {/* Top Tabs */}
+        {/* Speed Type Selection */}
+        <AppText style={[styles.label, {marginBottom: hp(1), fontWeight: '700'}]}>Withdrawal Speed</AppText>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            onPress={() => setSpeedType('N')}
+            style={[
+              styles.speedButton,
+              speedType === 'N' && {backgroundColor: '#3b82f6', borderColor: '#3b82f6'},
+            ]}>
+            <AppText style={[styles.speedTitle, {color: speedType === 'N' ? '#fff' : '#000'}]}>Normal</AppText>
+            <AppText style={[styles.speedSub, {color: speedType === 'N' ? '#ddd' : '#666'}]}>Up to 6 hours</AppText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setSpeedType('E')}
+            style={[
+              styles.speedButton,
+              speedType === 'E' && {backgroundColor: '#f59e0b', borderColor: '#f59e0b'},
+            ]}>
+            <AppText style={[styles.speedTitle, {color: speedType === 'E' ? '#fff' : '#000'}]}>⚡ Express</AppText>
+            <AppText style={[styles.speedSub, {color: speedType === 'E' ? '#fff' : '#666'}]}>~30 min | 2.5% fee</AppText>
+          </TouchableOpacity>
+        </View>
+
+        {speedType === 'E' && parseFloat(withdrawalAmount) > 0 && (
+          <View style={styles.feePreview}>
+            <View style={styles.feeRow}>
+              <AppText style={styles.feeLabel}>Express Fee (2.5%)</AppText>
+              <AppText style={styles.feeValue}>-₹{expressFee}</AppText>
+            </View>
+            <View style={styles.feeRow}>
+              <AppText style={styles.feeLabel}>You'll receive</AppText>
+              <AppText style={styles.payoutValue}>₹{payoutAmount}</AppText>
+            </View>
+          </View>
+        )}
+
+        {/* Payment Method Tabs */}
+        <AppText style={[styles.label, {marginBottom: hp(1), fontWeight: '700'}]}>Payment Method</AppText>
         <View style={styles.buttonRow}>
           <TouchableOpacity
             onPress={() => setActiveTab('upi')}
@@ -119,13 +166,6 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
               styles.button,
               activeTab === 'upi' && {backgroundColor: '#d4a843'},
             ]}>
-            {/* <Image
-              source={require('../../../assets/icons/upi.png')}
-              style={[
-                styles.iconImage,
-                {tintColor: activeTab === 'upi' ? '#fff' : '#000'},
-              ]}
-            /> */}
             <View
               style={[
                 styles.upiSection,
@@ -156,13 +196,6 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
               styles.button,
               activeTab === 'bank' && {backgroundColor: '#d4a843'},
             ]}>
-            {/* <Image
-              source={require('../../../assets/icons/bankIcon.png')}
-              style={[
-                styles.iconImage,
-                {tintColor: activeTab === 'bank' ? '#fff' : '#000'},
-              ]}
-            /> */}
             <FontAwesome
               name="bank"
               size={20}
@@ -328,6 +361,52 @@ const styles = StyleSheet.create({
     width: wp(90),
     position: 'absolute',
     bottom: hp(20),
+  },
+  speedButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: wp(43),
+    height: hp(7),
+    borderRadius: wp(2),
+    borderWidth: 1.5,
+    borderColor: '#ccc',
+    backgroundColor: '#f5f5f5',
+  },
+  speedTitle: {
+    fontSize: fp(1.9),
+    fontWeight: '700',
+  },
+  speedSub: {
+    fontSize: fp(1.3),
+    marginTop: 2,
+  },
+  feePreview: {
+    width: wp(90),
+    backgroundColor: '#f8f4eb',
+    borderWidth: 1,
+    borderColor: '#d4a843',
+    borderRadius: wp(2),
+    padding: wp(3),
+    marginBottom: hp(2),
+  },
+  feeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  feeLabel: {
+    fontSize: fp(1.6),
+    color: '#666',
+  },
+  feeValue: {
+    fontSize: fp(1.6),
+    color: '#ef4444',
+    fontWeight: '600',
+  },
+  payoutValue: {
+    fontSize: fp(1.7),
+    color: '#10b981',
+    fontWeight: '700',
   },
 });
 
