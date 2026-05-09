@@ -2275,6 +2275,8 @@
         loadUserBets();
         connectMatchWebSocket();
         loadSocialLinks();
+        // Periodic API fallback if WS fails to deliver data
+        setInterval(() => { if (!autoMatchData) loadMatches(); }, 8000);
         // Restore section from URL hash
         const hash = location.hash || '#home';
         const sec = hashSectionMap[hash];
@@ -2494,7 +2496,7 @@
     function renderAutoMatch() {
         const container = document.getElementById('auto-match-container');
         if (!autoMatchData) {
-            container.innerHTML = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>Connecting to China Market...</p></div>';
+            container.innerHTML = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>Connecting to China Market...</p><button onclick="loadMatches();connectMatchWebSocket();" style="margin-top:10px;padding:6px 16px;border-radius:8px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-size:12px;">Retry</button></div>';
             autoMatchRenderedId = null;
             autoMatchRenderedUrl = null;
             return;
@@ -2870,11 +2872,29 @@
 
     async function loadMatches() {
         loadOdds();
+        // Load auto match data via API (fallback for when WS is slow/failing)
+        try {
+            const autoRes = await fetch(`${API}/cockfight/auto-history/`, { headers: {'Authorization': `Bearer ${token}`} });
+            if (autoRes.ok) {
+                const autoData = await autoRes.json();
+                const results = autoData.results || autoData;
+                if (Array.isArray(results) && results.length > 0) {
+                    const liveAuto = results.find(m => m.isLive);
+                    if (liveAuto && !autoMatchData) {
+                        autoMatchData = liveAuto;
+                        if (currentChannel === 'auto') renderAutoMatch();
+                    }
+                }
+            }
+        } catch(e) {}
+        // Load manual zones
         try {
             const res = await fetch(`${API}/cockfight/manual-history/`, { headers: {'Authorization': `Bearer ${token}`} });
             if (res.ok) {
                 const data = await res.json();
-                renderMatches(data.results || data);
+                const zones = data.results || data;
+                if (!manualMatchData && zones) { manualMatchData = zones; updateChannelTabs(); }
+                renderMatches(zones);
             }
         } catch(e) {}
     }
