@@ -993,13 +993,21 @@ body.login .input-field .prefix { display: none !important; }
 body.login nav, body.login .ma-tools-icons { display: none !important; }
 body.login img[src="/static/logo.png"] { display: none !important; }
 body.login footer, body.login #footer { display: none !important; }
-body.login > div { display: flex !important; justify-content: center !important; align-items: center !important; min-height: 100vh !important; background: var(--bg-main) !important; }
-body.login > div > img { display: none !important; }
-body.login form { 
+body.login > div.indent { display: flex !important; justify-content: center !important; align-items: center !important; min-height: 100vh !important; background: var(--bg-main) !important; }
+body.login > div.indent > img { display: none !important; }
+body.login #img-lightbox { display: none !important; }
+body.login #live-refresh-indicator { display: none !important; }
+body.login form#login-form { 
     background: var(--bg-card) !important; border-radius: 16px !important;
     box-shadow: var(--shadow) !important;
     padding: 40px 32px !important; border: 1px solid var(--gold-border) !important;
-    width: 360px !important; max-width: 90vw !important;
+    width: 380px !important; max-width: 90vw !important;
+    display: block !important;
+}
+body.login .row, body.login .col, body.login .s12 {
+    width: 100% !important; max-width: 100% !important;
+    margin: 0 !important; padding: 0 !important;
+    flex: none !important;
 }
 body.login form::before {
     content: ''; display: block; width: 64px; height: 64px;
@@ -1007,27 +1015,28 @@ body.login form::before {
     background: url('/static/admin/img/logo.png') center/contain no-repeat;
     border: 1px solid var(--gold-border);
 }
-body.login form input[type="text"],
-body.login form input[type="password"] {
+body.login form#login-form input[type="text"],
+body.login form#login-form input[type="password"] {
     width: 100% !important; padding: 12px 14px !important;
     border: 1px solid var(--border) !important; border-radius: 10px !important;
     font-size: 14px !important; background: var(--bg-elevated) !important;
     color: var(--text-primary) !important; margin-bottom: 6px !important;
     box-sizing: border-box !important; height: auto !important;
+    display: block !important;
 }
 body.login form input[type="text"]:focus,
 body.login form input[type="password"]:focus {
     border-color: var(--gold) !important; outline: none !important;
     box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
 }
-body.login form button[type="submit"],
-body.login form input[type="submit"] {
+body.login form#login-form button[type="submit"],
+body.login form#login-form input[type="submit"] {
     width: 100% !important; padding: 12px !important;
     background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
     border: none !important; border-radius: 10px !important;
     font-size: 15px !important; font-weight: 600 !important;
     cursor: pointer !important; margin-top: 12px !important;
-    height: auto !important;
+    height: auto !important; display: block !important;
 }
 body.login form button[type="submit"]:hover,
 body.login form input[type="submit"]:hover {
