@@ -7,6 +7,7 @@ from django.db.models import F
 from dicePlayManager.models import Board, DicePlayMatch, DicePlayMatchBet
 from dicePlayManager.tasks import auto_roll_virtual_match, create_next_virtual_round
 from wallet.models import WalletHistory
+from kokoroko.error_handler import KokorokoError, ErrorCode, Severity, build_error_response
 from .serializers import (
     BoardSerializer,
     BoardWithMatchesSerializer,
@@ -29,11 +30,19 @@ class BoardViewSet(viewsets.ReadOnlyModelViewSet):
         """Start a new virtual round on this board (admin only or auto-triggered)."""
         board = self.get_object()
         if not board.is_virtual:
-            return Response({"detail": "This board is not configured for virtual mode."}, status=status.HTTP_400_BAD_REQUEST)
+            raise KokorokoError(
+                ErrorCode.GAME_NOT_VIRTUAL,
+                "This board is not configured for virtual mode.",
+                severity=Severity.LOW,
+            )
 
         active = DicePlayMatch.objects.filter(board=board, isWinnerDeclared=False).exists()
         if active:
-            return Response({"detail": "Board already has an active match."}, status=status.HTTP_400_BAD_REQUEST)
+            raise KokorokoError(
+                ErrorCode.GAME_ACTIVE_MATCH_EXISTS,
+                "Board already has an active match.",
+                severity=Severity.LOW,
+            )
 
         create_next_virtual_round.delay(board.id)
         return Response({"message": "Virtual round starting..."}, status=status.HTTP_200_OK)
@@ -47,7 +56,12 @@ class BoardViewSet(viewsets.ReadOnlyModelViewSet):
                 board=board, isLive=True, isWinnerDeclared=False, match_type="V"
             )
         except DicePlayMatch.DoesNotExist:
-            return Response({"detail": "No active virtual match on this board."}, status=status.HTTP_404_NOT_FOUND)
+            raise KokorokoError(
+                ErrorCode.GAME_MATCH_NOT_FOUND,
+                "No active virtual match on this board.",
+                http_status=status.HTTP_404_NOT_FOUND,
+                severity=Severity.LOW,
+            )
 
         auto_roll_virtual_match.delay(match.id)
         return Response({"message": "Dice rolling...", "match_id": match.id}, status=status.HTTP_200_OK)
@@ -96,9 +110,9 @@ class DicePlayMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
         with transaction.atomic():
             wallet.refresh_from_db()
             if wallet.balance < amount:
-                return Response(
-                    {"detail": "Insufficient wallet balance."},
-                    status=status.HTTP_400_BAD_REQUEST,
+                raise KokorokoError(
+                    ErrorCode.BET_INSUFFICIENT_BALANCE,
+                    severity=Severity.MEDIUM,
                 )
             wallet.balance = F("balance") - amount
             wallet.save()

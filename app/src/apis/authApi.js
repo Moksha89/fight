@@ -1,174 +1,92 @@
-import {baseApiEndpoint as BASE_URL} from '../Config/baseEndpoint';
-
+/**
+ * Auth API — uses Smart API Client for error handling, auto-retry, token refresh
+ *
+ * Auth endpoints (getOtp, verifyOtp, getNewAccess) use { auth: false }
+ * since the user isn't authenticated yet.
+ */
+import {apiRequest} from '../utils/apiClient';
+import {handleError} from '../utils/errorHandler';
 import storage from '../utils/storage';
 
 export const getOtp = async email => {
-  const requestData = {
-    email: email,
-  };
+  const result = await apiRequest('/api/user/getotp/', {
+    method: 'POST',
+    body: JSON.stringify({email}),
+  }, {auth: false});
 
-  try {
-    const response = await fetch(`${BASE_URL}/api/user/getotp/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestData),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      return {success: true, data};
-    } else {
-      return {success: false, data};
-    }
-  } catch (error) {
-    console.error('Error creating post:', error);
-    return {success: false, error};
-  }
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'getOtp', silent: true});
+  return {success: false, data: result.data || {}, error: result.error};
 };
 
 export const verifyOtp = async (email, otp) => {
-  try {
-    const response = await fetch(`${BASE_URL}/api/user/verifyotp/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({email, otp}),
-    });
+  const result = await apiRequest('/api/user/verifyotp/', {
+    method: 'POST',
+    body: JSON.stringify({email, otp}),
+  }, {auth: false});
 
-    const data = await response.json();
-
-    if (response.ok) {
-      return {success: true, data};
-    } else {
-      return {success: false, data};
-    }
-  } catch (error) {
-    console.error('verifyOtp API error:', error);
-    return {success: false, data: {message: 'Network error'}};
-  }
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'verifyOtp', silent: true});
+  return {success: false, data: result.data || {message: 'Verification failed'}};
 };
 
 export const getNewAccess = async refreshToken => {
-  try {
-    const response = await fetch(`${BASE_URL}/auth/jwt/refresh`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({refresh: refreshToken}),
-    });
+  const result = await apiRequest('/auth/jwt/refresh', {
+    method: 'POST',
+    body: JSON.stringify({refresh: refreshToken}),
+  }, {auth: false, maxRetries: 1});
 
-    const data = await response.json();
-
-    if (response.ok) {
-      return {ok: true, data};
-    } else {
-      console.log('Failed to refresh token:', data);
-      return {ok: false, data};
-    }
-  } catch (error) {
-    console.error('API error:', error);
-    return {ok: false};
-  }
+  if (result.success) return {ok: true, data: result.data};
+  return {ok: false, data: result.data || {}};
 };
 
 export const fetchBanners = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/api/base/banners/`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch banners');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching banners:', error);
-    return [];
-  }
+  const result = await apiRequest('/api/base/banners/', {}, {auth: false});
+  if (result.success) return result.data;
+  handleError(result.error, {context: 'fetchBanners', silent: true});
+  return [];
 };
 
 export const fetchStatuses = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/api/base/statuses/`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch statuses');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching statuses:', error);
-    return [];
-  }
+  const result = await apiRequest('/api/base/statuses/', {}, {auth: false});
+  if (result.success) return result.data;
+  handleError(result.error, {context: 'fetchStatuses', silent: true});
+  return [];
 };
 
 export const fetchHighlights = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/api/base/highlights/`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch highlights');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching highlights:', error);
-    return [];
-  }
+  const result = await apiRequest('/api/base/highlights/', {}, {auth: false});
+  if (result.success) return result.data;
+  handleError(result.error, {context: 'fetchHighlights', silent: true});
+  return [];
 };
 
 export const getUserInfo = async (access = null) => {
-  try {
-    const token = access ? access : await storage.getItem('accessToken');
-
-    if (!token) {
-      console.warn('No access token available');
-      return {success: false, error: 'Unauthorized'};
-    }
-
-    const response = await fetch(`${BASE_URL}/api/user/me/`, {
+  if (access) {
+    // If explicit token passed, make direct call with it
+    const result = await apiRequest('/api/user/me/', {
       method: 'GET',
-      headers: {
-        Authorization: `JWT ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+      headers: {Authorization: `JWT ${access}`},
+    }, {auth: false});
 
-    const data = await response.json();
-
-    if (response.ok) {
-      return {success: true, data};
-    } else {
-      return {success: false, data};
-    }
-  } catch (error) {
-    console.error('getUserInfo error:', error);
-    return {success: false, error: 'Network error'};
+    if (result.success) return {success: true, data: result.data};
+    handleError(result.error, {context: 'getUserInfo', silent: true});
+    return {success: false, data: result.data || {}, error: result.error?.message || 'Failed'};
   }
+
+  const result = await apiRequest('/api/user/me/');
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'getUserInfo', silent: true});
+  return {success: false, error: result.error?.message || 'Network error'};
 };
 
 export const updateUserInfo = async updatedData => {
-  try {
-    const token = await storage.getItem('accessToken');
+  const result = await apiRequest('/api/user/me/', {
+    method: 'PATCH',
+    body: JSON.stringify(updatedData),
+  });
 
-    const response = await fetch(`${BASE_URL}/api/user/me/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `JWT ${token}`,
-      },
-      body: JSON.stringify(updatedData),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      return {success: true, data};
-    } else {
-      console.warn('Profile update failed:', data);
-      return {success: false, data};
-    }
-  } catch (error) {
-    console.error('Error updating user info:', error);
-    return {success: false, error};
-  }
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'updateUserInfo'});
+  return {success: false, data: result.data || {}, error: result.error};
 };

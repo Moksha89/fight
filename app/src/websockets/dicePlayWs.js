@@ -5,6 +5,8 @@ import {getDicePlayUserBets} from '../apis/dicePlayApi';
 let DiceMatchSocket = null;
 let DiceMatchReconnectTimeout = null;
 let DiceMatchShouldReconnect = true;
+let DiceMatchRetryCount = 0;
+const MAX_RECONNECT_DELAY = 30000;
 
 export const connectDiceMatchWebSocket = async (
   setBoardsData,
@@ -34,6 +36,7 @@ export const connectDiceMatchWebSocket = async (
 
   DiceMatchSocket.onopen = () => {
     console.log('[WS] Dice match WebSocket connected');
+    DiceMatchRetryCount = 0;
   };
 
   DiceMatchSocket.onmessage = event => {
@@ -87,9 +90,12 @@ export const connectDiceMatchWebSocket = async (
     DiceMatchSocket = null;
 
     if (DiceMatchShouldReconnect) {
+      const delay = Math.min(500 * Math.pow(2, DiceMatchRetryCount), MAX_RECONNECT_DELAY);
+      DiceMatchRetryCount++;
+      console.log(`[WS] Dice match reconnecting in ${delay}ms (attempt ${DiceMatchRetryCount})`);
       DiceMatchReconnectTimeout = setTimeout(() => {
         connectDiceMatchWebSocket(setBoardsData);
-      }, 500);
+      }, delay);
     }
   };
 };
@@ -108,6 +114,7 @@ export const closeDiceMatchWebSocket = () => {
 let DiceResultSocket = null;
 let DiceResultReconnectTimeout = null;
 let DiceResultShouldReconnect = true;
+let DiceResultRetryCount = 0;
 
 export const connectDiceMatchResultWebSocket = async (
   setBoardsData,
@@ -143,6 +150,7 @@ export const connectDiceMatchResultWebSocket = async (
 
   DiceResultSocket.onopen = () => {
     console.log('[WS] Dice result WebSocket connected');
+    DiceResultRetryCount = 0;
   };
 
   DiceResultSocket.onmessage = async event => {
@@ -190,9 +198,12 @@ export const connectDiceMatchResultWebSocket = async (
     DiceResultSocket = null;
 
     if (DiceResultShouldReconnect) {
+      const delay = Math.min(1000 * Math.pow(2, DiceResultRetryCount), MAX_RECONNECT_DELAY);
+      DiceResultRetryCount++;
+      console.log(`[WS] Dice result reconnecting in ${delay}ms (attempt ${DiceResultRetryCount})`);
       DiceResultReconnectTimeout = setTimeout(() => {
         connectDiceMatchResultWebSocket(setBoardsData, setUserBetHistory, onResultCallback);
-      }, 1000);
+      }, delay);
     }
   };
 };

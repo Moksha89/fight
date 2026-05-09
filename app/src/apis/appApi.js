@@ -1,194 +1,79 @@
-import {baseApiEndpoint as BASE_URL} from '../Config/baseEndpoint';
-
-import storage from '../utils/storage';
+/**
+ * App API — uses Smart API Client for error handling, auto-retry, token refresh
+ */
+import {apiRequest} from '../utils/apiClient';
+import {handleError} from '../utils/errorHandler';
 
 export const fetchLearningData = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/api/base/learningvideos/`);
-    const data = await response.json();
-    console.log('Fetched data:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching learning data:', error);
-    return [];
-  }
+  const result = await apiRequest('/api/base/learningvideos/', {}, {auth: false});
+  if (result.success) return result.data;
+  handleError(result.error, {context: 'fetchLearningData', silent: true});
+  return [];
 };
 
 export const fetchProducts = async () => {
-  const token = await storage.getItem('accessToken');
-  try {
-    const response = await fetch(`${BASE_URL}/api/base/products/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `JWT ${token}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch Products: ${response.status}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return [];
-  }
+  const result = await apiRequest('/api/base/products/');
+  if (result.success) return result.data;
+  handleError(result.error, {context: 'fetchProducts', silent: true});
+  return [];
 };
 
 export const createProductOrder = async orderData => {
-  try {
-    const token = await storage.getItem('accessToken');
-
-    const response = await fetch(`${BASE_URL}/api/base/product-order/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `JWT ${token}`,
-      },
-      body: JSON.stringify(orderData),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      return {success: true, data};
-    } else {
-      console.warn('Order creation failed:', data);
-      return {success: false, data};
-    }
-  } catch (error) {
-    console.error('Error creating product order:', error);
-    return {success: false, error};
-  }
+  const result = await apiRequest('/api/base/product-order/', {
+    method: 'POST',
+    body: JSON.stringify(orderData),
+  });
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'createProductOrder'});
+  return {success: false, data: result.data || {}, error: result.error};
 };
+
 export const getOrderHistory = async () => {
-  try {
-    const token = await storage.getItem('accessToken');
-
-    const response = await fetch(`${BASE_URL}/api/base/product-order/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `JWT ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      return {success: true, data: data.results}; // NOTE: pass only results array here
-    } else {
-      console.warn('Fetching order history failed:', data);
-      return {success: false, data};
-    }
-  } catch (error) {
-    console.error('Error fetching order history:', error);
-    return {success: false, error};
-  }
+  const result = await apiRequest('/api/base/product-order/');
+  if (result.success) return {success: true, data: result.data?.results || result.data};
+  handleError(result.error, {context: 'getOrderHistory', silent: true});
+  return {success: false, data: result.data || {}, error: result.error};
 };
 
 export const getWalletInfo = async (pageLink = null) => {
-  try {
-    const token = await storage.getItem('accessToken');
-
-    const endpoint = pageLink ? pageLink : `${BASE_URL}/api/wallet/me/info/`;
-
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `JWT ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      return {success: true, data}; // assuming data is the wallet info object
-    } else {
-      console.warn('Fetching wallet info failed:', data);
-      return {success: false, data};
-    }
-  } catch (error) {
-    console.error('Error fetching wallet info:', error);
-    return {success: false, error};
-  }
+  const path = pageLink || '/api/wallet/me/info/';
+  const result = await apiRequest(path);
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'getWalletInfo', silent: true});
+  return {success: false, data: result.data || {}, error: result.error};
 };
 
 export async function getSettings() {
-  try {
-    const response = await fetch(`${BASE_URL}/api/base/settings/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  const result = await apiRequest('/api/base/settings/', {}, {auth: false});
+  if (result.success && Array.isArray(result.data)) {
+    const mapped = {};
+    result.data.forEach(item => {
+      mapped[item.action] = {
+        actionValue: item.actionValue,
+        action_display: item.action_display,
+      };
     });
-
-    const data = await response.json();
-
-    var result = {};
-
-    if (response.ok) {
-      data.forEach(item => {
-        result[item.action] = {
-          actionValue: item.actionValue,
-          action_display: item.action_display,
-        };
-      });
-      return {success: true, result};
-    } else {
-      console.warn('Fetching settings failed:', data);
-      return {success: false, data};
-    }
-  } catch (error) {
-    console.error('Error fetching settings:', error);
-    return {success: false, error};
+    return {success: true, result: mapped};
   }
+  handleError(result.error, {context: 'getSettings', silent: true});
+  return {success: false, data: result.data || {}};
 }
 
 export const fetchGiftAndPricePools = async () => {
-  const token = await storage.getItem('accessToken');
+  const [giftResult, priceResult] = await Promise.all([
+    apiRequest('/api/lottery/gift-pools/'),
+    apiRequest('/api/lottery/price-pools/'),
+  ]);
 
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `JWT ${token}`,
+  return {
+    giftPools: giftResult.success ? giftResult.data : [],
+    pricePools: priceResult.success ? priceResult.data : [],
   };
+};
 
-  try {
-    const [giftPoolsResponse, pricePoolsResponse] = await Promise.all([
-      fetch(`${BASE_URL}/api/lottery/gift-pools/`, {
-        method: 'GET',
-        headers,
-      }),
-      fetch(`${BASE_URL}/api/lottery/price-pools/`, {
-        method: 'GET',
-        headers,
-      }),
-    ]);
-
-    if (!giftPoolsResponse.ok) {
-      throw new Error(
-        `Failed to fetch Gift Pools: ${giftPoolsResponse.status}`,
-      );
-    }
-    if (!pricePoolsResponse.ok) {
-      throw new Error(
-        `Failed to fetch Price Pools: ${pricePoolsResponse.status}`,
-      );
-    }
-
-    const giftPools = await giftPoolsResponse.json();
-    const pricePools = await pricePoolsResponse.json();
-
-    return {
-      giftPools,
-      pricePools,
-    };
-  } catch (error) {
-    console.error('Error fetching pools:', error);
-    return {
-      giftPools: [],
-      pricePools: [],
-    };
-  }
+export const getReferralCode = async () => {
+  const result = await apiRequest('/api/user/referral/');
+  if (result.success) return result.data;
+  handleError(result.error, {context: 'getReferralCode', silent: true});
+  return null;
 };

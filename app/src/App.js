@@ -73,6 +73,9 @@ import MainNavigator from './navigation/MainNavigator';
 import {AuthProvider} from './context/AuthContext';
 
 import NoInternet from './components/NoInternet';
+import ErrorBoundary from './components/ErrorBoundary';
+import SmartToast, {showToast} from './components/SmartToast';
+import {registerErrorCallbacks} from './utils/errorHandler';
 
 export default function App() {
   const [isConnected, setIsConnected] = useState(true);
@@ -82,12 +85,22 @@ export default function App() {
       setIsConnected(state.isConnected);
     });
 
+    // Register global error callbacks for the smart error handler
+    registerErrorCallbacks({
+      onToast: (message, duration) => {
+        showToast(message, {type: 'error', duration: duration || 4000});
+      },
+    });
+
     return () => unsubscribe();
   }, []);
 
   return (
-    <AuthProvider>
-      {isConnected ? <MainNavigator /> : <NoInternet />}
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        {isConnected ? <MainNavigator /> : <NoInternet />}
+        <SmartToast />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

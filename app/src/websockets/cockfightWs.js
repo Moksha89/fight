@@ -5,6 +5,8 @@ import storage from '../utils/storage';
 let MatchSocket = null;
 let MatchReconnectTimeout = null;
 let MatchShouldReconnect = true;
+let MatchRetryCount = 0;
+const MAX_RECONNECT_DELAY = 30000;
 
 export const connectMatchWebSocket = async (
   handleAutoMatchUpdate,
@@ -42,6 +44,7 @@ export const connectMatchWebSocket = async (
 
   MatchSocket.onopen = () => {
     console.log('[WS] Match WebSocket connected');
+    MatchRetryCount = 0;
   };
 
   MatchSocket.onmessage = event => {
@@ -78,14 +81,16 @@ export const connectMatchWebSocket = async (
     MatchSocket = null;
 
     if (MatchShouldReconnect) {
-      console.log('[WS] Attempting to reconnect in 500ms...');
+      const delay = Math.min(500 * Math.pow(2, MatchRetryCount), MAX_RECONNECT_DELAY);
+      MatchRetryCount++;
+      console.log(`[WS] Match reconnecting in ${delay}ms (attempt ${MatchRetryCount})`);
       MatchReconnectTimeout = setTimeout(() => {
         connectMatchWebSocket(
           handleAutoMatchUpdate,
           handleManualMatchUpdate,
           setAvailableChannels,
         );
-      }, 500);
+      }, delay);
     } else {
       console.log('[WS] Not reconnecting (intentional close)');
     }
@@ -114,6 +119,7 @@ import { Alert } from 'react-native';
 let MatchHistorySocket = null;
 let MatchHistoryReconnectTimeout = null;
 let MatchHistoryShouldReconnect = true;
+let MatchHistoryRetryCount = 0;
 
 export const connectMatchHistoryWebSocket = async (
   setAutoMatchHistory,
@@ -151,6 +157,7 @@ export const connectMatchHistoryWebSocket = async (
 
   MatchHistorySocket.onopen = async () => {
     console.log('[WS] MatchHistory WebSocket connected');
+    MatchHistoryRetryCount = 0;
 
     const pollUntilData = async () => {
       while (true) {
@@ -240,14 +247,16 @@ export const connectMatchHistoryWebSocket = async (
     MatchHistorySocket = null;
 
     if (MatchHistoryShouldReconnect) {
-      console.log('[WS] Attempting to reconnect in 500ms...');
+      const delay = Math.min(1000 * Math.pow(2, MatchHistoryRetryCount), MAX_RECONNECT_DELAY);
+      MatchHistoryRetryCount++;
+      console.log(`[WS] MatchHistory reconnecting in ${delay}ms (attempt ${MatchHistoryRetryCount})`);
       MatchHistoryReconnectTimeout = setTimeout(() => {
         connectMatchHistoryWebSocket(
           setAutoMatchHistory,
           setManualMatchHistory,
           setUserBetHistory,
         );
-      }, 1000);
+      }, delay);
     } else {
       console.log('[WS] Not reconnecting (intentional close)');
     }

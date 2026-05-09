@@ -1,83 +1,33 @@
+/**
+ * Wallet API — uses Smart API Client for error handling, auto-retry, token refresh
+ */
+import {apiRequest} from '../utils/apiClient';
 import {baseApiEndpoint as BASE_URL} from '../Config/baseEndpoint';
 import storage from '../utils/storage';
+import {handleError} from '../utils/errorHandler';
 
 export const getDepositPaymentOptions = async amount => {
-  const token = await storage.getItem('accessToken');
-  try {
-    const response = await fetch(
-      `${BASE_URL}/api/wallet/deposit/payment-options/?amount=${amount}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch deposit payment options: ${response.status}`,
-      );
-    }
-
-    const data = await response.json();
-    console.log('Deposit payment options:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching deposit payment options:', error);
-    return null;
-  }
+  const result = await apiRequest(`/api/wallet/deposit/payment-options/?amount=${amount}`);
+  if (result.success) return result.data;
+  handleError(result.error, {context: 'getDepositPaymentOptions', silent: true});
+  return null;
 };
 
 // ========================= Deposit ========================
 
 export const getCurrentDeposit = async () => {
-  const token = await storage.getItem('accessToken');
-  try {
-    const response = await fetch(`${BASE_URL}/api/wallet/deposit/current/`, {
-      method: 'GET',
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        // No ongoing deposit
-        return null;
-      }
-      throw new Error(`Failed to fetch current deposit: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('Current deposit:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching current deposit:', error);
-    return null;
-  }
+  const result = await apiRequest('/api/wallet/deposit/current/');
+  if (result.success) return result.data;
+  if (result.status === 404) return null;
+  handleError(result.error, {context: 'getCurrentDeposit', silent: true});
+  return null;
 };
 
 export const deleteCurrentDeposit = async () => {
-  const token = await storage.getItem('accessToken');
-  try {
-    const response = await fetch(`${BASE_URL}/api/wallet/deposit/current/`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
-
-    if (!response.ok && response.status != 404) {
-      throw new Error(`Failed to delete current deposit: ${response.status}`);
-    }
-
-    console.log('Successfully deleted current deposit.');
-    return true;
-  } catch (error) {
-    console.error('Error deleting current deposit:', error);
-    return true;
-  }
+  const result = await apiRequest('/api/wallet/deposit/current/', {method: 'DELETE'});
+  if (result.success || result.status === 404) return true;
+  handleError(result.error, {context: 'deleteCurrentDeposit', silent: true});
+  return true;
 };
 
 export const createDepositRequest = async ({
@@ -87,7 +37,6 @@ export const createDepositRequest = async ({
   screenShortUri,
 }) => {
   const token = await storage.getItem('accessToken');
-
   const formData = new FormData();
   formData.append('deposit_type', depositType);
   formData.append('utr_id', utrId);
@@ -96,7 +45,6 @@ export const createDepositRequest = async ({
   if (screenShortUri) {
     const fileName = screenShortUri.split('/').pop();
     const fileType = screenShortUri.split('.').pop();
-
     formData.append('screenShort', {
       uri: screenShortUri,
       name: fileName || `screenshot.${fileType}`,
@@ -104,140 +52,74 @@ export const createDepositRequest = async ({
     });
   }
 
-  try {
-    const response = await fetch(`${BASE_URL}/api/wallet/deposit/`, {
-      method: 'POST',
-      headers: {
-        Authorization: `JWT ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-      body: formData,
-    });
+  const result = await apiRequest('/api/wallet/deposit/', {
+    method: 'POST',
+    body: formData,
+    headers: {},
+  });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Deposit failed: ${response.status} ${errorText}`);
-    }
+  if (result.success) return result.data;
 
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error during deposit:', error);
-    return null;
-  }
+  // Return structured error for UI to display
+  const errorMsg = handleError(result.error, {context: 'createDepositRequest'});
+  return {success: false, error: result.error, message: errorMsg};
 };
 
 //======================= Withdrawal =====================
 
 export const getCurrentWithdrawal = async () => {
-  const token = await storage.getItem('accessToken');
-  try {
-    const response = await fetch(`${BASE_URL}/api/wallet/withdrawal/current/`, {
-      method: 'GET',
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        // No ongoing withdrawal
-        return null;
-      }
-      throw new Error(`Failed to fetch current withdrawal: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('Current withdrawal:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching current withdrawal:', error);
-    return null;
-  }
+  const result = await apiRequest('/api/wallet/withdrawal/current/');
+  if (result.success) return result.data;
+  if (result.status === 404) return null;
+  handleError(result.error, {context: 'getCurrentWithdrawal', silent: true});
+  return null;
 };
 
 export const deleteCurrentWithdrawal = async () => {
-  const token = await storage.getItem('accessToken');
-  try {
-    const response = await fetch(`${BASE_URL}/api/wallet/withdrawal/current/`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
-
-    if (!response.ok && response.status != 404) {
-      throw new Error(
-        `Failed to delete current withdrawal: ${response.status}`,
-      );
-    }
-
-    console.log('Successfully deleted current withdrawal.');
-    return true;
-  } catch (error) {
-    console.error('Error deleting current withdrawal:', error);
-    return true;
-  }
+  const result = await apiRequest('/api/wallet/withdrawal/current/', {method: 'DELETE'});
+  if (result.success || result.status === 404) return true;
+  handleError(result.error, {context: 'deleteCurrentWithdrawal', silent: true});
+  return true;
 };
 
 export const createWithdrawal = async params => {
-  const token = await storage.getItem('accessToken');
-
-  // Validate required fields based on withdrawal_type
   if (!params.withdrawal_type || !params.withdrawal_amount) {
-    console.error('withdrawal_type and withdrawal_amount are required.');
+    handleError(
+      {code: 'VALIDATION_5001', message: 'Withdrawal type and amount are required.', severity: 'low'},
+      {context: 'createWithdrawal'},
+    );
     return null;
   }
 
-  if (params.withdrawal_type === 'U') {
-    if (!params.upi_id) {
-      console.error('UPI ID is required for UPI withdrawal.');
-      return null;
-    }
-  } else if (params.withdrawal_type === 'B') {
-    if (
-      !params.account_number ||
-      !params.ifsc_code ||
-      !params.account_holder_name
-    ) {
-      console.error('Bank details are required for bank withdrawal.');
-      return null;
-    }
-  } else {
-    console.error('Invalid withdrawal_type. Use "U" or "B".');
+  if (params.withdrawal_type === 'U' && !params.upi_id) {
+    handleError(
+      {code: 'VALIDATION_5001', message: 'UPI ID is required for UPI withdrawal.', severity: 'low'},
+      {context: 'createWithdrawal'},
+    );
     return null;
   }
 
-  try {
-    const response = await fetch(`${BASE_URL}/api/wallet/withdrawal/`, {
-      method: 'POST',
-      headers: {
-        Authorization: `JWT ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        withdrawal_type: params.withdrawal_type,
-        withdrawal_amount: params.withdrawal_amount,
-        upi_id: params.upi_id || '',
-        account_number: params.account_number || '',
-        ifsc_code: params.ifsc_code || '',
-        account_holder_name: params.account_holder_name || '',
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Withdrawal request failed:', errorData);
-      throw new Error(
-        `Status ${response.status}: ${JSON.stringify(errorData)}`,
-      );
-    }
-
-    const data = await response.json();
-    console.log('Withdrawal request successful:', data);
-    return data;
-  } catch (error) {
-    console.error('Error creating withdrawal:', error);
+  if (params.withdrawal_type === 'B' && (!params.account_number || !params.ifsc_code || !params.account_holder_name)) {
+    handleError(
+      {code: 'VALIDATION_5001', message: 'Bank details are required for bank withdrawal.', severity: 'low'},
+      {context: 'createWithdrawal'},
+    );
     return null;
   }
+
+  const result = await apiRequest('/api/wallet/withdrawal/', {
+    method: 'POST',
+    body: JSON.stringify({
+      withdrawal_type: params.withdrawal_type,
+      withdrawal_amount: params.withdrawal_amount,
+      upi_id: params.upi_id || '',
+      account_number: params.account_number || '',
+      ifsc_code: params.ifsc_code || '',
+      account_holder_name: params.account_holder_name || '',
+    }),
+  });
+
+  if (result.success) return result.data;
+  const errorMsg = handleError(result.error, {context: 'createWithdrawal'});
+  return {success: false, error: result.error, message: errorMsg};
 };

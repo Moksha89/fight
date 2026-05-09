@@ -8,6 +8,7 @@ from userManager.models import *
 from django.db import transaction
 from .serializers import *
 from rest_framework.exceptions import ValidationError, PermissionDenied, MethodNotAllowed
+from kokoroko.error_handler import KokorokoError, ErrorCode, Severity, build_error_response
 
 from .paginations import *
 
@@ -69,25 +70,40 @@ class DepositRequestViewSet(viewsets.ModelViewSet):
             action='J').first().actionValue)
 
         if float(deposit_amount) < minDepositValue:
-            raise ValidationError(
-                f"Deposit amount should be grater than {minDepositValue}.")
+            raise KokorokoError(
+                ErrorCode.WALLET_DEPOSIT_MIN_AMOUNT,
+                f"Minimum deposit is ₹{int(minDepositValue)}.",
+                severity=Severity.LOW,
+            )
 
         if not utr_id:
-            raise ValidationError("UTR ID is required.")
+            raise KokorokoError(
+                ErrorCode.VALIDATION_REQUIRED_FIELD,
+                "UTR ID is required.",
+                severity=Severity.LOW,
+            )
 
         if not str(utr_id).isdigit():
-            raise ValidationError("UTR ID must contain only numbers.")
+            raise KokorokoError(
+                ErrorCode.WALLET_UTR_INVALID,
+                severity=Severity.LOW,
+            )
 
         if not deposit_type or not deposit_amount:
             raise ValidationError("Deposit type and amount are required.")
 
         if DepositRequest.objects.filter(customer=user).exists():
-            raise ValidationError(
-                "You already have an active deposit request.")
+            raise KokorokoError(
+                ErrorCode.WALLET_DEPOSIT_ACTIVE,
+                "You already have an active deposit request.",
+                severity=Severity.LOW,
+            )
 
         if DepositRequest.objects.filter(utr_id=utr_id).exclude(customer=None).exclude(customer=user).exists():
-            raise ValidationError(
-                "This UTR ID is already linked to another user.")
+            raise KokorokoError(
+                ErrorCode.WALLET_UTR_DUPLICATE,
+                severity=Severity.MEDIUM,
+            )
 
         existing_staff_request = DepositRequest.objects.filter(
             utr_id=utr_id, customer=None).first()
@@ -210,20 +226,33 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
         withdrawal_amount = serializer.validated_data.get('withdrawal_amount')
 
         if float(withdrawal_amount) <= 0:
-            raise ValidationError("Withdrawal amount should be grater than 0.")
+            raise KokorokoError(
+                ErrorCode.BET_INVALID_AMOUNT,
+                "Withdrawal amount must be greater than ₹0.",
+                severity=Severity.LOW,
+            )
 
         if WithdrawalRequest.objects.filter(customer=user).exists():
-            raise PermissionDenied(
-                "You already have an existing withdrawal request.")
+            raise KokorokoError(
+                ErrorCode.WALLET_WITHDRAWAL_ACTIVE,
+                "You already have an active withdrawal request.",
+                severity=Severity.LOW,
+            )
 
         wallet = getattr(user, 'wallet', None)
         if not wallet:
-            raise PermissionDenied("Wallet does not exist.")
+            raise KokorokoError(
+                ErrorCode.WALLET_NOT_FOUND,
+                http_status=status.HTTP_404_NOT_FOUND,
+                severity=Severity.HIGH,
+            )
 
         available = wallet.balance - wallet.bonusDebt
         if available < withdrawal_amount:
-            raise PermissionDenied(
-                "Insufficient wallet balance for this withdrawal request.")
+            raise KokorokoError(
+                ErrorCode.WALLET_INSUFFICIENT_BALANCE,
+                severity=Severity.MEDIUM,
+            )
 
         with transaction.atomic():
             wallet.balance = F('balance') - withdrawal_amount
