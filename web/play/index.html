@@ -3486,20 +3486,20 @@
     }
 
     // ===== DICE GAMES (Advanced) =====
-    let diceBoards = [];
-    let diceActiveBoardId = null;
-    let diceSelectedFace = null;
-    let diceBetAmount = 0;
-    let diceSelectedCoin = 100;
-    let dicePendingBets = [];
-    let diceUserBets = [];
-    let diceRenderedMatchId = null;
-    let diceRenderedStreamUrl = null;
-    let diceWsMatch = null;
-    let diceWsResult = null;
-    let diceSoundEnabled = true;
-    let diceCountdownTimer = null;
-    let diceCountdownValue = 0;
+    var diceBoards = [];
+    var diceActiveBoardId = null;
+    var diceSelectedFace = null;
+    var diceBetAmount = 0;
+    var diceSelectedCoin = 100;
+    var dicePendingBets = [];
+    var diceUserBets = [];
+    var diceRenderedMatchId = null;
+    var diceRenderedStreamUrl = null;
+    var diceWsMatch = null;
+    var diceWsResult = null;
+    var diceSoundEnabled = true;
+    var diceCountdownTimer = null;
+    var diceCountdownValue = 0;
 
     const DICE_COIN_VALUES = [50, 100, 200, 500, 1000, 2500, 5000];
     const DICE_FACE_NAMES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
@@ -3592,13 +3592,17 @@
     function getActiveDiceMatch() {
         const board = getActiveDiceBoard();
         if (!board) return null;
+        // For virtual boards, find the match that's not in 'done' phase
+        if (board.is_virtual) {
+            return (board.matches || []).find(m => !m.isWinnerDeclared || (m.virtual_phase && m.virtual_phase !== 'done')) || null;
+        }
         return (board.matches || []).find(m => !m.isWinnerDeclared) || null;
     }
 
     function getCompletedDiceMatches() {
         const board = getActiveDiceBoard();
         if (!board) return [];
-        return (board.matches || []).filter(m => m.isWinnerDeclared).sort((a,b) => (a.id - b.id));
+        return (board.matches || []).filter(m => m.isWinnerDeclared && (!m.virtual_phase || m.virtual_phase === 'done' || m.virtual_phase === 'result')).sort((a,b) => (a.id - b.id));
     }
 
     function renderDiceMain() {
@@ -3621,12 +3625,14 @@
             diceRenderedStreamUrl = streamUrl || promoUrl;
 
             let streamHtml = '';
+            const vPhase = match?.virtual_phase || 'betting';
+            const gameHash = match?.game_hash || '';
             if (isVirtual) {
-                // Virtual mode: show animated dice arena instead of stream
-                streamHtml = `<div class="dice-stream-placeholder" style="height:140px;background:linear-gradient(180deg,#0a1a0a,#1a1a1a);">
-                    <div style="font-size:40px;">🎲</div>
+                streamHtml = `<div class="dice-stream-placeholder" id="dice-virtual-arena" style="height:160px;background:linear-gradient(180deg,#0a1a0a,#1a1a1a);position:relative;">
+                    <div id="dice-phase-display" style="font-size:40px;">🎲</div>
                     <span style="color:var(--gold);font-weight:700;font-size:15px;">VIRTUAL DICE</span>
-                    <span style="font-size:11px;">Server rolls 6 dice automatically</span>
+                    <span style="font-size:11px;">24/7 Auto-Play | 2min Betting → 30s Shuffle → Result</span>
+                    ${gameHash ? '<div class="dice-hash-display" style="font-size:9px;color:var(--text-muted);margin-top:4px;font-family:monospace;opacity:0.7;">Hash: '+gameHash.slice(0,16)+'...</div>' : ''}
                 </div>`;
             } else if (streamUrl) {
                 const ytId = extractYoutubeId(streamUrl);
@@ -3642,10 +3648,11 @@
             }
 
             const matchTitle = match ? `${match.title || 'Match #' + match.id}` : 'No Live Match';
-            const isBetting = match?.isBettingEnabled;
+            const isBetting = match?.isBettingEnabled && vPhase === 'betting';
             const modeBadge = isVirtual
                 ? '<span class="dice-virtual-badge virtual">VIRTUAL</span>'
                 : '<span class="dice-virtual-badge live">LIVE</span>';
+            const phaseStatusHtml = isVirtual && match ? getVirtualPhaseStatus(vPhase) : (match ? (isBetting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">ROLLING...</span>') : '<span class="match-closed">WAITING</span>');
 
             container.innerHTML = `
             <div class="dice-layout">
@@ -3659,7 +3666,7 @@
                             </div>
                             <div style="display:flex;align-items:center;gap:8px;">
                                 <span id="dice-sound-toggle" onclick="toggleDiceSound()" style="cursor:pointer;font-size:18px;color:${diceSoundEnabled?'var(--gold)':'var(--text-muted)'};" class="material-icons">${diceSoundEnabled?'volume_up':'volume_off'}</span>
-                                <span id="dice-bet-status">${match ? (isBetting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">ROLLING...</span>') : '<span class="match-closed">WAITING</span>'}</span>
+                                <span id="dice-bet-status">${phaseStatusHtml}</span>
                             </div>
                         </div>
                         ${isVirtual && match ? '<div class="dice-virtual-banner" id="dice-virtual-banner"><span id="dice-countdown-display"></span></div>' : ''}
@@ -3683,7 +3690,7 @@
                         </div>
                         <!-- Bet Actions -->
                         <div id="dice-betting-area">
-                            ${match && isBetting ? renderDiceBettingActions() : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>'}
+                            ${match && isBetting ? renderDiceBettingActions() : getVirtualPhaseWaitingHtml(vPhase)}
                         </div>
                         <!-- Bet History -->
                         <div id="dice-bet-history-area" class="dice-bet-history" style="padding:0 16px 12px;"></div>
@@ -3701,27 +3708,67 @@
                 </div>
             </div>`;
             loadDiceUserBets();
-            if (isVirtual && match && match.isBettingEnabled) {
-                startDiceCountdown(board.virtual_betting_seconds || 30, match);
+            if (isVirtual && match) {
+                startDicePhaseCountdown(board, match);
             }
         } else {
             updateDiceInPlace();
         }
     }
 
-    function startDiceCountdown(seconds, match) {
+    function getVirtualPhaseStatus(phase) {
+        switch(phase) {
+            case 'betting': return '<span class="match-live">BETTING OPEN</span>';
+            case 'shuffling': return '<span class="match-closed" style="background:rgba(255,152,0,0.15);color:#ff9800;">SHUFFLING...</span>';
+            case 'result': return '<span class="match-closed" style="background:rgba(33,150,243,0.15);color:#2196f3;">RESULT</span>';
+            default: return '<span class="match-closed">WAITING</span>';
+        }
+    }
+
+    function getVirtualPhaseWaitingHtml(phase) {
+        switch(phase) {
+            case 'shuffling': return '<div style="text-align:center;padding:16px;color:#ff9800;font-size:13px;background:#1a1200;">🎲 Dice are being shuffled... Result coming soon!</div>';
+            case 'result': return '<div style="text-align:center;padding:16px;color:#2196f3;font-size:13px;background:#0a1020;">📊 Result displayed. Next round starting soon...</div>';
+            default: return '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>';
+        }
+    }
+
+    function startDicePhaseCountdown(board, match) {
         if (diceCountdownTimer) clearInterval(diceCountdownTimer);
-        diceCountdownValue = seconds;
         const displayEl = document.getElementById('dice-countdown-display');
         if (!displayEl) return;
 
+        const phase = match.virtual_phase || 'betting';
+        let totalSecs;
+        switch(phase) {
+            case 'betting': totalSecs = board.virtual_betting_seconds || 120; break;
+            case 'shuffling': totalSecs = board.virtual_shuffle_seconds || 30; break;
+            case 'result': totalSecs = board.virtual_result_seconds || 12; break;
+            default: totalSecs = 120;
+        }
+
+        // Calculate elapsed from phase_started_at
+        const phaseStart = match.phase_started_at ? new Date(match.phase_started_at).getTime() : (match.liveDate ? new Date(match.liveDate).getTime() : Date.now());
+        const elapsedMs = Date.now() - phaseStart;
+        const elapsedSecs = Math.floor(elapsedMs / 1000);
+        diceCountdownValue = Math.max(0, totalSecs - elapsedSecs);
+
         function updateDisplay() {
             if (!displayEl) return;
-            if (diceCountdownValue > 0) {
-                const urgent = diceCountdownValue <= 5;
-                displayEl.innerHTML = `<span class="dice-countdown ${urgent?'urgent':''}">${diceCountdownValue}s</span> <span style="font-size:12px;color:var(--text-muted);">until dice roll</span>`;
-            } else {
-                displayEl.innerHTML = `<span class="dice-rolling-status"><span class="material-icons" style="font-size:16px;">casino</span> Rolling dice...</span>`;
+            if (phase === 'betting') {
+                if (diceCountdownValue > 0) {
+                    const mins = Math.floor(diceCountdownValue / 60);
+                    const secs = diceCountdownValue % 60;
+                    const timeStr = mins > 0 ? `${mins}:${String(secs).padStart(2,'0')}` : `${secs}s`;
+                    const urgent = diceCountdownValue <= 10;
+                    displayEl.innerHTML = `<span class="dice-countdown ${urgent?'urgent':''}">${timeStr}</span> <span style="font-size:12px;color:var(--text-muted);">until dice roll</span>`;
+                } else {
+                    displayEl.innerHTML = `<span class="dice-rolling-status"><span class="material-icons" style="font-size:16px;">casino</span> Rolling dice...</span>`;
+                }
+            } else if (phase === 'shuffling') {
+                displayEl.innerHTML = `<span style="color:#ff9800;font-weight:700;"><span class="material-icons" style="font-size:16px;vertical-align:middle;">casino</span> Shuffling... ${diceCountdownValue}s</span>`;
+            } else if (phase === 'result') {
+                displayEl.innerHTML = `<span style="color:#2196f3;font-weight:700;">📊 Result • Next round in ${diceCountdownValue}s</span>`;
             }
         }
         updateDisplay();
@@ -3732,21 +3779,8 @@
             if (diceCountdownValue <= 0) {
                 clearInterval(diceCountdownTimer);
                 diceCountdownTimer = null;
-                // Trigger auto-roll via API (virtual mode)
-                triggerVirtualRoll();
             }
         }, 1000);
-    }
-
-    async function triggerVirtualRoll() {
-        const board = getActiveDiceBoard();
-        if (!board || !board.is_virtual) return;
-        try {
-            await fetch(`${API}/dice-play/history/${board.id}/roll-dice/`, {
-                method: 'POST',
-                headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}
-            });
-        } catch(e) {}
     }
 
     function extractYoutubeId(url) {
@@ -3812,9 +3846,11 @@
         const completed = getCompletedDiceMatches();
         if (completed.length === 0) return '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">No completed matches yet</div>';
         let html = '<div class="dice-history-grid">';
-        completed.forEach((match, idx) => {
+        completed.forEach((match) => {
+            const label = match.daily_match_number ? `#${match.daily_match_number}` : `#${match.id}`;
+            const hashTip = match.game_hash ? ` | Hash: ${match.game_hash.slice(0,12)}` : '';
             html += '<div class="dice-history-col">';
-            html += `<div class="dice-history-col-header">#${idx + 1}</div>`;
+            html += `<div class="dice-history-col-header" title="${match.title || ''}${hashTip}">${label}</div>`;
             for (let f = 1; f <= 6; f++) {
                 const count = match[`total${f}Rolled`] || 0;
                 const isRolled = count > 0;
@@ -3862,23 +3898,46 @@
     }
 
     function updateDiceInPlace() {
+        const board = getActiveDiceBoard();
         const match = getActiveDiceMatch();
+        const isVirtual = board?.is_virtual || match?.match_type === 'V';
+        const vPhase = match?.virtual_phase || 'betting';
+        const isBetting = match?.isBettingEnabled && vPhase === 'betting';
+
         const titleEl = document.getElementById('dice-match-title');
         if (titleEl) titleEl.textContent = match ? (match.title || `Match #${match.id}`) : 'No Live Match';
         const statusEl = document.getElementById('dice-bet-status');
         if (statusEl) {
-            if (!match) statusEl.innerHTML = '<span class="match-closed">WAITING</span>';
-            else if (match.isBettingEnabled) statusEl.innerHTML = '<span class="match-live">BETTING OPEN</span>';
-            else statusEl.innerHTML = '<span class="match-closed">IN PROGRESS</span>';
+            if (isVirtual && match) {
+                statusEl.innerHTML = getVirtualPhaseStatus(vPhase);
+            } else if (!match) {
+                statusEl.innerHTML = '<span class="match-closed">WAITING</span>';
+            } else if (isBetting) {
+                statusEl.innerHTML = '<span class="match-live">BETTING OPEN</span>';
+            } else {
+                statusEl.innerHTML = '<span class="match-closed">IN PROGRESS</span>';
+            }
         }
         const bettingArea = document.getElementById('dice-betting-area');
         if (bettingArea && match) {
             const hasBetActions = bettingArea.querySelector('.bet-actions') !== null;
-            if (match.isBettingEnabled && !hasBetActions) {
+            if (isBetting && !hasBetActions) {
                 bettingArea.innerHTML = renderDiceBettingActions();
-            } else if (!match.isBettingEnabled && hasBetActions) {
-                bettingArea.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>';
+            } else if (!isBetting && hasBetActions) {
+                bettingArea.innerHTML = getVirtualPhaseWaitingHtml(vPhase);
             }
+        }
+        // Update hash display (in-place, avoid duplicates)
+        const arenaEl = document.getElementById('dice-virtual-arena');
+        if (arenaEl && match?.game_hash) {
+            const existingHash = arenaEl.querySelector('.dice-hash-display');
+            if (existingHash) {
+                existingHash.textContent = 'Hash: ' + match.game_hash.slice(0, 16) + '...';
+            }
+        }
+        // Restart countdown if phase changed
+        if (isVirtual && match && board) {
+            startDicePhaseCountdown(board, match);
         }
         const gridEl = document.getElementById('dice-grid');
         if (gridEl) gridEl.innerHTML = renderDiceGrid(match);
@@ -3991,9 +4050,9 @@
                     diceBoards = diceBoards.map(prevBoard => {
                         const wsBoard = wsData.find(b => String(b.id) === String(prevBoard.id));
                         if (!wsBoard) return prevBoard;
-                        const completed = (prevBoard.matches || []).filter(m => m.isWinnerDeclared);
-                        const undecided = (wsBoard.matches || []).filter(m => !m.isWinnerDeclared);
-                        return { ...prevBoard, ...wsBoard, matches: [...undecided, ...completed] };
+                        const completed = (prevBoard.matches || []).filter(m => m.isWinnerDeclared && m.virtual_phase === 'done');
+                        const active = (wsBoard.matches || []).filter(m => !m.isWinnerDeclared || (m.virtual_phase && m.virtual_phase !== 'done'));
+                        return { ...prevBoard, ...wsBoard, matches: [...active, ...completed] };
                     });
                     renderDiceBoardTabs();
                     updateDiceInPlace();
@@ -4031,20 +4090,9 @@
                     renderDiceMain();
                     loadUserInfo();
 
-                    // For virtual boards: auto-start next round after animation
-                    const board = diceBoards.find(b => b.id === boardId);
-                    if (board && board.is_virtual) {
-                        setTimeout(async () => {
-                            try {
-                                await fetch(`${API}/dice-play/history/${board.id}/start-virtual/`, {
-                                    method: 'POST',
-                                    headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}
-                                });
-                            } catch(e) {}
-                            // Reload boards to pick up the new match
-                            setTimeout(() => loadDiceGames(), 2000);
-                        }, 6000);
-                    }
+                    // Server handles next round creation automatically
+                    // Just reload boards after a short delay to pick up new match
+                    setTimeout(() => loadDiceGames(), 5000);
                 }
             } catch(e) {}
         };
