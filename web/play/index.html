@@ -2592,13 +2592,33 @@
             setTimeout(loadMatchHistory, 100);
         }
 
+        // Stream down indicator
+        const streamDown = d.streamDown || false;
+        const streamStatusEl = document.getElementById('stream-status');
+        if (streamStatusEl) {
+            if (streamDown) {
+                streamStatusEl.style.display = 'block';
+                streamStatusEl.style.background = 'rgba(244,67,54,0.85)';
+                streamStatusEl.style.color = '#fff';
+                streamStatusEl.textContent = '⚠ STREAM DOWN';
+            } else {
+                streamStatusEl.style.display = 'none';
+            }
+        }
+
         // In-place updates (no iframe recreation)
         const fightEl = document.getElementById('am-fight-num');
         if (fightEl) fightEl.textContent = 'Fight #' + matchNum;
         const timerEl = document.getElementById('am-timer');
         if (timerEl) timerEl.innerHTML = getMatchTimerHtml();
         const statusEl = document.getElementById('am-bet-status');
-        if (statusEl) statusEl.innerHTML = isAccepting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>';
+        if (statusEl) {
+            if (streamDown) {
+                statusEl.innerHTML = '<span class="match-closed" style="background:rgba(244,67,54,0.2);color:#f44336;">⚠ STREAM DOWN</span>';
+            } else {
+                statusEl.innerHTML = isAccepting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>';
+            }
+        }
         const omEl = document.getElementById('am-odds-meron');
         if (omEl) omEl.textContent = meronMax + 'x';
         const odEl = document.getElementById('am-odds-draw');
@@ -2609,6 +2629,9 @@
         // Update betting area only if status changed
         const bettingArea = document.getElementById('am-betting-area');
         if (bettingArea) {
+            if (streamDown) {
+                bettingArea.innerHTML = '<div style="text-align:center;padding:16px;color:#f44336;font-size:13px;background:#1a1012;border-radius:8px;"><span class="material-icons" style="font-size:20px;vertical-align:middle;margin-right:4px;">warning</span> Stream unavailable — betting paused for your protection. Will auto-resume when stream is back.</div>';
+            } else {
             const currentlyShowingBet = bettingArea.querySelector('.bet-actions') !== null;
             if (isAccepting && !currentlyShowingBet) {
                 bettingArea.innerHTML = `
@@ -2629,6 +2652,7 @@
                     </div>`;
             } else if (!isAccepting && currentlyShowingBet) {
                 bettingArea.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>';
+            }
             }
         }
         const betHistEl = document.getElementById('am-bet-history');
@@ -3840,7 +3864,7 @@
     function updateDiceInPlace() {
         const match = getActiveDiceMatch();
         const titleEl = document.getElementById('dice-match-title');
-        if (titleEl) titleEl.textContent = match ? `Match #${match.title || match.id}` : 'No Live Match';
+        if (titleEl) titleEl.textContent = match ? (match.title || `Match #${match.id}`) : 'No Live Match';
         const statusEl = document.getElementById('dice-bet-status');
         if (statusEl) {
             if (!match) statusEl.innerHTML = '<span class="match-closed">WAITING</span>';
