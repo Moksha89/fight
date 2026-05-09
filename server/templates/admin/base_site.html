@@ -12,12 +12,42 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ============ CSS VARIABLES (Dark-Gold Premium Theme) ============ */
+:root {
+    --bg-main: #0B0B0B;
+    --bg-card: #141414;
+    --bg-elevated: #1A1A1A;
+    --bg-hover: #1F1A12;
+    --bg-sidebar: #0A0A0A;
+    --gold: #D4A843;
+    --gold-dark: #B8922E;
+    --gold-light: #F0D78C;
+    --gold-bg: rgba(212,168,67,0.08);
+    --gold-bg-hover: rgba(212,168,67,0.14);
+    --gold-border: rgba(212,168,67,0.18);
+    --gold-border-strong: rgba(212,168,67,0.30);
+    --text-primary: #F5F1E8;
+    --text-secondary: #A8A29E;
+    --text-muted: #6B6560;
+    --border: rgba(255,255,255,0.06);
+    --border-light: rgba(255,255,255,0.04);
+    --success: #22C55E;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --info: #3B82F6;
+    --meron: #DC2626;
+    --wala: #2563EB;
+    --draw: #A855F7;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+}
+
 /* ============ RESET & BASE ============ */
 * { box-sizing: border-box; }
 body, html {
     margin: 0; padding: 0;
-    background: #F8F9FA !important;
-    color: #1a1a1a !important;
+    background: var(--bg-main) !important;
+    color: var(--text-primary) !important;
     font-family: 'Inter', -apple-system, sans-serif !important;
     overflow-x: hidden;
     font-size: 14px;
@@ -42,10 +72,10 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
 #kokoroko-sidebar {
     position: fixed;
     top: 0; left: 0;
-    width: 200px;
+    width: 220px;
     height: 100vh;
-    background: #111111;
-    border-right: 1px solid #222;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
     z-index: 9000;
     overflow-y: auto;
     overflow-x: hidden;
@@ -53,10 +83,10 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     flex-direction: column;
 }
 #kokoroko-sidebar::-webkit-scrollbar { width: 3px; }
-#kokoroko-sidebar::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+#kokoroko-sidebar::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
 #kokoroko-main {
-    margin-left: 200px;
+    margin-left: 220px;
     flex: 1;
     min-height: 100vh;
     display: flex;
@@ -65,197 +95,211 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     height: 100vh;
 }
 #kokoroko-header {
-    background: #FFFFFF;
-    border-bottom: 1px solid #E5E7EB;
-    padding: 10px 20px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
-    min-height: 48px;
+    min-height: 52px;
     flex-shrink: 0;
 }
 #kokoroko-content {
     flex: 1;
-    padding: 16px 20px;
+    padding: 20px 24px;
 }
 
-/* ============ SIDEBAR (Black + Gold) ============ */
+/* ============ SIDEBAR (Dark + Gold) ============ */
 .sb-brand {
-    padding: 14px 12px;
+    padding: 16px 14px;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid #222;
+    border-bottom: 1px solid var(--border);
 }
-.sb-brand img { width: 32px; height: 32px; border-radius: 8px; }
-.sb-brand span { color: #C5930A; font-size: 16px; font-weight: 700; }
+.sb-brand img { width: 34px; height: 34px; border-radius: 8px; }
+.sb-brand span { color: var(--gold); font-size: 17px; font-weight: 700; letter-spacing: 0.3px; }
 
 .sb-section { padding: 8px 6px 2px; }
 .sb-title {
-    color: #666; font-size: 10px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    padding: 4px 12px; margin-bottom: 2px;
+    color: var(--text-muted); font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.4px;
+    padding: 6px 14px; margin-bottom: 2px;
 }
 .sb-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 7px 12px; margin: 1px 4px;
-    border-radius: 6px; text-decoration: none;
-    color: #AAA; font-size: 12px; font-weight: 400;
-    transition: all 0.15s ease;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px; margin: 2px 6px;
+    border-radius: 8px; text-decoration: none;
+    color: var(--text-secondary); font-size: 13px; font-weight: 400;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
 }
-.sb-item:hover { background: #1a1a1a; color: #FFF; }
-.sb-item.active { background: rgba(197,147,10,0.12); color: #C5930A; font-weight: 500; border-left: 3px solid #C5930A; }
-.sb-item i { font-size: 16px; width: 20px; text-align: center; opacity: 0.6; }
-.sb-item:hover i { opacity: 1; color: #FFF; }
-.sb-item.active i { opacity: 1; color: #C5930A; }
-.sb-divider { height: 1px; background: #222; margin: 8px 16px; }
-.sb-badge { display: none; margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 10px; font-weight: 700; line-height: 18px; text-align: center; color: #FFF; background: #ef4444; }
-.sb-badge.sb-badge-green { background: #10b981; }
+.sb-item:hover { background: var(--gold-bg); color: var(--text-primary); }
+.sb-item.active {
+    background: var(--gold-bg-hover);
+    color: var(--gold);
+    font-weight: 500;
+    border-left-color: var(--gold);
+}
+.sb-item i { font-size: 18px; width: 22px; text-align: center; opacity: 0.5; }
+.sb-item:hover i { opacity: 0.9; color: var(--gold-light); }
+.sb-item.active i { opacity: 1; color: var(--gold); }
+.sb-divider { height: 1px; background: var(--border); margin: 8px 18px; }
+.sb-badge { display: none; margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 10px; font-weight: 700; line-height: 20px; text-align: center; color: #FFF; background: var(--danger); }
+.sb-badge.sb-badge-green { background: var(--success); }
 .sb-badge.has-count { display: inline-block; }
 
-/* ============ HEADER (White) ============ */
-.header-title { color: #111; font-size: 20px; font-weight: 600; }
-.header-breadcrumb { color: #666; font-size: 12px; margin-top: 2px; }
-.header-breadcrumb a { color: #444; text-decoration: none; }
-.header-breadcrumb a:hover { color: #C5930A; }
-.header-right { display: flex; align-items: center; gap: 12px; }
+/* ============ HEADER (Dark) ============ */
+.header-title { color: var(--text-primary); font-size: 20px; font-weight: 600; }
+.header-breadcrumb { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+.header-breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+.header-breadcrumb a:hover { color: var(--gold); }
+.header-right { display: flex; align-items: center; gap: 14px; }
 .header-btn {
-    background: #C5930A; border: none; color: #FFF;
-    padding: 8px 16px; border-radius: 6px; cursor: pointer;
-    font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    border: none; color: #000;
+    padding: 8px 18px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s;
 }
-.header-btn:hover { background: #A67C08; color: #FFF; }
+.header-btn:hover { background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #000; transform: translateY(-1px); }
 .header-user {
     display: flex; align-items: center; gap: 8px;
-    color: #444; font-size: 13px;
+    color: var(--text-secondary); font-size: 13px;
 }
 .header-user .avatar {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: #111; color: #C5930A; font-weight: 600; font-size: 13px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--gold-bg-hover); color: var(--gold); font-weight: 600; font-size: 14px;
     display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--gold-border);
 }
 
 /* ============ CONTENT AREA ============ */
-#container { margin-left: 200px !important; width: calc(100% - 200px) !important; padding: 0 !important; background: #F8F9FA !important; }
+#container { margin-left: 220px !important; width: calc(100% - 220px) !important; padding: 0 !important; background: var(--bg-main) !important; }
 #container .indent { margin-left: 0 !important; width: 100% !important; }
-#content, #content-main { padding: 16px 20px !important; background: #F8F9FA !important; width: 100% !important; max-width: 100% !important; }
+#content, #content-main { padding: 20px 24px !important; background: var(--bg-main) !important; width: 100% !important; max-width: 100% !important; }
 #content h1, #content-main h1 { display: none !important; }
 
-/* ============ TABLES (White, clean) ============ */
+/* ============ TABLES (Dark, premium) ============ */
 #result_list, .results { width: 100% !important; overflow-x: auto !important; }
 #result_list table, .results table {
-    background: #FFFFFF !important; border-radius: 8px !important;
-    border: 1px solid #E5E7EB !important; overflow: hidden;
+    background: var(--bg-card) !important; border-radius: 12px !important;
+    border: 1px solid var(--gold-border) !important; overflow: hidden;
     width: 100% !important; border-collapse: collapse !important;
 }
 #result_list th, .results th {
-    background: #F9FAFB !important; color: #6B7280 !important;
+    background: var(--bg-elevated) !important; color: var(--text-muted) !important;
     font-size: 11px !important; text-transform: uppercase !important;
-    font-weight: 600 !important; letter-spacing: 0.5px !important;
-    border-bottom: 1px solid #E5E7EB !important; padding: 8px 8px !important;
+    font-weight: 600 !important; letter-spacing: 0.6px !important;
+    border-bottom: 1px solid var(--gold-border) !important; padding: 10px 10px !important;
     white-space: nowrap !important;
 }
-#result_list th a, .results th a { color: #6B7280 !important; text-decoration: none !important; }
+#result_list th a, .results th a { color: var(--text-muted) !important; text-decoration: none !important; }
+#result_list th a:hover, .results th a:hover { color: var(--gold) !important; }
 #result_list td, .results td {
-    color: #1a1a1a !important; font-size: 13px !important; padding: 8px 8px !important;
-    border-bottom: 1px solid #F3F4F6 !important;
+    color: var(--text-primary) !important; font-size: 13px !important; padding: 10px 10px !important;
+    border-bottom: 1px solid var(--border) !important;
     white-space: nowrap !important;
 }
 #result_list tbody tr, .results tbody tr {
-    background: #FFFFFF !important;
+    background: var(--bg-card) !important;
 }
-#result_list tbody tr:hover, .results tbody tr:hover { background: #FEFCE8 !important; }
+#result_list tbody tr:hover, .results tbody tr:hover { background: var(--bg-hover) !important; }
 
 /* ============ ACTION BUTTONS (D/W/S/BH/BL/PR) ============ */
 a[title="Deposit"], a[title="Withdraw"], a[title="Statement"],
 a[title="Bet History"], a[title="Blacklist"], a[title="Whitelist"],
 a[title="Reset Password"] {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 28px; height: 28px; border-radius: 6px;
+    width: 30px; height: 30px; border-radius: 8px;
     font-size: 11px; font-weight: 700; text-decoration: none;
-    margin-right: 3px; transition: all 0.15s;
+    margin-right: 3px; transition: all 0.2s;
 }
-a[title="Deposit"] { background: #C5930A !important; color: #FFF !important; border: 1px solid #C5930A !important; border-radius: 6px !important; width: 28px !important; height: 28px !important; padding: 0 !important; }
-a[title="Withdraw"] { background: #FFF !important; color: #C5930A !important; border: 1px solid #C5930A !important; border-radius: 6px !important; width: 28px !important; height: 28px !important; padding: 0 !important; }
-a[title="Statement"] { background: #F3F4F6 !important; color: #374151 !important; border: 1px solid #D1D5DB !important; border-radius: 6px !important; width: 28px !important; height: 28px !important; padding: 0 !important; }
-a[title="Bet History"] { background: #F3F4F6 !important; color: #374151 !important; border: 1px solid #D1D5DB !important; border-radius: 6px !important; width: 28px !important; height: 28px !important; padding: 0 !important; }
-a[title="Blacklist"] { background: #FEF2F2 !important; color: #DC2626 !important; border: 1px solid #FECACA !important; border-radius: 6px !important; width: 28px !important; height: 28px !important; padding: 0 !important; }
-a[title="Whitelist"] { background: #ECFDF5 !important; color: #059669 !important; border: 1px solid #A7F3D0 !important; border-radius: 6px !important; width: 28px !important; height: 28px !important; padding: 0 !important; }
-a[title="Reset Password"] { background: #F3F4F6 !important; color: #374151 !important; border: 1px solid #D1D5DB !important; border-radius: 6px !important; width: 28px !important; height: 28px !important; padding: 0 !important; }
+a[title="Deposit"] { background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important; border: none !important; }
+a[title="Withdraw"] { background: transparent !important; color: var(--gold) !important; border: 1px solid var(--gold-border-strong) !important; }
+a[title="Statement"] { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; border: 1px solid var(--border) !important; }
+a[title="Bet History"] { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; border: 1px solid var(--border) !important; }
+a[title="Blacklist"] { background: rgba(239,68,68,0.12) !important; color: var(--danger) !important; border: 1px solid rgba(239,68,68,0.25) !important; }
+a[title="Whitelist"] { background: rgba(34,197,94,0.12) !important; color: var(--success) !important; border: 1px solid rgba(34,197,94,0.25) !important; }
+a[title="Reset Password"] { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; border: 1px solid var(--border) !important; }
+a[title="Deposit"]:hover, a[title="Withdraw"]:hover, a[title="Statement"]:hover,
+a[title="Bet History"]:hover, a[title="Blacklist"]:hover, a[title="Whitelist"]:hover,
+a[title="Reset Password"]:hover { transform: translateY(-1px); opacity: 0.9; }
 
 /* ============ FORMS & INPUTS ============ */
 input, select, textarea {
-    background: #FFFFFF !important; border: 1px solid #D1D5DB !important;
-    color: #1a1a1a !important; border-radius: 6px !important;
-    padding: 7px 10px !important; font-size: 13px !important;
+    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important; border-radius: 8px !important;
+    padding: 8px 12px !important; font-size: 13px !important;
     height: auto !important;
 }
 #result_list textarea { width: 100px !important; height: 32px !important; min-height: 32px !important; max-height: 60px !important; resize: vertical !important; font-size: 11px !important; padding: 3px 5px !important; }
 #result_list input[type="text"], #result_list input[type="number"] { width: 100px !important; font-size: 12px !important; padding: 4px 6px !important; }
-#result_list td { font-size: 12px !important; padding: 6px 4px !important; white-space: nowrap; }
-#result_list th { font-size: 11px !important; padding: 6px 4px !important; white-space: nowrap; }
+#result_list td { font-size: 12px !important; padding: 8px 6px !important; white-space: nowrap; }
+#result_list th { font-size: 11px !important; padding: 8px 6px !important; white-space: nowrap; }
 input:focus, select:focus, textarea:focus {
-    border-color: #C5930A !important; outline: none !important;
-    box-shadow: 0 0 0 3px rgba(197,147,10,0.1) !important;
+    border-color: var(--gold) !important; outline: none !important;
+    box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
 }
 
 /* ============ BUTTONS ============ */
 input[type="submit"], .submit-row input, button[type="submit"] {
-    background: #C5930A !important; color: #FFF !important;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
     font-weight: 600 !important; border: none !important;
-    border-radius: 6px !important; padding: 10px 24px !important;
+    border-radius: 8px !important; padding: 10px 24px !important;
     cursor: pointer !important; font-size: 14px !important;
-    transition: background 0.15s !important;
+    transition: all 0.2s !important;
 }
 input[type="submit"]:hover, .submit-row input:hover, button[type="submit"]:hover {
-    background: #A67C08 !important;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold)) !important;
+    transform: translateY(-1px) !important;
 }
 .deletelink, a.deletelink {
-    background: #DC2626 !important; color: #FFF !important;
-    border-radius: 6px !important; padding: 10px 20px !important;
+    background: rgba(239,68,68,0.15) !important; color: var(--danger) !important;
+    border: 1px solid rgba(239,68,68,0.3) !important;
+    border-radius: 8px !important; padding: 10px 20px !important;
     text-decoration: none !important;
 }
+.deletelink:hover, a.deletelink:hover { background: var(--danger) !important; color: #FFF !important; }
 
 /* ============ LINKS ============ */
-a { color: #1a1a1a; text-decoration: none; }
-a:hover { color: #C5930A; }
-#result_list td a, .results td a, #result_list th a { color: #1a1a1a !important; }
-#result_list td a:hover, .results td a:hover { color: #C5930A !important; }
+a { color: var(--text-primary); text-decoration: none; }
+a:hover { color: var(--gold); }
+#result_list td a, .results td a, #result_list th a { color: var(--text-primary) !important; }
+#result_list td a:hover, .results td a:hover { color: var(--gold) !important; }
 
 /* ============ PAGINATION ============ */
 .paginator, #changelist .paginator {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important; padding: 12px 16px !important;
-    color: #6B7280 !important; font-size: 13px !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important; padding: 14px 18px !important;
+    color: var(--text-muted) !important; font-size: 13px !important;
     margin-top: 16px !important;
 }
-.paginator a { color: #C5930A !important; text-decoration: none !important; padding: 4px 8px !important; }
-.paginator .this-page { color: #111 !important; font-weight: 700 !important; }
+.paginator a { color: var(--gold) !important; text-decoration: none !important; padding: 4px 10px !important; }
+.paginator .this-page { color: var(--text-primary) !important; font-weight: 700 !important; }
 .paginator ul, p.paginator ul, .pagination {
     list-style: none !important; padding: 0 !important; margin: 0 !important;
     display: flex !important; gap: 4px !important; flex-wrap: wrap !important;
 }
 .paginator ul li, .pagination li { list-style: none !important; display: inline-block !important; }
 .paginator ul li a, .pagination li a {
-    background: #F3F4F6 !important; color: #374151 !important;
-    padding: 6px 12px !important; border-radius: 4px !important;
+    background: var(--bg-elevated) !important; color: var(--text-secondary) !important;
+    padding: 6px 14px !important; border-radius: 6px !important;
     text-decoration: none !important; font-size: 13px !important;
+    border: 1px solid var(--border) !important;
 }
 .paginator ul li a:hover, .pagination li a:hover {
-    background: #C5930A !important; color: #FFF !important;
+    background: var(--gold) !important; color: #000 !important; border-color: var(--gold) !important;
 }
-.paginator ul li.active a { background: #C5930A !important; color: #FFF !important; font-weight: 600 !important; }
+.paginator ul li.active a { background: var(--gold) !important; color: #000 !important; font-weight: 600 !important; border-color: var(--gold) !important; }
 
-/* ============ FILTER PANEL — HORIZONTAL (not sidebar) ============ */
-/* Main content area: stack everything vertically */
+/* ============ FILTER PANEL ============ */
 #content-main.list-content, #content-main {
     display: flex !important;
     flex-direction: column !important;
 }
-/* Side-wrapper: move from right side to full width at top */
 .side-wrapper {
     width: 100% !important;
     order: -1 !important;
@@ -283,14 +327,12 @@ a:hover { color: #C5930A; }
     width: 100% !important;
     flex-shrink: 0 !important;
 }
-/* Force ALL cards inside changelist to be full-width */
 #changelist .card, #changelist .card-panel {
     width: 100% !important;
     float: none !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
 }
-/* Ensure side-wrapper rows stack vertically */
 .side-wrapper .row {
     display: flex !important;
     flex-direction: column !important;
@@ -304,7 +346,6 @@ a:hover { color: #C5930A; }
     padding: 0 !important;
     margin: 0 !important;
 }
-/* Filter items inside #changelist-filter should be INLINE/horizontal */
 #changelist-filter .col, #changelist-filter [class*="col s"],
 #changelist-filter [class*="col m"], #changelist-filter [class*="col l"] {
     width: auto !important;
@@ -321,18 +362,17 @@ a:hover { color: #C5930A; }
     width: 100% !important;
     position: static !important;
     order: -1 !important;
-    background: #FFFFFF !important;
-    border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important;
-    padding: 10px 14px !important;
-    margin-bottom: 8px !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    margin-bottom: 10px !important;
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
-    gap: 10px !important;
+    gap: 12px !important;
     float: none !important;
 }
-/* Remove extra padding from card wrapping the filter */
 #changelist .card, #changelist > .card,
 .module.filtered > .card, .module.filtered {
     padding: 0 !important;
@@ -341,11 +381,9 @@ a:hover { color: #C5930A; }
     box-shadow: none !important;
     background: transparent !important;
 }
-/* ACTION bar - make compact */
 .actions, #changelist-form .actions, .changelist .actions {
     display: none !important;
 }
-/* Hide checkbox column since bulk actions are removed */
 #result_list th.action-checkbox-column,
 #result_list td .action-checkbox,
 #result_list td input[type="checkbox"],
@@ -354,51 +392,52 @@ a:hover { color: #C5930A; }
     display: none !important;
 }
 .actions label, .actions span {
-    color: #6B7280 !important;
+    color: var(--text-muted) !important;
     font-size: 13px !important;
 }
 .actions select {
-    border: 1px solid #D1D5DB !important;
-    border-radius: 6px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
     padding: 6px 10px !important;
     font-size: 13px !important;
-    background: #fff !important;
-    color: #374151 !important;
+    background: var(--bg-elevated) !important;
+    color: var(--text-primary) !important;
 }
 .actions button[type="submit"], .actions .button {
-    background: #C5930A !important;
-    color: #fff !important;
+    background: var(--gold) !important;
+    color: #000 !important;
     border: none !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     padding: 6px 16px !important;
     font-size: 13px !important;
     cursor: pointer !important;
 }
 #changelist-filter h2, #changelist-filter h3,
 [id*="changelist-filter"] h2, [id*="changelist-filter"] h3 {
-    color: #374151 !important; font-size: 13px !important;
+    color: var(--text-secondary) !important; font-size: 13px !important;
     font-weight: 600 !important; margin: 0 16px 0 0 !important;
     text-transform: uppercase !important; letter-spacing: 0.5px !important;
     width: auto !important;
 }
 #changelist-filter select, [id*="changelist-filter"] select {
-    background: #FFFFFF !important; border: 1px solid #D1D5DB !important;
-    color: #374151 !important; border-radius: 6px !important;
+    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important; border-radius: 8px !important;
     padding: 8px 12px !important; font-size: 13px !important;
     min-width: 140px !important;
 }
 #changelist-filter select:focus, [id*="changelist-filter"] select:focus {
-    border-color: #C5930A !important; box-shadow: 0 0 0 3px rgba(197,147,10,0.1) !important;
+    border-color: var(--gold) !important; box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
 }
 #changelist-filter label, [id*="changelist-filter"] label {
-    color: #6B7280 !important; font-size: 12px !important;
+    color: var(--text-muted) !important; font-size: 12px !important;
     font-weight: 500 !important; margin-right: 6px !important;
 }
 #changelist-filter li { list-style: none !important; display: inline-block !important; }
-#changelist-filter a { color: #6B7280 !important; font-size: 13px !important; }
-#changelist-filter a:hover, #changelist-filter li.selected a { color: #C5930A !important; }
+#changelist-filter a { color: var(--text-muted) !important; font-size: 13px !important; }
+#changelist-filter a:hover, #changelist-filter li.selected a { color: var(--gold) !important; }
+#changelist-filter > .label { display: none !important; }
 
-/* Search/toolbar inside side-wrapper */
+/* Search/toolbar */
 .side-wrapper #toolbar, .side-wrapper .actions {
     background: transparent !important; border: none !important;
     border-radius: 0 !important; padding: 0 !important;
@@ -411,31 +450,28 @@ a:hover { color: #C5930A; }
 #changelist-search .card-content {
     padding: 0 !important; background: transparent !important;
 }
-/* Hide the "FILTER" label text - use space more efficiently */
-#changelist-filter > .label { display: none !important; }
 
-/* Search bar in filter area */
+/* Search bar */
 input[type="search"], input[name="q"], input.validate, #icon_prefix, .input-field input {
-    background: #FFFFFF !important; border: 1px solid #D1D5DB !important;
-    color: #1a1a1a !important; border-radius: 6px !important;
+    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important; border-radius: 8px !important;
     padding: 10px 14px !important; width: 100% !important;
     box-shadow: none !important; height: auto !important;
     font-size: 14px !important;
 }
 input[type="search"]::placeholder, input[name="q"]::placeholder,
 input.validate::placeholder, #icon_prefix::placeholder {
-    color: #9CA3AF !important;
+    color: var(--text-muted) !important;
 }
 .input-field { margin-top: 4px !important; margin-bottom: 4px !important; }
-.input-field label { color: #6B7280 !important; font-size: 13px !important; }
-.input-field label.active { color: #C5930A !important; transform: translateY(-14px) scale(0.8) !important; }
+.input-field label { color: var(--text-muted) !important; font-size: 13px !important; }
+.input-field label.active { color: var(--gold) !important; transform: translateY(-14px) scale(0.8) !important; }
 .input-field input:focus { border-bottom: none !important; box-shadow: none !important; }
 input:not([type]):focus:not([readonly]),
 input[type=text]:not(.browser-default):focus:not([readonly]) {
     border-bottom: none !important; box-shadow: none !important;
-    border-color: #C5930A !important;
+    border-color: var(--gold) !important;
 }
-/* Number inputs - show up/down arrows */
 input[type="number"] {
     -moz-appearance: textfield !important;
     appearance: auto !important;
@@ -450,8 +486,8 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* ============ ACTION BAR ============ */
 .actions, #changelist .actions, div.actions {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important; padding: 0 !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important; padding: 0 !important;
     margin-bottom: 16px !important;
 }
 .actions > .card-content {
@@ -461,18 +497,18 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .actions label, .actions span, #changelist .actions span,
 .actions .card-content label, .actions .card-content span {
-    color: #6B7280 !important; font-size: 13px !important;
+    color: var(--text-muted) !important; font-size: 13px !important;
 }
 .actions select, .actions .card-content select, select[name="action"] {
-    background: #FFFFFF !important; border: 1px solid #D1D5DB !important;
-    color: #374151 !important; border-radius: 6px !important;
+    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important; border-radius: 8px !important;
     padding: 8px 12px !important; font-size: 13px !important;
     height: auto !important;
 }
 .actions button, .actions input[type="submit"],
 .card-action button, .card-action input[type="submit"] {
-    background: #C5930A !important; color: #FFF !important;
-    border: none !important; border-radius: 6px !important;
+    background: var(--gold) !important; color: #000 !important;
+    border: none !important; border-radius: 8px !important;
     padding: 8px 16px !important; font-weight: 600 !important;
     cursor: pointer !important; font-size: 13px !important;
     text-transform: none !important;
@@ -481,7 +517,7 @@ input[type="number"]::-webkit-outer-spin-button {
 /* ============ OBJECT TOOLS (Add button) ============ */
 .object-tools, #changelist-form .object-tools, ul.object-tools,
 #content ul, #changelist ul, .changelist ul {
-    list-style: none !important; padding: 0 !important; margin: 0 0 8px !important;
+    list-style: none !important; padding: 0 !important; margin: 0 0 10px !important;
     display: inline-flex !important; gap: 8px !important;
     align-items: center !important;
 }
@@ -490,42 +526,43 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .object-tools a, .object-tools li a,
 #content ul li a[href*="add"], a[href*="/add/"] {
-    background: #C5930A !important; color: #FFF !important;
-    border-radius: 6px !important; padding: 8px 16px !important;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
+    border-radius: 8px !important; padding: 8px 18px !important;
     font-size: 13px !important; font-weight: 600 !important;
     text-decoration: none !important; display: inline-flex !important;
     align-items: center !important; gap: 4px !important;
-    transition: background 0.15s !important;
+    transition: all 0.2s !important;
 }
-.object-tools a:hover, #content ul li a[href*="add"]:hover, a[href*="/add/"]:hover { background: #A67C08 !important; }
-.object-tools a i, #content ul li a i, a[href*="/add/"] i { font-size: 16px !important; color: #FFF !important; }
+.object-tools a:hover, #content ul li a[href*="add"]:hover, a[href*="/add/"]:hover {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold)) !important;
+    transform: translateY(-1px) !important;
+}
+.object-tools a i, #content ul li a i, a[href*="/add/"] i { font-size: 16px !important; color: #000 !important; }
 .object-tools a::after, #content ul li a[href*="add"]::after, a[href*="/add/"]::after { content: ' Add New'; }
-/* Ensure add link icon doesn't overflow */
 a[href*="/add/"] { overflow: visible !important; white-space: nowrap !important; line-height: 1.4 !important; }
 
-/* Changelist count / Paginator cleanup */
+/* Changelist count */
 #changelist form > p, #changelist-form > p {
-    color: #6B7280 !important; font-size: 13px !important;
+    color: var(--text-muted) !important; font-size: 13px !important;
     margin: 8px 0 !important;
 }
-/* Empty state paginator (no links = shows count only) */
 .paginator:not(:has(a)):not(:has(span.this-page)) {
     text-align: center !important; padding: 40px 16px !important;
-    color: #9CA3AF !important; font-size: 14px !important;
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important;
+    color: var(--text-muted) !important; font-size: 14px !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important;
 }
-/* View links in Action column */
+
+/* View links */
 td a[href*="/settlementhistory/"], td:last-child a[href*="/view/"] {
-    color: #C5930A !important; font-weight: 500 !important;
-    background: #FEF9E7 !important; padding: 4px 10px !important;
-    border-radius: 4px !important; font-size: 12px !important;
+    color: var(--gold) !important; font-weight: 500 !important;
+    background: var(--gold-bg) !important; padding: 4px 10px !important;
+    border-radius: 6px !important; font-size: 12px !important;
+    border: 1px solid var(--gold-border) !important;
 }
-td a[href*="/settlementhistory/"]:hover, td:last-child a[href*="/view/"]:hover { background: #C5930A !important; color: #FFF !important; }
-/* Status badges in tables */
-td a[href*="/toggle-user/"] { color: #059669 !important; font-weight: 500 !important; }
-/* Generic table links (balance etc) */
-#result_list td a[href*="/wallethistory/"] { color: #C5930A !important; font-weight: 600 !important; }
+td a[href*="/settlementhistory/"]:hover, td:last-child a[href*="/view/"]:hover { background: var(--gold) !important; color: #000 !important; }
+td a[href*="/toggle-user/"] { color: var(--success) !important; font-weight: 500 !important; }
+#result_list td a[href*="/wallethistory/"] { color: var(--gold) !important; font-weight: 600 !important; }
 #changelist form, .changelist form {
     background: transparent !important; border: none !important;
     box-shadow: none !important;
@@ -533,46 +570,46 @@ td a[href*="/toggle-user/"] { color: #059669 !important; font-weight: 500 !impor
 
 /* ============ CARDS ============ */
 .card, .card-panel {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important; box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important; box-shadow: var(--shadow-sm) !important;
 }
 .card-content {
-    background: #FFFFFF !important; color: #1a1a1a !important;
+    background: var(--bg-card) !important; color: var(--text-primary) !important;
     padding: 16px 20px !important;
 }
 .card-action, .card-action .right-align {
-    background: #F9FAFB !important; border-top: 1px solid #E5E7EB !important;
+    background: var(--bg-elevated) !important; border-top: 1px solid var(--border) !important;
     padding: 12px 16px !important;
 }
 
 /* ============ MODULE / APP LIST ============ */
 .app-list .module, .module {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important; padding: 20px !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important; padding: 20px !important;
 }
 .module h2, .module caption {
-    color: #111 !important; font-size: 14px !important;
+    color: var(--text-primary) !important; font-size: 14px !important;
     font-weight: 600 !important; text-transform: none !important;
 }
-.module table a, .module td a { color: #374151 !important; font-size: 13px !important; }
-.module table a:hover { color: #C5930A !important; }
+.module table a, .module td a { color: var(--text-secondary) !important; font-size: 13px !important; }
+.module table a:hover { color: var(--gold) !important; }
 
 /* ============ FIELDSETS (Forms) ============ */
 fieldset h2, fieldset .collapse-toggle, #content fieldset h2 {
-    background: #F9FAFB !important;
-    color: #111 !important; font-size: 13px !important;
+    background: var(--bg-elevated) !important;
+    color: var(--text-primary) !important; font-size: 13px !important;
     font-weight: 600 !important; text-transform: uppercase !important;
-    letter-spacing: 0.5px !important; padding: 12px 20px !important;
-    margin: 0 !important; border-radius: 8px 8px 0 0 !important;
-    border: none !important; border-bottom: 1px solid #E5E7EB !important;
+    letter-spacing: 0.5px !important; padding: 14px 20px !important;
+    margin: 0 !important; border-radius: 12px 12px 0 0 !important;
+    border: none !important; border-bottom: 1px solid var(--gold-border) !important;
 }
 fieldset {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important; margin-bottom: 16px !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important; margin-bottom: 16px !important;
     padding: 0 !important;
 }
 fieldset .form-row, fieldset .field-box {
-    padding: 10px 20px !important; border-bottom: 1px solid #F3F4F6 !important;
+    padding: 12px 20px !important; border-bottom: 1px solid var(--border) !important;
     display: flex !important; flex-wrap: wrap !important; gap: 12px !important;
     align-items: flex-start !important;
 }
@@ -594,12 +631,12 @@ fieldset .form-row select {
     width: 100% !important; box-sizing: border-box !important;
 }
 fieldset label {
-    color: #374151 !important; font-size: 12px !important;
+    color: var(--text-secondary) !important; font-size: 12px !important;
     font-weight: 500 !important; margin-bottom: 3px !important;
     display: block !important;
 }
 fieldset .form-row .help {
-    font-size: 11px !important; color: #9CA3AF !important;
+    font-size: 11px !important; color: var(--text-muted) !important;
     margin-top: 2px !important;
 }
 @media (max-width: 768px) {
@@ -612,36 +649,36 @@ fieldset .form-row .help {
 .select2-container--default .select2-selection--single,
 .select2-container .select2-selection,
 span[class*="select2"] {
-    background: #FFFFFF !important; border: 1px solid #D1D5DB !important;
-    color: #1a1a1a !important; border-radius: 6px !important;
+    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important; border-radius: 8px !important;
 }
 .select2-dropdown, .select2-results {
-    background: #FFFFFF !important; border: 1px solid #D1D5DB !important;
-    color: #1a1a1a !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    color: var(--text-primary) !important;
 }
-.select2-results__option { color: #374151 !important; }
-.select2-results__option--highlighted { background: #FEFCE8 !important; color: #C5930A !important; }
+.select2-results__option { color: var(--text-secondary) !important; }
+.select2-results__option--highlighted { background: var(--gold-bg-hover) !important; color: var(--gold) !important; }
 .select2-container--default .select2-selection--single .select2-selection__rendered {
-    color: #1a1a1a !important;
+    color: var(--text-primary) !important;
 }
 
 /* ============ FILE INPUT ============ */
 input[type="file"] {
-    background: #F9FAFB !important; border: 1px solid #D1D5DB !important;
-    color: #374151 !important; padding: 8px !important;
-    border-radius: 6px !important;
+    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    color: var(--text-secondary) !important; padding: 8px !important;
+    border-radius: 8px !important;
 }
 input[type="file"]::-webkit-file-upload-button {
-    background: #F3F4F6 !important; color: #374151 !important;
-    border: 1px solid #D1D5DB !important; border-radius: 4px !important;
+    background: var(--bg-card) !important; color: var(--text-primary) !important;
+    border: 1px solid var(--gold-border) !important; border-radius: 6px !important;
     padding: 6px 14px !important; cursor: pointer !important;
     font-size: 13px !important;
 }
 
 /* ============ SUBMIT ROW ============ */
 .submit-row {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important; padding: 16px 20px !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important; padding: 16px 20px !important;
     margin-top: 16px !important; display: flex !important;
     gap: 12px !important; flex-wrap: wrap !important;
 }
@@ -650,17 +687,17 @@ input[type="file"]::-webkit-file-upload-button {
 /* ============ INLINE GROUPS ============ */
 .inline-group { margin-top: 16px !important; }
 .inline-group h2 {
-    background: #F9FAFB !important; color: #111 !important;
-    padding: 12px 20px !important; border-radius: 8px 8px 0 0 !important;
+    background: var(--bg-elevated) !important; color: var(--text-primary) !important;
+    padding: 14px 20px !important; border-radius: 12px 12px 0 0 !important;
     font-size: 13px !important; text-transform: uppercase !important;
-    border-bottom: 1px solid #E5E7EB !important;
+    border-bottom: 1px solid var(--gold-border) !important;
 }
-.inline-related { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; border-radius: 8px !important; }
+.inline-related { background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important; border-radius: 12px !important; }
 
 /* ============ CHECKBOX ============ */
 input[type="checkbox"] {
     width: 16px !important; height: 16px !important;
-    accent-color: #C5930A !important;
+    accent-color: var(--gold) !important;
 }
 
 /* ============ HIDE NUMBER SPINNERS ============ */
@@ -674,13 +711,12 @@ input[type="number"] {
     appearance: textfield !important;
 }
 
-/* ============ HIDE 'ALL ACTIONS' DROPDOWN IN SUBMIT ROW ============ */
+/* ============ HIDE 'ALL ACTIONS' DROPDOWN ============ */
 .submit-row .ma-dropdown,
 .submit-row > div:first-child,
 .submit-row a[href="#"] {
     display: none !important;
 }
-/* Target the "All actions" wrapper specifically in change form */
 form > div > div:last-child > div:first-child:has(a[href="#"]) {
     display: none !important;
 }
@@ -688,76 +724,76 @@ form > div > div:last-child > div:first-child:has(a[href="#"]) {
 /* ============ MESSAGES ============ */
 .messagelist { display: block !important; }
 .messagelist li {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 8px !important; padding: 12px 16px !important;
-    color: #1a1a1a !important; margin-bottom: 8px !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 12px !important; padding: 12px 16px !important;
+    color: var(--text-primary) !important; margin-bottom: 8px !important;
     font-size: 13px !important;
 }
-.messagelist .success { border-left: 3px solid #16A34A !important; }
-.messagelist .error { border-left: 3px solid #DC2626 !important; }
-.messagelist .warning { border-left: 3px solid #D97706 !important; }
+.messagelist .success { border-left: 3px solid var(--success) !important; }
+.messagelist .error { border-left: 3px solid var(--danger) !important; }
+.messagelist .warning { border-left: 3px solid var(--warning) !important; }
 
 /* Error lists */
 .errorlist, ul.errorlist {
-    color: #DC2626 !important; background: #FEF2F2 !important;
-    border: 1px solid #FECACA !important; border-radius: 6px !important;
+    color: var(--danger) !important; background: rgba(239,68,68,0.1) !important;
+    border: 1px solid rgba(239,68,68,0.25) !important; border-radius: 8px !important;
     padding: 8px 14px !important; list-style: none !important;
     margin: 4px 0 !important; font-size: 13px !important;
 }
 
 /* ============ HELP TEXT ============ */
 .help, .helptext, p.help {
-    color: #9CA3AF !important; font-size: 12px !important;
+    color: var(--text-muted) !important; font-size: 12px !important;
 }
 
 /* ============ CALENDAR ============ */
 .calendarbox, .calendar, .datetimeshortcuts {
-    background: #FFFFFF !important;
+    background: var(--bg-card) !important;
 }
-.calendarbox table td, .calendarbox table th { color: #374151 !important; }
-.calendar-cancel, .calendar-shortcuts a { color: #C5930A !important; }
+.calendarbox table td, .calendarbox table th { color: var(--text-primary) !important; }
+.calendar-cancel, .calendar-shortcuts a { color: var(--gold) !important; }
 
 /* ============ CONTENT OVERRIDE ============ */
 #content, #content-main, .content, .main {
-    background: #F8F9FA !important;
+    background: var(--bg-main) !important;
 }
 
 /* Material Admin nav */
 nav, .nav-wrapper, .brand-logo {
     background: transparent !important; box-shadow: none !important;
 }
-.sidenav, #slide-out { background: #111 !important; }
-.sidenav li > a { color: #AAA !important; }
+.sidenav, #slide-out { background: var(--bg-sidebar) !important; }
+.sidenav li > a { color: var(--text-secondary) !important; }
 
 /* Collection items */
 .collection, .collection-item {
-    background: #FFFFFF !important; border-color: #E5E7EB !important;
-    color: #1a1a1a !important;
+    background: var(--bg-card) !important; border-color: var(--border) !important;
+    color: var(--text-primary) !important;
 }
 
 /* Chips */
-.chip { background: #F3F4F6 !important; color: #374151 !important; }
+.chip { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; }
 
 /* Dropdown */
 .dropdown-content {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    box-shadow: var(--shadow) !important;
 }
-.dropdown-content li > a { color: #374151 !important; }
-.dropdown-content li > a:hover { background: #FEFCE8 !important; color: #C5930A !important; }
+.dropdown-content li > a { color: var(--text-secondary) !important; }
+.dropdown-content li > a:hover { background: var(--gold-bg-hover) !important; color: var(--gold) !important; }
 
 /* Material btns */
 .btn, .btn-flat, .btn-small {
-    background: #F3F4F6 !important; color: #374151 !important;
-    box-shadow: none !important; border-radius: 6px !important;
-    border: 1px solid #D1D5DB !important;
+    background: var(--bg-elevated) !important; color: var(--text-primary) !important;
+    box-shadow: none !important; border-radius: 8px !important;
+    border: 1px solid var(--border) !important;
 }
-.btn:hover, .btn-flat:hover { background: #E5E7EB !important; }
-a.btn-floating { background: #C5930A !important; color: #FFF !important; }
+.btn:hover, .btn-flat:hover { background: var(--bg-hover) !important; }
+a.btn-floating { background: var(--gold) !important; color: #000 !important; }
 
 /* Tooltips & Toasts */
-.material-tooltip { background: #111 !important; color: #FFF !important; }
-.toast { background: #111 !important; color: #FFF !important; border-radius: 6px !important; }
+.material-tooltip { background: var(--bg-elevated) !important; color: var(--text-primary) !important; border: 1px solid var(--gold-border) !important; }
+.toast { background: var(--bg-card) !important; color: var(--text-primary) !important; border-radius: 8px !important; border: 1px solid var(--gold-border) !important; }
 
 /* SVG icons */
 td svg { width: 20px !important; height: 20px !important; opacity: 0.7; }
@@ -766,100 +802,101 @@ td img[src*="icon-yes"], td img[src*="icon-no"] { width: 18px !important; height
 /* Horizontal scroll on tables */
 .results, #result_list { overflow-x: auto !important; }
 .results::-webkit-scrollbar, #result_list::-webkit-scrollbar { height: 6px; }
-.results::-webkit-scrollbar-thumb, #result_list::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
-.results::-webkit-scrollbar-track, #result_list::-webkit-scrollbar-track { background: #F3F4F6; }
+.results::-webkit-scrollbar-thumb, #result_list::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+.results::-webkit-scrollbar-track, #result_list::-webkit-scrollbar-track { background: var(--bg-elevated); }
 
 /* Tabs (user list) */
 .custom-tabs a, .user-tabs .tab-btn {
-    padding: 6px 14px; border-radius: 6px; text-decoration: none;
-    font-size: 13px; font-weight: 500; transition: all 0.15s;
-    color: #374151; background: #F3F4F6; border: 1px solid #E5E7EB;
+    padding: 7px 16px; border-radius: 8px; text-decoration: none;
+    font-size: 13px; font-weight: 500; transition: all 0.2s;
+    color: var(--text-secondary); background: var(--bg-elevated); border: 1px solid var(--border);
     display: inline-block;
 }
 .custom-tabs a.active, .custom-tabs a:hover,
 .user-tabs .tab-active {
-    background: #C5930A; color: #FFF; border-color: #C5930A;
+    background: var(--gold); color: #000; border-color: var(--gold);
 }
 .user-tabs .tab-inactive {
-    background: #374151; color: #FFF; border-color: #374151;
+    background: var(--bg-elevated); color: var(--text-secondary); border-color: var(--border);
 }
 .user-tabs {
     display: flex; align-items: center; gap: 8px;
-    margin-bottom: 8px !important;
+    margin-bottom: 10px !important;
 }
 
 /* Export button */
 .export-btn, a.export-btn {
-    background: #FFFFFF !important; color: #C5930A !important;
-    border: 1px solid #C5930A !important; border-radius: 6px !important;
-    padding: 8px 16px !important; font-weight: 500 !important;
+    background: transparent !important; color: var(--gold) !important;
+    border: 1px solid var(--gold-border-strong) !important; border-radius: 8px !important;
+    padding: 8px 18px !important; font-weight: 500 !important;
     font-size: 13px !important; text-decoration: none !important;
     display: inline-flex !important; align-items: center !important;
-    transition: all 0.15s !important;
+    transition: all 0.2s !important;
 }
 .export-btn:hover, a.export-btn:hover {
-    background: #C5930A !important; color: #FFF !important;
+    background: var(--gold) !important; color: #000 !important;
 }
 
-/* Login page — hide sidebar & show full-page centered login */
+/* ============ LOGIN PAGE ============ */
 body.login #kokoroko-sidebar,
 body.login #kokoroko-header,
 body.login .mobile-toggle,
 body.login .sidebar-backdrop { display: none !important; }
 body.login #kokoroko-main { margin-left: 0 !important; }
 body.login #container { margin-left: 0 !important; width: 100% !important; }
-body.login { background: #F8F9FA !important; }
+body.login { background: var(--bg-main) !important; }
 body.login #content-main, body.login #content {
     display: flex !important; justify-content: center !important;
     align-items: center !important; min-height: 100vh !important;
-    padding: 20px !important; background: #F8F9FA !important;
+    padding: 20px !important; background: var(--bg-main) !important;
 }
 body.login #content-main > *, body.login #content > form {
     width: 100% !important; max-width: 400px !important;
-    background: #FFFFFF !important; border-radius: 12px !important;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08) !important;
-    padding: 40px 32px !important; border: 1px solid #E5E7EB !important;
+    background: var(--bg-card) !important; border-radius: 16px !important;
+    box-shadow: var(--shadow) !important;
+    padding: 40px 32px !important; border: 1px solid var(--gold-border) !important;
 }
 body.login #login-form h1, body.login h1 { display: none !important; }
 body.login #login-form {
     width: 100% !important; max-width: 400px !important;
-    background: #FFFFFF !important; border-radius: 12px !important;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08) !important;
-    padding: 40px 32px !important; border: 1px solid #E5E7EB !important;
+    background: var(--bg-card) !important; border-radius: 16px !important;
+    box-shadow: var(--shadow) !important;
+    padding: 40px 32px !important; border: 1px solid var(--gold-border) !important;
 }
 body.login #login-form::before {
-    content: ''; display: block; width: 60px; height: 60px;
-    margin: 0 auto 20px; border-radius: 12px;
+    content: ''; display: block; width: 64px; height: 64px;
+    margin: 0 auto 24px; border-radius: 14px;
     background: url('/static/admin/img/logo.png') center/contain no-repeat;
+    border: 1px solid var(--gold-border);
 }
 body.login #login-form input[type="text"],
 body.login #login-form input[type="email"],
 body.login #login-form input[type="password"] {
     width: 100% !important; padding: 12px 14px !important;
-    border: 1px solid #E5E7EB !important; border-radius: 8px !important;
-    font-size: 14px !important; background: #FFFFFF !important;
-    color: #111 !important; margin-bottom: 12px !important;
+    border: 1px solid var(--border) !important; border-radius: 10px !important;
+    font-size: 14px !important; background: var(--bg-elevated) !important;
+    color: var(--text-primary) !important; margin-bottom: 12px !important;
     box-sizing: border-box !important;
 }
 body.login #login-form input[type="text"]:focus,
 body.login #login-form input[type="email"]:focus,
 body.login #login-form input[type="password"]:focus {
-    border-color: #C5930A !important; outline: none !important;
-    box-shadow: 0 0 0 3px rgba(197,147,10,0.1) !important;
+    border-color: var(--gold) !important; outline: none !important;
+    box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
 }
 body.login #login-form input[type="submit"],
 body.login #login-form .submit-row input {
     width: 100% !important; padding: 12px !important;
-    background: #C5930A !important; color: #FFF !important;
-    border: none !important; border-radius: 8px !important;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
+    border: none !important; border-radius: 10px !important;
     font-size: 15px !important; font-weight: 600 !important;
     cursor: pointer !important; margin-top: 8px !important;
 }
 body.login #login-form input[type="submit"]:hover {
-    background: #A67C08 !important;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold)) !important;
 }
 body.login #login-form label {
-    color: #374151 !important; font-size: 13px !important;
+    color: var(--text-secondary) !important; font-size: 13px !important;
     font-weight: 500 !important; display: block !important;
     margin-bottom: 4px !important;
 }
@@ -869,62 +906,63 @@ body.login .input-field .prefix { display: none !important; }
 body.login nav, body.login .ma-tools-icons { display: none !important; }
 body.login img[src="/static/logo.png"] { display: none !important; }
 body.login footer, body.login #footer { display: none !important; }
-body.login > div { display: flex !important; justify-content: center !important; align-items: center !important; min-height: 100vh !important; background: #F8F9FA !important; }
+body.login > div { display: flex !important; justify-content: center !important; align-items: center !important; min-height: 100vh !important; background: var(--bg-main) !important; }
 body.login > div > img { display: none !important; }
 body.login form { 
-    background: #FFFFFF !important; border-radius: 12px !important;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08) !important;
-    padding: 40px 32px !important; border: 1px solid #E5E7EB !important;
+    background: var(--bg-card) !important; border-radius: 16px !important;
+    box-shadow: var(--shadow) !important;
+    padding: 40px 32px !important; border: 1px solid var(--gold-border) !important;
     width: 360px !important; max-width: 90vw !important;
 }
 body.login form::before {
-    content: ''; display: block; width: 60px; height: 60px;
-    margin: 0 auto 20px; border-radius: 12px;
+    content: ''; display: block; width: 64px; height: 64px;
+    margin: 0 auto 24px; border-radius: 14px;
     background: url('/static/admin/img/logo.png') center/contain no-repeat;
+    border: 1px solid var(--gold-border);
 }
 body.login form input[type="text"],
 body.login form input[type="password"] {
     width: 100% !important; padding: 12px 14px !important;
-    border: 1px solid #E5E7EB !important; border-radius: 8px !important;
-    font-size: 14px !important; background: #FFFFFF !important;
-    color: #111 !important; margin-bottom: 6px !important;
+    border: 1px solid var(--border) !important; border-radius: 10px !important;
+    font-size: 14px !important; background: var(--bg-elevated) !important;
+    color: var(--text-primary) !important; margin-bottom: 6px !important;
     box-sizing: border-box !important; height: auto !important;
 }
 body.login form input[type="text"]:focus,
 body.login form input[type="password"]:focus {
-    border-color: #C5930A !important; outline: none !important;
-    box-shadow: 0 0 0 3px rgba(197,147,10,0.1) !important;
+    border-color: var(--gold) !important; outline: none !important;
+    box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
 }
 body.login form button[type="submit"],
 body.login form input[type="submit"] {
     width: 100% !important; padding: 12px !important;
-    background: #C5930A !important; color: #FFF !important;
-    border: none !important; border-radius: 8px !important;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
+    border: none !important; border-radius: 10px !important;
     font-size: 15px !important; font-weight: 600 !important;
     cursor: pointer !important; margin-top: 12px !important;
     height: auto !important;
 }
 body.login form button[type="submit"]:hover,
 body.login form input[type="submit"]:hover {
-    background: #A67C08 !important;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold)) !important;
 }
 body.login form label {
-    color: #6B7280 !important; font-size: 12px !important;
+    color: var(--text-muted) !important; font-size: 12px !important;
     font-weight: 500 !important;
 }
 body.login form .input-field { margin-bottom: 12px !important; }
-body.login, body.login html { background: #F8F9FA !important; min-height: 100vh !important; height: 100vh !important; overflow: hidden !important; }
+body.login, body.login html { background: var(--bg-main) !important; min-height: 100vh !important; height: 100vh !important; overflow: hidden !important; }
 body.login .indent {
     position: fixed !important; top: 0 !important; left: 0 !important;
     width: 100vw !important; height: 100vh !important;
     display: flex !important; justify-content: center !important;
-    align-items: center !important; background: #F8F9FA !important;
+    align-items: center !important; background: var(--bg-main) !important;
     z-index: 9999 !important;
 }
 body.login #layout-content, body.login .text-content,
 body.login #content, body.login #content-main {
     display: flex !important; justify-content: center !important;
-    align-items: center !important; background: #F8F9FA !important;
+    align-items: center !important; background: var(--bg-main) !important;
 }
 body.login .side-bar { display: none !important; }
 body.login #footer { display: none !important; }
@@ -933,82 +971,85 @@ body.login #header { display: none !important; }
 /* ============ DASHBOARD ============ */
 .dash-grid {
     display: grid; grid-template-columns: repeat(6, 1fr);
-    gap: 10px; margin-bottom: 16px;
+    gap: 12px; margin-bottom: 20px;
 }
 .dash-card {
-    background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px;
-    padding: 12px 14px; position: relative; overflow: hidden;
+    background: var(--bg-card); border: 1px solid var(--gold-border); border-radius: 12px;
+    padding: 16px 18px; position: relative; overflow: hidden;
+    transition: all 0.2s;
 }
-.dash-card .label { color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 4px; }
-.dash-card .value { color: #111; font-size: 18px; font-weight: 700; }
-.dash-card .sub { color: #9CA3AF; font-size: 10px; margin-top: 3px; }
+.dash-card:hover { border-color: var(--gold-border-strong); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.dash-card .label { color: var(--text-muted); font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.dash-card .value { color: var(--text-primary); font-size: 20px; font-weight: 700; }
+.dash-card .sub { color: var(--text-muted); font-size: 10px; margin-top: 4px; }
 .dash-card .icon-bg {
-    position: absolute; top: 10px; right: 10px;
-    width: 30px; height: 30px; border-radius: 6px;
+    position: absolute; top: 12px; right: 12px;
+    width: 34px; height: 34px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    background: #FEF9E7;
+    background: var(--gold-bg);
+    border: 1px solid var(--gold-border);
 }
-.dash-card .icon-bg i { font-size: 16px; color: #C5930A; }
+.dash-card .icon-bg i { font-size: 18px; color: var(--gold); }
 
 .dash-filter {
-    display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+    display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;
 }
 .dash-filter button {
-    background: #FFFFFF; border: 1px solid #E5E7EB; color: #6B7280;
-    padding: 6px 12px; border-radius: 6px; cursor: pointer;
-    font-size: 12px; font-weight: 500; transition: all 0.15s;
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted);
+    padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 12px; font-weight: 500; transition: all 0.2s;
 }
 .dash-filter button:hover, .dash-filter button.active {
-    background: #C5930A; color: #FFF; border-color: #C5930A;
+    background: var(--gold); color: #000; border-color: var(--gold);
 }
 
 .dash-grid, .dash-table, .dash-filter { width: 100% !important; max-width: 100% !important; }
 .dash-table {
-    background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px;
-    overflow: hidden; margin-top: 12px;
+    background: var(--bg-card); border: 1px solid var(--gold-border); border-radius: 12px;
+    overflow: hidden; margin-top: 14px;
 }
 .dash-table h3 {
-    padding: 12px 16px; margin: 0; color: #111;
-    font-size: 14px; font-weight: 600; border-bottom: 1px solid #E5E7EB;
+    padding: 14px 18px; margin: 0; color: var(--text-primary);
+    font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--gold-border);
 }
 .dash-table table { width: 100%; border-collapse: collapse; }
 .dash-table th {
-    background: #F9FAFB; color: #6B7280; font-size: 11px;
-    text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px;
+    background: var(--bg-elevated); color: var(--text-muted); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 14px;
     text-align: left; font-weight: 600;
 }
 .dash-table td {
-    padding: 8px 12px; color: #1a1a1a; font-size: 13px;
-    border-bottom: 1px solid #F3F4F6;
+    padding: 10px 14px; color: var(--text-primary); font-size: 13px;
+    border-bottom: 1px solid var(--border);
 }
-.dash-table tr:hover td { background: #FEFCE8; }
+.dash-table tr:hover td { background: var(--bg-hover); }
 
 .badge {
-    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    display: inline-block; padding: 3px 12px; border-radius: 12px;
     font-size: 11px; font-weight: 600;
 }
-.badge-green { background: #ECFDF5; color: #059669; }
-.badge-orange { background: #FFF7ED; color: #EA580C; }
-.badge-gold { background: #FEF9E7; color: #92710A; }
-.badge-red { background: #FEF2F2; color: #DC2626; }
+.badge-green { background: rgba(34,197,94,0.12); color: var(--success); }
+.badge-orange { background: rgba(245,158,11,0.12); color: var(--warning); }
+.badge-gold { background: var(--gold-bg); color: var(--gold); }
+.badge-red { background: rgba(239,68,68,0.12); color: var(--danger); }
 
 /* ============ MODAL ============ */
 .modal-overlay {
     position: fixed !important; top: 0 !important; left: 0 !important;
     right: 0 !important; bottom: 0 !important;
-    background: rgba(0,0,0,0.4) !important;
+    background: rgba(0,0,0,0.6) !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
-    z-index: 10000 !important; backdrop-filter: blur(4px);
+    z-index: 10000 !important; backdrop-filter: blur(6px);
 }
 .modal-overlay .modal-content {
-    background: #FFFFFF !important; border: 1px solid #E5E7EB !important;
-    border-radius: 12px !important; padding: 28px !important;
+    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    border-radius: 16px !important; padding: 28px !important;
     max-width: 440px !important; width: 90% !important;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5) !important;
 }
-.modal-overlay .modal-content h2 { margin: 0 0 12px !important; font-size: 18px !important; color: #111 !important; }
-.modal-overlay .modal-content .info { color: #6B7280 !important; font-size: 13px !important; margin: 4px 0 !important; }
-.modal-overlay .modal-content .balance { color: #059669 !important; font-size: 15px !important; font-weight: 600 !important; margin: 0 0 16px !important; }
+.modal-overlay .modal-content h2 { margin: 0 0 12px !important; font-size: 18px !important; color: var(--text-primary) !important; }
+.modal-overlay .modal-content .info { color: var(--text-secondary) !important; font-size: 13px !important; margin: 4px 0 !important; }
+.modal-overlay .modal-content .balance { color: var(--success) !important; font-size: 15px !important; font-weight: 600 !important; margin: 0 0 16px !important; }
 
 /* Hide breadcrumbs */
 div.breadcrumbs { display: none !important; }
@@ -1019,22 +1060,27 @@ div.breadcrumbs { display: none !important; }
     #kokoroko-sidebar.open { transform: translateX(0); }
     #kokoroko-main, #container { margin-left: 0 !important; width: 100% !important; }
     .mobile-toggle { display: block !important; }
-    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 8999; }
+    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8999; }
     .sidebar-backdrop.show { display: block; }
 }
 .mobile-toggle {
-    display: none; background: none; border: none; color: #111;
+    display: none; background: none; border: none; color: var(--text-primary);
     cursor: pointer; padding: 4px;
 }
 @media (max-width: 1200px) {
     .dash-grid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 @media (max-width: 768px) {
-    #kokoroko-header { padding: 10px 12px; }
-    #content, #content-main { padding: 12px !important; }
+    #kokoroko-header { padding: 10px 14px; }
+    #content, #content-main { padding: 14px !important; }
     .dash-grid { grid-template-columns: repeat(2, 1fr) !important; }
     #changelist-filter { flex-direction: column !important; align-items: stretch !important; }
 }
+
+/* ============ SCROLLBAR GLOBAL ============ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
 </style>
 {% endblock %}
 
@@ -1050,18 +1096,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('.login-form') !== null;
     if (isLoginPage) {
         document.body.classList.add('login');
-        // Remove ALL external CSS files on login page to prevent dark backgrounds
         document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l) {
             if (l.href.indexOf('fonts.googleapis') === -1) l.disabled = true;
         });
-        // Force light background via inline style
-        document.documentElement.style.cssText = 'background:#F8F9FA!important;height:100vh!important;overflow:hidden!important;';
-        document.body.style.cssText = 'background:#F8F9FA!important;height:100vh!important;overflow:hidden!important;';
+        document.documentElement.style.cssText = 'background:#0B0B0B!important;height:100vh!important;overflow:hidden!important;';
+        document.body.style.cssText = 'background:#0B0B0B!important;height:100vh!important;overflow:hidden!important;';
         var indent = document.querySelector('.indent');
-        if (indent) indent.style.cssText = 'position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;display:flex!important;justify-content:center!important;align-items:center!important;background:#F8F9FA!important;z-index:9999!important;';
+        if (indent) indent.style.cssText = 'position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;display:flex!important;justify-content:center!important;align-items:center!important;background:#0B0B0B!important;z-index:9999!important;';
         var sideBar = document.querySelector('.side-bar');
         if (sideBar) sideBar.style.display = 'none';
-        return; // Don't inject sidebar or header on login/logout page
+        return;
     }
 
     // ====== BUILD SIDEBAR ======
@@ -1118,7 +1162,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         '<div style="flex:1;"></div>' +
         '<div class="sb-section" style="padding-bottom:16px;">' +
-        '<a href="/logout/" class="sb-item" style="color:#DC2626;"><i style="color:#DC2626;">logout</i>Logout</a>' +
+        '<a href="/logout/" class="sb-item" style="color:#EF4444;"><i style="color:#EF4444;">logout</i>Logout</a>' +
         '</div>';
 
     document.body.insertAdjacentElement('afterbegin', sidebar);
@@ -1130,11 +1174,11 @@ document.addEventListener('DOMContentLoaded', function() {
         header.id = 'kokoroko-header';
         var pageTitle = document.title.replace(' | Kokoroko Admin', '').replace('Kokoroko Admin', 'Dashboard');
         header.innerHTML = '<div style="display:flex;align-items:center;gap:12px;">' +
-            '<button class="mobile-toggle" onclick="toggleSidebar()"><i style="font-size:22px;color:#111;">menu</i></button>' +
+            '<button class="mobile-toggle" onclick="toggleSidebar()"><i style="font-size:22px;color:#F5F1E8;">menu</i></button>' +
             '<div class="header-title">' + pageTitle + '</div>' +
             '</div>' +
             '<div class="header-right">' +
-            '<a href="/" class="header-btn"><i style="font-size:16px;vertical-align:middle;margin-right:4px;color:#FFF;">dashboard</i>Dashboard</a>' +
+            '<a href="/" class="header-btn"><i style="font-size:16px;vertical-align:middle;margin-right:4px;color:#000;">dashboard</i>Dashboard</a>' +
             '<div class="header-user"><div class="avatar">A</div><span>Admin</span></div>' +
             '</div>';
         container.insertAdjacentElement('afterbegin', header);
@@ -1146,7 +1190,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (changelist && filterPanel) {
         changelist.insertAdjacentElement('afterbegin', filterPanel);
     }
-    // Move search input into filter bar for unified horizontal layout
     var searchForm = document.getElementById('changelist-search');
     if (searchForm && filterPanel) {
         var searchInput = searchForm.querySelector('input[name="q"]');
@@ -1154,41 +1197,34 @@ document.addEventListener('DOMContentLoaded', function() {
         if (searchInput) {
             var searchWrapper = document.createElement('div');
             searchWrapper.style.cssText = 'display:flex;align-items:center;gap:6px;margin-left:auto;';
-            searchInput.style.cssText = 'width:200px !important;padding:8px 12px !important;border:1px solid #D1D5DB !important;border-radius:6px !important;font-size:13px !important;background:#fff !important;';
+            searchInput.style.cssText = 'width:200px !important;padding:8px 12px !important;border:1px solid rgba(255,255,255,0.06) !important;border-radius:8px !important;font-size:13px !important;background:#1A1A1A !important;color:#F5F1E8 !important;';
             searchInput.placeholder = 'Search...';
             searchWrapper.appendChild(searchInput);
             if (searchBtn) {
-                searchBtn.style.cssText = 'background:#C5930A !important;color:#fff !important;border:none !important;border-radius:6px !important;padding:8px 12px !important;cursor:pointer !important;';
+                searchBtn.style.cssText = 'background:linear-gradient(135deg,#D4A843,#B8922E) !important;color:#000 !important;border:none !important;border-radius:8px !important;padding:8px 12px !important;cursor:pointer !important;';
                 searchWrapper.appendChild(searchBtn);
             }
             filterPanel.appendChild(searchWrapper);
             searchForm.style.display = 'none';
         }
     }
-    // Hide side-wrapper completely (search already moved to filter bar)
     var sideWrapper = document.querySelector('.side-wrapper');
     if (sideWrapper) sideWrapper.style.display = 'none';
-    // Force filter panel to be compact - strip all excess height
     if (filterPanel) {
-        filterPanel.style.cssText = 'display:flex !important;flex-wrap:wrap !important;align-items:center !important;gap:12px !important;width:100% !important;padding:12px 16px !important;background:#FFFFFF !important;border:1px solid #E5E7EB !important;border-radius:8px !important;margin-bottom:12px !important;height:auto !important;min-height:0 !important;flex-grow:0 !important;flex-shrink:0 !important;flex-basis:auto !important;align-self:flex-start !important;position:static !important;float:none !important;order:-1 !important;';
-        // Remove any internal row wrappers causing vertical stacking
+        filterPanel.style.cssText = 'display:flex !important;flex-wrap:wrap !important;align-items:center !important;gap:12px !important;width:100% !important;padding:12px 16px !important;background:#141414 !important;border:1px solid rgba(212,168,67,0.18) !important;border-radius:12px !important;margin-bottom:12px !important;height:auto !important;min-height:0 !important;flex-grow:0 !important;flex-shrink:0 !important;flex-basis:auto !important;align-self:flex-start !important;position:static !important;float:none !important;order:-1 !important;';
         var innerRows = filterPanel.querySelectorAll('.row');
         innerRows.forEach(function(row) {
             row.style.cssText = 'display:contents !important;';
         });
-        // Force all col children to be inline
         filterPanel.querySelectorAll('.col, [class*="col "]').forEach(function(col) {
             col.style.cssText = 'width:auto !important;display:inline-flex !important;align-items:center !important;gap:6px !important;padding:0 !important;margin:0 !important;float:none !important;flex-grow:0 !important;flex-shrink:0 !important;';
         });
-        // Force the Materialize select fields to be compact
         filterPanel.querySelectorAll('.input-field').forEach(function(f) {
             f.style.cssText = 'margin:0 !important;padding:0 !important;';
         });
     }
-    // Move action form into a compact inline bar above the table
     var actionForm = document.querySelector('.actions form, #changelist-form .actions');
     if (!actionForm) {
-        // Material admin puts actions in a separate card inside side-wrapper
         var actionCard = document.querySelector('.side-wrapper .card .actions');
     }
 
@@ -1214,18 +1250,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (bestMatch) bestMatch.classList.add('active');
 
-    // ====== FIX PAGINATOR TEXT (remove 'N.' numbering) ======
+    // ====== FIX PAGINATOR TEXT ======
     document.querySelectorAll('.paginator').forEach(function(p) {
         var text = p.textContent.trim();
-        // Replace patterns like "0 1. Banners" → "0 Banners" or "17 5. Wallets" → "17 Wallets"
         text = text.replace(/(\d+)\s+\d+\.\s+/g, '$1 ');
         if (text.match(/^0\s/)) {
-            p.innerHTML = '<i class="material-icons" style="font-size:32px;color:#D1D5DB;display:block;margin-bottom:8px;">inbox</i>' + text.replace(/^0\s*/, 'No ') + ' found';
+            p.innerHTML = '<i class="material-icons" style="font-size:32px;color:#6B6560;display:block;margin-bottom:8px;">inbox</i>' + text.replace(/^0\s*/, 'No ') + ' found';
         } else {
             p.textContent = text;
         }
     });
-    // Fix 'Select all N N.' text in actions
     document.querySelectorAll('.actions a, .actions span').forEach(function(el) {
         el.textContent = el.textContent.replace(/\s+\d+\.\s+/g, ' ');
     });
@@ -1255,7 +1289,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 '<div class="dash-table" id="dash-recent">' +
                 '<h3>Recent Transactions</h3>' +
                 '<table><thead><tr><th>Hash</th><th>User</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead>' +
-                '<tbody id="dash-recent-body"><tr><td colspan="5" style="text-align:center;color:#9CA3AF;">Loading...</td></tr></tbody></table>' +
+                '<tbody id="dash-recent-body"><tr><td colspan="5" style="text-align:center;color:#6B6560;">Loading...</td></tr></tbody></table>' +
                 '</div>';
 
             loadDashboardStats(0);
@@ -1279,13 +1313,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var href = link.getAttribute('href');
         var isDeposit = href.includes('/deposit/');
         var actionType = isDeposit ? 'Deposit' : 'Withdraw';
-        var actionColor = isDeposit ? '#059669' : '#EA580C';
+        var actionColor = isDeposit ? '#22C55E' : '#D4A843';
         var row = link.closest('tr');
         var phone = row ? (row.querySelector('th a') || row.querySelector('td a') || {}).textContent || 'User' : 'User';
-        var balance = '₹0.00';
+        var balance = '\u20B90.00';
         var tds = row ? row.querySelectorAll('td') : [];
         for (var i = 0; i < tds.length; i++) {
-            if (tds[i].textContent.indexOf('₹') !== -1 && !tds[i].querySelector('a')) {
+            if (tds[i].textContent.indexOf('\u20B9') !== -1 && !tds[i].querySelector('a')) {
                 balance = tds[i].textContent.trim(); break;
             }
         }
@@ -1323,9 +1357,9 @@ document.addEventListener('DOMContentLoaded', function() {
             '<p class="balance">Balance: ' + balance + '</p>' +
             '<form method="post" action="' + href + '">' +
             '<input type="hidden" name="csrfmiddlewaretoken" value="' + getCookie('csrftoken') + '">' +
-            '<input type="number" name="amount" min="1" step="1" required autofocus placeholder="Enter amount..." style="width:100%;margin-bottom:14px;">' +
-            '<button type="submit" style="background:' + actionColor + ' !important;color:#FFF !important;padding:12px;width:100%;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;" onclick="return confirm(\'Confirm ' + actionType.toLowerCase() + '?\')">Confirm ' + actionType + '</button>' +
-            '<button type="button" style="background:#F3F4F6;color:#374151;border:1px solid #D1D5DB;padding:10px;width:100%;border-radius:6px;margin-top:8px;cursor:pointer;font-size:13px;" onclick="this.closest(\'.modal-overlay\').remove()">Cancel</button>' +
+            '<input type="number" name="amount" min="1" step="1" required autofocus placeholder="Enter amount..." style="width:100%;margin-bottom:14px;background:#1A1A1A !important;border:1px solid rgba(255,255,255,0.06) !important;color:#F5F1E8 !important;">' +
+            '<button type="submit" style="background:' + actionColor + ' !important;color:#000 !important;padding:12px;width:100%;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;" onclick="return confirm(\'Confirm ' + actionType.toLowerCase() + '?\')">Confirm ' + actionType + '</button>' +
+            '<button type="button" style="background:#1A1A1A;color:#A8A29E;border:1px solid rgba(255,255,255,0.06);padding:10px;width:100%;border-radius:8px;margin-top:8px;cursor:pointer;font-size:13px;" onclick="this.closest(\'.modal-overlay\').remove()">Cancel</button>' +
             '</form></div>';
         document.body.appendChild(overlay);
         overlay.querySelector('input[name="amount"]').focus();
@@ -1372,16 +1406,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 var tbody = document.getElementById('dash-recent-body');
                 if (data.recent_transactions.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#9CA3AF;">No transactions yet</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#6B6560;">No transactions yet</td></tr>';
                 } else {
                     tbody.innerHTML = data.recent_transactions.map(function(t) {
                         var typeMap = {D:'Deposit',W:'Withdrawal',B:'Bonus',F:'Cockfight',I:'Dice Play',L:'Lottery'};
                         var colorMap = {D:'badge-green',W:'badge-orange',B:'badge-gold',F:'badge-gold',I:'badge-gold',L:'badge-gold',C:'badge-gold',S:'badge-gold'};
-                        return '<tr><td style="font-family:monospace;font-size:12px;color:#6B7280;">' + t.hash.substring(0,12) + '</td>' +
+                        return '<tr><td style="font-family:monospace;font-size:12px;color:#6B6560;">' + t.hash.substring(0,12) + '</td>' +
                             '<td>' + t.user + '</td>' +
-                            '<td><span class="badge ' + (colorMap[t.type]||'badge-blue') + '">' + (typeMap[t.type]||t.type) + '</span></td>' +
+                            '<td><span class="badge ' + (colorMap[t.type]||'badge-gold') + '">' + (typeMap[t.type]||t.type) + '</span></td>' +
                             '<td>\u20B9' + numberFormat(t.amount) + '</td>' +
-                            '<td style="color:#6B7280;">' + t.date + '</td></tr>';
+                            '<td style="color:#6B6560;">' + t.date + '</td></tr>';
                     }).join('');
                 }
             })
@@ -1406,26 +1440,23 @@ function toggleSidebar() {
 // ===== REAL-TIME AUTO-REFRESH FOR ALL ADMIN PAGES =====
 document.addEventListener('DOMContentLoaded', function() {
 (function() {
-    var REFRESH_INTERVAL = 10000; // 10 seconds
-    var DASHBOARD_INTERVAL = 8000; // 8 seconds for dashboard stats
+    var REFRESH_INTERVAL = 10000;
+    var DASHBOARD_INTERVAL = 8000;
 
-    // Pulse animation
     var pulseStyle = document.createElement('style');
     pulseStyle.textContent = '@keyframes livePulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }';
     document.head.appendChild(pulseStyle);
 
-    // Create refresh indicator
     var indicator = document.createElement('div');
     indicator.id = 'live-refresh-indicator';
-    indicator.style.cssText = 'position:fixed;top:8px;right:8px;z-index:99999;background:#10b981;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;display:flex;align-items:center;gap:5px;opacity:0.85;pointer-events:none;transition:opacity 0.3s;';
-    indicator.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;animation:livePulse 1.5s infinite;"></span> LIVE';
+    indicator.style.cssText = 'position:fixed;top:10px;right:10px;z-index:99999;background:rgba(34,197,94,0.9);color:#000;font-size:11px;font-weight:600;padding:4px 12px;border-radius:12px;display:flex;align-items:center;gap:5px;opacity:0.85;pointer-events:none;transition:opacity 0.3s;';
+    indicator.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#000;display:inline-block;animation:livePulse 1.5s infinite;"></span> LIVE';
     document.body.appendChild(indicator);
 
-    // Image lightbox overlay
     var lightbox = document.createElement('div');
     lightbox.id = 'img-lightbox';
-    lightbox.style.cssText = 'display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;cursor:pointer;';
-    lightbox.innerHTML = '<img style="max-width:90%;max-height:90%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5);" />' +
+    lightbox.style.cssText = 'display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;cursor:pointer;';
+    lightbox.innerHTML = '<img style="max-width:90%;max-height:90%;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.7);" />' +
         '<span style="position:absolute;top:16px;right:24px;color:#fff;font-size:32px;font-weight:bold;cursor:pointer;">&times;</span>';
     document.body.appendChild(lightbox);
     lightbox.addEventListener('click', function() { lightbox.style.display = 'none'; });
@@ -1433,7 +1464,6 @@ document.addEventListener('DOMContentLoaded', function() {
         lightbox.querySelector('img').src = url;
         lightbox.style.display = 'flex';
     };
-    // Attach lightbox to all screenshot thumbnails in result tables
     document.querySelectorAll('#result_list a[data-lightbox]').forEach(function(a) {
         a.addEventListener('click', function(e) {
             e.preventDefault();
@@ -1441,7 +1471,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Compact textareas in list tables (Django default rows=10 is too big)
     document.querySelectorAll('#result_list textarea').forEach(function(ta) {
         ta.rows = 2;
         ta.style.height = '36px';
@@ -1452,7 +1481,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ta.style.padding = '4px 6px';
     });
 
-    // Disable editing on processed (non-pending) rows in deposit/withdrawal lists
     document.querySelectorAll('#result_list tbody tr').forEach(function(row) {
         var cells = row.querySelectorAll('td');
         var isProcessed = false;
@@ -1463,7 +1491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isProcessed) {
             row.querySelectorAll('input, textarea, select').forEach(function(el) {
                 el.disabled = true;
-                el.style.opacity = '0.6';
+                el.style.opacity = '0.5';
                 el.style.pointerEvents = 'none';
                 el.style.background = 'transparent';
                 el.style.border = 'none';
@@ -1471,27 +1499,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Override Django's built-in "unsaved changes" confirm dialog
-    // Django uses window.confirm() in actions.js - intercept it
     var _origConfirm = window.confirm;
     window.confirm = function(message) {
-        // For Django's "unsaved editable fields" warning, just return true (allow navigation)
         if (message && message.indexOf('unsaved') !== -1) {
             return true;
         }
         return _origConfirm.call(window, message);
     };
-    // Also suppress Django's beforeunload handler for editable fields
     window.onbeforeunload = null;
 
-    // Flash indicator on refresh
     function flashIndicator() {
         indicator.style.opacity = '1';
-        indicator.style.background = '#C5930A';
-        setTimeout(function() { indicator.style.background = '#10b981'; indicator.style.opacity = '0.85'; }, 400);
+        indicator.style.background = 'rgba(212,168,67,0.9)';
+        setTimeout(function() { indicator.style.background = 'rgba(34,197,94,0.9)'; indicator.style.opacity = '0.85'; }, 400);
     }
 
-    // Sidebar badge counts - fetch and update
     function updateSidebarCounts() {
         fetch('/admin-api/sidebar-counts/', { credentials: 'same-origin' })
             .then(function(r) { return r.json(); })
@@ -1517,8 +1539,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateSidebarCounts();
     setInterval(updateSidebarCounts, 10000);
 
-    // Auto-refresh ALL list pages (deposit requests, withdrawal requests, bets, matches, wallets, etc.)
-    // Detect list pages: has result_list, changelist-form, or is a list URL (no /add/ or /change/)
     var resultTable = document.getElementById('result_list');
     var changelistForm = document.getElementById('changelist-form');
     var path = window.location.pathname;
@@ -1531,26 +1551,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(function(html) {
                     var parser = new DOMParser();
                     var doc = parser.parseFromString(html, 'text/html');
-                    // Update the results table if it exists
                     var newTable = doc.getElementById('result_list');
                     var curTable = document.getElementById('result_list');
                     if (newTable && curTable) {
                         curTable.innerHTML = newTable.innerHTML;
                     } else if (!curTable && newTable) {
-                        // Table appeared (new items came in) — update the full content area
                         var newContent = doc.getElementById('content') || doc.getElementById('content-main');
                         var curContent = document.getElementById('content') || document.getElementById('content-main');
                         if (newContent && curContent) curContent.innerHTML = newContent.innerHTML;
                     }
-                    // Update result count/pagination
                     var newPag = doc.querySelector('.paginator');
                     var curPag = document.querySelector('.paginator');
                     if (newPag && curPag) curPag.innerHTML = newPag.innerHTML;
-                    // Update action counters if present
                     var newCount = doc.querySelector('.actions .action-counter');
                     var curCount = document.querySelector('.actions .action-counter');
                     if (newCount && curCount) curCount.textContent = newCount.textContent;
-                    // Update changelist content area for empty → non-empty transitions
                     var newCLForm = doc.getElementById('changelist-form');
                     var curCLForm = document.getElementById('changelist-form');
                     if (newCLForm && curCLForm) curCLForm.innerHTML = newCLForm.innerHTML;
@@ -1565,7 +1580,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, REFRESH_INTERVAL);
     }
 
-    // Auto-refresh dashboard stats
     var dashEl = document.getElementById('stat-users');
     if (dashEl && typeof loadDashboardStats === 'function') {
         setInterval(function() {
@@ -1576,7 +1590,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, DASHBOARD_INTERVAL);
     }
 
-    // Auto-refresh change_form pages (individual edit pages) — update action log, readonly fields
     var changeForm = document.getElementById('content-main');
     var isChangeForm = changeForm && !resultTable && window.location.pathname.indexOf('/change') !== -1;
     if (isChangeForm) {
@@ -1586,11 +1599,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(function(html) {
                     var parser = new DOMParser();
                     var doc = parser.parseFromString(html, 'text/html');
-                    // Update readonly fields and action log
                     var newLog = doc.querySelector('.object-history, .timeline');
                     var curLog = document.querySelector('.object-history, .timeline');
                     if (newLog && curLog) curLog.innerHTML = newLog.innerHTML;
-                    // Update readonly/display fields
                     doc.querySelectorAll('.readonly, .field-status .readonly').forEach(function(newEl) {
                         var fieldName = newEl.closest('.form-row, .field-box');
                         if (fieldName) {
@@ -1605,7 +1616,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, REFRESH_INTERVAL);
     }
 
-    // Auto-refresh the odds config page
     if (window.location.pathname.indexOf('oddsconfig') !== -1) {
         setInterval(function() {
             fetch(window.location.href, { credentials: 'same-origin' })
