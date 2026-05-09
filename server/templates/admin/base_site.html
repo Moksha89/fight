@@ -1452,6 +1452,38 @@ document.addEventListener('DOMContentLoaded', function() {
         ta.style.padding = '4px 6px';
     });
 
+    // Disable editing on processed (non-pending) rows in deposit/withdrawal lists
+    document.querySelectorAll('#result_list tbody tr').forEach(function(row) {
+        var cells = row.querySelectorAll('td');
+        var isProcessed = false;
+        cells.forEach(function(c) {
+            var t = c.textContent.trim();
+            if (t === 'Accepted' || t === 'Rejected' || t === 'Approved') isProcessed = true;
+        });
+        if (isProcessed) {
+            row.querySelectorAll('input, textarea, select').forEach(function(el) {
+                el.disabled = true;
+                el.style.opacity = '0.6';
+                el.style.pointerEvents = 'none';
+                el.style.background = 'transparent';
+                el.style.border = 'none';
+            });
+        }
+    });
+
+    // Override Django's built-in "unsaved changes" confirm dialog
+    // Django uses window.confirm() in actions.js - intercept it
+    var _origConfirm = window.confirm;
+    window.confirm = function(message) {
+        // For Django's "unsaved editable fields" warning, just return true (allow navigation)
+        if (message && message.indexOf('unsaved') !== -1) {
+            return true;
+        }
+        return _origConfirm.call(window, message);
+    };
+    // Also suppress Django's beforeunload handler for editable fields
+    window.onbeforeunload = null;
+
     // Flash indicator on refresh
     function flashIndicator() {
         indicator.style.opacity = '1';
