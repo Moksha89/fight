@@ -853,20 +853,255 @@
         /* Match Timer */
         .match-timer { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
         .match-timer .material-icons { font-size: 14px; }
-        /* Dice Game */
-        .dice-board { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; }
-        .dice-board-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
-        .dice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-        .dice-face {
-            aspect-ratio: 1; border: 2px solid var(--border); border-radius: var(--radius);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 28px; font-weight: 700; transition: all .2s;
-            background: var(--bg-white);
+        /* ===== DICE GAME (Advanced) ===== */
+        .dice-layout { display: flex; gap: 16px; align-items: flex-start; }
+        .dice-layout .dice-left { flex: 1; min-width: 0; }
+        .dice-layout .dice-right { width: 380px; flex-shrink: 0; }
+        @media(max-width:900px) {
+            .dice-layout { flex-direction: column; }
+            .dice-layout .dice-right { width: 100%; }
         }
-        .dice-face:hover { border-color: var(--gold); background: var(--gold-bg); }
-        .dice-face.selected { border-color: var(--gold); background: var(--gold-bg); box-shadow: 0 0 0 3px rgba(212,168,67,0.2); }
-        .dice-face small { font-size: 10px; font-weight: 500; color: var(--text-muted); margin-top: 2px; }
-        .dice-emoji { font-size: 32px; }
+        .dice-board-tabs {
+            display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;
+        }
+        .dice-board-tab {
+            padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px;
+            font-weight: 700; white-space: nowrap; transition: all .2s; letter-spacing: 0.3px;
+            background: #fff; color: var(--text-primary); border: 2px solid var(--border);
+        }
+        .dice-board-tab.active {
+            background: var(--gold); color: #000; border-color: var(--gold);
+        }
+        .dice-board-tab:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+        .dice-match-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
+            box-shadow: var(--shadow-sm); transition: box-shadow 0.2s;
+        }
+        .dice-match-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px;
+            background: linear-gradient(90deg, #1a1a1a, #252525);
+            border-bottom: 1px solid var(--border-light);
+        }
+        .dice-match-title { font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+        .dice-stream-container {
+            width: 100%; background: var(--black); overflow: hidden;
+            position: relative;
+        }
+        .dice-stream-container iframe { width: 100%; height: 280px; border: none; }
+        .dice-stream-placeholder {
+            width: 100%; height: 200px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 8px;
+            background: linear-gradient(180deg, #111, #1a1a1a);
+            color: var(--text-muted); font-size: 13px;
+        }
+        .dice-stream-placeholder .material-icons { font-size: 48px; color: var(--gold); opacity: 0.5; }
+        /* 3D Dice Grid */
+        .dice-grid-container {
+            padding: 16px;
+            background: linear-gradient(180deg, #151515, #1a1a1a);
+        }
+        .dice-grid-label {
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            color: var(--gold); letter-spacing: 1px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .dice-grid-label .material-icons { font-size: 16px; }
+        .dice-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+        }
+        .dice-face {
+            aspect-ratio: 1; border: 2px solid var(--border); border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all .25s ease; position: relative;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .dice-face::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent);
+            border-radius: 12px 12px 0 0; pointer-events: none;
+        }
+        .dice-face:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(212,168,67,0.2); }
+        .dice-face.selected {
+            border-color: var(--gold); background: linear-gradient(145deg, #3a3020, #2a2518);
+            box-shadow: 0 0 0 3px rgba(212,168,67,0.2), 0 4px 16px rgba(212,168,67,0.15);
+            transform: translateY(-2px);
+        }
+        .dice-face.has-pending::after {
+            content: ''; position: absolute; top: 6px; right: 6px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,0.6);
+            animation: livePulse 1.5s infinite;
+        }
+        .dice-face-number {
+            font-size: 32px; font-weight: 800; color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            line-height: 1;
+        }
+        .dice-face.selected .dice-face-number { color: var(--gold); }
+        .dice-face-dots {
+            width: 48px; height: 48px; display: grid; gap: 2px; padding: 4px;
+            margin-bottom: 4px;
+        }
+        .dice-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fff, #bbb);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.1);
+        }
+        .dice-face.selected .dice-dot {
+            background: radial-gradient(circle at 35% 35%, var(--gold-light), var(--gold));
+        }
+        .dice-face-label {
+            font-size: 10px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .dice-face.selected .dice-face-label { color: var(--gold); }
+        .dice-bet-amount-badge {
+            position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+            background: var(--gold); color: #000; font-size: 10px; font-weight: 800;
+            padding: 2px 8px; border-radius: 8px; white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(212,168,67,0.4);
+        }
+        /* Dice Stats Bar */
+        .dice-stats-bar {
+            display: flex; padding: 8px 16px; gap: 4px;
+            background: #111; border-top: 1px solid var(--border-light);
+        }
+        .dice-stat-item {
+            flex: 1; text-align: center; padding: 4px 2px;
+            border-radius: 6px; font-size: 10px; font-weight: 600;
+        }
+        .dice-stat-num { font-size: 14px; font-weight: 800; color: var(--gold); }
+        .dice-stat-freq { font-size: 10px; color: var(--text-muted); }
+        .dice-stat-bar {
+            width: 100%; height: 3px; border-radius: 2px; background: #333; margin-top: 2px;
+            overflow: hidden;
+        }
+        .dice-stat-fill {
+            height: 100%; border-radius: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-dark));
+            transition: width 0.3s;
+        }
+        /* Dice Result History (horizontal scrolling grid) */
+        .dice-history-card {
+            background: var(--card-bg); border-radius: 12px;
+            border: 1px solid var(--border); overflow: hidden;
+        }
+        .dice-history-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; border-bottom: 1px solid var(--border);
+        }
+        .dice-history-title {
+            font-size: 14px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--gold);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .dice-history-title .material-icons { font-size: 18px; }
+        .dice-history-scroll {
+            overflow-x: auto; overflow-y: hidden; padding: 12px;
+            max-height: 300px;
+        }
+        .dice-history-scroll::-webkit-scrollbar { height: 4px; }
+        .dice-history-scroll::-webkit-scrollbar-track { background: transparent; }
+        .dice-history-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .dice-history-grid {
+            display: flex; gap: 6px;
+        }
+        .dice-history-col {
+            display: flex; flex-direction: column; gap: 3px; align-items: center;
+            min-width: 36px;
+        }
+        .dice-history-col-header {
+            font-size: 9px; font-weight: 700; color: var(--text-muted);
+            padding: 2px 0; text-align: center;
+        }
+        .dice-history-cell {
+            width: 30px; height: 30px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800;
+            background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+            border: 1px solid #333; color: #888;
+        }
+        .dice-history-cell.rolled {
+            background: linear-gradient(145deg, #3a3020, #2a2518);
+            border-color: var(--gold); color: var(--gold);
+            box-shadow: 0 0 6px rgba(212,168,67,0.15);
+        }
+        /* Dice bet history panel */
+        .dice-bet-history { margin-top: 12px; }
+        .dice-bet-history h4 {
+            font-size: 14px; font-weight: 600; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .dice-bet-history h4 .material-icons { font-size: 18px; color: var(--gold-dark); }
+        .dice-bet-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px; border-bottom: 1px solid var(--border-light);
+            background: var(--bg-card); border-radius: 8px; margin-bottom: 4px;
+        }
+        .dice-bet-face {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 14px;
+            background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+            border: 1px solid #444; color: var(--gold);
+        }
+        .dice-bet-details { flex: 1; }
+        .dice-bet-match { font-size: 11px; color: var(--text-muted); }
+        .dice-bet-amt { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .dice-bet-status {
+            font-size: 11px; font-weight: 700; padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .dice-bet-status.won { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .dice-bet-status.lost { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .dice-bet-status.pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        /* Dice Roll Animation */
+        @keyframes diceRoll {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            25% { transform: rotateX(180deg) rotateY(90deg); }
+            50% { transform: rotateX(360deg) rotateY(180deg); }
+            75% { transform: rotateX(540deg) rotateY(270deg); }
+            100% { transform: rotateX(720deg) rotateY(360deg); }
+        }
+        @keyframes diceBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            30% { transform: translateY(-20px) scale(1.1); }
+            60% { transform: translateY(0) scale(0.95); }
+            80% { transform: translateY(-5px) scale(1.02); }
+        }
+        .dice-rolling { animation: diceBounce 0.6s ease-in-out; }
+        .dice-result-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); z-index: 9990;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 16px; cursor: pointer;
+            backdrop-filter: blur(8px);
+        }
+        .dice-result-title {
+            font-size: 28px; font-weight: 800; color: var(--gold);
+            text-shadow: 0 2px 8px rgba(212,168,67,0.4);
+            letter-spacing: 2px;
+        }
+        .dice-result-faces {
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+        }
+        .dice-result-face {
+            width: 56px; height: 56px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 800;
+            background: linear-gradient(145deg, #3a3020, #2a2518);
+            border: 2px solid var(--gold); color: var(--gold);
+            box-shadow: 0 4px 12px rgba(212,168,67,0.3);
+            animation: diceBounce 0.6s ease-in-out;
+        }
+        .dice-result-payout {
+            font-size: 20px; font-weight: 700; color: #22c55e;
+            text-shadow: 0 2px 8px rgba(34,197,94,0.3);
+        }
         .wallet-action-btn.deposit {
             background: var(--gold); color: white;
         }
@@ -1497,8 +1732,13 @@
             <div id="sec-dice" class="section">
                 <div class="page-title">
                     <span class="material-icons">casino</span>
-                    Dice Games
+                    Dice Play — Gundata
                 </div>
+                <!-- Board Tabs -->
+                <div id="dice-board-tabs" class="dice-board-tabs">
+                    <div class="dice-board-tab active" data-board="loading">Loading boards...</div>
+                </div>
+                <!-- Main Dice Content -->
                 <div id="dice-container">
                     <div class="empty-state"><span class="material-icons">casino</span><p>Loading dice games...</p></div>
                 </div>
@@ -2733,7 +2973,7 @@
 
         if (sectionId === 'sec-statement') loadStatement();
         if (sectionId === 'sec-home' || sectionId === 'sec-cockfight') { loadMatches(); loadUserBets(); }
-        if (sectionId === 'sec-dice') loadDiceGames();
+        if (sectionId === 'sec-dice') { loadDiceGames(); loadDiceUserBets(); connectDiceWebSockets(); } else { disconnectDiceWebSockets(); }
         if (sectionId === 'sec-wallet') { loadStatement(); }
         window.scrollTo(0, 0);
     }
@@ -3105,74 +3345,521 @@
         container.innerHTML = html;
     }
 
-    // ===== DICE GAMES =====
+    // ===== DICE GAMES (Advanced) =====
     let diceBoards = [];
-    let selectedDice = {};
+    let diceActiveBoardId = null;
+    let diceSelectedFace = null;
+    let diceBetAmount = 0;
+    let diceSelectedCoin = 100;
+    let dicePendingBets = [];
+    let diceUserBets = [];
+    let diceRenderedMatchId = null;
+    let diceRenderedStreamUrl = null;
+    let diceWsMatch = null;
+    let diceWsResult = null;
+    let diceSoundEnabled = true;
+
+    const DICE_COIN_VALUES = [50, 100, 200, 500, 1000, 2500, 5000];
+    const DICE_FACE_NAMES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
+
+    function getDiceDotLayout(num) {
+        const layouts = {
+            1: [[1,1]],
+            2: [[0,0],[2,2]],
+            3: [[0,0],[1,1],[2,2]],
+            4: [[0,0],[0,2],[2,0],[2,2]],
+            5: [[0,0],[0,2],[1,1],[2,0],[2,2]],
+            6: [[0,0],[0,2],[1,0],[1,2],[2,0],[2,2]]
+        };
+        return layouts[num] || [];
+    }
+
+    function renderDiceDots(num) {
+        const dots = getDiceDotLayout(num);
+        let grid = '<div class="dice-face-dots" style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:2px;width:48px;height:48px;">';
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+                const hasDot = dots.some(d => d[0] === r && d[1] === c);
+                grid += hasDot ? '<div class="dice-dot" style="width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#bbb);box-shadow:inset 0 1px 2px rgba(0,0,0,.3);margin:auto;"></div>' : '<div></div>';
+            }
+        }
+        grid += '</div>';
+        return grid;
+    }
+
     async function loadDiceGames() {
         try {
             const res = await fetch(`${API}/dice-play/history/`, {headers:{'Authorization':`Bearer ${token}`}});
             if (res.ok) {
                 const data = await res.json();
                 diceBoards = data.results || data || [];
-                renderDiceGames();
+                if (!diceActiveBoardId && diceBoards.length > 0) {
+                    diceActiveBoardId = String(diceBoards[0].id);
+                }
+                renderDiceBoardTabs();
+                renderDiceMain();
             }
         } catch(e) {}
     }
-    function renderDiceGames() {
-        const container = document.getElementById('dice-container');
+
+    async function loadDiceUserBets() {
+        try {
+            const res = await fetch(`${API}/dice-play/bets/`, {headers:{'Authorization':`Bearer ${token}`}});
+            if (res.ok) {
+                const data = await res.json();
+                diceUserBets = Array.isArray(data) ? data : (data.results || []);
+                dicePendingBets = diceUserBets.filter(b => b.matchWinStatus === 0);
+                renderDiceBetHistory();
+                updateDicePendingDots();
+            }
+        } catch(e) {}
+    }
+
+    function renderDiceBoardTabs() {
+        const tabsEl = document.getElementById('dice-board-tabs');
         if (!diceBoards || diceBoards.length === 0) {
-            container.innerHTML = '<div class="empty-state"><span class="material-icons">casino</span><p>No dice games available right now</p></div>';
+            tabsEl.innerHTML = '<div class="dice-board-tab active">No boards</div>';
             return;
         }
-        const diceEmojis = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
         let html = '';
         diceBoards.forEach(board => {
-            const matches = board.matches || [];
-            const liveMatch = matches.find(m => !m.isWinnerDeclared);
-            if (!liveMatch) return;
-            html += `<div class="dice-board">
-                <div class="dice-board-title">${board.name} — Match #${liveMatch.id}</div>
-                <div class="dice-grid">`;
-            for (let i = 1; i <= 6; i++) {
-                html += `<div class="dice-face ${selectedDice[liveMatch.id]===i?'selected':''}" onclick="selectDiceFace(${liveMatch.id}, ${i})">
-                    <span class="dice-emoji">${diceEmojis[i]}</span>
-                    <small>${i}</small>
-                </div>`;
+            const bid = String(board.id);
+            const isActive = bid === diceActiveBoardId;
+            const hasLive = (board.matches || []).some(m => !m.isWinnerDeclared);
+            html += `<div class="dice-board-tab ${isActive?'active':''}" data-board="${bid}" onclick="switchDiceBoard('${bid}')">${hasLive?'<span class="live-dot"></span> ':''}${board.name}</div>`;
+        });
+        tabsEl.innerHTML = html;
+    }
+
+    function switchDiceBoard(boardId) {
+        if (diceActiveBoardId === boardId) return;
+        diceActiveBoardId = boardId;
+        diceSelectedFace = null;
+        diceBetAmount = 0;
+        diceRenderedMatchId = null;
+        diceRenderedStreamUrl = null;
+        renderDiceBoardTabs();
+        renderDiceMain();
+    }
+
+    function getActiveDiceBoard() {
+        return diceBoards.find(b => String(b.id) === diceActiveBoardId) || null;
+    }
+
+    function getActiveDiceMatch() {
+        const board = getActiveDiceBoard();
+        if (!board) return null;
+        return (board.matches || []).find(m => !m.isWinnerDeclared) || null;
+    }
+
+    function getCompletedDiceMatches() {
+        const board = getActiveDiceBoard();
+        if (!board) return [];
+        return (board.matches || []).filter(m => m.isWinnerDeclared).sort((a,b) => (a.id - b.id));
+    }
+
+    function renderDiceMain() {
+        const container = document.getElementById('dice-container');
+        const board = getActiveDiceBoard();
+        const match = getActiveDiceMatch();
+
+        if (!board) {
+            container.innerHTML = '<div class="empty-state"><span class="material-icons">casino</span><p>No dice boards available</p></div>';
+            return;
+        }
+
+        const needsFullRender = !diceRenderedMatchId || diceRenderedMatchId !== (match?.id || 'none');
+
+        if (needsFullRender) {
+            diceRenderedMatchId = match?.id || 'none';
+            const streamUrl = match?.youtubeLiveLink || '';
+            const promoUrl = match?.promoVideo || '';
+            diceRenderedStreamUrl = streamUrl || promoUrl;
+
+            let streamHtml = '';
+            if (streamUrl) {
+                const ytId = extractYoutubeId(streamUrl);
+                if (ytId) {
+                    streamHtml = `<div class="dice-stream-container"><iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&rel=0&modestbranding=1" allow="autoplay" allowfullscreen></iframe></div>`;
+                } else {
+                    streamHtml = `<div class="dice-stream-container"><iframe src="${streamUrl}" allowfullscreen></iframe></div>`;
+                }
+            } else if (promoUrl) {
+                streamHtml = `<div class="dice-stream-container"><video src="${promoUrl}" autoplay muted loop style="width:100%;height:280px;object-fit:cover;"></video></div>`;
+            } else {
+                streamHtml = `<div class="dice-stream-placeholder"><span class="material-icons">casino</span><span>Waiting for live stream...</span></div>`;
             }
-            html += `</div>
-                <div class="quick-chips" style="margin-bottom:8px;">
-                    <div class="chip" onclick="setAmount('dice-'+${liveMatch.id}, 100)">₹100</div>
-                    <div class="chip" onclick="setAmount('dice-'+${liveMatch.id}, 500)">₹500</div>
-                    <div class="chip" onclick="setAmount('dice-'+${liveMatch.id}, 1000)">₹1K</div>
-                    <div class="chip" onclick="setAmount('dice-'+${liveMatch.id}, 5000)">₹5K</div>
+
+            const matchTitle = match ? `Match #${match.title || match.id}` : 'No Live Match';
+            const isBetting = match?.isBettingEnabled;
+
+            container.innerHTML = `
+            <div class="dice-layout">
+                <div class="dice-left">
+                    <div class="dice-match-card">
+                        <div class="dice-match-header">
+                            <div class="dice-match-title">
+                                ${match ? '<span class="live-dot"></span>' : ''}
+                                <span id="dice-match-title">${matchTitle}</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span id="dice-sound-toggle" onclick="toggleDiceSound()" style="cursor:pointer;font-size:18px;color:${diceSoundEnabled?'var(--gold)':'var(--text-muted)'};" class="material-icons">${diceSoundEnabled?'volume_up':'volume_off'}</span>
+                                <span id="dice-bet-status">${match ? (isBetting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>') : '<span class="match-closed">WAITING</span>'}</span>
+                            </div>
+                        </div>
+                        ${streamHtml}
+                        <!-- Dice Grid -->
+                        <div class="dice-grid-container">
+                            <div class="dice-grid-label"><span class="material-icons">casino</span> Pick Your Number</div>
+                            <div class="dice-grid" id="dice-grid">
+                                ${renderDiceGrid(match)}
+                            </div>
+                        </div>
+                        <!-- Stats Bar -->
+                        <div class="dice-stats-bar" id="dice-stats-bar">${renderDiceStats()}</div>
+                        <!-- Coin Chips -->
+                        <div class="chips-row" id="dice-chips-row">
+                            ${DICE_COIN_VALUES.map(v => `<div class="chip ${diceSelectedCoin===v?'selected':''}" onclick="selectDiceCoin(this, ${v})">₹${v>=1000?(v/1000)+'K':v}</div>`).join('')}
+                        </div>
+                        <!-- Bet Actions -->
+                        <div id="dice-betting-area">
+                            ${match && isBetting ? renderDiceBettingActions() : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>'}
+                        </div>
+                        <!-- Bet History -->
+                        <div id="dice-bet-history-area" class="dice-bet-history" style="padding:0 16px 12px;"></div>
+                    </div>
                 </div>
-                <div class="bet-amount-row">
-                    <input type="number" placeholder="Enter amount" id="bet-amt-dice-${liveMatch.id}" min="10">
-                    <button class="bet-submit" onclick="placeDiceBet(${liveMatch.id})">Place Bet</button>
+                <div class="dice-right">
+                    <div class="dice-history-card">
+                        <div class="dice-history-header">
+                            <div class="dice-history-title"><span class="material-icons">history</span> Match Results</div>
+                        </div>
+                        <div class="dice-history-scroll" id="dice-history-scroll">
+                            ${renderDiceMatchHistory()}
+                        </div>
+                    </div>
                 </div>
             </div>`;
+            loadDiceUserBets();
+        } else {
+            updateDiceInPlace();
+        }
+    }
+
+    function extractYoutubeId(url) {
+        if (!url) return null;
+        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+        const m = url.match(/(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        return m ? m[1] : null;
+    }
+
+    function renderDiceGrid(match) {
+        const isBetting = match?.isBettingEnabled;
+        let html = '';
+        for (let i = 1; i <= 6; i++) {
+            const isSelected = diceSelectedFace === i;
+            const hasPending = dicePendingBets.some(b => {
+                const board = getActiveDiceBoard();
+                const boardMatchIds = new Set((board?.matches || []).map(m => m.id));
+                return b.diceNumber === i && boardMatchIds.has(b.match);
+            });
+            const amountDisplay = isSelected && diceBetAmount > 0 ? `<div class="dice-bet-amount-badge">₹${diceBetAmount}</div>` : '';
+            html += `<div class="dice-face ${isSelected?'selected':''} ${hasPending?'has-pending':''} ${!isBetting?'':'clickable'}" onclick="handleDiceFaceClick(${i})" style="${!isBetting?'opacity:0.6;cursor:not-allowed;':''}">
+                ${renderDiceDots(i)}
+                <div class="dice-face-label">${DICE_FACE_NAMES[i]}</div>
+                ${amountDisplay}
+            </div>`;
+        }
+        return html;
+    }
+
+    function renderDiceBettingActions() {
+        return `<div class="bet-actions">
+            <input type="number" class="bet-amount-input" placeholder="Enter amount or select chip" id="dice-bet-amount-input" min="10" value="${diceBetAmount > 0 ? diceBetAmount : ''}">
+            <button class="bet-submit" onclick="handleDicePlaceBet()">BET</button>
+            <button class="bet-cancel" onclick="clearDiceBet()">✕</button>
+        </div>`;
+    }
+
+    function renderDiceStats() {
+        const completed = getCompletedDiceMatches();
+        if (completed.length === 0) return '<div style="text-align:center;padding:4px;color:var(--text-muted);font-size:11px;width:100%;">No completed matches yet</div>';
+        const freq = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+        let totalRolls = 0;
+        completed.forEach(m => {
+            for (let f = 1; f <= 6; f++) {
+                const count = m[`total${f}Rolled`] || 0;
+                freq[f] += count;
+                totalRolls += count;
+            }
         });
-        if (!html) html = '<div class="empty-state"><span class="material-icons">casino</span><p>No active dice games right now</p></div>';
-        container.innerHTML = html;
+        let html = '';
+        for (let f = 1; f <= 6; f++) {
+            const pct = totalRolls > 0 ? Math.round((freq[f] / totalRolls) * 100) : 0;
+            html += `<div class="dice-stat-item">
+                <div class="dice-stat-num">${f}</div>
+                <div class="dice-stat-freq">${freq[f]}x (${pct}%)</div>
+                <div class="dice-stat-bar"><div class="dice-stat-fill" style="width:${pct}%"></div></div>
+            </div>`;
+        }
+        return html;
     }
-    function selectDiceFace(matchId, face) {
-        selectedDice[matchId] = face;
-        renderDiceGames();
+
+    function renderDiceMatchHistory() {
+        const completed = getCompletedDiceMatches();
+        if (completed.length === 0) return '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">No completed matches yet</div>';
+        let html = '<div class="dice-history-grid">';
+        completed.forEach((match, idx) => {
+            html += '<div class="dice-history-col">';
+            html += `<div class="dice-history-col-header">#${idx + 1}</div>`;
+            for (let f = 1; f <= 6; f++) {
+                const count = match[`total${f}Rolled`] || 0;
+                const isRolled = count > 0;
+                html += `<div class="dice-history-cell ${isRolled?'rolled':''}" title="Face ${f}: rolled ${count}x">${isRolled ? f : ''}</div>`;
+            }
+            html += '</div>';
+        });
+        html += '</div>';
+        return html;
     }
-    async function placeDiceBet(matchId) {
-        if (!selectedDice[matchId]) { showToast('Select a dice face', 'error'); return; }
-        const amount = document.getElementById('bet-amt-dice-'+matchId).value;
-        if (!amount || amount < 10) { showToast('Minimum bet ₹10', 'error'); return; }
-        if (!await customConfirm(`Place <b>₹${amount}</b> on dice face <b>${selectedDice[matchId]}</b>?`, {title: 'Place Dice Bet', icon: '🎲', okText: 'Place Bet'})) return;
+
+    function renderDiceBetHistory() {
+        const area = document.getElementById('dice-bet-history-area');
+        if (!area) return;
+        if (!diceUserBets || diceUserBets.length === 0) { area.innerHTML = ''; return; }
+        const recent = diceUserBets.slice(0, 8);
+        let html = '<h4><span class="material-icons">history</span> Your Dice Bets</h4>';
+        recent.forEach(b => {
+            let status = 'Pending', cls = 'pending';
+            if (b.matchWinStatus === 1) { status = 'Won'; cls = 'won'; }
+            else if (b.matchWinStatus === 2) { status = 'Lost'; cls = 'lost'; }
+            const payout = b.matchWinStatus === 1 && b.rolled_count ? `+₹${b.amount + (b.rolled_count * b.amount)}` : '';
+            html += `<div class="dice-bet-item">
+                <div class="dice-bet-face">${b.diceNumber}</div>
+                <div class="dice-bet-details">
+                    <div class="dice-bet-match">Match #${b.match}</div>
+                    <div class="dice-bet-amt">₹${b.amount} on face ${b.diceNumber} ${payout ? '<span style="color:#22c55e;font-size:12px;">'+payout+'</span>' : ''}</div>
+                </div>
+                <div class="dice-bet-status ${cls}">${status}</div>
+            </div>`;
+        });
+        area.innerHTML = html;
+    }
+
+    function updateDicePendingDots() {
+        document.querySelectorAll('#dice-grid .dice-face').forEach((el, idx) => {
+            const faceNum = idx + 1;
+            const hasPending = dicePendingBets.some(b => {
+                const board = getActiveDiceBoard();
+                const boardMatchIds = new Set((board?.matches || []).map(m => m.id));
+                return b.diceNumber === faceNum && boardMatchIds.has(b.match);
+            });
+            el.classList.toggle('has-pending', hasPending);
+        });
+    }
+
+    function updateDiceInPlace() {
+        const match = getActiveDiceMatch();
+        const titleEl = document.getElementById('dice-match-title');
+        if (titleEl) titleEl.textContent = match ? `Match #${match.title || match.id}` : 'No Live Match';
+        const statusEl = document.getElementById('dice-bet-status');
+        if (statusEl) {
+            if (!match) statusEl.innerHTML = '<span class="match-closed">WAITING</span>';
+            else if (match.isBettingEnabled) statusEl.innerHTML = '<span class="match-live">BETTING OPEN</span>';
+            else statusEl.innerHTML = '<span class="match-closed">IN PROGRESS</span>';
+        }
+        const bettingArea = document.getElementById('dice-betting-area');
+        if (bettingArea && match) {
+            const hasBetActions = bettingArea.querySelector('.bet-actions') !== null;
+            if (match.isBettingEnabled && !hasBetActions) {
+                bettingArea.innerHTML = renderDiceBettingActions();
+            } else if (!match.isBettingEnabled && hasBetActions) {
+                bettingArea.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>';
+            }
+        }
+        const gridEl = document.getElementById('dice-grid');
+        if (gridEl) gridEl.innerHTML = renderDiceGrid(match);
+        const statsEl = document.getElementById('dice-stats-bar');
+        if (statsEl) statsEl.innerHTML = renderDiceStats();
+        const histEl = document.getElementById('dice-history-scroll');
+        if (histEl) histEl.innerHTML = renderDiceMatchHistory();
+    }
+
+    function handleDiceFaceClick(num) {
+        const match = getActiveDiceMatch();
+        if (!match || !match.isBettingEnabled) {
+            showToast('Betting is not open yet', 'error');
+            return;
+        }
+        if (diceSelectedFace === num) {
+            diceBetAmount += diceSelectedCoin;
+        } else {
+            diceSelectedFace = num;
+            diceBetAmount = diceSelectedCoin;
+        }
+        if (diceSoundEnabled) playSound('nav');
+        const gridEl = document.getElementById('dice-grid');
+        if (gridEl) gridEl.innerHTML = renderDiceGrid(match);
+        const amtInput = document.getElementById('dice-bet-amount-input');
+        if (amtInput) amtInput.value = diceBetAmount;
+    }
+
+    function selectDiceCoin(el, value) {
+        diceSelectedCoin = value;
+        if (diceSelectedFace) {
+            diceBetAmount = value;
+            const match = getActiveDiceMatch();
+            const gridEl = document.getElementById('dice-grid');
+            if (gridEl) gridEl.innerHTML = renderDiceGrid(match);
+            const amtInput = document.getElementById('dice-bet-amount-input');
+            if (amtInput) amtInput.value = diceBetAmount;
+        }
+        document.querySelectorAll('#dice-chips-row .chip').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        if (diceSoundEnabled) playSound('nav');
+    }
+
+    function clearDiceBet() {
+        diceSelectedFace = null;
+        diceBetAmount = 0;
+        const match = getActiveDiceMatch();
+        const gridEl = document.getElementById('dice-grid');
+        if (gridEl) gridEl.innerHTML = renderDiceGrid(match);
+        const amtInput = document.getElementById('dice-bet-amount-input');
+        if (amtInput) amtInput.value = '';
+    }
+
+    function toggleDiceSound() {
+        diceSoundEnabled = !diceSoundEnabled;
+        const el = document.getElementById('dice-sound-toggle');
+        if (el) {
+            el.textContent = diceSoundEnabled ? 'volume_up' : 'volume_off';
+            el.style.color = diceSoundEnabled ? 'var(--gold)' : 'var(--text-muted)';
+        }
+    }
+
+    async function handleDicePlaceBet() {
+        const match = getActiveDiceMatch();
+        if (!match) { showToast('No live match available', 'error'); return; }
+        if (!diceSelectedFace) { showToast('Select a dice face first', 'error'); return; }
+        const amtInput = document.getElementById('dice-bet-amount-input');
+        const amount = amtInput ? parseFloat(amtInput.value) : diceBetAmount;
+        if (!amount || amount < 10) { showToast('Minimum bet is ₹10', 'error'); return; }
+        if (!await customConfirm(`Place <b>₹${amount}</b> on dice face <b>${diceSelectedFace}</b> (${DICE_FACE_NAMES[diceSelectedFace]})?`, {title: 'Place Dice Bet', icon: '🎲', okText: 'Place Bet'})) return;
         try {
             const res = await fetch(`${API}/dice-play/bets/place-bet/`, {
-                method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-                body:JSON.stringify({matchId, diceNumber: selectedDice[matchId], amount: parseFloat(amount)})
+                method:'POST', headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+                body:JSON.stringify({matchId: match.id, diceNumber: diceSelectedFace, amount: amount})
             });
             const data = await res.json();
-            if (res.ok || res.status === 201) { playSound('bet'); showToast('Dice bet placed!', 'success'); loadUserInfo(); }
-            else { showToast(data.detail || data.error || 'Bet failed', 'error'); }
+            if (res.ok || res.status === 201) {
+                playSound('bet');
+                showToast('Dice bet placed!', 'success');
+                if (data.bet) diceUserBets.unshift(data.bet);
+                dicePendingBets = diceUserBets.filter(b => b.matchWinStatus === 0);
+                diceSelectedFace = null;
+                diceBetAmount = 0;
+                const gridEl = document.getElementById('dice-grid');
+                if (gridEl) gridEl.innerHTML = renderDiceGrid(match);
+                const amtEl = document.getElementById('dice-bet-amount-input');
+                if (amtEl) amtEl.value = '';
+                renderDiceBetHistory();
+                updateDicePendingDots();
+                loadUserInfo();
+            } else {
+                showToast(data.detail || data.amount || data.error || JSON.stringify(data) || 'Bet failed', 'error');
+            }
         } catch(e) { showToast('Network error', 'error'); }
+    }
+
+    // Dice WebSocket connections
+    function connectDiceWebSockets() {
+        const wsBase = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const wsHost = '155.117.46.249:8000';
+
+        // Match updates WS
+        if (diceWsMatch) { try { diceWsMatch.close(); } catch(e) {} }
+        diceWsMatch = new WebSocket(`${wsBase}${wsHost}/ws/dice-match-updates/?token=${token}`);
+        diceWsMatch.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'dice_match_update' && msg.data) {
+                    const wsData = Array.isArray(msg.data) ? msg.data : [];
+                    diceBoards = diceBoards.map(prevBoard => {
+                        const wsBoard = wsData.find(b => String(b.id) === String(prevBoard.id));
+                        if (!wsBoard) return prevBoard;
+                        const completed = (prevBoard.matches || []).filter(m => m.isWinnerDeclared);
+                        const undecided = (wsBoard.matches || []).filter(m => !m.isWinnerDeclared);
+                        return { ...prevBoard, ...wsBoard, matches: [...undecided, ...completed] };
+                    });
+                    renderDiceBoardTabs();
+                    updateDiceInPlace();
+                }
+            } catch(e) {}
+        };
+        diceWsMatch.onclose = () => { setTimeout(connectDiceMatchWs, 3000); };
+        function connectDiceMatchWs() {
+            if (document.getElementById('sec-dice')?.offsetParent !== null) {
+                connectDiceWebSockets();
+            }
+        }
+
+        // Result WS
+        if (diceWsResult) { try { diceWsResult.close(); } catch(e) {} }
+        diceWsResult = new WebSocket(`${wsBase}${wsHost}/ws/dice-match-result/?token=${token}`);
+        diceWsResult.onmessage = async (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'dice_match_result' && msg.data) {
+                    const resultMatch = msg.data;
+                    const boardId = resultMatch.board;
+                    diceBoards = diceBoards.map(board => {
+                        if (board.id !== boardId) return board;
+                        return {
+                            ...board,
+                            matches: [resultMatch, ...(board.matches || []).filter(m => m.id !== resultMatch.id)]
+                        };
+                    });
+                    showDiceResultAnimation(resultMatch);
+                    await loadDiceUserBets();
+                    diceRenderedMatchId = null;
+                    renderDiceMain();
+                    loadUserInfo();
+                }
+            } catch(e) {}
+        };
+        diceWsResult.onclose = () => { setTimeout(() => {
+            if (document.getElementById('sec-dice')?.offsetParent !== null) connectDiceWebSockets();
+        }, 3000); };
+    }
+
+    function showDiceResultAnimation(match) {
+        if (!match) return;
+        const faces = [];
+        for (let f = 1; f <= 6; f++) {
+            const count = match[`total${f}Rolled`] || 0;
+            for (let i = 0; i < count; i++) faces.push(f);
+        }
+        if (faces.length === 0) return;
+
+        playSound('win');
+        const overlay = document.createElement('div');
+        overlay.className = 'dice-result-overlay';
+        overlay.onclick = () => overlay.remove();
+        overlay.innerHTML = `
+            <div class="dice-result-title">DICE RESULT</div>
+            <div class="dice-result-faces">
+                ${faces.map((f, i) => `<div class="dice-result-face" style="animation-delay:${i*0.1}s">${f}</div>`).join('')}
+            </div>
+            <div style="color:var(--text-muted);font-size:13px;margin-top:8px;">Match #${match.title || match.id} — Tap to dismiss</div>
+        `;
+        document.body.appendChild(overlay);
+        setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 5000);
+    }
+
+    function disconnectDiceWebSockets() {
+        if (diceWsMatch) { try { diceWsMatch.close(); } catch(e) {} diceWsMatch = null; }
+        if (diceWsResult) { try { diceWsResult.close(); } catch(e) {} diceWsResult = null; }
     }
 
     // ===== BET HISTORY ON COCKFIGHT PAGE =====
@@ -3489,13 +4176,19 @@
     // Social links: every 60s
     setInterval(() => { if (token) loadSocialLinks(); }, 60000);
 
-    // Dice games: every 20s (if on dice page)
+    // Dice games: every 15s (if on dice page) + user bets every 12s
     setInterval(() => {
         if (token) {
             const diceEl = document.getElementById('sec-dice');
-            if (diceEl && diceEl.offsetParent !== null) loadDiceGames();
+            if (diceEl && diceEl.offsetParent !== null) { loadDiceGames(); }
         }
-    }, 20000);
+    }, 15000);
+    setInterval(() => {
+        if (token) {
+            const diceEl = document.getElementById('sec-dice');
+            if (diceEl && diceEl.offsetParent !== null) loadDiceUserBets();
+        }
+    }, 12000);
 
     // ==========================================
     // FEATURE 1: UTR AUTO-EXTRACT (Browser OCR)
