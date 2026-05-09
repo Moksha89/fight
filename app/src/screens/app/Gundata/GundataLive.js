@@ -45,6 +45,11 @@ import {
   connectDiceMatchResultWebSocket,
   closeDiceMatchResultWebSocket,
 } from '../../../websockets/dicePlayWs';
+import {
+  connectDiceTimerWebSocket,
+  closeDiceTimerWebSocket,
+  getServerNow,
+} from '../../../websockets/diceTimerWs';
 
 const {width} = Dimensions.get('window');
 
@@ -140,7 +145,23 @@ const GundataLive = ({navigation}) => {
   const isVirtualBoard = activeBoard?.is_virtual ?? false;
   const virtualBettingSeconds = activeBoard?.virtual_betting_seconds ?? 30;
 
-  // Virtual countdown timer
+  // Server-authoritative timer via WS; fallback to local countdown
+  const [serverTimerEnd, setServerTimerEnd] = useState(null);
+
+  const handleTimerSync = useCallback((timers) => {
+    if (!liveMatch) return;
+    const timer = timers.find(t => String(t.match_id) === String(liveMatch.id));
+    if (timer && timer.ends_at) {
+      setServerTimerEnd(new Date(timer.ends_at).getTime());
+    }
+  }, [liveMatch?.id]);
+
+  const handlePhaseChange = useCallback((data) => {
+    if (data.ends_at) {
+      setServerTimerEnd(new Date(data.ends_at).getTime());
+    }
+  }, []);
+
   useEffect(() => {
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
@@ -150,25 +171,40 @@ const GundataLive = ({navigation}) => {
       setCountdownSeconds(0);
       return;
     }
-    setCountdownSeconds(virtualBettingSeconds);
-    countdownRef.current = setInterval(() => {
-      setCountdownSeconds(prev => {
-        if (prev <= 1) {
+
+    // If server timer available, use server-authoritative countdown
+    if (serverTimerEnd) {
+      const tick = () => {
+        const remaining = Math.max(0, Math.ceil((serverTimerEnd - getServerNow()) / 1000));
+        setCountdownSeconds(remaining);
+        if (remaining <= 0) {
           clearInterval(countdownRef.current);
           countdownRef.current = null;
-          // Trigger virtual roll
-          if (activeBoard?.id) {
-            triggerVirtualRoll(activeBoard.id);
-          }
-          return 0;
         }
-        return prev - 1;
-      });
-    }, 1000);
+      };
+      tick();
+      countdownRef.current = setInterval(tick, 1000);
+    } else {
+      // Fallback: local countdown
+      setCountdownSeconds(virtualBettingSeconds);
+      countdownRef.current = setInterval(() => {
+        setCountdownSeconds(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownRef.current);
+            countdownRef.current = null;
+            if (activeBoard?.id) {
+              triggerVirtualRoll(activeBoard.id);
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
-  }, [isVirtualBoard, liveMatch?.id, liveMatch?.isBettingEnabled, activeBoardId]);
+  }, [isVirtualBoard, liveMatch?.id, liveMatch?.isBettingEnabled, activeBoardId, serverTimerEnd]);
 
   // Show dice roll animation when a result comes in
   const showDiceResultAnimation = useCallback((match) => {
@@ -253,10 +289,12 @@ const GundataLive = ({navigation}) => {
       loadBetHistoryFromApi();
       connectDiceMatchWebSocket(applyBoardsData);
       connectDiceMatchResultWebSocket(setBoardsData, setUserBetHistory, showDiceResultAnimation);
+      connectDiceTimerWebSocket(handleTimerSync, handlePhaseChange);
     };
     const onBlur = () => {
       closeDiceMatchWebSocket();
       closeDiceMatchResultWebSocket();
+      closeDiceTimerWebSocket();
     };
 
     const focusListener = navigation.addListener('focus', onFocus);
@@ -459,6 +497,7 @@ const GundataLive = ({navigation}) => {
         bettingHistory={userBetHistory}
         isVirtualBoard={isVirtualBoard}
         countdownSeconds={countdownSeconds}
+        commitmentHash={liveMatch?.commitment_hash || liveMatch?.game_hash || null}
       />
 
       <ScrollView style={{flex: 1}}>

@@ -38,6 +38,7 @@ function VideoPlayBox({
   bettingHistory,
   isVirtualBoard = false,
   countdownSeconds = 0,
+  commitmentHash = null,
 }) {
   const navigation = useNavigation();
 
@@ -224,6 +225,11 @@ function VideoPlayBox({
           <Text style={styles.virtualDiceIcon}>🎲</Text>
           <Text style={styles.virtualTitle}>VIRTUAL DICE</Text>
           <Text style={styles.virtualSubtext}>Server rolls 6 dice automatically</Text>
+          {commitmentHash ? (
+            <Text style={styles.hashDisplay}>
+              🔒 {commitmentHash.slice(0, 16)}...
+            </Text>
+          ) : null}
         </View>
         <View style={styles.virtualBadge}>
           <Text style={styles.virtualBadgeText}>VIRTUAL</Text>
@@ -400,5 +406,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
+  },
+  hashDisplay: {
+    fontSize: 9,
+    color: '#666',
+    marginTop: 6,
+    fontFamily: 'monospace',
+    opacity: 0.8,
   },
 });

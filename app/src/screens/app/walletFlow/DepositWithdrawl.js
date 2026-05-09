@@ -130,7 +130,7 @@ const DepositWithdrawl = ({navigation}) => {
       <HeaderComponent
         title="Wallet"
         onBackPress={() => navigation.goBack()}
-        onIconPress={() => navigation.navigate('HistoryScreen')}
+        onIconPress={() => navigation.navigate('StatementScreen')}
         RightIconComponent={
           <MaterialIcons name="history" size={25} color="#ffffff" />
         }

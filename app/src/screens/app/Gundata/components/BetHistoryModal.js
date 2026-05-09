@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   FlatList,
+  TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
 import {
@@ -13,7 +14,9 @@ import {
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
 
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {getDicePlayUserBets} from '../../../../apis/dicePlayApi';
+import ProvablyFairModal from './ProvablyFairModal';
 
 const getColor = (matchWinStatus) => {
   if (matchWinStatus === 0) return '#FFA500';
@@ -42,6 +45,9 @@ const getAmountText = (item) => {
 const BetHistoryModal = ({bets, setBets, visible, onClose}) => {
   const [nextPage, setNextPage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fairModalVisible, setFairModalVisible] = useState(false);
+  const [fairMatchId, setFairMatchId] = useState(null);
+  const [fairCommitHash, setFairCommitHash] = useState(null);
 
   const fetchBets = async (url = null, append = false) => {
     try {
@@ -72,6 +78,12 @@ const BetHistoryModal = ({bets, setBets, visible, onClose}) => {
     }
   };
 
+  const openFairModal = (item) => {
+    setFairMatchId(item.match);
+    setFairCommitHash(item.commitment_hash || null);
+    setFairModalVisible(true);
+  };
+
   const renderItem = ({item}) => {
     const amountText = getAmountText(item);
     const hasRolledCount =
@@ -81,6 +93,7 @@ const BetHistoryModal = ({bets, setBets, visible, onClose}) => {
     const titleText = hasRolledCount
       ? `#${item.diceNumber} × ${item.rolled_count} × ₹${item.amount} + ₹${item.amount} = ₹${item.amount + item.rolled_count * item.amount}`
       : `#${item.diceNumber} — ₹${item.amount}`;
+    const isSettled = item.matchWinStatus === 1 || item.matchWinStatus === 2;
 
     return (
       <View style={styles.card}>
@@ -92,8 +105,16 @@ const BetHistoryModal = ({bets, setBets, visible, onClose}) => {
             <Text style={styles.title}>{titleText}</Text>
             <Text style={styles.subText}>
               {new Date(item.createdDate).toLocaleDateString()} {' | '}
-              Match {item.match}
+              Game #{item.daily_match_number || item.match}
             </Text>
+            {isSettled && (
+              <TouchableOpacity
+                style={styles.verifyBtn}
+                onPress={() => openFairModal(item)}>
+                <MaterialIcons name="verified" size={12} color="#D4A843" />
+                <Text style={styles.verifyText}>Verify Fair</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -149,6 +170,13 @@ const BetHistoryModal = ({bets, setBets, visible, onClose}) => {
           />
         </View>
       </View>
+
+      <ProvablyFairModal
+        visible={fairModalVisible}
+        onClose={() => setFairModalVisible(false)}
+        matchId={fairMatchId}
+        commitmentHash={fairCommitHash}
+      />
     </Modal>
   );
 };
@@ -243,5 +271,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#999',
     marginTop: hp(2),
+  },
+  verifyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    gap: 3,
+  },
+  verifyText: {
+    fontSize: fp(1.2),
+    color: '#D4A843',
+    fontWeight: '600',
   },
 });

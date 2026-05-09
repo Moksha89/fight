@@ -89,11 +89,29 @@ const SettingsScreen = ({navigation}) => {
             style={styles.bannerArrow}
           />
         </TouchableOpacity>
-        <AppText style={styles.sectionLabel}>Settings:</AppText>
+        <AppText style={styles.sectionLabel}>Account:</AppText>
         <TouchableOpacity
           style={styles.itemRow}
           onPress={() => navigation.navigate('ProfileUpdateScreen')}>
           <AppText style={styles.itemText}>Profile</AppText>
+          <AntDesign name="right" size={18} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.itemRow}
+          onPress={() => navigation.navigate('NotificationsScreen')}>
+          <AppText style={styles.itemText}>Notifications</AppText>
+          <AntDesign name="right" size={18} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.itemRow}
+          onPress={() => navigation.navigate('StatementScreen')}>
+          <AppText style={styles.itemText}>Transaction History</AppText>
+          <AntDesign name="right" size={18} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.itemRow}
+          onPress={() => navigation.navigate('ChangePasswordScreen')}>
+          <AppText style={styles.itemText}>Change Password</AppText>
           <AntDesign name="right" size={18} color="#000" />
         </TouchableOpacity>
         <TouchableOpacity

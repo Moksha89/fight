@@ -13,11 +13,14 @@ import ProfileUpdateScreen from '../screens/app/settingsFlow/ProfileUpdateScreen
 import ReferralScreen from '../screens/app/settingsFlow/ReferralScreen';
 import SetLockScreen from '../screens/app/settingsFlow/SetLockScreen';
 import SettingsScreen from '../screens/app/settingsFlow/SettingsScreen';
+import ChangePasswordScreen from '../screens/app/settingsFlow/ChangePasswordScreen';
 import DepositUpiAndBankAccount from '../screens/app/walletFlow/DepositUpiAndBankAccount';
 import DepositWithdrawl from '../screens/app/walletFlow/DepositWithdrawl';
 import WithdrawlUpiAndBankAccount from '../screens/app/walletFlow/WithdrawlUpiAndBankAccount';
 import HistoryScreen from '../screens/app/walletFlow/HistoryScreen';
+import StatementScreen from '../screens/app/walletFlow/StatementScreen';
 import GundataLive from '../screens/app/Gundata/GundataLive';
+import NotificationsScreen from '../screens/app/NotificationsScreen';
 
 import FeatureUnderMaintenanceScreen from "../screens/FeatureUnderMaintenanceScreen";
 
@@ -32,7 +35,6 @@ export default function AppNavigator() {
       <Stack.Screen name="PromotionsScreen" component={PromotionsScreen} />
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
       <Stack.Screen name="DepositWithdrawl" component={DepositWithdrawl} />
-
 
       <Stack.Screen name="LotteryGift" component={LotteryGift} />
       <Stack.Screen name="LotteryGiftLive" component={LotteryGiftLive} />
@@ -54,13 +56,13 @@ export default function AppNavigator() {
       <Stack.Screen name="LotteryTicket" component={LotteryTicket} />
       <Stack.Screen name="LearningScreen" component={LearningScreen} />
 
-
       <Stack.Screen
         name="ProfileUpdateScreen"
         component={ProfileUpdateScreen}
       />
       <Stack.Screen name="ReferralScreen" component={ReferralScreen} />
       <Stack.Screen name="SetLockScreen" component={SetLockScreen} />
+      <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
       <Stack.Screen
         name="DepositUpiAndBankAccount"
         component={DepositUpiAndBankAccount}
@@ -70,6 +72,8 @@ export default function AppNavigator() {
         component={WithdrawlUpiAndBankAccount}
       />
       <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
+      <Stack.Screen name="StatementScreen" component={StatementScreen} />
+      <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
     </Stack.Navigator>
   );
 }

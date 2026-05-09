@@ -42,12 +42,17 @@ import {
   connectMatchWebSocket,
   closeMatchWebSocket,
 } from '../../websockets/cockfightWs';
+import {
+  connectNotificationWebSocket,
+  closeNotificationWebSocket,
+} from '../../websockets/notificationWs';
 
 const HomeScreen = ({navigation}) => {
   const [activeChannel, setActiveChannel] = useState(0);
   const [availableChannels, setAvailableChannels] = useState({0: '24/7'});
   const [autoMatchData, setAutoMatchData] = useState(null);
   const [manualMatchData, setManualMatchData] = useState(null);
+  const [notifCount, setNotifCount] = useState(0);
 
   const [manualDataFirstTimeCheckFlag, setManualDataFirstTimeCheckFlag] =
     useState(false);
@@ -73,6 +78,11 @@ const HomeScreen = ({navigation}) => {
       setManualDataFirstTimeCheckFlag(true);
     }
   }, [manualMatchData]);
+
+  useEffect(() => {
+    connectNotificationWebSocket(null, setNotifCount);
+    return () => closeNotificationWebSocket();
+  }, []);
 
   useEffect(() => {
     const onFocus = () => {
@@ -228,6 +238,18 @@ const HomeScreen = ({navigation}) => {
           <AppText style={styles.headerBrandText}>Kokoroko</AppText>
         </View>
         <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={styles.notifButton}
+            onPress={() => navigation.navigate('NotificationsScreen')}>
+            <MaterialIcons name="notifications-none" size={22} color="#1a1a1a" />
+            {notifCount > 0 && (
+              <View style={styles.notifBadge}>
+                <AppText style={styles.notifBadgeText}>
+                  {notifCount > 9 ? '9+' : notifCount}
+                </AppText>
+              </View>
+            )}
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.walletButton}
             onPress={() => navigation.navigate('DepositWithdrawl')}>
@@ -874,6 +896,32 @@ const styles = StyleSheet.create({
     marginLeft: wp(2),
     borderWidth: 1,
     borderColor: '#e5e7eb',
+  },
+  notifButton: {
+    position: 'relative',
+    width: wp(9),
+    height: wp(9),
+    borderRadius: wp(4.5),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: wp(1),
+  },
+  notifBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#ef4444',
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  notifBadgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '700',
   },
   categoryItem: {
     alignItems: 'center',
