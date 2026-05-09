@@ -146,3 +146,53 @@ class DicePlayMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
             customer=request.user, matchWinStatus=0
         ).select_related("match").order_by("-createdDate")
         return Response(DicePlayMatchBetSerializer(pending, many=True).data)
+
+
+class ProvablyFairViewSet(viewsets.ViewSet):
+    """Provably fair verification endpoints."""
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=["get"], url_path="verify/(?P<match_id>[0-9]+)")
+    def verify_round(self, request, match_id=None):
+        """Verify a completed dice round's fairness."""
+        try:
+            match = DicePlayMatch.objects.get(id=match_id)
+        except DicePlayMatch.DoesNotExist:
+            return Response({"error": "Match not found"}, status=404)
+
+        if not match.server_seed_revealed:
+            return Response({
+                "match_id": match.id,
+                "game_number": match.daily_match_number,
+                "commitment_hash": match.commitment_hash,
+                "status": "pending",
+                "message": "Server seed not yet revealed. Wait for round to complete.",
+            })
+
+        dice_list = []
+        if match.dice_result_json:
+            dice_list = [int(x) for x in match.dice_result_json.split(",")]
+
+        verification = None
+        if match.server_seed and match.client_seed and match.commitment_hash:
+            from kokoroko.provably_fair import verify_round as pf_verify
+            verification = pf_verify(
+                match.server_seed,
+                match.commitment_hash,
+                match.client_seed,
+                match.nonce,
+                dice_list,
+            )
+
+        return Response({
+            "match_id": match.id,
+            "game_number": match.daily_match_number,
+            "match_date": str(match.match_date),
+            "commitment_hash": match.commitment_hash,
+            "server_seed": match.server_seed,
+            "client_seed": match.client_seed,
+            "nonce": match.nonce,
+            "dice_result": dice_list,
+            "verification": verification,
+            "status": "revealed",
+        })

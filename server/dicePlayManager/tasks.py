@@ -1,5 +1,6 @@
 import hashlib
 import secrets
+import uuid
 from datetime import timedelta, date, datetime, time, timezone as dt_tz
 from decimal import Decimal
 from celery import shared_task
@@ -29,6 +30,15 @@ def generate_game_hash(board_id, match_date, daily_number, server_seed=None):
         server_seed = secrets.token_hex(32)
     raw = f"{board_id}:{match_date}:{daily_number}:{server_seed}"
     return hashlib.sha256(raw.encode()).hexdigest()
+
+
+def create_provably_fair_seeds(nonce):
+    """Create provably fair seeds for a new round."""
+    from kokoroko.provably_fair import generate_server_seed, generate_client_seed, compute_commitment_hash
+    server_seed = generate_server_seed()
+    client_seed = generate_client_seed()
+    commitment_hash = compute_commitment_hash(server_seed)
+    return server_seed, client_seed, commitment_hash, nonce
 
 
 def get_rolled_count(match, dice_number):
@@ -122,8 +132,12 @@ def auto_roll_virtual_match(match_id: int):
         if match.match_type != "V":
             return "Not a virtual match"
 
-        # Roll 6 dice
-        dice_list = roll_six_dice()
+        # Roll 6 dice using provably fair system if seeds are available
+        if match.server_seed and match.client_seed:
+            from kokoroko.provably_fair import derive_dice_result
+            dice_list = derive_dice_result(match.server_seed, match.client_seed, match.nonce)
+        else:
+            dice_list = roll_six_dice()
         counts = count_dice(dice_list)
 
         # Store the individual dice results
@@ -166,6 +180,8 @@ def declare_virtual_match_result(match_id: int):
         match.isWinnerDeclared = True
         match.virtual_phase = "result"
         match.phase_started_at = timezone.now()
+        # Reveal server seed for provably fair verification
+        match.server_seed_revealed = True
         match.save()  # triggers post_save -> process_dice_play_match_result via model save()
 
         # Broadcast result on the result channel so frontend gets immediate notification
@@ -209,8 +225,9 @@ def create_next_virtual_round(board_id: int):
         ).count()
         daily_num = todays_count + 1
 
-        # Generate unique game hash
-        game_hash = generate_game_hash(board.id, today_ist, daily_num)
+        # Generate provably fair seeds
+        server_seed, client_seed, commitment_hash, nonce = create_provably_fair_seeds(daily_num)
+        game_hash = commitment_hash  # Use commitment hash as game hash
 
         match = DicePlayMatch.objects.create(
             board=board,
@@ -224,6 +241,10 @@ def create_next_virtual_round(board_id: int):
             match_date=today_ist,
             virtual_phase="betting",
             phase_started_at=timezone.now(),
+            server_seed=server_seed,
+            client_seed=client_seed,
+            commitment_hash=commitment_hash,
+            nonce=daily_num,
         )
         return f"Created Game #{daily_num} for {today_ist} (match {match.id}, hash: {game_hash[:12]}...)"
     except Board.DoesNotExist:

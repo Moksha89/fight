@@ -15,6 +15,7 @@ class DicePlayMatchSerializer(serializers.ModelSerializer):
             "total4Rolled", "total5Rolled", "total6Rolled",
             "dice_result_json", "isWinnerDeclared", "updated_at",
             "game_hash", "daily_match_number", "match_date", "virtual_phase",
+            "commitment_hash", "client_seed", "nonce", "server_seed_revealed",
         ]
 
 
@@ -29,6 +30,7 @@ class DicePlayMatchDeepListSerializer(serializers.ModelSerializer):
             "total4Rolled", "total5Rolled", "total6Rolled",
             "dice_result_json", "isWinnerDeclared", "created_at", "updated_at",
             "game_hash", "daily_match_number", "match_date", "virtual_phase", "phase_started_at",
+            "commitment_hash", "client_seed", "nonce", "server_seed_revealed",
         ]
 
 
@@ -77,10 +79,10 @@ class DicePlayMatchBetSerializer(serializers.ModelSerializer):
         model = DicePlayMatchBet
         fields = [
             "id", "match", "diceNumber", "amount",
-            "matchWinStatus", "rolled_count", "createdDate",
-            "match_info",
+            "matchWinStatus", "rolled_count", "payout_amount",
+            "createdDate", "match_info",
         ]
-        read_only_fields = ["id", "matchWinStatus", "rolled_count", "createdDate"]
+        read_only_fields = ["id", "matchWinStatus", "rolled_count", "payout_amount", "createdDate"]
 
 
 class PlaceDiceBetSerializer(serializers.Serializer):

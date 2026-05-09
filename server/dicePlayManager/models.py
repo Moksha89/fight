@@ -32,10 +32,14 @@ MATCH_TYPE_CHOICES = (
 )
 
 VIRTUAL_PHASE_CHOICES = (
+    ("created", "Created"),
     ("betting", "Betting Open"),
-    ("shuffling", "Dice Shuffling"),
-    ("result", "Result Display"),
+    ("betting_closed", "Betting Closed"),
+    ("shuffling", "Dice Rolling"),
+    ("result", "Result Reveal"),
+    ("settlement", "Settlement"),
     ("done", "Completed"),
+    ("cancelled", "Cancelled"),
 )
 
 
@@ -63,8 +67,17 @@ class DicePlayMatch(models.Model):
     game_hash = models.CharField(max_length=64, null=True, blank=True, db_index=True, help_text="Unique SHA-256 hash for game verification")
     daily_match_number = models.PositiveIntegerField(default=0, help_text="Match number for the day (resets at 12:00 AM IST)")
     match_date = models.DateField(null=True, blank=True, db_index=True, help_text="IST date this match belongs to")
-    virtual_phase = models.CharField(max_length=10, choices=VIRTUAL_PHASE_CHOICES, default="betting", help_text="Current phase of virtual match lifecycle")
+    virtual_phase = models.CharField(max_length=15, choices=VIRTUAL_PHASE_CHOICES, default="betting", help_text="Current phase of virtual match lifecycle")
     phase_started_at = models.DateTimeField(null=True, blank=True, help_text="When the current phase started")
+    # Provably fair fields
+    server_seed = models.CharField(max_length=64, null=True, blank=True, help_text="Secret server seed (revealed after round)")
+    client_seed = models.CharField(max_length=32, null=True, blank=True, help_text="Public client seed")
+    commitment_hash = models.CharField(max_length=64, null=True, blank=True, help_text="SHA256(server_seed) shown before round")
+    nonce = models.PositiveIntegerField(default=0, help_text="Round nonce for provably fair")
+    server_seed_revealed = models.BooleanField(default=False, help_text="Whether server seed has been revealed")
+    # Settlement tracking
+    settlement_id = models.CharField(max_length=30, null=True, blank=True, help_text="Unique settlement transaction ID")
+    settled_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -116,8 +129,19 @@ class DicePlayMatch(models.Model):
             process_dice_play_match_result.delay(self.id)
 
 
+BET_STATUS_CHOICES = (
+    (0, "Pending"),
+    (1, "Won"),
+    (2, "Lost"),
+    (3, "Accepted"),
+    (4, "Cancelled"),
+    (5, "Refunded"),
+    (6, "Rejected"),
+)
+
+
 class DicePlayMatchBet(models.Model):
-    """Bet on a dice number (1-6) for a match; payout = rolled_count * amount if that die rolled >= 2."""
+    """Bet on a dice number (1-6) for a match; payout = bet + rolled_count * amount if die rolled >= 2."""
     match = models.ForeignKey(
         DicePlayMatch, on_delete=models.PROTECT, related_name='bets', db_index=True
     )
@@ -127,9 +151,11 @@ class DicePlayMatchBet(models.Model):
     diceNumber = models.PositiveSmallIntegerField(db_index=True)
     amount = models.PositiveIntegerField()
     matchWinStatus = models.PositiveSmallIntegerField(
-        default=0, db_index=True
-    )  # 0=pending, 1=won, 2=lost
+        default=0, choices=BET_STATUS_CHOICES, db_index=True
+    )  # 0=pending, 1=won, 2=lost, 3=accepted, 4=cancelled, 5=refunded, 6=rejected
     rolled_count = models.PositiveSmallIntegerField(default=0)
+    payout_amount = models.PositiveIntegerField(default=0, help_text="Actual payout credited")
+    settlement_id = models.CharField(max_length=30, null=True, blank=True, help_text="Settlement transaction ID")
     createdDate = models.DateTimeField(auto_now_add=True, db_index=True)
     updatedDate = models.DateTimeField(auto_now=True)
 
