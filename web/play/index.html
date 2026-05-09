@@ -1678,6 +1678,14 @@
     let regStep = 'form';
     let loginMobile = '';
 
+    // Hash-to-section mapping for URL routing (must be before showApp call)
+    var hashSectionMap = {
+        '#home': 'sec-home', '#cockfight': 'sec-cockfight', '#dice': 'sec-dice',
+        '#wallet': 'sec-wallet', '#statements': 'sec-statement', '#profile': 'sec-profile'
+    };
+    var sectionHashMap = {};
+    for (var hk in hashSectionMap) { sectionHashMap[hashSectionMap[hk]] = hk; }
+
     if (token) showApp();
 
     function switchAuthTab(tab) {
@@ -1813,6 +1821,10 @@
         loadUserBets();
         connectMatchWebSocket();
         loadSocialLinks();
+        // Restore section from URL hash
+        const hash = location.hash || '#home';
+        const sec = hashSectionMap[hash];
+        if (sec && sec !== 'sec-home') navigate(sec, true);
     }
 
     function loadSocialLinks() {
@@ -2556,9 +2568,16 @@
     }
 
     // Navigation
-    function navigate(sectionId) {
+    // Hash-to-section mapping defined in early declarations above showApp()
+
+    function navigate(sectionId, skipHash) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(sectionId).classList.add('active');
+
+        // Update URL hash
+        if (!skipHash && sectionHashMap[sectionId]) {
+            history.pushState(null, '', sectionHashMap[sectionId]);
+        }
 
         // Update bottom nav
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -2583,6 +2602,13 @@
         if (sectionId === 'sec-wallet') { loadStatement(); }
         window.scrollTo(0, 0);
     }
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function() {
+        const hash = location.hash || '#home';
+        const sec = hashSectionMap[hash] || 'sec-home';
+        navigate(sec, true);
+    });
 
     function navigateSidebar(sectionId) {
         navigate(sectionId);
