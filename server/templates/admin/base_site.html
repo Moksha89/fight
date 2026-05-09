@@ -1421,6 +1421,26 @@ document.addEventListener('DOMContentLoaded', function() {
     indicator.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;animation:livePulse 1.5s infinite;"></span> LIVE';
     document.body.appendChild(indicator);
 
+    // Image lightbox overlay
+    var lightbox = document.createElement('div');
+    lightbox.id = 'img-lightbox';
+    lightbox.style.cssText = 'display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;cursor:pointer;';
+    lightbox.innerHTML = '<img style="max-width:90%;max-height:90%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5);" />' +
+        '<span style="position:absolute;top:16px;right:24px;color:#fff;font-size:32px;font-weight:bold;cursor:pointer;">&times;</span>';
+    document.body.appendChild(lightbox);
+    lightbox.addEventListener('click', function() { lightbox.style.display = 'none'; });
+    window.openLightbox = function(url) {
+        lightbox.querySelector('img').src = url;
+        lightbox.style.display = 'flex';
+    };
+    // Attach lightbox to all screenshot thumbnails in result tables
+    document.querySelectorAll('#result_list a[data-lightbox]').forEach(function(a) {
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.openLightbox(a.getAttribute('href'));
+        });
+    });
+
     // Compact textareas in list tables (Django default rows=10 is too big)
     document.querySelectorAll('#result_list textarea').forEach(function(ta) {
         ta.rows = 2;
