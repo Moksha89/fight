@@ -64,6 +64,11 @@ i, .material-icons {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
+/* Global table background fix - prevent white bg from base CSS */
+table, thead, tbody, tr, td, th {
+    background-color: transparent !important;
+    color: inherit;
+}
 /* Hide ALL default admin chrome */
 #header, .breadcrumbs, #user-tools, .header,
 nav.navbar, .ma-tools-icons, [class*="ma-tools"],
@@ -1115,10 +1120,12 @@ body.login #header { display: none !important; }
     text-align: left; font-weight: 600;
 }
 .dash-table td {
-    padding: 10px 14px; color: var(--text-primary); font-size: 13px;
+    padding: 10px 14px; color: var(--text-primary) !important; font-size: 13px;
     border-bottom: 1px solid var(--border);
+    background: transparent !important;
 }
-.dash-table tr:hover td { background: var(--bg-hover); }
+.dash-table tr { background: transparent !important; }
+.dash-table tr:hover td { background: var(--bg-hover) !important; }
 
 .badge {
     display: inline-block; padding: 3px 12px; border-radius: 12px;
