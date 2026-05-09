@@ -1,0 +1,247 @@
+import React, {useState, useEffect} from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import {
+  responsiveHeight as hp,
+  responsiveWidth as wp,
+  responsiveFontSize as fp,
+} from 'react-native-responsive-dimensions';
+
+import {getDicePlayUserBets} from '../../../../apis/dicePlayApi';
+
+const getColor = (matchWinStatus) => {
+  if (matchWinStatus === 0) return '#FFA500';
+  if (matchWinStatus === 1) return '#43A048';
+  return '#BA2343';
+};
+
+// Total payout when won: rolled_count * amount (new formula)
+const getWinTotal = (item) => {
+  const count = item.rolled_count;
+  if (count != null && count >= 2) {
+    return count * item.amount;
+  }
+  return 0;
+};
+
+const getAmountText = (item) => {
+  if (item.matchWinStatus === 0) return 'In Progress';
+  if (item.matchWinStatus === 1) {
+    const total = getWinTotal(item);
+    return `+${total}`;
+  }
+  return `-${item.amount}`;
+};
+
+const BetHistoryModal = ({bets, setBets, visible, onClose}) => {
+  const [nextPage, setNextPage] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchBets = async (url = null, append = false) => {
+    try {
+      setLoading(true);
+      const data = await getDicePlayUserBets(url);
+
+      if (data) {
+        const list = Array.isArray(data) ? data : (data.results || []);
+        setBets(prev => (append ? [...prev, ...list] : list));
+        setNextPage(data.next || null);
+      }
+    } catch (error) {
+      console.error('Error fetching dice play bets:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (visible) {
+      fetchBets();
+    }
+  }, [visible]);
+
+  const loadMore = () => {
+    if (nextPage && !loading) {
+      fetchBets(nextPage, true);
+    }
+  };
+
+  const renderItem = ({item}) => {
+    const amountText = getAmountText(item);
+    const hasRolledCount =
+      item.matchWinStatus === 1 &&
+      item.rolled_count != null &&
+      item.rolled_count >= 2;
+    const titleText = hasRolledCount
+      ? `#${item.diceNumber} × ${item.rolled_count} × ₹${item.amount} = ₹${item.rolled_count * item.amount}`
+      : `#${item.diceNumber} — ₹${item.amount}`;
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.left}>
+          <View style={[styles.diceBadge, {backgroundColor: '#5C6BC0'}]}>
+            <Text style={styles.diceBadgeText}>{item.diceNumber}</Text>
+          </View>
+          <View style={styles.textInfo}>
+            <Text style={styles.title}>{titleText}</Text>
+            <Text style={styles.subText}>
+              {new Date(item.createdDate).toLocaleDateString()} {' | '}
+              Match {item.match}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.right}>
+          {item.matchWinStatus === 0 ? (
+            <View style={{alignItems: 'flex-end'}}>
+              <Text style={styles.inProgress}>In Progress</Text>
+              <Text style={styles.amount}>{item.amount}</Text>
+            </View>
+          ) : (
+            <Text
+              style={[
+                styles.amount,
+                {
+                  color:
+                    amountText.startsWith('+') ? '#43A048' : '#BA2343',
+                },
+              ]}>
+              {amountText}
+            </Text>
+          )}
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent
+      statusBarTranslucent>
+      <View style={styles.overlay}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.dimmedArea} />
+        </TouchableWithoutFeedback>
+
+        <View style={styles.modalContainer}>
+          <View style={styles.handleWrapper}>
+            <View style={styles.handle} />
+          </View>
+
+          <FlatList
+            data={bets}
+            extraData={bets}
+            keyExtractor={item => item.id.toString()}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            contentContainerStyle={styles.listContent}
+            ListEmptyComponent={<Text style={styles.emptyText}>No bets yet</Text>}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+export default BetHistoryModal;
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: '#00000070',
+    justifyContent: 'flex-end',
+  },
+  dimmedArea: {
+    flex: 1,
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    height: hp(60),
+    borderTopLeftRadius: wp(4),
+    borderTopRightRadius: wp(4),
+    paddingHorizontal: wp(4),
+    paddingTop: hp(2),
+  },
+  handleWrapper: {
+    alignItems: 'center',
+    marginBottom: hp(1.5),
+  },
+  handle: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#ccc',
+    borderRadius: 3,
+  },
+  card: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: wp(0.3),
+    marginBottom: hp(1),
+    borderColor: '#F2F2F2',
+    borderRadius: wp(2),
+    backgroundColor: '#fff',
+  },
+  left: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  diceBadge: {
+    width: wp(8),
+    height: wp(8),
+    borderRadius: wp(4),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: wp(3),
+  },
+  diceBadgeText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: fp(1.8),
+  },
+  textInfo: {
+    flexShrink: 1,
+  },
+  title: {
+    fontSize: fp(1.7),
+    color: '#414141',
+  },
+  subText: {
+    fontSize: fp(1.5),
+    color: '#999',
+    marginTop: hp(0.5),
+  },
+  right: {
+    alignItems: 'flex-end',
+  },
+  inProgress: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: hp(0.5),
+  },
+  amount: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  listContent: {
+    paddingBottom: hp(4),
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#999',
+    marginTop: hp(2),
+  },
+});

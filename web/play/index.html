@@ -1061,21 +1061,111 @@
         .dice-bet-status.won { background: rgba(34,197,94,0.15); color: #22c55e; }
         .dice-bet-status.lost { background: rgba(239,68,68,0.15); color: #ef4444; }
         .dice-bet-status.pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
-        /* Dice Roll Animation */
-        @keyframes diceRoll {
-            0% { transform: rotateX(0deg) rotateY(0deg); }
-            25% { transform: rotateX(180deg) rotateY(90deg); }
-            50% { transform: rotateX(360deg) rotateY(180deg); }
-            75% { transform: rotateX(540deg) rotateY(270deg); }
-            100% { transform: rotateX(720deg) rotateY(360deg); }
+        /* 3D Dice Roll Animation */
+        .dice-3d-scene {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9); z-index: 9990;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 20px;
+            backdrop-filter: blur(10px);
         }
-        @keyframes diceBounce {
-            0%, 100% { transform: translateY(0) scale(1); }
-            30% { transform: translateY(-20px) scale(1.1); }
-            60% { transform: translateY(0) scale(0.95); }
-            80% { transform: translateY(-5px) scale(1.02); }
+        .dice-3d-title {
+            font-size: 22px; font-weight: 800; color: var(--gold);
+            text-shadow: 0 2px 12px rgba(212,168,67,0.5);
+            letter-spacing: 3px; text-transform: uppercase;
         }
-        .dice-rolling { animation: diceBounce 0.6s ease-in-out; }
+        .dice-3d-row {
+            display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+            perspective: 600px;
+        }
+        .dice-3d-cube-wrap {
+            width: 64px; height: 64px; perspective: 300px;
+        }
+        .dice-3d-cube {
+            width: 64px; height: 64px; position: relative;
+            transform-style: preserve-3d;
+            animation: dice3dSpin 2.5s ease-out forwards;
+        }
+        .dice-3d-cube.landed { animation: none; }
+        .dice-3d-face {
+            position: absolute; width: 64px; height: 64px;
+            background: linear-gradient(145deg, #f5f5f5, #ddd);
+            border: 2px solid #bbb; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.08);
+        }
+        .dice-3d-face.front  { transform: rotateY(0deg) translateZ(32px); }
+        .dice-3d-face.back   { transform: rotateY(180deg) translateZ(32px); }
+        .dice-3d-face.right  { transform: rotateY(90deg) translateZ(32px); }
+        .dice-3d-face.left   { transform: rotateY(-90deg) translateZ(32px); }
+        .dice-3d-face.top    { transform: rotateX(90deg) translateZ(32px); }
+        .dice-3d-face.bottom { transform: rotateX(-90deg) translateZ(32px); }
+        .dice-3d-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #333, #111);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+            position: absolute;
+        }
+        @keyframes dice3dSpin {
+            0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+            20% { transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg); }
+            40% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg); }
+            60% { transform: rotateX(1080deg) rotateY(540deg) rotateZ(270deg); }
+            80% { transform: rotateX(1300deg) rotateY(650deg) rotateZ(300deg); }
+            100% { transform: var(--land-rotation); }
+        }
+        @keyframes dice3dBounce {
+            0% { transform: scale(0.3) translateY(40px); opacity: 0; }
+            50% { transform: scale(1.15) translateY(-10px); opacity: 1; }
+            70% { transform: scale(0.95) translateY(3px); }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .dice-3d-landed-row {
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+        }
+        .dice-3d-landed-face {
+            width: 64px; height: 64px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 800;
+            background: linear-gradient(145deg, #3a3020, #2a2518);
+            border: 2px solid var(--gold); color: var(--gold);
+            box-shadow: 0 4px 16px rgba(212,168,67,0.4);
+            animation: dice3dBounce 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        .dice-3d-payout {
+            font-size: 22px; font-weight: 700; color: #22c55e;
+            text-shadow: 0 2px 8px rgba(34,197,94,0.4);
+            animation: dice3dBounce 0.5s ease-out 0.3s forwards; opacity: 0;
+        }
+        .dice-3d-close {
+            font-size: 13px; color: var(--text-muted); cursor: pointer;
+            margin-top: 8px; animation: dice3dBounce 0.5s ease-out 0.6s forwards; opacity: 0;
+        }
+        /* Virtual Mode Countdown */
+        .dice-virtual-banner {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 10px 16px;
+            background: linear-gradient(90deg, #1a2a1a, #1a1a2a);
+            border-bottom: 1px solid var(--border-light);
+        }
+        .dice-virtual-badge {
+            padding: 3px 10px; border-radius: 12px; font-size: 11px;
+            font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+        }
+        .dice-virtual-badge.virtual { background: rgba(76,175,80,0.2); color: #4caf50; }
+        .dice-virtual-badge.live { background: rgba(244,67,54,0.2); color: #f44336; }
+        .dice-countdown {
+            font-size: 18px; font-weight: 800; color: var(--gold);
+            font-variant-numeric: tabular-nums;
+        }
+        .dice-countdown.urgent { color: #f44336; animation: livePulse 0.5s infinite; }
+        .dice-rolling-status {
+            font-size: 14px; font-weight: 700; color: var(--gold);
+            display: flex; align-items: center; gap: 6px;
+            animation: livePulse 1s infinite;
+        }
+        /* Dice result overlay (simple fallback) */
         .dice-result-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.85); z-index: 9990;
@@ -1098,7 +1188,6 @@
             background: linear-gradient(145deg, #3a3020, #2a2518);
             border: 2px solid var(--gold); color: var(--gold);
             box-shadow: 0 4px 12px rgba(212,168,67,0.3);
-            animation: diceBounce 0.6s ease-in-out;
         }
         .dice-result-payout {
             font-size: 20px; font-weight: 700; color: #22c55e;
@@ -3360,6 +3449,8 @@
     let diceWsMatch = null;
     let diceWsResult = null;
     let diceSoundEnabled = true;
+    let diceCountdownTimer = null;
+    let diceCountdownValue = 0;
 
     const DICE_COIN_VALUES = [50, 100, 200, 500, 1000, 2500, 5000];
     const DICE_FACE_NAMES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
@@ -3428,7 +3519,8 @@
             const bid = String(board.id);
             const isActive = bid === diceActiveBoardId;
             const hasLive = (board.matches || []).some(m => !m.isWinnerDeclared);
-            html += `<div class="dice-board-tab ${isActive?'active':''}" data-board="${bid}" onclick="switchDiceBoard('${bid}')">${hasLive?'<span class="live-dot"></span> ':''}${board.name}</div>`;
+            const modeIcon = board.is_virtual ? '🎰' : '📺';
+            html += `<div class="dice-board-tab ${isActive?'active':''}" data-board="${bid}" onclick="switchDiceBoard('${bid}')">${hasLive?'<span class="live-dot"></span> ':''}${modeIcon} ${board.name}</div>`;
         });
         tabsEl.innerHTML = html;
     }
@@ -3464,6 +3556,7 @@
         const container = document.getElementById('dice-container');
         const board = getActiveDiceBoard();
         const match = getActiveDiceMatch();
+        const isVirtual = board?.is_virtual || match?.match_type === 'V';
 
         if (!board) {
             container.innerHTML = '<div class="empty-state"><span class="material-icons">casino</span><p>No dice boards available</p></div>';
@@ -3479,7 +3572,14 @@
             diceRenderedStreamUrl = streamUrl || promoUrl;
 
             let streamHtml = '';
-            if (streamUrl) {
+            if (isVirtual) {
+                // Virtual mode: show animated dice arena instead of stream
+                streamHtml = `<div class="dice-stream-placeholder" style="height:140px;background:linear-gradient(180deg,#0a1a0a,#1a1a1a);">
+                    <div style="font-size:40px;">🎲</div>
+                    <span style="color:var(--gold);font-weight:700;font-size:15px;">VIRTUAL DICE</span>
+                    <span style="font-size:11px;">Server rolls 6 dice automatically</span>
+                </div>`;
+            } else if (streamUrl) {
                 const ytId = extractYoutubeId(streamUrl);
                 if (ytId) {
                     streamHtml = `<div class="dice-stream-container"><iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&rel=0&modestbranding=1" allow="autoplay" allowfullscreen></iframe></div>`;
@@ -3492,8 +3592,11 @@
                 streamHtml = `<div class="dice-stream-placeholder"><span class="material-icons">casino</span><span>Waiting for live stream...</span></div>`;
             }
 
-            const matchTitle = match ? `Match #${match.title || match.id}` : 'No Live Match';
+            const matchTitle = match ? `${match.title || 'Match #' + match.id}` : 'No Live Match';
             const isBetting = match?.isBettingEnabled;
+            const modeBadge = isVirtual
+                ? '<span class="dice-virtual-badge virtual">VIRTUAL</span>'
+                : '<span class="dice-virtual-badge live">LIVE</span>';
 
             container.innerHTML = `
             <div class="dice-layout">
@@ -3502,13 +3605,15 @@
                         <div class="dice-match-header">
                             <div class="dice-match-title">
                                 ${match ? '<span class="live-dot"></span>' : ''}
+                                ${modeBadge}
                                 <span id="dice-match-title">${matchTitle}</span>
                             </div>
                             <div style="display:flex;align-items:center;gap:8px;">
                                 <span id="dice-sound-toggle" onclick="toggleDiceSound()" style="cursor:pointer;font-size:18px;color:${diceSoundEnabled?'var(--gold)':'var(--text-muted)'};" class="material-icons">${diceSoundEnabled?'volume_up':'volume_off'}</span>
-                                <span id="dice-bet-status">${match ? (isBetting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>') : '<span class="match-closed">WAITING</span>'}</span>
+                                <span id="dice-bet-status">${match ? (isBetting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">ROLLING...</span>') : '<span class="match-closed">WAITING</span>'}</span>
                             </div>
                         </div>
+                        ${isVirtual && match ? '<div class="dice-virtual-banner" id="dice-virtual-banner"><span id="dice-countdown-display"></span></div>' : ''}
                         ${streamHtml}
                         <!-- Dice Grid -->
                         <div class="dice-grid-container">
@@ -3522,6 +3627,10 @@
                         <!-- Coin Chips -->
                         <div class="chips-row" id="dice-chips-row">
                             ${DICE_COIN_VALUES.map(v => `<div class="chip ${diceSelectedCoin===v?'selected':''}" onclick="selectDiceCoin(this, ${v})">₹${v>=1000?(v/1000)+'K':v}</div>`).join('')}
+                        </div>
+                        <!-- Payout Info -->
+                        <div style="text-align:center;padding:6px 16px;background:#111;font-size:11px;color:var(--text-muted);">
+                            Win = bet × times your number appears (min 2× to win) | E.g. ₹100 on 3, appears 4 times = ₹400
                         </div>
                         <!-- Bet Actions -->
                         <div id="dice-betting-area">
@@ -3543,9 +3652,52 @@
                 </div>
             </div>`;
             loadDiceUserBets();
+            if (isVirtual && match && match.isBettingEnabled) {
+                startDiceCountdown(board.virtual_betting_seconds || 30, match);
+            }
         } else {
             updateDiceInPlace();
         }
+    }
+
+    function startDiceCountdown(seconds, match) {
+        if (diceCountdownTimer) clearInterval(diceCountdownTimer);
+        diceCountdownValue = seconds;
+        const displayEl = document.getElementById('dice-countdown-display');
+        if (!displayEl) return;
+
+        function updateDisplay() {
+            if (!displayEl) return;
+            if (diceCountdownValue > 0) {
+                const urgent = diceCountdownValue <= 5;
+                displayEl.innerHTML = `<span class="dice-countdown ${urgent?'urgent':''}">${diceCountdownValue}s</span> <span style="font-size:12px;color:var(--text-muted);">until dice roll</span>`;
+            } else {
+                displayEl.innerHTML = `<span class="dice-rolling-status"><span class="material-icons" style="font-size:16px;">casino</span> Rolling dice...</span>`;
+            }
+        }
+        updateDisplay();
+
+        diceCountdownTimer = setInterval(() => {
+            diceCountdownValue--;
+            updateDisplay();
+            if (diceCountdownValue <= 0) {
+                clearInterval(diceCountdownTimer);
+                diceCountdownTimer = null;
+                // Trigger auto-roll via API (virtual mode)
+                triggerVirtualRoll();
+            }
+        }, 1000);
+    }
+
+    async function triggerVirtualRoll() {
+        const board = getActiveDiceBoard();
+        if (!board || !board.is_virtual) return;
+        try {
+            await fetch(`${API}/dice-play/history/${board.id}/roll-dice/`, {
+                method: 'POST',
+                headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}
+            });
+        } catch(e) {}
     }
 
     function extractYoutubeId(url) {
@@ -3635,7 +3787,7 @@
             let status = 'Pending', cls = 'pending';
             if (b.matchWinStatus === 1) { status = 'Won'; cls = 'won'; }
             else if (b.matchWinStatus === 2) { status = 'Lost'; cls = 'lost'; }
-            const payout = b.matchWinStatus === 1 && b.rolled_count ? `+₹${b.amount + (b.rolled_count * b.amount)}` : '';
+            const payout = b.matchWinStatus === 1 && b.rolled_count ? `+₹${b.rolled_count * b.amount}` : '';
             html += `<div class="dice-bet-item">
                 <div class="dice-bet-face">${b.diceNumber}</div>
                 <div class="dice-bet-details">
@@ -3815,6 +3967,8 @@
                 if (msg.type === 'dice_match_result' && msg.data) {
                     const resultMatch = msg.data;
                     const boardId = resultMatch.board;
+                    // Stop countdown if running
+                    if (diceCountdownTimer) { clearInterval(diceCountdownTimer); diceCountdownTimer = null; }
                     diceBoards = diceBoards.map(board => {
                         if (board.id !== boardId) return board;
                         return {
@@ -3827,6 +3981,21 @@
                     diceRenderedMatchId = null;
                     renderDiceMain();
                     loadUserInfo();
+
+                    // For virtual boards: auto-start next round after animation
+                    const board = diceBoards.find(b => b.id === boardId);
+                    if (board && board.is_virtual) {
+                        setTimeout(async () => {
+                            try {
+                                await fetch(`${API}/dice-play/history/${board.id}/start-virtual/`, {
+                                    method: 'POST',
+                                    headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}
+                                });
+                            } catch(e) {}
+                            // Reload boards to pick up the new match
+                            setTimeout(() => loadDiceGames(), 2000);
+                        }, 6000);
+                    }
                 }
             } catch(e) {}
         };
@@ -3837,26 +4006,128 @@
 
     function showDiceResultAnimation(match) {
         if (!match) return;
-        const faces = [];
-        for (let f = 1; f <= 6; f++) {
-            const count = match[`total${f}Rolled`] || 0;
-            for (let i = 0; i < count; i++) faces.push(f);
+        // Get individual dice from dice_result_json or reconstruct from counts
+        let faces = [];
+        if (match.dice_result_json) {
+            faces = match.dice_result_json.split(',').map(Number).filter(n => n >= 1 && n <= 6);
+        }
+        if (faces.length === 0) {
+            for (let f = 1; f <= 6; f++) {
+                const count = match[`total${f}Rolled`] || 0;
+                for (let i = 0; i < count; i++) faces.push(f);
+            }
         }
         if (faces.length === 0) return;
 
         playSound('win');
-        const overlay = document.createElement('div');
-        overlay.className = 'dice-result-overlay';
-        overlay.onclick = () => overlay.remove();
-        overlay.innerHTML = `
-            <div class="dice-result-title">DICE RESULT</div>
-            <div class="dice-result-faces">
-                ${faces.map((f, i) => `<div class="dice-result-face" style="animation-delay:${i*0.1}s">${f}</div>`).join('')}
+
+        // Create 3D scene
+        const scene = document.createElement('div');
+        scene.className = 'dice-3d-scene';
+        scene.id = 'dice-3d-scene';
+
+        // Phase 1: Spinning cubes
+        scene.innerHTML = `
+            <div class="dice-3d-title">ROLLING DICE...</div>
+            <div class="dice-3d-row" id="dice-3d-cubes">
+                ${faces.map((f, i) => `
+                    <div class="dice-3d-cube-wrap" style="animation-delay:${i*0.1}s">
+                        <div class="dice-3d-cube" style="--land-rotation:${getDiceLandRotation(f)};animation-delay:${i*0.15}s">
+                            ${render3dCubeFaces()}
+                        </div>
+                    </div>
+                `).join('')}
             </div>
-            <div style="color:var(--text-muted);font-size:13px;margin-top:8px;">Match #${match.title || match.id} — Tap to dismiss</div>
         `;
-        document.body.appendChild(overlay);
-        setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 5000);
+        document.body.appendChild(scene);
+
+        // Phase 2: After spin completes, show landed results
+        setTimeout(() => {
+            const titleEl = scene.querySelector('.dice-3d-title');
+            if (titleEl) titleEl.textContent = 'DICE RESULT';
+
+            const cubesEl = document.getElementById('dice-3d-cubes');
+            if (cubesEl) {
+                cubesEl.innerHTML = '';
+                cubesEl.className = 'dice-3d-landed-row';
+                faces.forEach((f, i) => {
+                    const faceEl = document.createElement('div');
+                    faceEl.className = 'dice-3d-landed-face';
+                    faceEl.style.animationDelay = `${i * 0.1}s`;
+                    faceEl.innerHTML = renderDiceDots3d(f);
+                    cubesEl.appendChild(faceEl);
+                });
+            }
+
+            // Show payout info
+            const payoutDiv = document.createElement('div');
+            payoutDiv.className = 'dice-3d-payout';
+            const counts = {};
+            faces.forEach(f => { counts[f] = (counts[f] || 0) + 1; });
+            const winners = Object.entries(counts).filter(([_, c]) => c >= 2).map(([n, c]) => `${n} (${c}x)`);
+            payoutDiv.textContent = winners.length > 0 ? `Winners: ${winners.join(', ')}` : 'No number appeared 2+ times';
+            scene.appendChild(payoutDiv);
+
+            // Close button
+            const closeDiv = document.createElement('div');
+            closeDiv.className = 'dice-3d-close';
+            closeDiv.textContent = 'Tap anywhere to close';
+            scene.appendChild(closeDiv);
+
+            scene.onclick = () => scene.remove();
+        }, 2800);
+
+        // Auto-dismiss after 8s
+        setTimeout(() => { if (scene.parentNode) scene.remove(); }, 8000);
+    }
+
+    function getDiceLandRotation(face) {
+        const rotations = {
+            1: 'rotateX(0deg) rotateY(0deg)',
+            2: 'rotateX(0deg) rotateY(-90deg)',
+            3: 'rotateX(-90deg) rotateY(0deg)',
+            4: 'rotateX(90deg) rotateY(0deg)',
+            5: 'rotateX(0deg) rotateY(90deg)',
+            6: 'rotateX(180deg) rotateY(0deg)',
+        };
+        return rotations[face] || 'rotateX(0deg) rotateY(0deg)';
+    }
+
+    function render3dCubeFaces() {
+        let html = '';
+        const faceNames = ['front','back','right','left','top','bottom'];
+        const faceNums = [1, 6, 5, 2, 3, 4]; // standard dice opposite faces sum to 7
+        faceNames.forEach((name, i) => {
+            html += `<div class="dice-3d-face ${name}">${render3dDots(faceNums[i])}</div>`;
+        });
+        return html;
+    }
+
+    function render3dDots(num) {
+        const positions = {
+            1: [[28,28]],
+            2: [[12,12],[44,44]],
+            3: [[12,12],[28,28],[44,44]],
+            4: [[12,12],[12,44],[44,12],[44,44]],
+            5: [[12,12],[12,44],[28,28],[44,12],[44,44]],
+            6: [[12,12],[12,28],[12,44],[44,12],[44,28],[44,44]]
+        };
+        return (positions[num] || []).map(([x,y]) =>
+            `<div class="dice-3d-dot" style="left:${x-5}px;top:${y-5}px;"></div>`
+        ).join('');
+    }
+
+    function renderDiceDots3d(num) {
+        const dots = getDiceDotLayout(num);
+        let grid = '<div style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px;width:42px;height:42px;">';
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+                const hasDot = dots.some(d => d[0] === r && d[1] === c);
+                grid += hasDot ? '<div style="width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--gold-light),var(--gold));box-shadow:0 1px 3px rgba(0,0,0,.3);margin:auto;"></div>' : '<div></div>';
+            }
+        }
+        grid += '</div>';
+        return grid;
     }
 
     function disconnectDiceWebSockets() {
