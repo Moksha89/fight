@@ -92,9 +92,11 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     flex: 1;
     min-height: 100vh;
     min-width: 0;
+    width: calc(100vw - 220px);
     max-width: calc(100vw - 220px);
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
     overflow-y: auto;
     height: 100vh;
 }
@@ -181,14 +183,16 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
 }
 
 /* ============ CONTENT AREA ============ */
-#container { margin-left: 220px !important; width: auto !important; max-width: calc(100vw - 220px) !important; min-width: 0 !important; padding: 0 !important; background: var(--bg-main) !important; }
+html body #container, body > #container, #container#container { margin-left: 220px !important; width: calc(100vw - 220px) !important; max-width: calc(100vw - 220px) !important; min-width: 0 !important; padding: 0 !important; background: var(--bg-main) !important; overflow-x: hidden !important; }
 #container .indent { margin-left: 0 !important; width: 100% !important; }
-#content, #content-main { padding: 20px 24px !important; background: var(--bg-main) !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
-#changelist, #changelist-form { min-width: 0 !important; max-width: 100% !important; }
+#content, #content-main { padding: 20px 24px !important; background: var(--bg-main) !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; overflow-x: hidden !important; }
+#changelist, #changelist-form { min-width: 0 !important; max-width: 100% !important; overflow-x: hidden !important; width: 100% !important; }
+.object-tools { max-width: 100% !important; overflow: hidden !important; }
+#changelist-form > div:not(.results) { max-width: 100% !important; overflow-x: hidden !important; }
 #content h1, #content-main h1 { display: none !important; }
 
 /* ============ TABLES (Dark, premium) ============ */
-#result_list, .results { width: 100% !important; }
+#result_list, .results { width: 100% !important; overflow: hidden !important; min-width: 0 !important; max-width: 100% !important; }
 #result_list table, .results table {
     background: var(--bg-card) !important; border-radius: 12px !important;
     border: 1px solid var(--gold-border) !important; overflow: hidden;
@@ -197,8 +201,9 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
 
 /* ============ TABLE SCROLL WRAPPER ============ */
 .table-scroll-wrapper {
+    display: block;
     width: 100%;
-    max-width: 100%;
+    max-width: calc(100vw - 220px - 48px);
     overflow-x: auto;
     overflow-y: hidden;
     border: 1px solid var(--gold-border);
@@ -265,7 +270,7 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
 .action-more-dropdown a[title="Reset Password"] .more-icon { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
 
 /* ============ RESPONSIVE COLUMN HIDING ============ */
-@media (max-width: 1200px) {
+@media (max-width: 1500px) {
     .col-hide-1200 { display: none !important; }
 }
 @media (max-width: 1024px) {
@@ -445,6 +450,7 @@ a:hover { color: var(--gold); }
 #changelist-filter, .changelist-filter-wrapper, [id*="changelist-filter"],
 .card-content#changelist-filter {
     width: 100% !important;
+    max-width: calc(100vw - 220px - 48px) !important;
     position: static !important;
     order: -1 !important;
     background: var(--bg-card) !important;
@@ -1139,7 +1145,8 @@ div.breadcrumbs { display: none !important; }
 @media (max-width: 1024px) {
     #kokoroko-sidebar { transform: translateX(-100%); transition: transform 0.3s; }
     #kokoroko-sidebar.open { transform: translateX(0); }
-    #kokoroko-main, #container { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; }
+    #kokoroko-main, #container { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important; }
+    .table-scroll-wrapper { max-width: calc(100vw - 32px) !important; }
     .mobile-toggle { display: block !important; }
     .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8999; }
     .sidebar-backdrop.show { display: block; }
@@ -1843,14 +1850,30 @@ function tagResponsiveColumns() {
     });
 }
 
+// Force container width constraint (overrides external stylesheets)
+function fixContainerWidth() {
+    var container = document.getElementById('container');
+    if (container) {
+        var sidebarWidth = 220;
+        if (window.innerWidth <= 1024) sidebarWidth = 0;
+        container.style.setProperty('width', 'calc(100vw - ' + sidebarWidth + 'px)', 'important');
+        container.style.setProperty('max-width', 'calc(100vw - ' + sidebarWidth + 'px)', 'important');
+        container.style.setProperty('margin-left', sidebarWidth + 'px', 'important');
+        container.style.setProperty('overflow-x', 'hidden', 'important');
+        container.style.setProperty('min-width', '0', 'important');
+    }
+}
+
 // Run responsive functions after DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    fixContainerWidth();
     wrapTablesInScrollWrapper();
     collapseActionButtons();
     tagResponsiveColumns();
     document.addEventListener('click', function() {
         document.querySelectorAll('.action-more-dropdown.show').forEach(function(d) { d.classList.remove('show'); });
     });
+    window.addEventListener('resize', fixContainerWidth);
 });
 </script>
 {% endblock %}
