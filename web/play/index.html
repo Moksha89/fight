@@ -3798,7 +3798,7 @@
     function getCompletedDiceMatches() {
         const board = getActiveDiceBoard();
         if (!board) return [];
-        return (board.matches || []).filter(m => m.isWinnerDeclared && (!m.virtual_phase || m.virtual_phase === 'done' || m.virtual_phase === 'result')).sort((a,b) => (a.id - b.id));
+        return (board.matches || []).filter(m => m.isWinnerDeclared && (!m.virtual_phase || m.virtual_phase === 'done' || m.virtual_phase === 'result')).sort((a,b) => (b.daily_match_number || b.id) - (a.daily_match_number || a.id));
     }
 
     function renderDiceMain() {
@@ -3843,7 +3843,7 @@
                 streamHtml = `<div class="dice-stream-placeholder"><span class="material-icons">casino</span><span>Waiting for live stream...</span></div>`;
             }
 
-            const matchTitle = match ? `${match.title || 'Match #' + match.id}` : 'No Live Match';
+            const matchTitle = match ? `Game #${match.daily_match_number || match.id}` : 'No Live Match';
             const isBetting = match?.isBettingEnabled && vPhase === 'betting';
             const modeBadge = isVirtual
                 ? '<span class="dice-virtual-badge virtual">VIRTUAL</span>'
@@ -3886,7 +3886,7 @@
                         </div>
                         <!-- Bet Actions -->
                         <div id="dice-betting-area">
-                            ${match && isBetting ? renderDiceBettingActions() : getVirtualPhaseWaitingHtml(vPhase)}
+                            ${match && isBetting ? renderDiceBettingActions() : getVirtualPhaseWaitingHtml(vPhase, match)}
                         </div>
                         <!-- Bet History -->
                         <div id="dice-bet-history-area" class="dice-bet-history" style="padding:0 16px 12px;"></div>
@@ -3921,12 +3921,70 @@
         }
     }
 
-    function getVirtualPhaseWaitingHtml(phase) {
-        switch(phase) {
-            case 'shuffling': return '<div style="text-align:center;padding:16px;color:var(--color-exposure);font-size:13px;background:var(--bg-card);">🎲 Dice are being shuffled... Result coming soon!</div>';
-            case 'result': return '<div style="text-align:center;padding:16px;color:var(--color-wala);font-size:13px;background:var(--bg-card);">📊 Result displayed. Next round starting soon...</div>';
-            default: return '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:var(--bg-card);">⏳ Waiting for betting window...</div>';
+    function getVirtualPhaseWaitingHtml(phase, match) {
+        if (phase === 'shuffling') {
+            return '<div style="text-align:center;padding:16px;color:var(--color-exposure);font-size:13px;background:var(--bg-card);">🎲 Dice are being shuffled... Result coming soon!</div>';
         }
+        if (phase === 'result' && match) {
+            return getDiceResultRevealHtml(match);
+        }
+        if (phase === 'result') {
+            return '<div style="text-align:center;padding:16px;color:var(--color-wala);font-size:13px;background:var(--bg-card);">📊 Result displayed. Next round starting soon...</div>';
+        }
+        return '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:var(--bg-card);">⏳ Waiting for betting window...</div>';
+    }
+
+    function getDiceResultRevealHtml(match) {
+        let faces = [];
+        if (match.dice_result_json) {
+            faces = match.dice_result_json.split(',').map(Number).filter(n => n >= 1 && n <= 6);
+        }
+        if (faces.length === 0) {
+            for (let f = 1; f <= 6; f++) {
+                const count = match[`total${f}Rolled`] || 0;
+                for (let i = 0; i < count; i++) faces.push(f);
+            }
+        }
+        if (faces.length === 0) return '<div style="text-align:center;padding:16px;color:var(--color-wala);font-size:13px;">📊 Processing result...</div>';
+
+        const counts = {};
+        faces.forEach(f => { counts[f] = (counts[f] || 0) + 1; });
+        const winners = Object.entries(counts).filter(([_, c]) => c >= 2).map(([n, c]) => `Face ${n} (${c}x)`);
+        const gameNum = match.daily_match_number || match.id;
+
+        let userResultHtml = '';
+        const matchBets = diceUserBets.filter(b => {
+            const mid = b.match_info ? b.match_info.id : b.match;
+            return mid === match.id;
+        });
+        if (matchBets.length > 0) {
+            let totalWon = 0, totalLost = 0;
+            matchBets.forEach(b => {
+                const faceCount = counts[b.diceNumber] || 0;
+                if (faceCount >= 2) {
+                    totalWon += faceCount * b.amount;
+                } else {
+                    totalLost += b.amount;
+                }
+            });
+            if (totalWon > 0) {
+                userResultHtml = `<div style="margin-top:8px;padding:6px 16px;background:rgba(34,197,94,0.15);border-radius:8px;color:var(--success);font-weight:700;font-size:14px;">You Won +₹${totalWon.toLocaleString('en-IN')}</div>`;
+            } else {
+                userResultHtml = `<div style="margin-top:8px;padding:6px 16px;background:rgba(239,68,68,0.12);border-radius:8px;color:var(--danger);font-weight:600;font-size:13px;">Better luck next round! -₹${totalLost.toLocaleString('en-IN')}</div>`;
+            }
+        }
+
+        return `<div style="text-align:center;padding:20px 16px;background:linear-gradient(180deg,rgba(212,168,67,0.08),var(--bg-card));border:1px solid var(--border);border-radius:12px;margin:8px 0;">
+            <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Game #${gameNum} Result</div>
+            <div style="display:flex;justify-content:center;gap:8px;margin:12px 0;">
+                ${faces.map(f => `<div style="width:46px;height:46px;background:var(--dice-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--dice-pip);border:2px solid var(--brass);box-shadow:0 2px 8px rgba(0,0,0,0.3);">${f}</div>`).join('')}
+            </div>
+            <div style="font-size:13px;color:${winners.length > 0 ? 'var(--gold)' : 'var(--text-muted)'};font-weight:600;margin-top:8px;">
+                ${winners.length > 0 ? 'Winners: ' + winners.join(', ') : 'No number appeared 2+ times'}
+            </div>
+            ${userResultHtml}
+            <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Next round starting soon...</div>
+        </div>`;
     }
 
     function startDicePhaseCountdown(board, match) {
@@ -4041,18 +4099,38 @@
     function renderDiceMatchHistory() {
         const completed = getCompletedDiceMatches();
         if (completed.length === 0) return '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">No completed matches yet</div>';
-        let html = '<div class="dice-history-grid">';
+        let html = '<div style="display:flex;flex-direction:column;gap:6px;padding:8px;">';
         completed.forEach((match) => {
-            const label = match.daily_match_number ? `#${match.daily_match_number}` : `#${match.id}`;
-            const hashTip = match.game_hash ? ` | Hash: ${match.game_hash.slice(0,12)}` : '';
-            html += '<div class="dice-history-col">';
-            html += `<div class="dice-history-col-header" title="${match.title || ''}${hashTip}">${label}</div>`;
-            for (let f = 1; f <= 6; f++) {
-                const count = match[`total${f}Rolled`] || 0;
-                const isRolled = count > 0;
-                html += `<div class="dice-history-cell ${isRolled?'rolled':''}" title="Face ${f}: rolled ${count}x">${isRolled ? f : ''}</div>`;
+            const gameNum = match.daily_match_number || match.id;
+            const hashTip = match.game_hash ? `Hash: ${match.game_hash.slice(0,16)}` : '';
+            // Get individual dice from dice_result_json
+            let faces = [];
+            if (match.dice_result_json) {
+                faces = match.dice_result_json.split(',').map(Number).filter(n => n >= 1 && n <= 6);
             }
-            html += '</div>';
+            if (faces.length === 0) {
+                for (let f = 1; f <= 6; f++) {
+                    const count = match[`total${f}Rolled`] || 0;
+                    for (let i = 0; i < count; i++) faces.push(f);
+                }
+            }
+            // Count winners
+            const counts = {};
+            faces.forEach(f => { counts[f] = (counts[f] || 0) + 1; });
+            const winners = Object.entries(counts).filter(([_, c]) => c >= 2).map(([n, c]) => `${n}(${c}x)`);
+
+            html += `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:8px 10px;" title="${hashTip}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <span style="font-size:12px;font-weight:700;color:var(--gold);">#${gameNum}</span>
+                    <span style="font-size:10px;color:${winners.length > 0 ? 'var(--success)' : 'var(--text-muted)'};">${winners.length > 0 ? winners.join(', ') : 'No winner'}</span>
+                </div>
+                <div style="display:flex;gap:4px;">
+                    ${faces.map(f => {
+                        const isWinner = (counts[f] || 0) >= 2;
+                        return `<div style="width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;${isWinner ? 'background:var(--dice-bg);color:var(--dice-pip);border:1.5px solid var(--brass);' : 'background:var(--bg);color:var(--text-secondary);border:1px solid var(--border-subtle);'}">${f}</div>`;
+                    }).join('')}
+                </div>
+            </div>`;
         });
         html += '</div>';
         return html;
@@ -4062,18 +4140,36 @@
         const area = document.getElementById('dice-bet-history-area');
         if (!area) return;
         if (!diceUserBets || diceUserBets.length === 0) { area.innerHTML = ''; return; }
-        const recent = diceUserBets.slice(0, 8);
+        const recent = diceUserBets.slice(0, 10);
         let html = '<h4><span class="material-icons">history</span> Your Dice Bets</h4>';
         recent.forEach(b => {
+            const mi = b.match_info || {};
+            const gameNum = mi.daily_match_number || b.match;
             let status = 'Pending', cls = 'pending';
             if (b.matchWinStatus === 1) { status = 'Won'; cls = 'won'; }
             else if (b.matchWinStatus === 2) { status = 'Lost'; cls = 'lost'; }
-            const payout = b.matchWinStatus === 1 && b.rolled_count ? `+₹${b.rolled_count * b.amount}` : '';
+            const payout = b.matchWinStatus === 1 && b.rolled_count ? `+₹${(b.rolled_count * b.amount).toLocaleString('en-IN')}` : '';
+
+            // Show individual dice results if available
+            let diceResultHtml = '';
+            if (mi.dice_result_json && b.matchWinStatus !== 0) {
+                const faces = mi.dice_result_json.split(',').map(Number).filter(n => n >= 1 && n <= 6);
+                if (faces.length > 0) {
+                    diceResultHtml = `<div style="display:flex;gap:3px;margin-top:3px;">
+                        ${faces.map(f => {
+                            const highlight = f === b.diceNumber;
+                            return `<span style="width:18px;height:18px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;${highlight ? 'background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold);' : 'background:var(--bg);color:var(--text-muted);border:1px solid var(--border-subtle);'}">${f}</span>`;
+                        }).join('')}
+                    </div>`;
+                }
+            }
+
             html += `<div class="dice-bet-item">
                 <div class="dice-bet-face">${b.diceNumber}</div>
                 <div class="dice-bet-details">
-                    <div class="dice-bet-match">Match #${b.match}</div>
-                    <div class="dice-bet-amt">₹${b.amount} on face ${b.diceNumber} ${payout ? '<span class="amount-credit" style="font-size:12px;">'+payout+'</span>' : ''}</div>
+                    <div class="dice-bet-match">Game #${gameNum}</div>
+                    <div class="dice-bet-amt">₹${b.amount.toLocaleString('en-IN')} on face ${b.diceNumber} ${payout ? '<span class="amount-credit" style="font-size:12px;">'+payout+'</span>' : ''}</div>
+                    ${diceResultHtml}
                 </div>
                 <div class="dice-bet-status ${cls}">${status}</div>
             </div>`;
@@ -4101,7 +4197,7 @@
         const isBetting = match?.isBettingEnabled && vPhase === 'betting';
 
         const titleEl = document.getElementById('dice-match-title');
-        if (titleEl) titleEl.textContent = match ? (match.title || `Match #${match.id}`) : 'No Live Match';
+        if (titleEl) titleEl.textContent = match ? `Game #${match.daily_match_number || match.id}` : 'No Live Match';
         const statusEl = document.getElementById('dice-bet-status');
         if (statusEl) {
             if (isVirtual && match) {
@@ -4120,15 +4216,42 @@
             if (isBetting && !hasBetActions) {
                 bettingArea.innerHTML = renderDiceBettingActions();
             } else if (!isBetting && hasBetActions) {
-                bettingArea.innerHTML = getVirtualPhaseWaitingHtml(vPhase);
+                bettingArea.innerHTML = getVirtualPhaseWaitingHtml(vPhase, match);
+            } else if (!isBetting && !hasBetActions && vPhase === 'result') {
+                bettingArea.innerHTML = getVirtualPhaseWaitingHtml(vPhase, match);
             }
         }
-        // Update hash display (in-place, avoid duplicates)
+        // Update virtual arena display for different phases
         const arenaEl = document.getElementById('dice-virtual-arena');
-        if (arenaEl && match?.game_hash) {
-            const existingHash = arenaEl.querySelector('.dice-hash-display');
-            if (existingHash) {
-                existingHash.textContent = 'Hash: ' + match.game_hash.slice(0, 16) + '...';
+        if (arenaEl && match) {
+            if (vPhase === 'result' && match.dice_result_json) {
+                // Show dice result in the arena during result phase
+                const faces = match.dice_result_json.split(',').map(Number).filter(n => n >= 1 && n <= 6);
+                const counts = {};
+                faces.forEach(f => { counts[f] = (counts[f] || 0) + 1; });
+                const winners = Object.entries(counts).filter(([_, c]) => c >= 2).map(([n, c]) => `${n}(${c}x)`);
+                arenaEl.innerHTML = `
+                    <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">Game #${match.daily_match_number || match.id} Result</div>
+                    <div style="display:flex;gap:8px;margin:8px 0;">
+                        ${faces.map(f => {
+                            const isW = (counts[f] || 0) >= 2;
+                            return `<div style="width:42px;height:42px;background:${isW?'var(--dice-bg)':'rgba(255,255,255,0.08)'};border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:${isW?'var(--dice-pip)':'var(--text-secondary)'};border:2px solid ${isW?'var(--brass)':'transparent'};box-shadow:${isW?'0 2px 8px rgba(184,134,11,0.4)':'none'};transition:all 0.3s;">${f}</div>`;
+                        }).join('')}
+                    </div>
+                    <div style="font-size:13px;color:${winners.length > 0 ? 'var(--gold)' : 'var(--text-muted)'};font-weight:600;">${winners.length > 0 ? 'Winners: ' + winners.join(', ') : 'No number appeared 2+ times'}</div>
+                `;
+            } else if (vPhase === 'shuffling') {
+                arenaEl.innerHTML = `
+                    <div id="dice-phase-display" style="font-size:40px;">🎲</div>
+                    <span style="color:var(--color-exposure);font-weight:700;font-size:15px;">SHUFFLING DICE...</span>
+                    <span style="font-size:11px;color:var(--text-muted);">Result coming soon</span>
+                `;
+            } else {
+                // Betting phase
+                const existingHash = arenaEl.querySelector('.dice-hash-display');
+                if (existingHash && match.game_hash) {
+                    existingHash.textContent = 'Hash: ' + match.game_hash.slice(0, 16) + '...';
+                }
             }
         }
         // Restart countdown if phase changed
@@ -4246,9 +4369,13 @@
                     diceBoards = diceBoards.map(prevBoard => {
                         const wsBoard = wsData.find(b => String(b.id) === String(prevBoard.id));
                         if (!wsBoard) return prevBoard;
-                        const completed = (prevBoard.matches || []).filter(m => m.isWinnerDeclared && m.virtual_phase === 'done');
-                        const active = (wsBoard.matches || []).filter(m => !m.isWinnerDeclared || (m.virtual_phase && m.virtual_phase !== 'done'));
-                        return { ...prevBoard, ...wsBoard, matches: [...active, ...completed] };
+                        // Keep completed+done matches from previous state, merge in active/result from WS
+                        const prevCompleted = (prevBoard.matches || []).filter(m => m.isWinnerDeclared && m.virtual_phase === 'done');
+                        const wsMatches = (wsBoard.matches || []);
+                        // Merge: use WS matches + any prev completed not already in WS
+                        const wsMatchIds = new Set(wsMatches.map(m => m.id));
+                        const mergedCompleted = prevCompleted.filter(m => !wsMatchIds.has(m.id));
+                        return { ...prevBoard, ...wsBoard, matches: [...wsMatches, ...mergedCompleted] };
                     });
                     renderDiceBoardTabs();
                     updateDiceInPlace();
@@ -4268,7 +4395,7 @@
         diceWsResult.onmessage = async (event) => {
             try {
                 const msg = JSON.parse(event.data);
-                if (msg.type === 'dice_match_result' && msg.data) {
+                if ((msg.type === 'dice_match_result' || msg.type === 'dice_result') && msg.data) {
                     const resultMatch = msg.data;
                     const boardId = resultMatch.board;
                     // Stop countdown if running
