@@ -2558,11 +2558,11 @@
     }
 
     // ===== Real-Time Wallet Balance WebSocket =====
-    let walletWs = null;
+    var walletWs = null;
     function connectWalletWebSocket() {
         if (!token) return;
         const wsBase = location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const wsHost = '155.117.46.249:8000';
+        const wsHost = location.host;
         if (walletWs) { try { walletWs.close(); } catch(e) {} }
         walletWs = new WebSocket(`${wsBase}${wsHost}/ws/user/?token=${token}`);
         walletWs.onmessage = (event) => {
@@ -2580,12 +2580,12 @@
     }
 
     // ===== Real-Time Notifications WebSocket =====
-    let notifWs = null;
-    let unreadNotifCount = 0;
+    var notifWs = null;
+    var unreadNotifCount = 0;
     function connectNotificationWebSocket() {
         if (!token) return;
         const wsBase = location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const wsHost = '155.117.46.249:8000';
+        const wsHost = location.host;
         if (notifWs) { try { notifWs.close(); } catch(e) {} }
         notifWs = new WebSocket(`${wsBase}${wsHost}/ws/notifications/?token=${token}`);
         notifWs.onmessage = (event) => {
@@ -2629,12 +2629,12 @@
     }
 
     // ===== Dice Timer WebSocket (server-authoritative countdown) =====
-    let diceTimerWs = null;
-    let serverTimeOffset = 0; // difference between server time and client time (ms)
+    var diceTimerWs = null;
+    var serverTimeOffset = 0; // difference between server time and client time (ms)
     function connectDiceTimerWebSocket() {
         if (!token) return;
         const wsBase = location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const wsHost = '155.117.46.249:8000';
+        const wsHost = location.host;
         if (diceTimerWs) { try { diceTimerWs.close(); } catch(e) {} }
         diceTimerWs = new WebSocket(`${wsBase}${wsHost}/ws/dice-timer/?token=${token}`);
         diceTimerWs.onmessage = (event) => {
@@ -2898,8 +2898,8 @@
         if (inp) inp.value = amount;
     }
 
-    let autoMatchRenderedId = null;
-    let autoMatchRenderedUrl = null;
+    var autoMatchRenderedId = null;
+    var autoMatchRenderedUrl = null;
     function renderAutoMatch() {
         const container = document.getElementById('auto-match-container');
         if (!autoMatchData) {
@@ -3066,7 +3066,7 @@
         if (betHistEl && betHistEl.innerHTML === '') betHistEl.innerHTML = renderBetHistory();
     }
 
-    let selectedAutoRatio = 0.80;
+    var selectedAutoRatio = 0.80;
     function selectOddsTeam(el, team, name) {
         document.querySelectorAll('.odds-col').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
@@ -3407,7 +3407,7 @@
         document.getElementById(`bet-amt-${matchId}`).value = amount;
     }
 
-    let selectedBets = {};
+    var selectedBets = {};
     function selectBet(el, matchId, team, teamName) {
         const parent = el.parentElement;
         parent.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected'));
@@ -3435,7 +3435,7 @@
         } catch(e) { showToast('Network error', 'error'); }
     }
 
-    let allTransactions = [];
+    var allTransactions = [];
     async function loadStatement() {
         try {
             const res = await fetch(`${API}/user/statement/`, { headers: {'Authorization': `Bearer ${token}`} });
@@ -3638,9 +3638,9 @@
     }
 
     // ===== DEPOSIT =====
-    let depSelectedOption = null;
-    let depFile = null;
-    let depMethodType = null; // 'qr' or 'bank'
+    var depSelectedOption = null;
+    var depFile = null;
+    var depMethodType = null; // 'qr' or 'bank'
     function openDeposit() {
         document.getElementById('deposit-modal').classList.add('show');
         depGoToStep(1);
@@ -3813,7 +3813,7 @@
     }
 
     // ===== WITHDRAWAL =====
-    let wdType = null;
+    var wdType = null;
     function openWithdraw() {
         document.getElementById('withdraw-modal').classList.add('show');
         var wdBal = document.getElementById('wd-available-bal');
@@ -3956,8 +3956,8 @@
     var diceCountdownTimer = null;
     var diceCountdownValue = 0;
 
-    const DICE_COIN_VALUES = [50, 100, 200, 500, 1000, 2500, 5000];
-    const DICE_FACE_NAMES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
+    var DICE_COIN_VALUES = [50, 100, 200, 500, 1000, 2500, 5000];
+    var DICE_FACE_NAMES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
 
     function getDiceDotLayout(num) {
         const layouts = {
@@ -4635,7 +4635,7 @@
     // Dice WebSocket connections
     function connectDiceWebSockets() {
         const wsBase = location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const wsHost = '155.117.46.249:8000';
+        const wsHost = location.host;
 
         // Match updates WS
         if (diceWsMatch) { try { diceWsMatch.close(); } catch(e) {} }
@@ -4835,7 +4835,7 @@
     }
 
     // ===== BET HISTORY ON COCKFIGHT PAGE =====
-    let userBets = [];
+    var userBets = [];
     async function loadUserBets() {
         try {
             const res = await fetch(`${API}/cockfight/bets/`, {headers:{'Authorization':`Bearer ${token}`}});
@@ -4934,9 +4934,9 @@
     }
 
     // ===== WIN/LOSS NOTIFICATION & LAST MATCH RESULT =====
-    let lastAutoMatchId = null;
-    let lastAutoWinner = 0;
-    let prevAutoMatchData = null;
+    var lastAutoMatchId = null;
+    var lastAutoWinner = 0;
+    var prevAutoMatchData = null;
     function checkMatchTransition(newData) {
         if (!newData) return;
         if (prevAutoMatchData && prevAutoMatchData.matchId !== newData.matchId) {
@@ -4976,7 +4976,7 @@
     }
 
     // ===== MATCH TIMER =====
-    let matchStartTime = null;
+    var matchStartTime = null;
     function getMatchTimerHtml() {
         if (!matchStartTime) return '';
         const elapsed = Math.floor((Date.now() - matchStartTime) / 1000);
@@ -5031,7 +5031,7 @@
     setInterval(() => { if (autoMatchData && currentChannel === 'auto') { const timerEl = document.querySelector('.match-timer'); if (timerEl && matchStartTime) { const elapsed = Math.floor((Date.now() - matchStartTime)/1000); timerEl.innerHTML = `<span class="material-icons">timer</span>${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`; } } }, 1000);
 
     // ===== BANNER CAROUSEL =====
-    let bannerIndex = 0;
+    var bannerIndex = 0;
     function goToSlide(i) {
         bannerIndex = i;
         const track = document.getElementById('banner-track');
