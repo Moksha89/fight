@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import secrets
 import uuid
 from datetime import timedelta, date, datetime, time, timezone as dt_tz
@@ -7,6 +8,8 @@ from celery import shared_task
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 from wallet.models import WalletHistory
 from .models import DicePlayMatch, DicePlayMatchBet
@@ -208,48 +211,47 @@ def create_next_virtual_round(board_id: int):
     try:
         board = Board.objects.get(id=board_id)
 
-        # Check no active undone match on this board
-        active = DicePlayMatch.objects.filter(
-            board=board, match_type="V"
-        ).exclude(virtual_phase="done").exists()
-        if active:
-            return "Board already has an active match"
+        # Use atomic transaction with select_for_update to prevent race conditions
+        with transaction.atomic():
+            active = DicePlayMatch.objects.select_for_update().filter(
+                board=board, match_type="V"
+            ).exclude(virtual_phase="done").exists()
+            if active:
+                return "Board already has an active match"
 
-        # Check IST time bounds: only run between 12:00 AM and 11:59 PM IST
-        ist_now = get_ist_now()
-        today_ist = ist_now.date()
+            ist_now = get_ist_now()
+            today_ist = ist_now.date()
 
-        # Get next daily match number
-        todays_count = DicePlayMatch.objects.filter(
-            board=board, match_type="V", match_date=today_ist
-        ).count()
-        daily_num = todays_count + 1
+            todays_count = DicePlayMatch.objects.filter(
+                board=board, match_type="V", match_date=today_ist
+            ).count()
+            daily_num = todays_count + 1
 
-        # Generate provably fair seeds
-        server_seed, client_seed, commitment_hash, nonce = create_provably_fair_seeds(daily_num)
-        game_hash = commitment_hash  # Use commitment hash as game hash
+            server_seed, client_seed, commitment_hash, nonce = create_provably_fair_seeds(daily_num)
+            game_hash = commitment_hash
 
-        match = DicePlayMatch.objects.create(
-            board=board,
-            title=f"Game #{daily_num}",
-            match_type="V",
-            isLive=True,
-            isBettingEnabled=True,
-            liveDate=timezone.now(),
-            game_hash=game_hash,
-            daily_match_number=daily_num,
-            match_date=today_ist,
-            virtual_phase="betting",
-            phase_started_at=timezone.now(),
-            server_seed=server_seed,
-            client_seed=client_seed,
-            commitment_hash=commitment_hash,
-            nonce=daily_num,
-        )
+            match = DicePlayMatch.objects.create(
+                board=board,
+                title=f"Game #{daily_num}",
+                match_type="V",
+                isLive=True,
+                isBettingEnabled=True,
+                liveDate=timezone.now(),
+                game_hash=game_hash,
+                daily_match_number=daily_num,
+                match_date=today_ist,
+                virtual_phase="betting",
+                phase_started_at=timezone.now(),
+                server_seed=server_seed,
+                client_seed=client_seed,
+                commitment_hash=commitment_hash,
+                nonce=daily_num,
+            )
         return f"Created Game #{daily_num} for {today_ist} (match {match.id}, hash: {game_hash[:12]}...)"
     except Board.DoesNotExist:
         return "Board not found"
     except Exception as e:
+        logger.exception("Failed to create virtual round for board %s", board_id)
         return str(e)
 
 
@@ -314,8 +316,9 @@ def manage_virtual_dice_rounds():
 
         else:
             # No active match - create one
-            create_next_virtual_round(board.id)
-            results.append(f"{board.name}: no active match, creating round")
+            create_result = create_next_virtual_round(board.id)
+            logger.info("Virtual dice create_next_virtual_round result: %s", create_result)
+            results.append(f"{board.name}: {create_result}")
 
     # Broadcast timer sync to all connected clients
     try:
