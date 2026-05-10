@@ -282,6 +282,16 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # =============================================================================
+# CACHE CONFIGURATION (Redis — shared across all workers)
+# =============================================================================
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1"),
+    }
+}
+
 # CHANNELS & WEBSOCKETS CONFIGURATION
 # =============================================================================
 

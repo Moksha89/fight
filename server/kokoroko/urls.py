@@ -392,12 +392,13 @@ def _get_active_theme():
     # Default
     theme = {"preset": "gold-black", "custom": None}
     try:
+        from base.models import Setting
         s = Setting.objects.filter(action='Z').first()
         if s:
             theme = json.loads(s.actionValue)
     except Exception:
         pass
-    cache.set("active_theme", theme, timeout=300)
+    cache.set("active_theme", theme, timeout=86400)
     return theme
 
 
@@ -450,7 +451,7 @@ def set_theme_api(request):
     )
 
     from django.core.cache import cache
-    cache.set("active_theme", theme_data, timeout=300)
+    cache.set("active_theme", theme_data, timeout=86400)
 
     log_admin_action(
         request.user, 'change_theme', 'system', preset,
