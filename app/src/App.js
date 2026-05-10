@@ -71,6 +71,7 @@ import React, {useEffect, useState} from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import MainNavigator from './navigation/MainNavigator';
 import {AuthProvider} from './context/AuthContext';
+import {ThemeProvider} from './context/ThemeContext';
 
 import NoInternet from './components/NoInternet';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -97,10 +98,12 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        {isConnected ? <MainNavigator /> : <NoInternet />}
-        <SmartToast />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          {isConnected ? <MainNavigator /> : <NoInternet />}
+          <SmartToast />
+        </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

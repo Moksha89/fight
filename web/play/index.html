@@ -1586,6 +1586,86 @@
         /* ===== DEPOSIT MODAL ENHANCEMENTS ===== */
         .dep-progress-bar { margin-bottom: 20px; }
     </style>
+    <script>
+    /* Theme Loader - applies theme from cache instantly, then syncs from server */
+    (function(){
+        var THEME_MAP = {
+            gold: '--gold', gold_dark: '--gold-dark', gold_light: '--gold-light',
+            bg: '--bg', bg_card: '--bg-card', bg_elevated: '--bg-card-elevated',
+            bg_surface: '--bg-surface', bg_white: '--bg-white',
+            text_primary: '--text-primary', text_secondary: '--text-secondary', text_muted: '--text-muted',
+            border: '--border', border_light: '--border-light',
+            success: '--success', danger: '--danger', warning: '--color-exposure',
+            meron: '--meron', wala: '--wala', draw: '--draw',
+        };
+        var EXTRA_MAP = {
+            gold: ['--gold-bg:0.08'],
+            border: ['--border-subtle:replace'],
+            bg: ['--black'],
+            bg_card: ['--black-light', '--bg-card-hover'],
+            danger: ['--color-withdraw', '--danger'],
+            success: ['--color-deposit'],
+            meron: ['--color-meron'],
+            wala: ['--color-wala'],
+            draw: ['--color-bonus'],
+        };
+        function applyColors(colors) {
+            var root = document.documentElement;
+            for (var key in colors) {
+                var cssVar = THEME_MAP[key];
+                if (cssVar) root.style.setProperty(cssVar, colors[key]);
+                var extras = EXTRA_MAP[key];
+                if (extras) {
+                    for (var i = 0; i < extras.length; i++) {
+                        var extra = extras[i];
+                        if (extra.indexOf(':') > -1) {
+                            var parts = extra.split(':');
+                            if (parts[1] === 'replace') {
+                                root.style.setProperty(parts[0], colors[key]);
+                            } else {
+                                var hex = colors[key];
+                                if (hex && hex.charAt(0) === '#') {
+                                    var r = parseInt(hex.substr(1,2),16);
+                                    var g = parseInt(hex.substr(3,2),16);
+                                    var b = parseInt(hex.substr(5,2),16);
+                                    root.style.setProperty(parts[0], 'rgba('+r+','+g+','+b+','+parts[1]+')');
+                                }
+                            }
+                        } else {
+                            root.style.setProperty(extra, colors[key]);
+                        }
+                    }
+                }
+            }
+            if (colors.gold) {
+                var hex = colors.gold;
+                if (hex.charAt(0) === '#') {
+                    var r = parseInt(hex.substr(1,2),16);
+                    var g = parseInt(hex.substr(3,2),16);
+                    var b = parseInt(hex.substr(5,2),16);
+                    root.style.setProperty('--gold-bg', 'rgba('+r+','+g+','+b+',0.08)');
+                    root.style.setProperty('--border', 'rgba('+r+','+g+','+b+',0.18)');
+                    root.style.setProperty('--border-light', 'rgba('+r+','+g+','+b+',0.10)');
+                }
+            }
+        }
+        // Apply cached theme instantly
+        try {
+            var cached = localStorage.getItem('kokoroko_theme');
+            if (cached) applyColors(JSON.parse(cached));
+        } catch(e){}
+        // Fetch latest from server
+        var base = window.location.protocol + '//' + window.location.hostname + ':8080';
+        fetch(base + '/admin-api/get-theme/')
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                if (data && data.colors) {
+                    applyColors(data.colors);
+                    localStorage.setItem('kokoroko_theme', JSON.stringify(data.colors));
+                }
+            }).catch(function(){});
+    })();
+    </script>
 </head>
 <body>
     <!-- MAINTENANCE OVERLAY (hidden by default, shown if setting A=Y) -->

@@ -35,6 +35,7 @@ import {fetchBanners} from '../../apis/authApi';
 import {fetchHighlights} from '../../apis/authApi';
 
 import {useAuth} from '../../context/AuthContext';
+import {useTheme} from '../../context/ThemeContext';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
@@ -48,6 +49,7 @@ import {
 } from '../../websockets/notificationWs';
 
 const HomeScreen = ({navigation}) => {
+  const {colors: themeColors} = useTheme();
   const [activeChannel, setActiveChannel] = useState(0);
   const [availableChannels, setAvailableChannels] = useState({0: '24/7'});
   const [autoMatchData, setAutoMatchData] = useState(null);
@@ -241,7 +243,7 @@ const HomeScreen = ({navigation}) => {
           <TouchableOpacity
             style={styles.notifButton}
             onPress={() => navigation.navigate('NotificationsScreen')}>
-            <MaterialIcons name="notifications-none" size={22} color="#1a1a1a" />
+            <MaterialIcons name="notifications-none" size={22} color={themeColors.text_primary} />
             {notifCount > 0 && (
               <View style={styles.notifBadge}>
                 <AppText style={styles.notifBadgeText}>
@@ -253,7 +255,7 @@ const HomeScreen = ({navigation}) => {
           <TouchableOpacity
             style={styles.walletButton}
             onPress={() => navigation.navigate('DepositWithdrawl')}>
-            <MaterialCommunityIcons name="wallet" size={16} color={'#1a1a1a'} />
+            <MaterialCommunityIcons name="wallet" size={16} color={themeColors.gold} />
             <AppText style={styles.walletText}>
               ₹{String(wallet.balanceWithBonus).split('.')[0]}
             </AppText>
@@ -261,7 +263,7 @@ const HomeScreen = ({navigation}) => {
           <TouchableOpacity
             style={styles.profileIcon}
             onPress={() => navigation.navigate('SettingsScreen')}>
-            <Feather name="user" size={22} color="#1a1a1a" />
+            <Feather name="user" size={22} color={themeColors.text_primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -412,7 +414,7 @@ const HomeScreen = ({navigation}) => {
             <TouchableOpacity
               style={[
                 styles.switchContainer,
-                isActive && {backgroundColor: '#d4a843'},
+                isActive && {backgroundColor: themeColors.gold},
               ]}
               activeOpacity={0.8}
               onPress={toggleSwitch}>
@@ -733,7 +735,7 @@ const HomeScreen = ({navigation}) => {
             Popular Cock Fight Highlights -
           </AppText>
           <TouchableOpacity onPress={() => navigation.navigate('PastMatches')}>
-            <AppText style={{color: '#d4a843'}}>View All</AppText>
+            <AppText style={{color: themeColors.gold}}>View All</AppText>
           </TouchableOpacity>
         </View>
 
@@ -807,8 +809,8 @@ const HomeScreen = ({navigation}) => {
         <TouchableOpacity
           style={styles.iconContainer}
           onPress={() => navigation.navigate('HomeScreen')}>
-          <MaterialIcons name="home" size={30} color="#d4a843" />
-          <AppText style={[styles.iconName, {color: '#d4a843'}]}>Home</AppText>
+          <MaterialIcons name="home" size={30} color={themeColors.gold} />
+          <AppText style={[styles.iconName, {color: themeColors.gold}]}>Home</AppText>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconContainer}

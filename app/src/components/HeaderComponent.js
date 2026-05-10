@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import {View, TouchableOpacity, StyleSheet} from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import AppText from './AppText';
 import {
@@ -7,6 +7,7 @@ import {
   responsiveWidth as wp,
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
+import {useTheme} from '../context/ThemeContext';
 
 const HeaderComponent = ({
   title,
@@ -16,17 +17,18 @@ const HeaderComponent = ({
   containerStyle = {},
   RightIconComponent = null,
 }) => {
+  const {colors} = useTheme();
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[styles.container, {backgroundColor: colors.bg_card, borderBottomColor: colors.border}, containerStyle]}>
       {onBackPress ? (
         <TouchableOpacity onPress={onBackPress}>
-          <FontAwesome6 name="arrow-left-long" size={24} color="#1a1a1a" />
+          <FontAwesome6 name="arrow-left-long" size={24} color={colors.text_primary} />
         </TouchableOpacity>
       ) : (
         <View style={{width: 28}} />
       )}
 
-      <AppText style={styles.title}>{title}</AppText>
+      <AppText style={[styles.title, {color: colors.text_primary}]}>{title}</AppText>
 
       {RightIconComponent ? (
         <TouchableOpacity
@@ -49,13 +51,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(4),
     alignItems: 'center',
     height: hp(7),
-    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
   },
   title: {
     fontSize: fp(1.9),
-    color: '#1a1a1a',
     fontWeight: '600',
   },
   rightIconWrapper: {
