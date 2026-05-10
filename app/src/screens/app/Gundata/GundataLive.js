@@ -33,6 +33,7 @@ import BetHistoryModal from './components/BetHistoryModal';
 import FeatureUnderMaintenanceScreen from '../../FeatureUnderMaintenanceScreen';
 
 import {useAuth} from '../../../context/AuthContext';
+import COLORS from '../../../context/designTokens';
 import {
   placeDicePlayBet,
   getDicePlayBoards,
@@ -679,14 +680,14 @@ const GundataLive = ({navigation}) => {
 
 const styles = StyleSheet.create({
   headerSection: {
-    backgroundColor: '#f3f4f5',
+    backgroundColor: COLORS.bg_surface,
     paddingHorizontal: wp(7),
     borderRadius: wp(2),
     width: wp(100),
     height: hp(7),
   },
   walletButton: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     borderRadius: wp(2),
     flexDirection: 'row',
     width: wp(25),
@@ -696,7 +697,7 @@ const styles = StyleSheet.create({
   },
   walletText: {
     fontSize: fp(1.8),
-    color: '#ffffff',
+    color: COLORS.white,
   },
   banner: {
     flexDirection: 'row',
@@ -728,7 +729,7 @@ const styles = StyleSheet.create({
   dice: {
     width: wp(31.5),
     height: '100%',
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.white,
     borderRadius: wp(3),
     display: 'flex',
     justifyContent: 'center',
@@ -742,15 +743,15 @@ const styles = StyleSheet.create({
     width: wp(2),
     height: wp(2),
     borderRadius: wp(1),
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
   },
   diceSelected: {
     borderWidth: 2,
-    borderColor: '#d4a843',
+    borderColor: COLORS.gold,
   },
   diceNumber: {
     fontWeight: '400',
-    color: '#808080',
+    color: COLORS.text_muted,
     fontSize: fp(1.8),
   },
   diceImage: {
@@ -886,7 +887,7 @@ const styles = StyleSheet.create({
   diceAnimationTitle: {
     fontSize: fp(2.8),
     fontWeight: '800',
-    color: '#d4a843',
+    color: COLORS.gold,
     letterSpacing: 3,
     textTransform: 'uppercase',
   },
@@ -925,7 +926,7 @@ const styles = StyleSheet.create({
     fontSize: fp(1.6),
   },
   diceAnimationWinner: {
-    color: '#4caf50',
+    color: COLORS.success,
     fontSize: fp(2),
     fontWeight: '700',
   },

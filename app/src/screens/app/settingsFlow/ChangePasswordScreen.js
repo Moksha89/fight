@@ -15,6 +15,7 @@ import AppScreen from '../../../components/AppScreen';
 import HeaderComponent from '../../../components/HeaderComponent';
 
 import {apiRequest} from '../../../utils/apiClient';
+import COLORS from '../../../context/designTokens';
 
 import {
   responsiveHeight as hp,
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   submitBtn: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: fp(1.8),
     fontWeight: '700',
   },

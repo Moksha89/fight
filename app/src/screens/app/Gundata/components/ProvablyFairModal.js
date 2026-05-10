@@ -14,6 +14,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import AppText from '../../../../components/AppText';
 import {apiRequest} from '../../../../utils/apiClient';
+import COLORS from '../../../../context/designTokens';
 
 import {
   responsiveHeight as hp,
@@ -147,12 +148,12 @@ const ProvablyFairModal = ({visible, onClose, matchId, commitmentHash}) => {
                   <MaterialIcons
                     name={verifyData.verified ? 'check-circle' : 'cancel'}
                     size={20}
-                    color={verifyData.verified ? '#22c55e' : '#ef4444'}
+                    color={verifyData.verified ? COLORS.success : COLORS.meron_light}
                   />
                   <AppText
                     style={[
                       styles.statusText,
-                      {color: verifyData.verified ? '#22c55e' : '#ef4444'},
+                      {color: verifyData.verified ? COLORS.success : COLORS.meron_light},
                     ]}>
                     {verifyData.verified
                       ? 'Result Verified — Fair'
@@ -316,14 +317,14 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 8,
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     alignItems: 'center',
     justifyContent: 'center',
   },
   diceText: {
     fontSize: fp(2.2),
     fontWeight: '700',
-    color: '#fff',
+    color: COLORS.white,
   },
   loadingContainer: {
     alignItems: 'center',
@@ -331,7 +332,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 8,
-    color: '#888',
+    color: COLORS.text_label,
     fontSize: fp(1.4),
   },
   errorContainer: {
@@ -340,7 +341,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginTop: 8,
-    color: '#ef4444',
+    color: COLORS.meron_light,
     fontSize: fp(1.5),
   },
   retryBtn: {
@@ -348,10 +349,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 6,
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
   },
   retryText: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: '600',
   },
 });

@@ -19,13 +19,10 @@
   src: url(https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
   font-display: block;
 }
-/* ============ CSS VARIABLES (Dark-Gold Premium Theme) ============ */
+/* ============ CSS VARIABLES — KOKOROKO DESIGN SYSTEM (Admin Panel) ============ */
+/* Synced with web frontend master token list. Admin theme API can override brand colors. */
 :root {
-    --bg-main: #0B0B0B;
-    --bg-card: #141414;
-    --bg-elevated: #1A1A1A;
-    --bg-hover: #1F1A12;
-    --bg-sidebar: #0A0A0A;
+    /* Brand */
     --gold: #D4A843;
     --gold-dark: #B8922E;
     --gold-light: #F0D78C;
@@ -33,20 +30,56 @@
     --gold-bg-hover: rgba(212,168,67,0.14);
     --gold-border: rgba(212,168,67,0.18);
     --gold-border-strong: rgba(212,168,67,0.30);
+    --gold-glow: rgba(212,168,67,0.3);
+
+    /* Backgrounds */
+    --bg-main: #0B0B0B;
+    --bg: #0B0B0B;
+    --bg-card: #141414;
+    --bg-elevated: #1A1A1A;
+    --bg-card-hover: #1F1F1F;
+    --bg-hover: #1F1A12;
+    --bg-sidebar: #0A0A0A;
+    --bg-surface: #121212;
+    --bg-input: #1a1a1a;
+    --bg-white: #171717;
+
+    /* Text */
     --text-primary: #F5F1E8;
     --text-secondary: #A8A29E;
     --text-muted: #6B6560;
+    --text-on-gold: #000000;
+    --text-label: #9ca3af;
+
+    /* Borders */
     --border: rgba(255,255,255,0.06);
     --border-light: rgba(255,255,255,0.04);
+    --border-subtle: rgba(255,255,255,0.06);
+
+    /* Status */
     --success: #22C55E;
+    --success-dark: #16a34a;
     --danger: #EF4444;
+    --danger-dark: #dc2626;
     --warning: #F59E0B;
+    --warning-dark: #d97706;
     --info: #3B82F6;
+
+    /* Game Colors */
     --meron: #DC2626;
+    --meron-light: #ef4444;
     --wala: #2563EB;
+    --wala-light: #3b82f6;
     --draw: #A855F7;
+    --draw-light: #c084fc;
+
+    /* Layout */
     --shadow: 0 4px 24px rgba(0,0,0,0.4);
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
 }
 
 /* ============ RESET & BASE ============ */

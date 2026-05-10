@@ -42,6 +42,7 @@ import AppText from '../../../components/AppText';
 import AppScreen from '../../../components/AppScreen';
 
 import {useAuth} from '../../../context/AuthContext';
+import COLORS from '../../../context/designTokens';
 
 import FeatureUnderMaintenanceScreen from '../../FeatureUnderMaintenanceScreen';
 import HistoryContainer from './components/HistoryContainer';
@@ -317,7 +318,7 @@ const styles = StyleSheet.create({
   header: {flexDirection: 'row', alignItems: 'center', padding: 12},
   headerTitle: {flex: 1, textAlign: 'center', fontWeight: 'bold', fontSize: 18},
   walletButton: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     borderRadius: wp(2),
     flexDirection: 'row',
     width: wp(25),
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
   },
   walletText: {
     fontSize: fp(1.8),
-    color: '#ffffff',
+    color: COLORS.white,
   },
   banner: {
     flexDirection: 'row',
@@ -410,7 +411,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#FF5500',
+    color: COLORS.warning,
     fontWeight: 'bold',
   },
 

@@ -19,6 +19,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import {useAuth} from '../../../context/AuthContext';
+import COLORS from '../../../context/designTokens';
 
 import {
   getCurrentDeposit,
@@ -135,7 +136,7 @@ const DepositWithdrawl = ({navigation}) => {
           <MaterialIcons name="history" size={25} color="#ffffff" />
         }
         rightIconWrapperStyle={{
-          backgroundColor: '#d4a843',
+          backgroundColor: COLORS.gold,
         }}
       />
       <AppText style={styles.walletAmount}>
@@ -776,7 +777,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(2),
   },
   selectedButton: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
   },
   iconImage: {
     tintColor: '#000',
@@ -793,7 +794,7 @@ const styles = StyleSheet.create({
   },
   commissionText: {
     fontSize: 12,
-    color: '#555',
+    color: COLORS.text_muted,
   },
   selectedText: {
     color: '#fff',

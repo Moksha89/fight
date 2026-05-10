@@ -27,6 +27,8 @@ import {
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
 
+import COLORS from '../../context/designTokens';
+
 const NOTIF_ICONS = {
   DEPOSIT_SUBMITTED: 'account_balance',
   DEPOSIT_APPROVED: 'check_circle',
@@ -43,13 +45,13 @@ const NOTIF_ICONS = {
 };
 
 const NOTIF_COLORS = {
-  DEPOSIT_APPROVED: '#22c55e',
-  BET_WON: '#22c55e',
-  BONUS_RECEIVED: '#D4A843',
-  DEPOSIT_REJECTED: '#ef4444',
-  WITHDRAWAL_REJECTED: '#ef4444',
-  BET_LOST: '#ef4444',
-  default: '#D4A843',
+  DEPOSIT_APPROVED: COLORS.success,
+  BET_WON: COLORS.success,
+  BONUS_RECEIVED: COLORS.gold,
+  DEPOSIT_REJECTED: COLORS.meron_light,
+  WITHDRAWAL_REJECTED: COLORS.meron_light,
+  BET_LOST: COLORS.meron_light,
+  default: COLORS.gold,
 };
 
 const NotificationsScreen = ({navigation}) => {
@@ -213,23 +215,23 @@ const styles = StyleSheet.create({
   notifTitle: {
     fontSize: fp(1.6),
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: COLORS.bg_input,
   },
   notifBody: {
     fontSize: fp(1.4),
-    color: '#666',
+    color: COLORS.text_muted,
     marginTop: 2,
   },
   notifTime: {
     fontSize: fp(1.2),
-    color: '#aaa',
+    color: COLORS.text_label,
     marginTop: 3,
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     marginLeft: 8,
   },
   emptyState: {
@@ -242,12 +244,12 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: fp(1.8),
     fontWeight: '600',
-    color: '#666',
+    color: COLORS.text_muted,
   },
   emptySubtext: {
     marginTop: 6,
     fontSize: fp(1.4),
-    color: '#aaa',
+    color: COLORS.text_label,
     textAlign: 'center',
     paddingHorizontal: wp(10),
   },

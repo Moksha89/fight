@@ -17,6 +17,7 @@ import AppText from '../../../../components/AppText';
 import LottieView from 'lottie-react-native';
 
 import {useAuth} from '../../../../context/AuthContext';
+import COLORS from '../../../../context/designTokens';
 
 import {useNavigation} from '@react-navigation/native';
 
@@ -652,7 +653,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   betPlaceButton: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     width: wp(35),
     paddingVertical: hp(1.2),
     borderRadius: wp(2),

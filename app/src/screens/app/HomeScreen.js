@@ -36,6 +36,7 @@ import {fetchHighlights} from '../../apis/authApi';
 
 import {useAuth} from '../../context/AuthContext';
 import {useTheme} from '../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
@@ -846,7 +847,7 @@ const styles = StyleSheet.create({
   bottomTabs: {
     width: wp(100),
     height: hp(10),
-    backgroundColor: '#1a1a1a',
+    backgroundColor: COLORS.bg_input,
     position: 'absolute',
     bottom: 0,
     flexDirection: 'row',
@@ -856,7 +857,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconName: {color: '#9ca3af', marginTop: hp(1)},
+  iconName: {color: COLORS.text_label, marginTop: hp(1)},
   topRow: {
     width: wp(100),
     height: hp(8),
@@ -881,7 +882,7 @@ const styles = StyleSheet.create({
   headerBrandText: {
     fontSize: fp(2.2),
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: COLORS.bg_input,
     marginLeft: wp(2),
   },
   headerRight: {
@@ -912,7 +913,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: '#ef4444',
+    backgroundColor: COLORS.meron_light,
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -944,7 +945,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   walletButton: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     borderRadius: wp(2),
     flexDirection: 'row',
     width: wp(25),
@@ -995,7 +996,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   activeDot: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     width: 10,
     height: 10,
     borderRadius: 5,

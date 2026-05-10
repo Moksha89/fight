@@ -17,11 +17,12 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {getDicePlayUserBets} from '../../../../apis/dicePlayApi';
 import ProvablyFairModal from './ProvablyFairModal';
+import COLORS from '../../../../context/designTokens';
 
 const getColor = (matchWinStatus) => {
-  if (matchWinStatus === 0) return '#FFA500';
-  if (matchWinStatus === 1) return '#43A048';
-  return '#BA2343';
+  if (matchWinStatus === 0) return COLORS.warning;
+  if (matchWinStatus === 1) return COLORS.success;
+  return COLORS.meron;
 };
 
 // Total payout when won: bet returned + rolled_count * amount
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
     marginRight: wp(3),
   },
   diceBadgeText: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: 'bold',
     fontSize: fp(1.8),
   },
@@ -245,11 +246,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: fp(1.7),
-    color: '#414141',
+    color: COLORS.text_primary,
   },
   subText: {
     fontSize: fp(1.5),
-    color: '#999',
+    color: COLORS.text_label,
     marginTop: hp(0.5),
   },
   right: {
@@ -257,7 +258,7 @@ const styles = StyleSheet.create({
   },
   inProgress: {
     fontSize: 12,
-    color: '#999',
+    color: COLORS.text_label,
     marginTop: hp(0.5),
   },
   amount: {
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    color: '#999',
+    color: COLORS.text_label,
     marginTop: hp(2),
   },
   verifyBtn: {
@@ -280,7 +281,7 @@ const styles = StyleSheet.create({
   },
   verifyText: {
     fontSize: fp(1.2),
-    color: '#D4A843',
+    color: COLORS.gold,
     fontWeight: '600',
   },
 });

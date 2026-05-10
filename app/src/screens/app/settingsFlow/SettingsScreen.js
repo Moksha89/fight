@@ -19,6 +19,7 @@ import SoundPlayer from 'react-native-sound-player';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 import {useAuth} from '../../../context/AuthContext';
+import COLORS from '../../../context/designTokens';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -65,7 +66,7 @@ const SettingsScreen = ({navigation}) => {
         onBackPress={() => navigation.goBack()}
         onIconPress={() => setIsLocked(true)}
         RightIconComponent={<Octicons name="lock" size={17} color="#ffffff" />}
-        rightIconWrapperStyle={{backgroundColor: '#d4a843'}}
+        rightIconWrapperStyle={{backgroundColor: COLORS.gold}}
         containerStyle={{}}
       />
       <ScrollView
