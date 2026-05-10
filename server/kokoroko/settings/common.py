@@ -288,7 +288,7 @@ CELERY_BEAT_SCHEDULE = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1"),
+        "LOCATION": os.environ.get("REDIS_URL", os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0").rsplit("/", 1)[0] + "/1"),
     }
 }
 
