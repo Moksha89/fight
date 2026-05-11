@@ -107,6 +107,19 @@ class RequestLoggingMiddleware:
             except (json.JSONDecodeError, AttributeError):
                 pass
 
+        # Track metrics for monitoring dashboard
+        try:
+            from kokoroko.monitoring import track_metric
+            track_metric("api_requests")
+            if response.status_code >= 400:
+                track_metric("api_errors", tags={"status": str(response.status_code)})
+            if response.status_code >= 500:
+                track_metric("api_5xx_errors")
+            if duration_ms > 2000:
+                track_metric("slow_requests", tags={"path": request.path[:50]})
+        except Exception:
+            pass
+
         return response
 
 

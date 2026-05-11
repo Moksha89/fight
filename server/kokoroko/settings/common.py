@@ -116,7 +116,7 @@ INSTALLED_APPS = [
     "wallet",
     "cockfightManager",
     "dicePlayManager",
-    # "lotteryManager",
+    "lotteryManager",
 ]
 
 MIDDLEWARE = [
@@ -278,6 +278,18 @@ CELERY_BEAT_SCHEDULE = {
     "check-cockfight-stream-health": {
         "task": "cockfightManager.tasks.check_stream_health",
         "schedule": timedelta(seconds=15),
+    },
+    "run-daily-backups": {
+        "task": "kokoroko.task_utils.run_scheduled_backups",
+        "schedule": crontab(hour=2, minute=0),  # Daily at 2:00 AM IST
+    },
+    "cleanup-old-backups": {
+        "task": "kokoroko.task_utils.cleanup_scheduled_backups",
+        "schedule": crontab(hour=3, minute=0),  # Daily at 3:00 AM IST
+    },
+    "wallet-integrity-check": {
+        "task": "kokoroko.task_utils.check_wallet_integrity_task",
+        "schedule": crontab(hour=4, minute=0),  # Daily at 4:00 AM IST
     },
 }
 

@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.contrib import admin
@@ -59,6 +60,11 @@ def deposit_action_view(request, pk, action):
                 {'amount': str(amount), 'customer': customer.username, 'utr': deposit.utr_id}, request
             )
             msg.success(request, f"Deposit #{pk} accepted. {amount} credited to {customer.username}.")
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(customer, "deposit_approved", {"amount": str(amount)})
+            except Exception:
+                pass
 
         elif action == 'reject':
             with db_transaction.atomic():
@@ -82,6 +88,11 @@ def deposit_action_view(request, pk, action):
                 {'customer': customer.username, 'amount': str(deposit.deposit_amount)}, request
             )
             msg.warning(request, f"Deposit #{pk} rejected.")
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(customer, "deposit_rejected", {"amount": str(deposit.deposit_amount)})
+            except Exception:
+                pass
     except DepositRequest.DoesNotExist:
         msg.error(request, f"Deposit #{pk} not found.")
     except Exception as e:
@@ -111,6 +122,11 @@ def withdrawal_action_view(request, pk, action):
                 {'amount': str(wd.withdrawal_amount), 'customer': wd.customer.username}, request
             )
             msg.success(request, f"Withdrawal #{pk} approved.")
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(wd.customer, "withdrawal_approved", {"amount": str(wd.withdrawal_amount)})
+            except Exception:
+                pass
 
         elif action == 'reject':
             with db_transaction.atomic():
@@ -134,6 +150,11 @@ def withdrawal_action_view(request, pk, action):
                 {'amount': str(amount), 'customer': customer.username}, request
             )
             msg.warning(request, f"Withdrawal #{pk} rejected. Amount returned to {customer.username}.")
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(customer, "withdrawal_rejected", {"amount": str(amount)})
+            except Exception:
+                pass
 
         elif action == 'handle':
             with db_transaction.atomic():
@@ -862,6 +883,45 @@ updatePreview();
 from django.views.static import serve
 from django.urls import re_path
 
+# ─── Risk Detection API ──────────────────────────────────────────────────────
+@staff_member_required
+def admin_user_risk(request, user_id):
+    """Get risk assessment for a specific user."""
+    from kokoroko.risk_detection import get_user_risk_summary
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+    summary = get_user_risk_summary(user)
+    return JsonResponse(summary)
+
+# ─── Health / Monitoring API ─────────────────────────────────────────────────
+def health_check_view(request):
+    """Public health check endpoint."""
+    from kokoroko.monitoring import full_health_check
+    data = full_health_check()
+    status_code = 200 if data.get("overall") == "ok" else 503
+    return JsonResponse(data, status=status_code)
+
+@staff_member_required
+def admin_monitoring_dashboard(request):
+    """Admin monitoring dashboard data."""
+    from kokoroko.monitoring import get_dashboard_data
+    return JsonResponse(get_dashboard_data())
+
+# ─── Backup API ──────────────────────────────────────────────────────────────
+@staff_member_required
+def admin_run_backup(request):
+    """Manually trigger a backup run."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+    from kokoroko.backup import run_all_backups
+    results = run_all_backups()
+    log_admin_action(request, "manual_backup", {"results": {k: v for k, v in results.items()}})
+    return JsonResponse({"status": "ok", "results": results})
+
 urlpatterns = [
     # Media files (before admin catch-all, no auth required)
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
@@ -875,6 +935,10 @@ urlpatterns = [
     path('admin-api/set-theme/', set_theme_api, name='set_theme_api'),
     path('admin-api/theme-presets/', get_theme_presets_api, name='get_theme_presets_api'),
     path('admin-api/theme-settings/', admin_theme_page, name='admin_theme_page'),
+    path('admin-api/user-risk/<int:user_id>/', admin_user_risk, name='admin_user_risk'),
+    path('admin-api/monitoring/', admin_monitoring_dashboard, name='admin_monitoring'),
+    path('admin-api/run-backup/', admin_run_backup, name='admin_run_backup'),
+    path('health/', health_check_view, name='health_check'),
     path('', admin.site.urls),
 ]
 

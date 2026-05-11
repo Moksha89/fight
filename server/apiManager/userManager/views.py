@@ -77,6 +77,27 @@ class SubscriptionViewSet(viewsets.ViewSet):
 
         return Response({"detail": "Subscription successful."}, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["get"], url_path="status")
+    def subscription_status(self, request):
+        user = request.user
+        is_active = False
+        days_left = 0
+        if user.lastSubscribedAt:
+            elapsed = timezone.now() - user.lastSubscribedAt
+            if elapsed < timedelta(days=30):
+                is_active = True
+                days_left = 30 - elapsed.days
+        try:
+            cost = Setting.objects.get(action='K').actionValue
+        except Setting.DoesNotExist:
+            cost = "0"
+        return Response({
+            "is_subscribed": user.isSubscribed and is_active,
+            "days_left": days_left,
+            "monthly_cost": cost,
+            "last_subscribed_at": user.lastSubscribedAt.isoformat() if user.lastSubscribedAt else None,
+        }, status=status.HTTP_200_OK)
+
 
 class UserViewSet(viewsets.GenericViewSet):
     def get_serializer_class(self):
@@ -351,3 +372,21 @@ class UserViewSet(viewsets.GenericViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path="referral")
+    def referral(self, request):
+        """Get user's referral code and stats."""
+        user = request.user
+        import hashlib
+        referral_code = hashlib.sha256(f"REF-{user.id}-{user.email}".encode()).hexdigest()[:8].upper()
+        from django.core.cache import cache
+        referral_key = f"referral_code:{referral_code}"
+        cache.set(referral_key, user.id, timeout=None)
+        referral_count = cache.get(f"referral_count:{user.id}", 0)
+        referral_earnings = cache.get(f"referral_earnings:{user.id}", "0.00")
+        return Response({
+            "referral_code": referral_code,
+            "referral_count": referral_count,
+            "referral_earnings": str(referral_earnings),
+            "share_message": f"Join Kokoroko and use my referral code {referral_code} to get started! Earn 2% commission on every win.",
+        }, status=status.HTTP_200_OK)

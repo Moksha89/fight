@@ -40,7 +40,7 @@ class RoomAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     icon_name = 'person'
-    list_display = ["phoneNumber", "username", "wallet_balance_display", "status_badge", "joinedDate", "action_buttons"]
+    list_display = ["phoneNumber", "username", "wallet_balance_display", "risk_badge", "status_badge", "joinedDate", "action_buttons"]
     search_fields = ["phoneNumber", "username", "email"]
     list_filter = ["is_active", "is_staff", "room"]
     readonly_fields = ["last_login", "joinedDate"]
@@ -108,6 +108,24 @@ class UserAdmin(BaseUserAdmin):
             return format_html('<span style="background:#4caf50;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold;">Active</span>')
         return format_html('<span style="background:#f44336;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold;">Blocked</span>')
     status_badge.short_description = "Status"
+
+    def risk_badge(self, obj):
+        try:
+            from kokoroko.risk_detection import get_user_risk_summary
+            summary = get_user_risk_summary(obj)
+            level = summary.get("level", "LOW")
+            count = summary.get("count", 0)
+            if count == 0:
+                return format_html('<span style="background:#4caf50;color:#fff;padding:3px 8px;border-radius:12px;font-size:10px;">LOW</span>')
+            colors = {"LOW": "#4caf50", "MEDIUM": "#ff9800", "HIGH": "#f44336", "CRITICAL": "#d50000"}
+            color = colors.get(level, "#999")
+            return format_html(
+                '<a href="/admin-api/user-risk/{}/" target="_blank" style="background:{};color:#fff;padding:3px 8px;border-radius:12px;font-size:10px;text-decoration:none;cursor:pointer;">{} ({})</a>',
+                obj.pk, color, level, count
+            )
+        except Exception:
+            return format_html('<span style="color:#999;font-size:10px;">—</span>')
+    risk_badge.short_description = "Risk"
 
     def action_buttons(self, obj):
         deposit_url = reverse("admin:user_deposit", args=[obj.pk])

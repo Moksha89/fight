@@ -25,21 +25,35 @@ import AppText from '../../../components/AppText';
 import AppScreen from '../../../components/AppScreen';
 import HeaderComponent from '../../../components/HeaderComponent';
 import TutorialVideoModal from '../../../components/TutorialVideoModal';
+import {getReferralCode} from '../../../apis/appApi';
 
 const ReferralScreen = ({navigation}) => {
   const [showTutorialModal, setShowTutorialModal] = React.useState(false);
   const [screenWidth, setScreenWidth] = useState(
     Dimensions.get('window').width,
   );
+  const [referralCode, setReferralCode] = useState('...');
+  const [referralCount, setReferralCount] = useState(0);
+  const [referralEarnings, setReferralEarnings] = useState('0.00');
+  const [shareMessage, setShareMessage] = useState('');
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({window}) => {
       setScreenWidth(window.width);
     });
-
+    loadReferralData();
     return () => subscription?.remove();
   }, []);
-  const referralCode = 'AGHMU545';
+
+  const loadReferralData = async () => {
+    const data = await getReferralCode();
+    if (data) {
+      setReferralCode(data.referral_code || 'ERROR');
+      setReferralCount(data.referral_count || 0);
+      setReferralEarnings(data.referral_earnings || '0.00');
+      setShareMessage(data.share_message || '');
+    }
+  };
 
   const handleCopy = () => {
     Clipboard.setString(referralCode);
@@ -49,7 +63,7 @@ const ReferralScreen = ({navigation}) => {
   const handleShare = async () => {
     try {
       await Share.open({
-        message: `Use my referral code ${referralCode} and start earning!`,
+        message: shareMessage || `Use my referral code ${referralCode} and start earning!`,
       });
     } catch (error) {
       console.log(error);

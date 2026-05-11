@@ -132,6 +132,14 @@ class DicePlayMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
                 description=f"Dice Game #{match.daily_match_number} bet {amount} on face {dice_number}",
             )
 
+        try:
+            from kokoroko.notifications import create_notification
+            create_notification(user, "bet_placed", {
+                "amount": str(amount), "game": f"Dice Game #{match.daily_match_number}"
+            })
+        except Exception:
+            pass
+
         return Response(
             {
                 "message": "Bet placed successfully.",

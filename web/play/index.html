@@ -2057,6 +2057,15 @@
                 </div>
             </div>
             <div class="sidebar-section">
+                <div class="sidebar-section-title">More</div>
+                <div class="sidebar-item" onclick="navigateSidebar('sec-promotions')">
+                    <span class="material-icons">local_offer</span> Promotions
+                </div>
+                <div class="sidebar-item" onclick="navigateSidebar('sec-lottery')">
+                    <span class="material-icons">emoji_events</span> Lottery
+                </div>
+            </div>
+            <div class="sidebar-section">
                 <div class="sidebar-section-title">Account</div>
                 <div class="sidebar-item" onclick="navigateSidebar('sec-wallet')">
                     <span class="material-icons">account_balance_wallet</span> Wallet
@@ -2386,6 +2395,48 @@
                     <span class="material-icons">logout</span> Logout
                 </button>
             </div>
+
+            <!-- PROMOTIONS -->
+            <div id="sec-promotions" class="section">
+                <div class="section-title">
+                    <span class="material-icons">local_offer</span>
+                    Promotions
+                </div>
+                <div id="promotions-list" style="display:flex;flex-direction:column;gap:12px;">
+                    <div class="card" style="padding:24px;text-align:center;opacity:0.7;">
+                        <span class="material-icons" style="font-size:48px;color:var(--gold);margin-bottom:8px;">campaign</span>
+                        <p style="color:var(--text-secondary);font-size:14px;">No promotions available right now. Check back soon!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOTTERY -->
+            <div id="sec-lottery" class="section">
+                <div class="section-title">
+                    <span class="material-icons">emoji_events</span>
+                    Lottery
+                </div>
+                <div id="lottery-gift-pools" style="display:flex;flex-direction:column;gap:12px;">
+                    <div class="card" style="padding:20px;">
+                        <h3 style="color:var(--gold);margin-bottom:8px;">Gift Pools</h3>
+                        <div id="gift-pools-list">
+                            <div style="text-align:center;padding:16px;opacity:0.6;">
+                                <span class="material-icons" style="font-size:40px;color:var(--gold);">card_giftcard</span>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">Loading gift pools...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" style="padding:20px;">
+                        <h3 style="color:var(--gold);margin-bottom:8px;">Price Pools</h3>
+                        <div id="price-pools-list">
+                            <div style="text-align:center;padding:16px;opacity:0.6;">
+                                <span class="material-icons" style="font-size:40px;color:var(--gold);">monetization_on</span>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">Loading price pools...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Bottom Nav (mobile) -->
@@ -2611,7 +2662,8 @@
     // Hash-to-section mapping for URL routing (must be before showApp call)
     var hashSectionMap = {
         '#home': 'sec-home', '#cockfight': 'sec-cockfight', '#dice': 'sec-dice',
-        '#wallet': 'sec-wallet', '#statements': 'sec-statement', '#profile': 'sec-profile'
+        '#wallet': 'sec-wallet', '#statements': 'sec-statement', '#profile': 'sec-profile',
+        '#promotions': 'sec-promotions', '#lottery': 'sec-lottery'
     };
     var sectionHashMap = {};
     for (var hk in hashSectionMap) { sectionHashMap[hashSectionMap[hk]] = hk; }
@@ -3703,6 +3755,76 @@
         container.innerHTML = html;
     }
 
+    // Load Promotions (Products)
+    async function loadPromotions() {
+        try {
+            var res = await fetch(API + '/base/products/', { headers: {'Authorization': 'Bearer ' + token} });
+            if (res.ok) {
+                var data = await res.json();
+                var products = Array.isArray(data) ? data : (data.results || []);
+                var container = document.getElementById('promotions-list');
+                if (products.length === 0) {
+                    container.innerHTML = '<div class="card" style="padding:24px;text-align:center;opacity:0.7;"><span class="material-icons" style="font-size:48px;color:var(--gold);margin-bottom:8px;">campaign</span><p style="color:var(--text-secondary);font-size:14px;">No promotions available right now. Check back soon!</p></div>';
+                    return;
+                }
+                var html = '';
+                products.forEach(function(p) {
+                    html += '<div class="card" style="padding:16px;display:flex;gap:12px;align-items:center;">';
+                    if (p.image) html += '<img src="' + p.image + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;">';
+                    html += '<div><h4 style="color:var(--text-primary);margin:0;">' + (p.name || p.title || 'Promotion') + '</h4>';
+                    if (p.description) html += '<p style="color:var(--text-secondary);font-size:13px;margin:4px 0 0;">' + p.description + '</p>';
+                    if (p.price) html += '<span style="color:var(--gold);font-weight:bold;">₹' + p.price + '</span>';
+                    html += '</div></div>';
+                });
+                container.innerHTML = html;
+            }
+        } catch(e) { console.log('loadPromotions error', e); }
+    }
+
+    // Load Lottery Gift Pools & Price Pools
+    async function loadLottery() {
+        try {
+            var gRes = await fetch(API + '/lottery/gift-pools/', { headers: {'Authorization': 'Bearer ' + token} });
+            if (gRes.ok) {
+                var gData = await gRes.json();
+                var gifts = Array.isArray(gData) ? gData : (gData.results || []);
+                var gContainer = document.getElementById('gift-pools-list');
+                if (gifts.length === 0) {
+                    gContainer.innerHTML = '<div style="text-align:center;padding:16px;opacity:0.6;"><span class="material-icons" style="font-size:40px;color:var(--gold);">card_giftcard</span><p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">No gift pools active</p></div>';
+                } else {
+                    var gHtml = '';
+                    gifts.forEach(function(g) {
+                        gHtml += '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">';
+                        if (g.image) gHtml += '<img src="' + g.image + '" style="width:50px;height:50px;border-radius:8px;object-fit:cover;">';
+                        gHtml += '<div><div style="color:var(--text-primary);font-weight:600;">' + g.name + '</div>';
+                        gHtml += '<div style="color:var(--gold);font-size:13px;">₹' + g.amount + ' • Min Balance: ₹' + g.minWalletBalance + '</div>';
+                        if (g.isLocked) gHtml += '<span class="badge badge-danger" style="font-size:10px;">Locked</span>';
+                        gHtml += '</div></div>';
+                    });
+                    gContainer.innerHTML = gHtml;
+                }
+            }
+            var pRes = await fetch(API + '/lottery/price-pools/', { headers: {'Authorization': 'Bearer ' + token} });
+            if (pRes.ok) {
+                var pData = await pRes.json();
+                var prices = Array.isArray(pData) ? pData : (pData.results || []);
+                var pContainer = document.getElementById('price-pools-list');
+                if (prices.length === 0) {
+                    pContainer.innerHTML = '<div style="text-align:center;padding:16px;opacity:0.6;"><span class="material-icons" style="font-size:40px;color:var(--gold);">monetization_on</span><p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">No price pools active</p></div>';
+                } else {
+                    var pHtml = '';
+                    prices.forEach(function(p) {
+                        pHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">';
+                        pHtml += '<span style="color:var(--text-primary);">Price Pool</span>';
+                        pHtml += '<span style="color:var(--gold);font-weight:bold;">₹' + p.price + '</span>';
+                        pHtml += '</div>';
+                    });
+                    pContainer.innerHTML = pHtml;
+                }
+            }
+        } catch(e) { console.log('loadLottery error', e); }
+    }
+
     // Navigation
     // Hash-to-section mapping defined in early declarations above showApp()
 
@@ -3733,7 +3855,8 @@
         document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
         const sidebarMap = {
             'sec-home': 0, 'sec-cockfight': 1, 'sec-dice': 2,
-            'sec-wallet': 3, 'sec-statement': 4, 'sec-profile': 5
+            'sec-wallet': 5, 'sec-statement': 6, 'sec-profile': 7,
+            'sec-promotions': 3, 'sec-lottery': 4
         };
         const sidebarItems = document.querySelectorAll('.sidebar-item');
         if (sidebarMap[sectionId] !== undefined && sidebarItems[sidebarMap[sectionId]]) {
@@ -3744,6 +3867,8 @@
         if (sectionId === 'sec-home' || sectionId === 'sec-cockfight') { loadMatches(); loadUserBets(); }
         if (sectionId === 'sec-dice') { loadDiceGames(); loadDiceUserBets(); connectDiceWebSockets(); connectDiceTimerWebSocket(); } else { disconnectDiceWebSockets(); if (diceTimerWs) { diceTimerWs.close(); diceTimerWs = null; } }
         if (sectionId === 'sec-wallet') { loadStatement(); }
+        if (sectionId === 'sec-promotions') { loadPromotions(); }
+        if (sectionId === 'sec-lottery') { loadLottery(); }
         window.scrollTo(0, 0);
     }
 

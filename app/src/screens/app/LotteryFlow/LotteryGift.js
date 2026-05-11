@@ -327,8 +327,6 @@ export default function GiftPoolScreen({onSelect, navigation}) {
     if (onSelect) onSelect(item);
   };
 
-  return <AppUnderMaintenanceScreen nav={navigation} />;
-
   return (
     <AppScreen isTranslucent lightStatusBar>
       <HeaderComponent

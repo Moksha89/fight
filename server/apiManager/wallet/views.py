@@ -160,6 +160,11 @@ class DepositRequestViewSet(viewsets.ModelViewSet):
                     description=f"Deposit auto-verified by UTR match ({utr_id})"
                 )
 
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(user, "deposit_approved", {"amount": str(amount)})
+            except Exception:
+                pass
             return
 
         serializer.save(
@@ -169,6 +174,11 @@ class DepositRequestViewSet(viewsets.ModelViewSet):
             deposit_type=deposit_type,
             deposit_amount=deposit_amount
         )
+        try:
+            from kokoroko.notifications import create_notification
+            create_notification(user, "deposit_submitted", {"amount": str(deposit_amount)})
+        except Exception:
+            pass
 
     @action(detail=False, methods=['get'], url_path='payment-options')
     def get_payment_options(self, request):
@@ -334,6 +344,12 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
                 fee_amount=fee_amount,
                 payout_amount=payout_amount,
             )
+
+        try:
+            from kokoroko.notifications import create_notification
+            create_notification(user, "withdrawal_submitted", {"amount": str(withdrawal_amount)})
+        except Exception:
+            pass
 
     @action(detail=False, methods=['get', 'delete'])
     def current(self, request):

@@ -108,9 +108,23 @@ def process_dice_play_match_result(match_id: int):
                 bet.matchWinStatus = 1
                 bet.save(update_fields=["matchWinStatus", "rolled_count", "updatedDate"])
                 process_single_dice_winning_bet.delay(bet.id, payout)
+                try:
+                    from kokoroko.notifications import create_notification
+                    create_notification(bet.customer, "bet_won", {
+                        "amount": str(payout), "game": f"Dice Game #{match.daily_match_number}"
+                    })
+                except Exception:
+                    pass
             else:
                 bet.matchWinStatus = 2
                 bet.save(update_fields=["matchWinStatus", "rolled_count", "updatedDate"])
+                try:
+                    from kokoroko.notifications import create_notification
+                    create_notification(bet.customer, "bet_lost", {
+                        "amount": str(bet.amount), "game": f"Dice Game #{match.daily_match_number}"
+                    })
+                except Exception:
+                    pass
 
         match.processed = True
         match.save(update_fields=["processed", "updated_at"])
