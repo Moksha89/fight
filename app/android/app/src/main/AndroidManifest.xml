@@ -26,7 +26,7 @@
       android:allowBackup="false"
       android:theme="@style/SplashTheme"
       android:supportsRtl="true"
-      android:usesCleartextTraffic="true">
+      android:usesCleartextTraffic="false">
 
       <activity
         android:name=".MainActivity"

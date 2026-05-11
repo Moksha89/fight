@@ -2364,8 +2364,8 @@
             if (!match.isLive) return;
             const teamAName = match.teamAName || 'Meron';
             const teamBName = match.teamBName || 'Wala';
-            const teamAIcon = match.teamAIcon ? (match.teamAIcon.startsWith('http') ? match.teamAIcon : `http://155.117.46.249:8080${match.teamAIcon}`) : '';
-            const teamBIcon = match.teamBIcon ? (match.teamBIcon.startsWith('http') ? match.teamBIcon : `http://155.117.46.249:8080${match.teamBIcon}`) : '';
+            const teamAIcon = match.teamAIcon ? (match.teamAIcon.startsWith('http') ? match.teamAIcon : `${match.teamAIcon}`) : '';
+            const teamBIcon = match.teamBIcon ? (match.teamBIcon.startsWith('http') ? match.teamBIcon : `${match.teamBIcon}`) : '';
             const minA = match.minThresholdTeamA || '0.75';
             const maxA = match.maxThresholdTeamA || '0.85';
             const minB = match.minThresholdTeamB || '0.75';

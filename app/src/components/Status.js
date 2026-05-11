@@ -156,7 +156,7 @@ const StoryPlayer = ({category, stories, startIndex, onClose}) => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Lets' play together download Kokoroko app at : https://kokoroko.xyz`,
+        message: `Lets' play together download RoosterRun app at : https://roosterrun.io`,
       });
     } catch (err) {
       console.warn('Share failed:', err.message);
