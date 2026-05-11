@@ -1,2 +1,2 @@
-export const baseApiEndpoint = 'https://api.kokoroko.xyz';
-export const baseWSEndpoint = 'wss://api.kokoroko.xyz';
+export const baseApiEndpoint = 'http://155.117.46.249:8081';
+export const baseWSEndpoint = 'ws://155.117.46.249:8081';

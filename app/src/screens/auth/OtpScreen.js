@@ -67,8 +67,8 @@ const OtpScreen = ({route, navigation}) => {
   const handleVerifyOtp = async () => {
     const otpValue = Array.isArray(otp) ? otp.join('') : otp;
 
-    if (otpValue.length < 4) {
-      // Alert.alert('Error', 'Please enter the 4-digit OTP.');
+    if (otpValue.length < 6) {
+      // Alert.alert('Error', 'Please enter the 6-digit OTP.');
       return;
     }
 
@@ -120,9 +120,9 @@ const OtpScreen = ({route, navigation}) => {
 
       <TextInput
         style={styles.otpInput}
-        placeholder="XXXX"
+        placeholder="XXXXXX"
         keyboardType="numeric"
-        maxLength={4}
+        maxLength={6}
         value={otp}
         onChangeText={setOtp}
         placeholderTextColor="#6C6C6C"
