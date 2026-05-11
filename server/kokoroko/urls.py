@@ -14,6 +14,77 @@ from kokoroko.security import log_admin_action
 
 security_logger = logging.getLogger("kokoroko.security")
 
+# ─── Shared Sidebar HTML for standalone admin pages ──────────────────────────
+def _admin_sidebar_css():
+    return '''
+@font-face { font-family:'Material Icons'; font-style:normal; font-weight:400; src:url(https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2'); font-display:block; }
+i, .material-icons { font-family:'Material Icons' !important; font-weight:normal; font-style:normal; font-size:20px; line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap; word-wrap:normal; direction:ltr; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+#kk-sidebar { position:fixed; top:0; left:0; width:220px; height:100vh; background:#0A0A0A; border-right:1px solid rgba(255,255,255,0.06); z-index:9000; overflow-y:auto; display:flex; flex-direction:column; }
+#kk-sidebar::-webkit-scrollbar { width:3px; }
+#kk-sidebar::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
+.sb-brand { padding:16px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.06); }
+.sb-brand img { width:34px; height:34px; border-radius:8px; }
+.sb-brand span { color:#D4A843; font-size:17px; font-weight:700; }
+.sb-section { padding:6px 8px; }
+.sb-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#6B6560; padding:10px 12px 6px; }
+.sb-divider { height:1px; background:rgba(255,255,255,0.04); margin:4px 12px; }
+.sb-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; color:#A8A29E; font-size:13px; font-weight:500; text-decoration:none; transition:all 0.15s; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sb-item:hover { background:rgba(212,168,67,0.08); color:#F5F1E8; }
+.sb-item.active { background:rgba(212,168,67,0.12); color:#D4A843; font-weight:600; }
+.sb-item i { font-size:18px; width:22px; text-align:center; opacity:0.5; }
+.sb-item:hover i { opacity:0.9; color:#F0D78C; }
+.sb-item.active i { opacity:1; color:#D4A843; }
+#kk-main { margin-left:220px; min-height:100vh; }
+'''
+
+def _admin_sidebar_html(active_path=""):
+    def _cls(path):
+        return ' class="sb-item active"' if active_path == path else ' class="sb-item"'
+    return f'''<div id="kk-sidebar">
+    <div class="sb-brand"><img src="/static/admin/img/logo.png"><span>Kokoroko</span></div>
+    <div class="sb-section"><a href="/"{_cls("/")}><i>dashboard</i>Dashboard</a></div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+        <div class="sb-title">Management</div>
+        <a href="/userManager/user/?is_staff__exact=0"{_cls("/userManager/user/")}><i>people</i>Users</a>
+        <a href="/cockfightManager/cockfightmatch/"{_cls("/cockfightManager/cockfightmatch/")}><i>live_tv</i>Cockfight Matches</a>
+        <a href="/cockfightManager/cockfightautomatch/"{_cls("/cockfightManager/cockfightautomatch/")}><i>public</i>China Market</a>
+        <a href="/cockfightManager/livesession/"{_cls("/cockfightManager/livesession/")}><i>videocam</i>Live Sessions</a>
+        <a href="/cockfightManager/oddsconfig/"{_cls("/cockfightManager/oddsconfig/")}><i>trending_up</i>Odds Config</a>
+        <a href="/dicePlayManager/board/"{_cls("/dicePlayManager/")}><i>casino</i>Dice Matches</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+        <div class="sb-title">Finance</div>
+        <a href="/wallet/wallet/"{_cls("/wallet/wallet/")}><i>account_balance_wallet</i>Wallets</a>
+        <a href="/wallet/depositrequest/"{_cls("/wallet/depositrequest/")}><i>savings</i>Deposit Requests</a>
+        <a href="/wallet/withdrawalrequest/"{_cls("/wallet/withdrawalrequest/")}><i>payments</i>Withdrawal Requests</a>
+        <a href="/wallet/wallethistory/"{_cls("/wallet/wallethistory/")}><i>history</i>Transactions</a>
+        <a href="/wallet/paymentqr/"{_cls("/wallet/paymentqr/")}><i>qr_code</i>QR Manager</a>
+        <a href="/wallet/paymentbankaccount/"{_cls("/wallet/paymentbankaccount/")}><i>account_balance</i>Bank Accounts</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+        <div class="sb-title">Content</div>
+        <a href="/base/banner/"{_cls("/base/banner/")}><i>image</i>Banners</a>
+        <a href="/base/highlight/"{_cls("/base/highlight/")}><i>stars</i>Highlights</a>
+        <a href="/base/learningvideo/"{_cls("/base/learningvideo/")}><i>play_circle</i>Videos</a>
+        <a href="/base/setting/"{_cls("/base/setting/")}><i>settings</i>App Settings</a>
+        <a href="/admin-api/theme-settings/"{_cls("/admin-api/theme-settings/")}><i>palette</i>Theme Settings</a>
+        <a href="/admin-api/feature-controls/"{_cls("/admin-api/feature-controls/")}><i>tune</i>Feature Controls</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+        <div class="sb-title">Reports</div>
+        <a href="/cockfightManager/cockfightmatchbet/"{_cls("/cockfightManager/cockfightmatchbet/")}><i>analytics</i>Bet History</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section" style="margin-top:auto;padding-bottom:12px;">
+        <a href="/logout/" class="sb-item"><i>logout</i>Logout</a>
+    </div>
+</div>'''
+
+
 admin.site.site_header = "Kokoroko"
 admin.site.site_title = "Administration • Kokoroko"
 admin.site.enable_nav_sidebar = True
@@ -515,12 +586,15 @@ def admin_theme_page(request):
 
 def _theme_page_html(presets_json, active_preset, is_custom, active_colors_json):
     from django.middleware.csrf import get_token
+    sidebar_css = _admin_sidebar_css()
+    sidebar_html = _admin_sidebar_html("/admin-api/theme-settings/")
     return f'''<!DOCTYPE html>
 <html><head>
 <title>Theme Settings — Kokoroko Admin</title>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+{sidebar_css}
 body {{ font-family: 'Inter', -apple-system, sans-serif; background: #0B0B0B; color: #F5F1E8; min-height: 100vh; }}
 .theme-container {{ max-width: 1100px; margin: 0 auto; padding: 30px 24px; }}
 .page-header {{ display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }}
@@ -590,11 +664,12 @@ body {{ font-family: 'Inter', -apple-system, sans-serif; background: #0B0B0B; co
 .tab-content.active {{ display: block; }}
 </style>
 </head><body>
+{sidebar_html}
+<div id="kk-main">
 <div class="theme-container">
     <div class="page-header">
         <span class="material-icons">palette</span>
         <h1>Theme Settings</h1>
-        <a href="/" class="back"><span class="material-icons" style="font-size:18px">arrow_back</span> Back to Admin</a>
     </div>
 
     <div class="tab-row">
@@ -877,6 +952,7 @@ renderPresets();
 renderColorGrid();
 updatePreview();
 </script>
+</div>
 </body></html>'''
 
 
@@ -971,33 +1047,16 @@ def set_feature_controls_api(request):
 @staff_member_required
 def admin_feature_controls_page(request):
     config = _get_feature_config()
+    sidebar_css = _admin_sidebar_css()
+    sidebar_html = _admin_sidebar_html("/admin-api/feature-controls/")
     return HttpResponse(f'''<!DOCTYPE html>
 <html><head>
 <title>Feature Controls | Kokoroko Admin</title>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
 * {{ margin:0; padding:0; box-sizing:border-box; }}
-@font-face {{ font-family:'Material Icons'; font-style:normal; font-weight:400; src:url(https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2'); font-display:block; }}
-i, .material-icons {{ font-family:'Material Icons' !important; font-weight:normal; font-style:normal; font-size:20px; line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap; word-wrap:normal; direction:ltr; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }}
+{sidebar_css}
 body {{ font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#0B0B0B; color:#F5F1E8; min-height:100vh; }}
-/* Sidebar */
-#kk-sidebar {{ position:fixed; top:0; left:0; width:220px; height:100vh; background:#0A0A0A; border-right:1px solid rgba(255,255,255,0.06); z-index:9000; overflow-y:auto; display:flex; flex-direction:column; }}
-#kk-sidebar::-webkit-scrollbar {{ width:3px; }}
-#kk-sidebar::-webkit-scrollbar-thumb {{ background:#333; border-radius:3px; }}
-.sb-brand {{ padding:16px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.06); }}
-.sb-brand img {{ width:34px; height:34px; border-radius:8px; }}
-.sb-brand span {{ color:#D4A843; font-size:17px; font-weight:700; }}
-.sb-section {{ padding:6px 8px; }}
-.sb-title {{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#6B6560; padding:10px 12px 6px; }}
-.sb-divider {{ height:1px; background:rgba(255,255,255,0.04); margin:4px 12px; }}
-.sb-item {{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; color:#A8A29E; font-size:13px; font-weight:500; text-decoration:none; transition:all 0.15s; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
-.sb-item:hover {{ background:rgba(212,168,67,0.08); color:#F5F1E8; }}
-.sb-item.active {{ background:rgba(212,168,67,0.12); color:#D4A843; font-weight:600; }}
-.sb-item i {{ font-size:18px; width:22px; text-align:center; opacity:0.5; }}
-.sb-item:hover i {{ opacity:0.9; color:#F0D78C; }}
-.sb-item.active i {{ opacity:1; color:#D4A843; }}
-/* Main content */
-#kk-main {{ margin-left:220px; min-height:100vh; }}
 .topbar {{ background:#141414; padding:16px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2a2a2a; }}
 .topbar a {{ color:#D4A843; text-decoration:none; font-size:14px; }}
 .topbar h1 {{ font-size:20px; color:#D4A843; }}
@@ -1038,49 +1097,7 @@ input:checked + .slider:before {{ transform:translateX(20px); background:#fff; }
 </style>
 </head>
 <body>
-<div id="kk-sidebar">
-    <div class="sb-brand"><img src="/static/admin/img/logo.png"><span>Kokoroko</span></div>
-    <div class="sb-section"><a href="/" class="sb-item"><i>dashboard</i>Dashboard</a></div>
-    <div class="sb-divider"></div>
-    <div class="sb-section">
-        <div class="sb-title">Management</div>
-        <a href="/userManager/user/?is_staff__exact=0" class="sb-item"><i>people</i>Users</a>
-        <a href="/cockfightManager/cockfightmatch/" class="sb-item"><i>live_tv</i>Cockfight Matches</a>
-        <a href="/cockfightManager/cockfightautomatch/" class="sb-item"><i>public</i>China Market</a>
-        <a href="/cockfightManager/livesession/" class="sb-item"><i>videocam</i>Live Sessions</a>
-        <a href="/cockfightManager/oddsconfig/" class="sb-item"><i>trending_up</i>Odds Config</a>
-        <a href="/dicePlayManager/board/" class="sb-item"><i>casino</i>Dice Matches</a>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-section">
-        <div class="sb-title">Finance</div>
-        <a href="/wallet/wallet/" class="sb-item"><i>account_balance_wallet</i>Wallets</a>
-        <a href="/wallet/depositrequest/" class="sb-item"><i>savings</i>Deposit Requests</a>
-        <a href="/wallet/withdrawalrequest/" class="sb-item"><i>payments</i>Withdrawal Requests</a>
-        <a href="/wallet/wallethistory/" class="sb-item"><i>history</i>Transactions</a>
-        <a href="/wallet/paymentqr/" class="sb-item"><i>qr_code</i>QR Manager</a>
-        <a href="/wallet/paymentbankaccount/" class="sb-item"><i>account_balance</i>Bank Accounts</a>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-section">
-        <div class="sb-title">Content</div>
-        <a href="/base/banner/" class="sb-item"><i>image</i>Banners</a>
-        <a href="/base/highlight/" class="sb-item"><i>stars</i>Highlights</a>
-        <a href="/base/learningvideo/" class="sb-item"><i>play_circle</i>Videos</a>
-        <a href="/base/setting/" class="sb-item"><i>settings</i>App Settings</a>
-        <a href="/admin-api/theme-settings/" class="sb-item"><i>palette</i>Theme Settings</a>
-        <a href="/admin-api/feature-controls/" class="sb-item active"><i>tune</i>Feature Controls</a>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-section">
-        <div class="sb-title">Reports</div>
-        <a href="/cockfightManager/cockfightmatchbet/" class="sb-item"><i>analytics</i>Bet History</a>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-section" style="margin-top:auto;padding-bottom:12px;">
-        <a href="/logout/" class="sb-item"><i>logout</i>Logout</a>
-    </div>
-</div>
+{sidebar_html}
 <div id="kk-main">
 <div class="topbar">
     <h1><span class="material-icons">tune</span> Feature Controls</h1>
