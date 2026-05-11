@@ -220,6 +220,8 @@ class UserAdmin(BaseUserAdmin):
         except Exception:
             balance = 0
 
+        from django.middleware.csrf import get_token
+        csrf_token = get_token(request)
         html = f'''<!DOCTYPE html><html><head><title>Deposit - {user.phoneNumber or user.email}</title>
         <style>body{{font-family:'Inter',Arial,sans-serif;max-width:500px;margin:50px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
         .card{{background:#1c2128;border-radius:12px;padding:30px;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #30363d;}}
@@ -239,7 +241,7 @@ class UserAdmin(BaseUserAdmin):
         <p class="info">User: <b>{user.phoneNumber or user.email}</b></p>
         <p class="balance">Current Balance: ₹{balance}</p>
         <form method="post" onsubmit="return confirm('Confirm deposit of ₹' + this.amount.value + '?')">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{request.META.get("CSRF_COOKIE", "")}">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
         <label>Amount to Deposit (₹)</label>
         <input type="number" name="amount" min="1" step="1" required autofocus placeholder="Enter amount...">
         <label>Reason <span class="required">*</span></label>
@@ -248,8 +250,6 @@ class UserAdmin(BaseUserAdmin):
         </form>
         <a href="{reverse("admin:userManager_user_changelist")}" class="back">← Back to Users</a>
         </div></body></html>'''
-        from django.middleware.csrf import get_token
-        get_token(request)
         return HttpResponse(html)
 
     def withdraw_view(self, request, user_id):
@@ -296,6 +296,8 @@ class UserAdmin(BaseUserAdmin):
         except Exception:
             balance = 0
         
+        from django.middleware.csrf import get_token
+        csrf_token = get_token(request)
         html = f'''<!DOCTYPE html><html><head><title>Withdraw - {user.phoneNumber or user.email}</title>
         <style>body{{font-family:'Inter',Arial,sans-serif;max-width:500px;margin:50px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
         .card{{background:#1c2128;border-radius:12px;padding:30px;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #30363d;}}
@@ -315,7 +317,7 @@ class UserAdmin(BaseUserAdmin):
         <p class="info">User: <b>{user.phoneNumber or user.email}</b></p>
         <p class="balance">Current Balance: ₹{balance}</p>
         <form method="post" onsubmit="return confirm('Confirm withdrawal of ₹' + this.amount.value + '?')">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{request.META.get("CSRF_COOKIE", "")}">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
         <label>Amount to Withdraw (₹)</label>
         <input type="number" name="amount" min="1" max="{balance}" step="1" required autofocus placeholder="Enter amount...">
         <label>Reason <span class="required">*</span></label>
