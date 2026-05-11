@@ -121,6 +121,15 @@ const GundataLive = ({navigation}) => {
   const [countdownSeconds, setCountdownSeconds] = useState(0);
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [animationDice, setAnimationDice] = useState([]);
+  const [showWinConfetti, setShowWinConfetti] = useState(false);
+  const [winAmount, setWinAmount] = useState(0);
+  const confettiColors = ['#f59e0b', '#ef4444', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
+  const confettiAnims = useRef([...Array(30)].map(() => ({
+    x: new Animated.Value(0),
+    y: new Animated.Value(0),
+    opacity: new Animated.Value(1),
+    rotate: new Animated.Value(0),
+  }))).current;
   const countdownRef = useRef(null);
 
   useEffect(() => {
@@ -207,6 +216,29 @@ const GundataLive = ({navigation}) => {
     };
   }, [isVirtualBoard, liveMatch?.id, liveMatch?.isBettingEnabled, activeBoardId, serverTimerEnd]);
 
+  const triggerConfetti = useCallback((amount) => {
+    setWinAmount(amount || 0);
+    setShowWinConfetti(true);
+    Vibration.vibrate([0, 200, 100, 200]);
+    const screenW = Dimensions.get('window').width;
+    const screenH = Dimensions.get('window').height;
+    confettiAnims.forEach((anim) => {
+      anim.x.setValue(screenW / 2 - 10);
+      anim.y.setValue(-20);
+      anim.opacity.setValue(1);
+      anim.rotate.setValue(0);
+      const targetX = Math.random() * screenW;
+      const targetY = screenH * 0.3 + Math.random() * screenH * 0.6;
+      Animated.parallel([
+        Animated.timing(anim.x, {toValue: targetX, duration: 1500 + Math.random() * 1000, useNativeDriver: true}),
+        Animated.timing(anim.y, {toValue: targetY, duration: 1500 + Math.random() * 1000, useNativeDriver: true}),
+        Animated.timing(anim.opacity, {toValue: 0, duration: 2500, useNativeDriver: true}),
+        Animated.timing(anim.rotate, {toValue: Math.random() * 10, duration: 2500, useNativeDriver: true}),
+      ]).start();
+    });
+    setTimeout(() => setShowWinConfetti(false), 3000);
+  }, [confettiAnims]);
+
   // Show dice roll animation when a result comes in
   const showDiceResultAnimation = useCallback((match) => {
     if (!match) return;
@@ -218,8 +250,19 @@ const GundataLive = ({navigation}) => {
     if (faces.length === 0) return;
     setAnimationDice(faces);
     setShowDiceAnimation(true);
+    // Check if user had a winning bet on this match
+    const winningFaces = {};
+    faces.forEach(f => { winningFaces[f] = (winningFaces[f] || 0) + 1; });
+    const matchId = match.id;
+    const winBets = (userBetHistory || []).filter(b =>
+      String(b.match) === String(matchId) && winningFaces[b.diceNumber] >= 2
+    );
+    if (winBets.length > 0) {
+      const totalWin = winBets.reduce((sum, b) => sum + parseFloat(b.winning_amount || b.amount || 0), 0);
+      setTimeout(() => triggerConfetti(totalWin), 1000);
+    }
     setTimeout(() => setShowDiceAnimation(false), 4000);
-  }, []);
+  }, [userBetHistory, triggerConfetti]);
 
   // Derive from boardsData so match-update WS changes (isBettingEnabled) apply immediately
   const isBetAllowedAtCurrentChannel = useMemo(() => {
@@ -460,6 +503,35 @@ const GundataLive = ({navigation}) => {
             onPress={() => setShowDiceAnimation(false)}>
             <Text style={{color: '#fff', fontSize: 14}}>Tap to close</Text>
           </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Winner Confetti Celebration */}
+      {showWinConfetti && (
+        <View style={styles.confettiOverlay} pointerEvents="none">
+          {confettiAnims.map((anim, i) => (
+            <Animated.View
+              key={i}
+              style={{
+                position: 'absolute',
+                width: 10,
+                height: 10,
+                borderRadius: 2,
+                backgroundColor: confettiColors[i % confettiColors.length],
+                transform: [
+                  {translateX: anim.x},
+                  {translateY: anim.y},
+                  {rotate: anim.rotate.interpolate({inputRange:[0,10],outputRange:['0deg','360deg']})},
+                ],
+                opacity: anim.opacity,
+              }}
+            />
+          ))}
+          <View style={styles.winBanner}>
+            <Text style={styles.winBannerEmoji}>🎉</Text>
+            <Text style={styles.winBannerText}>YOU WON!</Text>
+            {winAmount > 0 && <Text style={styles.winBannerAmount}>+₹{winAmount.toFixed(2)}</Text>}
+          </View>
         </View>
       )}
 
@@ -937,6 +1009,38 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#555',
+  },
+  confettiOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10000,
+  },
+  winBanner: {
+    position: 'absolute',
+    top: '35%',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  winBannerEmoji: {
+    fontSize: 60,
+  },
+  winBannerText: {
+    fontSize: fp(4),
+    fontWeight: '900',
+    color: COLORS.gold,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: {width: 0, height: 2},
+    textShadowRadius: 8,
+  },
+  winBannerAmount: {
+    fontSize: fp(2.5),
+    fontWeight: '800',
+    color: COLORS.success,
+    marginTop: 4,
   },
 });
 

@@ -67,8 +67,35 @@ export default function HistoryContainer({
     }
   }, [activeChannel, autoMatchHistory, manualMatchHistory]);
 
+  const beadRoadData = React.useMemo(() => {
+    const results = activeChannel == 0 ? autoMatchHistory : (manualMatchHistory[activeChannel] || []);
+    return results.slice(-60).map(m => ({
+      color: teamColorMap[m.winTeam] || '#808080',
+      label: m.winTeam === 1 ? 'M' : m.winTeam === 2 ? 'W' : m.winTeam === 3 ? 'D' : '?',
+      id: m.id || m.matchId,
+    }));
+  }, [activeChannel, autoMatchHistory, manualMatchHistory]);
+
+  const beadScrollRef = useRef(null);
+
   return (
     <View style={styles.bettingSection}>
+      {/* Bead Road */}
+      <View style={styles.beadRoadContainer}>
+        <AppText style={styles.beadRoadTitle}>Bead Road</AppText>
+        <ScrollView
+          ref={beadScrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.beadRoadRow}
+          onContentSizeChange={() => beadScrollRef.current?.scrollToEnd({animated: true})}>
+          {beadRoadData.map((item, i) => (
+            <View key={i} style={[styles.beadDot, {backgroundColor: item.color}]}>
+              <AppText style={styles.beadDotText}>{item.label}</AppText>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
       <View style={styles.bettingResultsSection}>
         <View style={styles.bettinResultLeft}>
           <View style={styles.colorDetails}>
@@ -141,12 +168,9 @@ const styles = StyleSheet.create({
     width: wp(95),
     backgroundColor: '#ffffff',
     marginLeft: wp(2.5),
-    marginTop: hp(1),
     paddingHorizontal: wp(3),
-    paddingVertical: hp(3),
+    paddingVertical: hp(2),
     flexDirection: 'row',
-    borderTopLeftRadius: wp(4),
-    borderTopRightRadius: wp(4),
   },
   bettinResultLeft: {
     width: wp(12),
@@ -184,5 +208,39 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderWidth: 1,
     backgroundColor: 'transparent',
+  },
+  beadRoadContainer: {
+    width: wp(95),
+    marginLeft: wp(2.5),
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: wp(4),
+    borderTopRightRadius: wp(4),
+    paddingHorizontal: wp(3),
+    paddingTop: hp(1.5),
+    paddingBottom: hp(1),
+  },
+  beadRoadTitle: {
+    fontSize: fp(1.5),
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: hp(0.5),
+  },
+  beadRoadRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingVertical: 4,
+  },
+  beadDot: {
+    width: wp(5),
+    height: wp(5),
+    borderRadius: wp(2.5),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  beadDotText: {
+    color: '#fff',
+    fontSize: fp(1.1),
+    fontWeight: '700',
   },
 });

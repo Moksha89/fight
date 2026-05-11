@@ -107,6 +107,20 @@ export default function BettingControls({
 
   const [selectedCoin, setSelectedCoin] = useState(100);
   const [currentMatchTitle, setCurrentMatchTitle] = useState('');
+  const [autoBetEnabled, setAutoBetEnabled] = useState(false);
+  const [autoBetTeam, setAutoBetTeam] = useState(null);
+  const autoBetRef = useRef(null);
+
+  useEffect(() => {
+    if (autoBetEnabled && autoBetTeam && isBetAllowedAtCurrentChannel && isBettingButtonEnable && betAmount > 0) {
+      if (autoBetRef.current) clearTimeout(autoBetRef.current);
+      autoBetRef.current = setTimeout(() => {
+        setSelectedBetTeam(autoBetTeam);
+        handlePlaceBet();
+      }, 1500);
+    }
+    return () => { if (autoBetRef.current) clearTimeout(autoBetRef.current); };
+  }, [autoBetEnabled, autoBetTeam, isBetAllowedAtCurrentChannel, isBettingButtonEnable]);
 
   useEffect(() => {
     if (activeChannel == 0) {
@@ -577,6 +591,47 @@ export default function BettingControls({
         </TouchableOpacity>
         
       </View>
+
+      {/* Auto-Bet Controls */}
+      <View style={styles.autoBetContainer}>
+        <View style={styles.autoBetHeader}>
+          <AppText style={styles.autoBetTitle}>Auto Bet</AppText>
+          <TouchableOpacity
+            style={[styles.autoBetToggle, autoBetEnabled && styles.autoBetToggleActive]}
+            onPress={() => {
+              setAutoBetEnabled(!autoBetEnabled);
+              if (autoBetEnabled) setAutoBetTeam(null);
+            }}>
+            <AppText style={{color: autoBetEnabled ? '#000' : '#666', fontSize: fp(1.5), fontWeight: '700'}}>
+              {autoBetEnabled ? 'ON' : 'OFF'}
+            </AppText>
+          </TouchableOpacity>
+        </View>
+        {autoBetEnabled && (
+          <View style={styles.autoBetTeamRow}>
+            <TouchableOpacity
+              style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 1 ? '#DC2626' : '#333'}]}
+              onPress={() => setAutoBetTeam(1)}>
+              <AppText style={{color: '#fff', fontSize: fp(1.5), fontWeight: '600'}}>Meron</AppText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 2 ? '#2563EB' : '#333'}]}
+              onPress={() => setAutoBetTeam(2)}>
+              <AppText style={{color: '#fff', fontSize: fp(1.5), fontWeight: '600'}}>Wala</AppText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 3 ? '#7C3AED' : '#333'}]}
+              onPress={() => setAutoBetTeam(3)}>
+              <AppText style={{color: '#fff', fontSize: fp(1.5), fontWeight: '600'}}>Draw</AppText>
+            </TouchableOpacity>
+          </View>
+        )}
+        {autoBetEnabled && autoBetTeam && (
+          <AppText style={{color: '#999', fontSize: fp(1.3), textAlign: 'center', marginTop: 4}}>
+            Auto-betting ₹{betAmount} on {autoBetTeam === 1 ? 'Meron' : autoBetTeam === 2 ? 'Wala' : 'Draw'} each round
+          </AppText>
+        )}
+      </View>
     </View>
   );
 }
@@ -660,5 +715,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: hp(5),
     justifyContent: 'center',
+  },
+  autoBetContainer: {
+    marginHorizontal: wp(5),
+    marginTop: hp(1),
+    backgroundColor: '#1a1a1a',
+    borderRadius: wp(2),
+    padding: wp(3),
+  },
+  autoBetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  autoBetTitle: {
+    color: '#fff',
+    fontSize: fp(1.7),
+    fontWeight: '600',
+  },
+  autoBetToggle: {
+    backgroundColor: '#333',
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(0.5),
+    borderRadius: wp(2),
+  },
+  autoBetToggleActive: {
+    backgroundColor: COLORS.gold,
+  },
+  autoBetTeamRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: hp(1),
+    gap: wp(2),
+  },
+  autoBetTeamBtn: {
+    flex: 1,
+    paddingVertical: hp(1),
+    borderRadius: wp(2),
+    alignItems: 'center',
   },
 });
