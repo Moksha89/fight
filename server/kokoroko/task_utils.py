@@ -129,13 +129,22 @@ def log_task_result(task_name, result, **extra):
 @shared_task
 def run_scheduled_backups():
     """Daily backup of database, wallet ledger, results, admin activity."""
+    from django.core.cache import cache
+    fc = cache.get("feature_controls", {})
+    backup_cfg = fc.get("backup", {})
+    if not backup_cfg.get("enabled", True) or not backup_cfg.get("auto_daily", True):
+        return "Backup disabled in Feature Controls"
     from kokoroko.backup import run_all_backups
     return run_all_backups()
 
 
 @shared_task
 def cleanup_scheduled_backups():
-    """Clean up backup files older than 30 days."""
+    """Clean up backup files older than configured retention days."""
+    from django.core.cache import cache
+    fc = cache.get("feature_controls", {})
+    if not fc.get("backup", {}).get("enabled", True):
+        return "Backup disabled in Feature Controls"
     from kokoroko.backup import cleanup_old_backups
     return cleanup_old_backups()
 

@@ -56,6 +56,27 @@ dicePlayRouter.register(r'history', BoardViewSet, basename='dice-history')
 dicePlayRouter.register(r'bets', DicePlayMatchBetViewSet, basename='dice-bets')
 
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response as DRFResponse
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def feature_flags_view(request):
+    """Public endpoint returning which features are enabled for clients."""
+    from django.core.cache import cache
+    fc = cache.get("feature_controls", {})
+    flags = {}
+    for key, val in fc.items():
+        if isinstance(val, dict):
+            flags[key] = {"enabled": val.get("enabled", True)}
+            if key == "express_withdrawal":
+                flags[key]["fee_percent"] = val.get("fee_percent", 2.5)
+            if key == "referral":
+                flags[key]["commission_percent"] = val.get("commission_percent", 2.0)
+    return DRFResponse(flags)
+
+
 urlpatterns = [
     path('base/', include(baseRouter.urls)),
     path('user/', include(userManagerRouter.urls)),
@@ -63,4 +84,5 @@ urlpatterns = [
     path('cockfight/', include(cockfightRouter.urls)),
     path('dice-play/', include(dicePlayRouter.urls)),
     path('lottery/', include(lotteryRouter.urls)),
+    path('feature-flags/', feature_flags_view, name='feature_flags'),
 ]

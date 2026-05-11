@@ -112,11 +112,32 @@ TEMPLATES = {
 }
 
 
+def _is_notification_enabled(notification_type):
+    """Check if this notification type is enabled in Feature Controls."""
+    try:
+        from django.core.cache import cache
+        config = cache.get("feature_controls", {})
+        notif_config = config.get("notifications", {})
+        if not notif_config.get("enabled", True):
+            return False
+        if notification_type in ("deposit_submitted", "deposit_approved", "deposit_rejected"):
+            return notif_config.get("deposit_alerts", True)
+        if notification_type in ("withdrawal_submitted", "withdrawal_approved", "withdrawal_rejected"):
+            return notif_config.get("withdrawal_alerts", True)
+        if notification_type in ("bet_placed", "bet_won", "bet_lost", "bet_refunded"):
+            return notif_config.get("bet_alerts", True)
+        return notif_config.get("system_alerts", True)
+    except Exception:
+        return True
+
+
 def create_notification(user, notification_type, data=None):
     """
     Create an in-app notification for a user.
     Uses Django cache as lightweight storage (can be replaced with DB model).
     """
+    if not _is_notification_enabled(notification_type):
+        return None
     from django.core.cache import cache
     data = data or {}
 

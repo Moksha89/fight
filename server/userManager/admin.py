@@ -111,6 +111,10 @@ class UserAdmin(BaseUserAdmin):
 
     def risk_badge(self, obj):
         try:
+            from django.core.cache import cache
+            fc = cache.get("feature_controls", {})
+            if not fc.get("risk_detection", {}).get("enabled", True):
+                return format_html('<span style="color:#999;font-size:10px;">OFF</span>')
             from kokoroko.risk_detection import get_user_risk_summary
             summary = get_user_risk_summary(obj)
             level = summary.get("level", "LOW")

@@ -897,6 +897,349 @@ def admin_user_risk(request, user_id):
     summary = get_user_risk_summary(user)
     return JsonResponse(summary)
 
+# ─── Feature Controls ────────────────────────────────────────────────────────
+
+FEATURE_DEFAULTS = {
+    "referral": {"enabled": True, "commission_percent": 2.0, "bonus_amount": 0, "min_withdrawal_to_earn": 100},
+    "subscription": {"enabled": True, "monthly_cost": 299, "duration_days": 30, "auto_renew": False},
+    "promotions": {"enabled": True, "show_on_home": True},
+    "lottery": {"enabled": True, "show_on_home": True},
+    "notifications": {"enabled": True, "deposit_alerts": True, "withdrawal_alerts": True, "bet_alerts": True, "system_alerts": True},
+    "backup": {"enabled": True, "auto_daily": True, "retention_days": 30},
+    "risk_detection": {"enabled": True, "auto_flag_threshold": 3, "block_on_critical": False, "duplicate_upi_check": True, "win_pattern_check": True, "rapid_transaction_check": True},
+    "express_withdrawal": {"enabled": True, "fee_percent": 2.5, "processing_minutes": 30},
+    "normal_withdrawal": {"enabled": True, "processing_hours": 6},
+    "dice_play": {"enabled": True, "max_bet": 0, "auto_match": True},
+    "cockfight": {"enabled": True, "auto_match": True},
+    "cricket": {"enabled": False, "coming_soon": True},
+}
+
+def _get_feature_config():
+    from django.core.cache import cache
+    from base.models import Setting
+    config = cache.get("feature_controls")
+    if config:
+        return config
+    try:
+        s = Setting.objects.get(action='Z')
+        stored = json.loads(s.actionValue) if s.actionValue.startswith('{') else {}
+        feature_config = stored.get("feature_controls", {})
+    except Exception:
+        feature_config = {}
+    merged = {}
+    for key, defaults in FEATURE_DEFAULTS.items():
+        merged[key] = {**defaults, **(feature_config.get(key, {}))}
+    cache.set("feature_controls", merged, timeout=86400)
+    return merged
+
+def _save_feature_config(config):
+    from django.core.cache import cache
+    from base.models import Setting
+    cache.set("feature_controls", config, timeout=86400)
+    try:
+        s = Setting.objects.get(action='Z')
+        try:
+            existing = json.loads(s.actionValue)
+        except Exception:
+            existing = {}
+        existing["feature_controls"] = config
+        s.actionValue = json.dumps(existing)
+        s.save()
+    except Setting.DoesNotExist:
+        pass
+
+@staff_member_required
+def get_feature_controls_api(request):
+    return JsonResponse(_get_feature_config())
+
+@staff_member_required
+def set_feature_controls_api(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    current = _get_feature_config()
+    for key, vals in data.items():
+        if key in current and isinstance(vals, dict):
+            current[key].update(vals)
+    _save_feature_config(current)
+    log_admin_action(request, "feature_controls_updated", {"changes": data})
+    return JsonResponse({"status": "ok", "config": current})
+
+@staff_member_required
+def admin_feature_controls_page(request):
+    config = _get_feature_config()
+    return HttpResponse(f'''<!DOCTYPE html>
+<html><head>
+<title>Feature Controls | Kokoroko Admin</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+* {{ margin:0; padding:0; box-sizing:border-box; }}
+body {{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#0B0B0B; color:#F5F1E8; min-height:100vh; }}
+.topbar {{ background:#141414; padding:16px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2a2a2a; }}
+.topbar a {{ color:#D4A843; text-decoration:none; font-size:14px; }}
+.topbar h1 {{ font-size:20px; color:#D4A843; }}
+.container {{ max-width:1200px; margin:0 auto; padding:24px; }}
+.grid {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:20px; }}
+.card {{ background:#141414; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden; }}
+.card-header {{ padding:16px 20px; background:#1a1a1a; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2a2a2a; }}
+.card-header h3 {{ display:flex; align-items:center; gap:8px; font-size:15px; }}
+.card-header .material-icons {{ color:#D4A843; font-size:20px; }}
+.card-body {{ padding:16px 20px; }}
+.toggle-row {{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #1f1f1f; }}
+.toggle-row:last-child {{ border:none; }}
+.toggle-label {{ font-size:13px; color:#ccc; }}
+.toggle-label small {{ display:block; font-size:11px; color:#777; margin-top:2px; }}
+.switch {{ position:relative; width:44px; height:24px; flex-shrink:0; }}
+.switch input {{ opacity:0; width:0; height:0; }}
+.slider {{ position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#333; border-radius:24px; transition:.3s; }}
+.slider:before {{ content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#888; border-radius:50%; transition:.3s; }}
+input:checked + .slider {{ background:#D4A843; }}
+input:checked + .slider:before {{ transform:translateX(20px); background:#fff; }}
+.input-row {{ display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #1f1f1f; }}
+.input-row:last-child {{ border:none; }}
+.input-row label {{ font-size:13px; color:#ccc; }}
+.input-row input[type=number], .input-row input[type=text] {{ background:#1a1a1a; border:1px solid #333; color:#F5F1E8; padding:6px 10px; border-radius:6px; width:100px; font-size:13px; text-align:right; }}
+.save-bar {{ position:fixed; bottom:0; left:0; right:0; background:#141414; border-top:1px solid #2a2a2a; padding:12px 24px; display:flex; justify-content:flex-end; gap:12px; z-index:100; }}
+.btn {{ padding:10px 24px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }}
+.btn-primary {{ background:#D4A843; color:#000; }}
+.btn-primary:hover {{ background:#e0b654; }}
+.btn-secondary {{ background:#333; color:#ccc; }}
+.btn-secondary:hover {{ background:#444; }}
+.status {{ display:inline-block; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:600; }}
+.status-on {{ background:rgba(34,197,94,0.15); color:#22c55e; }}
+.status-off {{ background:rgba(239,68,68,0.15); color:#ef4444; }}
+.toast {{ position:fixed; top:20px; right:20px; padding:12px 20px; border-radius:8px; color:#fff; font-size:14px; z-index:9999; display:none; }}
+.toast-success {{ background:#22c55e; }}
+.toast-error {{ background:#ef4444; }}
+</style>
+</head>
+<body>
+<div class="topbar">
+    <a href="/">← Admin</a>
+    <h1><span class="material-icons">tune</span> Feature Controls</h1>
+</div>
+<div class="container">
+<div class="grid">
+
+    <!-- Referral -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">people</span> Referral System</h3><span class="status" id="st-referral"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Referral<small>Allow users to share referral codes</small></div><label class="switch"><input type="checkbox" id="referral-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Commission %<br><small style="color:#777">% of referred friend's winning bets</small></label><input type="number" id="referral-commission_percent" step="0.1" min="0" max="20" onchange="markDirty()"></div>
+            <div class="input-row"><label>Sign-up Bonus ₹</label><input type="number" id="referral-bonus_amount" min="0" onchange="markDirty()"></div>
+            <div class="input-row"><label>Min Withdrawal to Earn ₹</label><input type="number" id="referral-min_withdrawal_to_earn" min="0" onchange="markDirty()"></div>
+        </div>
+    </div>
+
+    <!-- Subscription -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">card_membership</span> Subscription</h3><span class="status" id="st-subscription"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Subscription<small>Monthly premium subscription for users</small></div><label class="switch"><input type="checkbox" id="subscription-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Monthly Cost ₹</label><input type="number" id="subscription-monthly_cost" min="0" onchange="markDirty()"></div>
+            <div class="input-row"><label>Duration (days)</label><input type="number" id="subscription-duration_days" min="1" max="365" onchange="markDirty()"></div>
+            <div class="toggle-row"><div class="toggle-label">Auto-Renew<small>Auto deduct from wallet on expiry</small></div><label class="switch"><input type="checkbox" id="subscription-auto_renew" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Promotions -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">local_offer</span> Promotions</h3><span class="status" id="st-promotions"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Promotions<small>Show promotions section to users</small></div><label class="switch"><input type="checkbox" id="promotions-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Show on Home Page<small>Display promotions on home page</small></div><label class="switch"><input type="checkbox" id="promotions-show_on_home" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Lottery -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">emoji_events</span> Lottery</h3><span class="status" id="st-lottery"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Lottery<small>Gift pools and price pools</small></div><label class="switch"><input type="checkbox" id="lottery-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Show on Home Page</div><label class="switch"><input type="checkbox" id="lottery-show_on_home" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">notifications</span> Notifications</h3><span class="status" id="st-notifications"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Notifications<small>Master switch for all notifications</small></div><label class="switch"><input type="checkbox" id="notifications-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Deposit Alerts</div><label class="switch"><input type="checkbox" id="notifications-deposit_alerts" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Withdrawal Alerts</div><label class="switch"><input type="checkbox" id="notifications-withdrawal_alerts" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Bet Alerts</div><label class="switch"><input type="checkbox" id="notifications-bet_alerts" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">System Alerts</div><label class="switch"><input type="checkbox" id="notifications-system_alerts" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Backup -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">backup</span> Backup & Recovery</h3><span class="status" id="st-backup"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Backups<small>Database + wallet ledger backups</small></div><label class="switch"><input type="checkbox" id="backup-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Auto Daily Backup<small>Run at 2:00 AM IST automatically</small></div><label class="switch"><input type="checkbox" id="backup-auto_daily" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Retention Days</label><input type="number" id="backup-retention_days" min="1" max="365" onchange="markDirty()"></div>
+        </div>
+    </div>
+
+    <!-- Risk Detection -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">security</span> Risk & Fraud Detection</h3><span class="status" id="st-risk_detection"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Risk Detection<small>Scan for suspicious activity</small></div><label class="switch"><input type="checkbox" id="risk_detection-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Auto-Flag Threshold<br><small style="color:#777">Number of flags to auto-mark HIGH</small></label><input type="number" id="risk_detection-auto_flag_threshold" min="1" max="20" onchange="markDirty()"></div>
+            <div class="toggle-row"><div class="toggle-label">Block on Critical<small>Auto-block users with CRITICAL risk</small></div><label class="switch"><input type="checkbox" id="risk_detection-block_on_critical" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Duplicate UPI Check</div><label class="switch"><input type="checkbox" id="risk_detection-duplicate_upi_check" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Win Pattern Check</div><label class="switch"><input type="checkbox" id="risk_detection-win_pattern_check" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Rapid Transaction Check</div><label class="switch"><input type="checkbox" id="risk_detection-rapid_transaction_check" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Express Withdrawal -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">bolt</span> Express Withdrawal</h3><span class="status" id="st-express_withdrawal"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Express Withdrawal<small>Fast withdrawal option with fee</small></div><label class="switch"><input type="checkbox" id="express_withdrawal-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Fee %</label><input type="number" id="express_withdrawal-fee_percent" step="0.1" min="0" max="20" onchange="markDirty()"></div>
+            <div class="input-row"><label>Processing Time (min)</label><input type="number" id="express_withdrawal-processing_minutes" min="5" max="120" onchange="markDirty()"></div>
+        </div>
+    </div>
+
+    <!-- Dice Play -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">casino</span> Dice Play</h3><span class="status" id="st-dice_play"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Dice Play<small>Virtual dice game</small></div><label class="switch"><input type="checkbox" id="dice_play-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Max Bet ₹ <small>(0=no limit)</small></label><input type="number" id="dice_play-max_bet" min="0" onchange="markDirty()"></div>
+            <div class="toggle-row"><div class="toggle-label">Auto Match<small>Auto-create new matches 24/7</small></div><label class="switch"><input type="checkbox" id="dice_play-auto_match" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Cockfight -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">sports_mma</span> Cockfight</h3><span class="status" id="st-cockfight"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Cockfight<small>Live cockfight betting</small></div><label class="switch"><input type="checkbox" id="cockfight-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Auto Match</div><label class="switch"><input type="checkbox" id="cockfight-auto_match" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Cricket -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">sports_cricket</span> Cricket</h3><span class="status" id="st-cricket"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Cricket<small>Cricket prediction game</small></div><label class="switch"><input type="checkbox" id="cricket-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Coming Soon Mode<small>Show "Coming Soon" instead of game</small></div><label class="switch"><input type="checkbox" id="cricket-coming_soon" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div class="save-bar" id="save-bar" style="display:none;">
+    <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
+    <button class="btn btn-primary" onclick="saveConfig()">💾 Save Changes</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var config = {json.dumps(config)};
+var dirty = false;
+
+function loadForm() {{
+    for (var section in config) {{
+        var st = document.getElementById('st-' + section);
+        if (st) {{
+            var on = config[section].enabled;
+            st.textContent = on ? 'ACTIVE' : 'OFF';
+            st.className = 'status ' + (on ? 'status-on' : 'status-off');
+        }}
+        for (var key in config[section]) {{
+            var el = document.getElementById(section + '-' + key);
+            if (!el) continue;
+            if (el.type === 'checkbox') el.checked = !!config[section][key];
+            else el.value = config[section][key];
+        }}
+    }}
+}}
+
+function getFormData() {{
+    var result = {{}};
+    for (var section in config) {{
+        result[section] = {{}};
+        for (var key in config[section]) {{
+            var el = document.getElementById(section + '-' + key);
+            if (!el) {{ result[section][key] = config[section][key]; continue; }}
+            if (el.type === 'checkbox') result[section][key] = el.checked;
+            else if (el.type === 'number') result[section][key] = parseFloat(el.value) || 0;
+            else result[section][key] = el.value;
+        }}
+    }}
+    return result;
+}}
+
+function markDirty() {{
+    dirty = true;
+    document.getElementById('save-bar').style.display = 'flex';
+    // Update status badges live
+    for (var section in config) {{
+        var el = document.getElementById(section + '-enabled');
+        var st = document.getElementById('st-' + section);
+        if (el && st) {{
+            st.textContent = el.checked ? 'ACTIVE' : 'OFF';
+            st.className = 'status ' + (el.checked ? 'status-on' : 'status-off');
+        }}
+    }}
+}}
+
+function resetForm() {{
+    loadForm();
+    dirty = false;
+    document.getElementById('save-bar').style.display = 'none';
+}}
+
+function saveConfig() {{
+    var data = getFormData();
+    fetch('/admin-api/set-feature-controls/', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}},
+        body: JSON.stringify(data)
+    }}).then(r => r.json()).then(d => {{
+        if (d.status === 'ok') {{
+            config = d.config;
+            loadForm();
+            dirty = false;
+            document.getElementById('save-bar').style.display = 'none';
+            showToast('Settings saved successfully!', 'success');
+        }} else {{
+            showToast('Error: ' + (d.error || 'Unknown'), 'error');
+        }}
+    }}).catch(e => showToast('Network error', 'error'));
+}}
+
+function getCookie(name) {{
+    var v = document.cookie.match('(^|;)\\\\s*' + name + '\\\\s*=\\\\s*([^;]+)');
+    return v ? v.pop() : '';
+}}
+
+function showToast(msg, type) {{
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast toast-' + type;
+    t.style.display = 'block';
+    setTimeout(function() {{ t.style.display = 'none'; }}, 3000);
+}}
+
+loadForm();
+</script>
+</body></html>''')
+
+
 # ─── Health / Monitoring API ─────────────────────────────────────────────────
 def health_check_view(request):
     """Public health check endpoint."""
@@ -938,6 +1281,9 @@ urlpatterns = [
     path('admin-api/user-risk/<int:user_id>/', admin_user_risk, name='admin_user_risk'),
     path('admin-api/monitoring/', admin_monitoring_dashboard, name='admin_monitoring'),
     path('admin-api/run-backup/', admin_run_backup, name='admin_run_backup'),
+    path('admin-api/feature-controls/', admin_feature_controls_page, name='admin_feature_controls'),
+    path('admin-api/get-feature-controls/', get_feature_controls_api, name='get_feature_controls_api'),
+    path('admin-api/set-feature-controls/', set_feature_controls_api, name='set_feature_controls_api'),
     path('health/', health_check_view, name='health_check'),
     path('', admin.site.urls),
 ]

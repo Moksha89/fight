@@ -376,6 +376,10 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=["get"], url_path="referral")
     def referral(self, request):
         """Get user's referral code and stats."""
+        from django.core.cache import cache as _cache
+        fc = _cache.get("feature_controls", {})
+        if not fc.get("referral", {}).get("enabled", True):
+            return Response({"error": "Referral system is currently disabled"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         user = request.user
         import hashlib
         referral_code = hashlib.sha256(f"REF-{user.id}-{user.email}".encode()).hexdigest()[:8].upper()
