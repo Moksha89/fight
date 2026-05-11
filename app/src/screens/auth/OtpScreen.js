@@ -23,7 +23,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 const OtpScreen = ({route, navigation}) => {
-  const {email} = route.params;
+  const {mobile} = route.params;
   const [errorMessage, setErrorMessage] = useState('');
 
   const {login} = useAuth();
@@ -48,7 +48,7 @@ const OtpScreen = ({route, navigation}) => {
     setErrorMessage('');
     try {
       setIsLoading(true);
-      const result = await getOtp(email);
+      const result = await getOtp(mobile);
 
       if (result.success) {
         // Alert.alert('Success', 'OTP sent to your email again!');
@@ -75,7 +75,7 @@ const OtpScreen = ({route, navigation}) => {
     try {
       setIsLoading(true);
 
-      const result = await verifyOtp(email, otpValue);
+      const result = await verifyOtp(mobile, otpValue);
 
       console.log('verifyOtp result:', result);
 
@@ -114,8 +114,8 @@ const OtpScreen = ({route, navigation}) => {
       <AppText style={styles.header}>Verify OTP</AppText>
 
       <AppText style={styles.description}>
-        Enter the OTP sent to your email address:{' '}
-        <AppText style={{fontWeight: 'bold'}}>{email}</AppText>.
+        Enter the OTP sent to your mobile number:{' '}
+        <AppText style={{fontWeight: 'bold'}}>{mobile}</AppText>.
       </AppText>
 
       <TextInput

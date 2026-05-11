@@ -8,10 +8,10 @@ import {apiRequest} from '../utils/apiClient';
 import {handleError} from '../utils/errorHandler';
 import storage from '../utils/storage';
 
-export const getOtp = async email => {
+export const getOtp = async mobile => {
   const result = await apiRequest('/api/user/getotp/', {
     method: 'POST',
-    body: JSON.stringify({email}),
+    body: JSON.stringify({mobile}),
   }, {auth: false});
 
   if (result.success) return {success: true, data: result.data};
@@ -19,10 +19,10 @@ export const getOtp = async email => {
   return {success: false, data: result.data || {}, error: result.error};
 };
 
-export const verifyOtp = async (email, otp) => {
+export const verifyOtp = async (mobile, otp) => {
   const result = await apiRequest('/api/user/verifyotp/', {
     method: 'POST',
-    body: JSON.stringify({email, otp}),
+    body: JSON.stringify({mobile, otp}),
   }, {auth: false});
 
   if (result.success) return {success: true, data: result.data};

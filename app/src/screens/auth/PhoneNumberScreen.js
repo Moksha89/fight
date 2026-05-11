@@ -16,7 +16,7 @@ import {
 
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Fontisto from 'react-native-vector-icons/Fontisto';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import AppScreen from '../../components/AppScreen';
 import AppText from '../../components/AppText';
@@ -32,45 +32,57 @@ import navigationRouteNames from '../../Config/navigationRouteNames';
 
 const PhoneNumberScreen = ({navigation}) => {
   const [showInput, setShowInput] = useState(false);
-  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
   const [error, setError] = useState('');
 
   const allSameDigits = num => /^(\d)\1+$/.test(num);
 
-  const validateEmail = text => {
-    setEmail(String(text).toLowerCase());
+  const validateMobile = text => {
+    const cleaned = text.replace(/[^0-9a-zA-Z_]/g, '');
+    setMobile(cleaned);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (text.length === 0) {
+    if (cleaned.length === 0) {
       setError('');
-    } else if (!emailRegex.test(text)) {
-      setError('Please enter a valid email address');
+    } else if (/^\d+$/.test(cleaned)) {
+      if (cleaned.length !== 10) {
+        setError('Please enter a valid 10-digit mobile number');
+      } else if (allSameDigits(cleaned)) {
+        setError('Invalid mobile number');
+      } else {
+        setError('');
+      }
+    } else if (cleaned.length < 3) {
+      setError('Username must be at least 3 characters');
     } else {
       setError('');
     }
   };
 
   const handleGetOtp = async () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address');
+    const isPhone = /^\d+$/.test(mobile);
+    if (isPhone && mobile.length !== 10) {
+      setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+    if (!isPhone && mobile.length < 3) {
+      setError('Please enter a valid username or mobile number');
       return;
     }
 
     setError('');
 
-    const response = await getOtp(email);
+    const response = await getOtp(mobile);
 
     if (response.success) {
-      navigation.navigate(navigationRouteNames.OTP_SCREEN, {email: email});
+      navigation.navigate(navigationRouteNames.OTP_SCREEN, {mobile: mobile});
     } else {
-      Alert.alert('Error', response.message);
+      const msg = response.error?.message || response.data?.error || 'Failed to send OTP';
+      Alert.alert('Error', msg);
     }
   };
 
-  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPhone = /^\d+$/.test(mobile);
+  const isValid = isPhone ? mobile.length === 10 && !allSameDigits(mobile) : mobile.length >= 3;
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -145,19 +157,20 @@ const PhoneNumberScreen = ({navigation}) => {
       <AppText style={styles.middleText}>Risk Win Party !</AppText>
       <AppText style={styles.bottomText}>Login & Enter !</AppText>
       <View style={styles.emailInput}>
-        <Fontisto
-          name="email"
-          size={28}
+        <FontAwesome
+          name="phone"
+          size={24}
           color="#000000"
-          style={{position: 'absolute', left: wp(4), top: hp(1.9)}}
+          style={{position: 'absolute', left: wp(4), top: hp(2)}}
         />
         <TextInput
           style={styles.mobileInput}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={validateEmail}
+          placeholder="Mobile Number or Username"
+          keyboardType="default"
+          value={mobile}
+          onChangeText={validateMobile}
           selectionColor="#d4a843"
+          autoCapitalize="none"
         />
       </View>
 

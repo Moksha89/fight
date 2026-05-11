@@ -118,10 +118,10 @@ const ProfileUpdateScreen = ({navigation, route}) => {
       />
       <TextInput
         editable={false}
-        placeholder="Email"
+        placeholder="Mobile Number"
         style={[styles.input, {backgroundColor: '#f0f0f0'}]}
-        keyboardType="email-address"
-        value={userInfo.email}
+        keyboardType="phone-pad"
+        value={userInfo.phoneNumber || userInfo.email}
       />
       <TextInput
         placeholder="Name"

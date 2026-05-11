@@ -31,45 +31,57 @@ import navigationRouteNames from '../../Config/navigationRouteNames';
 
 const PhoneNumberScreen = ({navigation}) => {
   const [showInput, setShowInput] = useState(false);
-  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
   const [error, setError] = useState('');
 
   const allSameDigits = num => /^(\d)\1+$/.test(num);
 
-  const validateEmail = text => {
-    setEmail(String(text).toLowerCase());
+  const validateMobile = text => {
+    const cleaned = text.replace(/[^0-9a-zA-Z_]/g, '');
+    setMobile(cleaned);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (text.length === 0) {
+    if (cleaned.length === 0) {
       setError('');
-    } else if (!emailRegex.test(text)) {
-      setError('Please enter a valid email address');
+    } else if (/^\d+$/.test(cleaned)) {
+      if (cleaned.length !== 10) {
+        setError('Please enter a valid 10-digit mobile number');
+      } else if (allSameDigits(cleaned)) {
+        setError('Invalid mobile number');
+      } else {
+        setError('');
+      }
+    } else if (cleaned.length < 3) {
+      setError('Username must be at least 3 characters');
     } else {
       setError('');
     }
   };
 
   const handleGetOtp = async () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address');
+    const isPhone = /^\d+$/.test(mobile);
+    if (isPhone && mobile.length !== 10) {
+      setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+    if (!isPhone && mobile.length < 3) {
+      setError('Please enter a valid username or mobile number');
       return;
     }
 
     setError('');
 
-    const response = await getOtp(email);
+    const response = await getOtp(mobile);
 
     if (response.success) {
-      navigation.navigate(navigationRouteNames.OTP_SCREEN, {email: email});
+      navigation.navigate(navigationRouteNames.OTP_SCREEN, {mobile: mobile});
     } else {
-      Alert.alert('Error', response.message);
+      const msg = response.error?.message || response.data?.error || 'Failed to send OTP';
+      Alert.alert('Error', msg);
     }
   };
 
-  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPhone = /^\d+$/.test(mobile);
+  const isValid = isPhone ? mobile.length === 10 && !allSameDigits(mobile) : mobile.length >= 3;
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -146,11 +158,11 @@ const PhoneNumberScreen = ({navigation}) => {
 
       <TextInput
         style={styles.mobileInput}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize={false}
-        value={email}
-        onChangeText={validateEmail}
+        placeholder="Mobile Number or Username"
+        keyboardType="default"
+        autoCapitalize="none"
+        value={mobile}
+        onChangeText={validateMobile}
       />
 
       {/* {!showInput ? (
