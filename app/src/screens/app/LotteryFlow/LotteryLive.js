@@ -328,7 +328,7 @@ const LotteryLive = ({numbers = [1, 15, 3, 9, 6], onRefresh, navigation}) => {
                               width: 26,
                               height: 26,
                               borderRadius: 13,
-                              backgroundColor: '#fff',
+                              backgroundColor: '#171717',
                               justifyContent: 'center',
                               alignItems: 'center',
                               marginHorizontal: 2,
@@ -366,7 +366,7 @@ const LotteryLive = ({numbers = [1, 15, 3, 9, 6], onRefresh, navigation}) => {
                             width: 26,
                             height: 26,
                             borderRadius: 13,
-                            backgroundColor: '#fff',
+                            backgroundColor: '#171717',
                             justifyContent: 'center',
                             alignItems: 'center',
                           }}>
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     backgroundColor: '#d4a843',
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderWidth: 1,
     width: wp(25),
     height: hp(4),
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   iconBox: {
     width: wp(10),
     aspectRatio: 1 / 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
   dropdownBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     paddingHorizontal: 12,
     borderRadius: 10,
     height: hp(4.5),
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: 14,
-    color: '#333',
+    color: '#A8A29E',
     marginRight: wp(8),
     marginLeft: wp(3),
   },
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     marginLeft: wp(4),
   },
   timeSlot: {
-    backgroundColor: '#eee',
+    backgroundColor: '#2a2a2a',
     borderRadius: wp(1),
     paddingVertical: 7,
     paddingHorizontal: 16,
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#d4a843',
   },
   timeSlotText: {
-    color: '#333',
+    color: '#A8A29E',
   },
   timeSlotTextSelected: {
     color: '#fff',
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
     width: wp(7),
     aspectRatio: 1 / 1,
     borderRadius: wp(5),
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     justifyContent: 'center',
     alignItems: 'center',
     display: 'flex',
@@ -602,14 +602,14 @@ const styles = StyleSheet.create({
     height: wp(7),
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#eee',
+    backgroundColor: '#2a2a2a',
     borderRadius: 8,
   },
   numberBoxSelected: {
     backgroundColor: '#d4a843',
   },
   numberText: {
-    color: '#333',
+    color: '#A8A29E',
   },
   numberTextSelected: {
     color: '#fff',
@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: wp(7),
     right: wp(7),
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     padding: wp(1.5),
     borderRadius: 30,
   },
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
   medalPlaceText: {
     position: 'absolute',
     fontSize: fp(0.8),
-    color: '#000',
+    color: '#F5F1E8',
     top: hp(1.5),
   },
   prizeText: {

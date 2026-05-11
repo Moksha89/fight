@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     marginTop: hp(4),
     fontSize: fp(3),
     fontWeight: 'bold',
-    color: '#333',
+    color: '#A8A29E',
   },
   description: {
     paddingHorizontal: wp(10),

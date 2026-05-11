@@ -371,12 +371,12 @@ const PromotionsScreen = ({navigation}) => {
 export default PromotionsScreen;
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: '#f5f5f5', paddingTop: hp(4.5)},
+  container: {backgroundColor: '#0B0B0B', paddingTop: hp(4.5)},
   card: {
     width: wp(44),
     borderRadius: wp(3),
     marginBottom: hp(2),
-    backgroundColor: '#ffffff',
+    backgroundColor: '#171717',
     position: 'relative',
     overflow: 'hidden',
     height: hp(31),
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   cardImageDiv: {
     width: wp(44),
     height: hp(20),
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     color: '#bfbfbf',
     textDecorationLine: 'line-through',
   },
-  price: {fontSize: fp(2.5), color: '#000000', fontWeight: '700'},
+  price: {fontSize: fp(2.5), color: '#F5F1E8', fontWeight: '700'},
   buyButton: {
     position: 'absolute',
     bottom: 0,
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   },
   addSymbol: {fontSize: fp(3.5), color: '#ffffff'},
   lockMessage: {fontSize: 12},
-  modalFullScreen: {paddingHorizontal: wp(7), flex: 1, backgroundColor: '#fff'},
+  modalFullScreen: {paddingHorizontal: wp(7), flex: 1, backgroundColor: '#171717'},
   rightIconText: {
     color: '#fff',
     marginLeft: wp(3),
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     width: wp(86),
     height: hp(6),
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: 8,
     marginBottom: hp(2),
     paddingLeft: wp(3),

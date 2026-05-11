@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
   },
   segmentProgressBar: {
     height: '100%',
-    backgroundColor: 'white',
+    backgroundColor: '#0B0B0B',
     borderRadius: 2,
   },
 

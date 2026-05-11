@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     marginLeft: wp(30),
   },
   arrowIcon: {marginLeft: wp(2)},
-  subscribeBtn: {color: '#000', fontWeight: '500'},
+  subscribeBtn: {color: '#F5F1E8', fontWeight: '500'},
   videosSection: {
     flexDirection: 'row',
     marginTop: hp(1),

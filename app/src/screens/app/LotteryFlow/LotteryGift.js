@@ -344,7 +344,7 @@ export default function GiftPoolScreen({onSelect, navigation}) {
         }
         rightIconWrapperStyle={{
           backgroundColor: '#d4a843',
-          borderColor: '#ccc',
+          borderColor: 'rgba(212,168,67,0.18)',
           borderWidth: 1,
           width: wp(25),
           height: hp(3),
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
   medalPlaceText: {
     position: 'absolute',
     fontSize: fp(0.9),
-    color: '#000',
+    color: '#F5F1E8',
     top: hp(0.55),
   },
   title: {
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     width: wp(90),
   },
   dot: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#171717',
     width: 8,
     height: 8,
     borderRadius: 4,

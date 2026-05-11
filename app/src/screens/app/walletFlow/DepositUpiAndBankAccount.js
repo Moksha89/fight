@@ -686,16 +686,16 @@ const styles = StyleSheet.create({
     width: wp(53),
     height: hp(6),
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: wp(2),
     paddingHorizontal: wp(3),
     fontSize: fp(2),
-    color: '#000',
+    color: '#F5F1E8',
   },
   uploadBox: {
     width: wp(34),
     height: hp(6),
-    backgroundColor: '#F3F4F5',
+    backgroundColor: '#171717',
     borderRadius: wp(2),
     justifyContent: 'space-evenly',
     alignItems: 'center',
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
     width: wp(65),
     height: hp(35),
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: wp(4),
     marginRight: wp(7),
     // backgroundColor: '#ffcc00',
@@ -777,12 +777,12 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontWeight: '700',
     fontSize: fp(2),
-    color: '#000000',
+    color: '#F5F1E8',
     marginLeft: wp(4),
     marginBottom: hp(0.5),
   },
   card: {
-    backgroundColor: '#FFF1EC',
+    backgroundColor: 'rgba(239,68,68,0.12)',
     borderRadius: wp(3),
     paddingHorizontal: wp(5),
     width: wp(90),
@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   amountBox: {
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     paddingVertical: hp(0.8),
     paddingHorizontal: wp(9),
     borderRadius: wp(2),
@@ -832,7 +832,7 @@ const styles = StyleSheet.create({
   amountText: {
     fontSize: fp(2),
     fontWeight: 'bold',
-    color: '#000',
+    color: '#F5F1E8',
   },
 });
 

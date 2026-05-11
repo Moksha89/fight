@@ -38,8 +38,8 @@ const AppScreen = ({
   ) : (
     <SafeAreaView style={[styles.screen, style]}>
       <StatusBar
-        barStyle="dark-content"
-        backgroundColor="white"
+        barStyle="light-content"
+        backgroundColor="#0B0B0B"
         translucent={false}
       />
       {children}
@@ -50,7 +50,7 @@ const AppScreen = ({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0B0B0B',
   },
 });
 

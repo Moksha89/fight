@@ -154,19 +154,19 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: fp(3.2),
-    color: '#000',
+    color: '#F5F1E8',
     fontWeight: '700',
     textAlign: 'center',
     marginTop: hp(8),
   },
   middleText: {
     fontSize: fp(5),
-    color: '#000',
+    color: '#F5F1E8',
     marginLeft: wp(7),
     marginTop: hp(8),
   },
   bottomText: {
-    color: '#000',
+    color: '#F5F1E8',
     marginHorizontal: wp(7),
     fontSize: fp(2),
     marginTop: hp(2),

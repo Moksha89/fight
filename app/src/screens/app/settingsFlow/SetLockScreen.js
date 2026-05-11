@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     width: hp(4.5),
     height: hp(4.5),
     borderWidth: wp(0.5),
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: 10,
     fontSize: hp(2.2),
     textAlign: 'center',

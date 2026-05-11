@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
   },
 
   amountText: {
-    color: '#000000',
+    color: '#F5F1E8',
     fontSize: fp(2),
     // fontWeight: 'bold',
     textAlign: 'center',

@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   referralBox: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     padding: wp(4),
     borderRadius: 12,
     alignItems: 'center',

@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
   },
   notifUnread: {
-    backgroundColor: '#fefce8',
+    backgroundColor: '#1F1A12',
   },
   notifIcon: {
     width: 40,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   notifTitle: {
     fontSize: fp(1.6),
     fontWeight: '600',
-    color: COLORS.bg_input,
+    color: COLORS.text_primary,
   },
   notifBody: {
     fontSize: fp(1.4),

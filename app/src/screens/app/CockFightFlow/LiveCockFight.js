@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   iconWrapper: {
     position: 'absolute',
     right: wp(3),
-    backgroundColor: 'white',
+    backgroundColor: '#171717',
     borderRadius: wp(3),
     padding: wp(0.5),
     bottom: hp(4.5),
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 40,
     height: 5,
-    backgroundColor: '#ccc',
+    backgroundColor: '#4a4a4a',
     borderRadius: 3,
     marginBottom: 10,
   },
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     fontSize: 14,
-    color: '#555',
+    color: '#A8A29E',
   },
   closeButton: {
     marginTop: 20,

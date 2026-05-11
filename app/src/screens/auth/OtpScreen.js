@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: wp(2),
     borderColor: '#B3B3B3',
-    color: '#000000',
+    color: '#F5F1E8',
     fontSize: fp(2.5),
     paddingHorizontal: wp(5),
     letterSpacing: wp(7),

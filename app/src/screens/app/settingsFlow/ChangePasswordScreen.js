@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     borderRadius: 16,
     padding: 24,
     shadowColor: '#000',
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: fp(1.4),
     fontWeight: '600',
-    color: '#555',
+    color: '#A8A29E',
     marginBottom: 6,
   },
   inputWrapper: {

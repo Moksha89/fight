@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   bettingResultsSection: {
     width: wp(95),
-    backgroundColor: '#ffffff',
+    backgroundColor: '#171717',
     marginLeft: wp(2.5),
     marginTop: hp(1),
     paddingHorizontal: wp(3),
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   cell: {
     width: hp(3),
     height: hp(3),
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     justifyContent: 'center',
     alignItems: 'center',
     borderRightWidth: 1,

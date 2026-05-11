@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   button: {
     width: wp(84),
     height: hp(6),
-    backgroundColor: '#000',
+    backgroundColor: '#D4A843',
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
@@ -76,9 +76,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   buttonLight: {
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#000',
+    borderColor: '#D4A843',
   },
   contentContainer: {
     flexDirection: 'row',

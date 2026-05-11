@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   bettingResultsSection: {
     width: wp(95),
-    backgroundColor: '#ffffff',
+    backgroundColor: '#171717',
     marginLeft: wp(2.5),
     paddingHorizontal: wp(3),
     paddingVertical: hp(2),
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   cell: {
     width: hp(3),
     height: hp(3),
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     justifyContent: 'center',
     alignItems: 'center',
     borderRightWidth: 1,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   beadRoadContainer: {
     width: wp(95),
     marginLeft: wp(2.5),
-    backgroundColor: '#ffffff',
+    backgroundColor: '#171717',
     borderTopLeftRadius: wp(4),
     borderTopRightRadius: wp(4),
     paddingHorizontal: wp(3),
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   beadRoadTitle: {
     fontSize: fp(1.5),
     fontWeight: '700',
-    color: '#333',
+    color: '#A8A29E',
     marginBottom: hp(0.5),
   },
   beadRoadRow: {

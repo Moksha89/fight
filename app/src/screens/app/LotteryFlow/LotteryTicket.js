@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     backgroundColor: '#d4a843',
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderWidth: 1,
     width: wp(27),
     flexDirection: 'row',

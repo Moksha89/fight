@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontWeight: '700',
     fontSize: fp(2),
-    color: '#000000',
+    color: '#F5F1E8',
     marginLeft: wp(4),
     marginBottom: hp(0.5),
   },

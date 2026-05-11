@@ -110,7 +110,7 @@ export default PastMatches;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0B0B0B',
     paddingTop: hp(3.5),
   },
   header: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fp(2),
     fontWeight: '700',
-    color: '#000',
+    color: '#F5F1E8',
   },
   liveButton: {
     flexDirection: 'row',
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(3),
     overflow: 'hidden',
     elevation: 3,
-    backgroundColor: '#eee',
+    backgroundColor: '#171717',
     width: wp(86),
     height: hp(18),
   },

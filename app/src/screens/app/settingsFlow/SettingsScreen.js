@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   hrLine: {
     width: wp(86),
     height: hp(0.1),
-    backgroundColor: '#DFDFDF',
+    backgroundColor: '#2a2a2a',
     marginTop: hp(1),
     marginBottom: hp(2.5),
   },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   logoutButton: {
     flexDirection: 'row',
     borderRadius: 12,
-    backgroundColor: '#FFEDED',
+    backgroundColor: 'rgba(239,68,68,0.12)',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: wp(86),
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontWeight: '700',
     fontSize: fp(2),
-    color: '#000000',
+    color: '#F5F1E8',
     marginLeft: wp(4),
     marginBottom: hp(0.5),
   },

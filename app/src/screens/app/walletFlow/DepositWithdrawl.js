@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: wp(2),
     height: hp(5),
-    backgroundColor: '#F3F4F5',
+    backgroundColor: '#171717',
     alignItems: 'center',
     marginLeft: wp(5),
   },
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: hp(65),
     bottom: 0,
-    backgroundColor: '#FFFAF8',
+    backgroundColor: '#1F1A12',
     width: wp(100),
     marginTop: hp(4),
     borderWidth: wp(0.2),
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
   amount: {
     width: wp(78),
     height: hp(7),
-    backgroundColor: '#ffffff',
+    backgroundColor: '#171717',
     borderRadius: wp(2),
     alignItems: 'center',
     justifyContent: 'center',
@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
     height: hp(4.5),
   },
   buttonText: {
-    color: '#000000',
+    color: '#F5F1E8',
     fontSize: fp(1.6),
   },
   activeButtonText: {
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
   upiButton: {
     width: wp(43),
     height: hp(15.5),
-    backgroundColor: '#EEEEEE',
+    backgroundColor: '#2a2a2a',
     borderRadius: wp(2),
     paddingHorizontal: wp(4),
     paddingVertical: hp(2),
@@ -787,7 +787,7 @@ const styles = StyleSheet.create({
   },
   paymentTypeText: {
     fontSize: 16,
-    color: '#000',
+    color: '#F5F1E8',
     marginVertical: 5,
     marginTop: hp(3.8),
     fontWeight: '700',
@@ -830,7 +830,7 @@ const styles = StyleSheet.create({
     width: wp(90),
     height: hp(6),
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: 8,
     paddingHorizontal: 15,
     fontSize: fp(2),
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
     marginTop: hp(2.5),
   },
   amountButton: {
-    backgroundColor: '#F3F4F5',
+    backgroundColor: '#171717',
     width: wp(16),
     borderRadius: wp(1),
     height: hp(3.5),
@@ -858,7 +858,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   amountText: {
-    color: '#000000',
+    color: '#F5F1E8',
     fontSize: fp(1.5),
   },
   activeText: {
@@ -921,7 +921,7 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontWeight: '600',
     fontSize: fp(2),
-    color: '#000000',
+    color: '#F5F1E8',
     marginLeft: wp(4),
     // marginBottom: hp(0.5),
   },

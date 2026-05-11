@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     backgroundColor: '#d4a843',
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderWidth: 1,
     width: wp(27),
     flexDirection: 'row',
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   iconBox: {
     width: 40,
     height: 40,
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   medalPlaceText: {
     position: 'absolute',
     fontSize: fp(1.2),
-    color: '#000',
+    color: '#F5F1E8',
     top: hp(1.65),
   },
   icon: {
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   dropdownBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     paddingHorizontal: 12,
     borderRadius: 10,
     height: hp(4.5),
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: fp(1.8),
-    color: '#333',
+    color: '#A8A29E',
     marginRight: wp(5),
     marginLeft: wp(2),
   },
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     marginLeft: wp(4),
   },
   timeSlot: {
-    backgroundColor: '#eee',
+    backgroundColor: '#2a2a2a',
     borderRadius: wp(1),
     paddingVertical: 7,
     paddingHorizontal: 16,
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#d4a843',
   },
   timeSlotText: {
-    color: '#333',
+    color: '#A8A29E',
   },
   timeSlotTextSelected: {
     color: '#fff',
@@ -476,14 +476,14 @@ const styles = StyleSheet.create({
     height: wp(8),
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#eee',
+    backgroundColor: '#2a2a2a',
     borderRadius: 8,
   },
   numberBoxSelected: {
     backgroundColor: '#d4a843',
   },
   numberText: {
-    color: '#333',
+    color: '#A8A29E',
   },
   numberTextSelected: {
     color: '#fff',
@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: wp(7),
     right: wp(7),
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     padding: wp(1.5),
     borderRadius: 30,
   },
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 2,
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     justifyContent: 'center',
     alignItems: 'center',
   },

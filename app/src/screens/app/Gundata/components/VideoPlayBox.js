@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: wp(7),
     right: wp(7),
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     padding: wp(1.5),
     borderRadius: 30,
   },

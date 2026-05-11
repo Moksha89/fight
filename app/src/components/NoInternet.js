@@ -17,7 +17,7 @@ const {width} = Dimensions.get('window');
 export default function NoInternetScreen() {
   return (
     <AppScreen style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar barStyle="light-content" backgroundColor="#0B0B0B" />
 
       <LottieView
         source={require('../assets/lottie/no-internet.json')}
@@ -41,7 +41,7 @@ export default function NoInternetScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0B0B0B',
     alignItems: 'center',
     paddingHorizontal: 24,
     justifyContent: 'space-evenly',

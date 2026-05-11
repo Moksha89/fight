@@ -105,7 +105,7 @@ const OrderHistoryModal = ({visible, onClose}) => {
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {flex: 1, padding: 20, backgroundColor: '#fff'},
+  modalContainer: {flex: 1, padding: 20, backgroundColor: '#171717'},
 
   closeButtonText: {color: 'white', fontWeight: 'bold'},
   historyItem: {
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   historyImage: {width: 60, height: 60, borderRadius: 6},
   historyTitle: {fontSize: 16, fontWeight: 'bold'},
-  historyDate: {fontSize: 12, color: 'gray', marginTop: 4},
+  historyDate: {fontSize: 12, color: '#6B6560', marginTop: 4},
   deliveryText: {fontSize: 13, marginTop: 2},
   progressContainer: {
     marginTop: 8,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    color: 'gray',
+    color: '#6B6560',
     marginTop: 4,
   },
 });

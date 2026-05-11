@@ -160,7 +160,7 @@ const PhoneNumberScreen = ({navigation}) => {
         <FontAwesome
           name="phone"
           size={24}
-          color="#000000"
+          color="#D4A843"
           style={{position: 'absolute', left: wp(4), top: hp(2)}}
         />
         <TextInput
@@ -272,10 +272,12 @@ const styles = StyleSheet.create({
   mobileInput: {
     width: wp(86),
     height: hp(7),
-    borderWidth: wp(0.1),
+    borderWidth: wp(0.3),
     borderRadius: wp(2),
     paddingLeft: wp(14),
     fontSize: fp(2.2),
+    color: '#F5F1E8',
+    borderColor: 'rgba(212,168,67,0.18)',
   },
   errorText: {
     color: 'red',
@@ -323,7 +325,7 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontWeight: '700',
     fontSize: fp(2),
-    color: '#000000',
+    color: '#F5F1E8',
     marginLeft: wp(4),
     marginBottom: hp(0.5),
   },

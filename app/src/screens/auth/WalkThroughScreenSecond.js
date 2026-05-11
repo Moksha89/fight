@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   dot: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#171717',
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -338,14 +338,14 @@ const styles = StyleSheet.create({
   },
   bonusRow: {
     flexDirection: 'row',
-    backgroundColor: '#E3E3E3',
+    backgroundColor: '#2a2a2a',
     alignItems: 'center',
     height: hp(2.5),
     marginTop: hp(4),
   },
   bonusText: {
     fontSize: fp(1.5),
-    color: '#333',
+    color: '#A8A29E',
     marginRight: wp(4),
     marginHorizontal: wp(1),
   },
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   playIcon: {position: 'absolute', top: 10, right: 10, zIndex: 2},
   gameBox: {
     alignItems: 'center',
-    backgroundColor: '#E3E3E3',
+    backgroundColor: '#2a2a2a',
     borderRadius: wp(2),
     width: wp(19),
     overflow: 'hidden',

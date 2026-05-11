@@ -801,7 +801,7 @@ const styles = StyleSheet.create({
   dice: {
     width: wp(31.5),
     height: '100%',
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.bg_card,
     borderRadius: wp(3),
     display: 'flex',
     justifyContent: 'center',
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
   diceAmountText: {
     fontWeight: 'bold',
     fontSize: fp(1.6),
-    color: '#333',
+    color: '#A8A29E',
   },
   coinsRow: {
     flexDirection: 'row',
@@ -899,7 +899,7 @@ const styles = StyleSheet.create({
   },
   bettingResultsSection: {
     width: wp(95),
-    backgroundColor: '#ffffff',
+    backgroundColor: '#171717',
     marginLeft: wp(2.5),
     marginTop: hp(1),
     flexDirection: 'row',
@@ -919,7 +919,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: wp(0.1),
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
   },
   headerText: {
     fontWeight: 'bold',
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
   diceAnimationFace: {
     width: wp(14),
     height: wp(14),
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     borderRadius: wp(2),
     justifyContent: 'center',
     alignItems: 'center',

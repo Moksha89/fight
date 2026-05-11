@@ -119,7 +119,7 @@ const ProfileUpdateScreen = ({navigation, route}) => {
       <TextInput
         editable={false}
         placeholder="Mobile Number"
-        style={[styles.input, {backgroundColor: '#f0f0f0'}]}
+        style={[styles.input, {backgroundColor: '#1a1a1a'}]}
         keyboardType="phone-pad"
         value={userInfo.phoneNumber || userInfo.email}
       />
@@ -177,14 +177,14 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: wp(2),
     paddingVertical: hp(1.2),
     paddingHorizontal: wp(4),
     fontSize: fp(1.9),
     marginBottom: hp(3),
     marginLeft: wp(5),
-    color: '#000',
+    color: '#F5F1E8',
     width: wp(90),
     height: hp(6.5),
   },

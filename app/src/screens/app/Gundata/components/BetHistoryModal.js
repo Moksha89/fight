@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     height: hp(60),
     borderTopLeftRadius: wp(4),
     borderTopRightRadius: wp(4),
@@ -219,9 +219,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: wp(0.3),
     marginBottom: hp(1),
-    borderColor: '#F2F2F2',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: wp(2),
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
   },
   left: {
     flexDirection: 'row',

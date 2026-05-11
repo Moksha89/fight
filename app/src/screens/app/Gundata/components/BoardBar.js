@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: fp(1.5),
-    color: '#000',
+    color: '#F5F1E8',
   },
   activeButtonText: {
     color: '#fff',

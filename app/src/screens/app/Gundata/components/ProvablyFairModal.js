@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: hp(80),
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   hashText: {
     flex: 1,
     fontSize: fp(1.3),
-    color: '#555',
+    color: '#A8A29E',
     fontFamily: 'monospace',
   },
   seedRow: {
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   seedValue: {
     flex: 1,
     fontSize: fp(1.3),
-    color: '#333',
+    color: '#A8A29E',
     fontFamily: 'monospace',
   },
   statusBanner: {

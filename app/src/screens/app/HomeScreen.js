@@ -303,7 +303,7 @@ const HomeScreen = ({navigation}) => {
           <TouchableOpacity
             style={styles.gameList}
             onPress={() => navigation.navigate('LearningScreen')}>
-            <FontAwesome name="graduation-cap" size={12} color="#000000" />
+            <FontAwesome name="graduation-cap" size={12} color={themeColors.gold} />
             <AppText style={{marginLeft: wp(2)}}>Watch Tutorials</AppText>
           </TouchableOpacity>
         </View>
@@ -865,9 +865,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: wp(4),
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.bg,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: COLORS.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
   headerBrandText: {
     fontSize: fp(2.2),
     fontWeight: '700',
-    color: COLORS.bg_input,
+    color: COLORS.gold,
     marginLeft: wp(2),
   },
   headerRight: {
@@ -893,12 +893,12 @@ const styles = StyleSheet.create({
     width: wp(10),
     height: wp(10),
     borderRadius: wp(5),
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.bg_card,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: wp(2),
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: COLORS.border,
   },
   notifButton: {
     position: 'relative',
@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
   categoryLabel: {
     marginTop: 4,
     fontSize: 10,
-    color: '#555',
+    color: COLORS.text_secondary,
     textAlign: 'center',
   },
   walletButton: {
@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
   },
   walletText: {
     fontSize: fp(1.8),
-    color: '#1a1a1a',
+    color: COLORS.text_on_gold,
   },
   banner: {
     height: hp(20),
@@ -989,7 +989,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(1),
   },
   dot: {
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.text_muted,
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -1004,11 +1004,11 @@ const styles = StyleSheet.create({
   },
   gameBox: {
     alignItems: 'center',
-    backgroundColor: '#E3E3E3',
+    backgroundColor: COLORS.bg_card,
     justifyContent: 'center',
     borderRadius: wp(4),
     elevation: 8,
-    borderColor: '#fff',
+    borderColor: COLORS.border,
     borderWidth: wp(0.3),
     width: wp(19),
     height: '100%',
@@ -1078,7 +1078,7 @@ const styles = StyleSheet.create({
     width: wp(8),
     height: hp(2),
     borderRadius: 14,
-    backgroundColor: '#ccc', // inactive color
+    backgroundColor: COLORS.bg_chip, // inactive color
     padding: 2,
     justifyContent: 'center',
   },
@@ -1086,15 +1086,15 @@ const styles = StyleSheet.create({
     width: hp(1.8),
     height: hp(1.8),
     borderRadius: 12,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.gold,
   },
   matchCard: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.bg_card,
     padding: wp(4),
     width: wp(92),
     borderRadius: 10,
     borderWidth: wp(0.5),
-    borderColor: '#E4E5E5',
+    borderColor: COLORS.border,
     marginLeft: wp(4),
     marginTop: hp(3),
   },
@@ -1107,7 +1107,7 @@ const styles = StyleSheet.create({
     paddingLeft: wp(4),
     // backgroundColor: '#ffcc00',
   },
-  matchDate: {fontSize: fp(1.5), color: 'gray', textAlign: 'center'},
+  matchDate: {fontSize: fp(1.5), color: COLORS.text_muted, textAlign: 'center'},
   matchTitle: {
     fontSize: fp(3),
     fontWeight: '500',
@@ -1152,7 +1152,7 @@ const styles = StyleSheet.create({
     height: hp(4),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F3F4F5',
+    backgroundColor: COLORS.bg_chip,
   },
   boxText: {
     fontSize: 14,
@@ -1209,7 +1209,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: hp(3),
     width: wp(92),
-    backgroundColor: '#F3F4F5',
+    backgroundColor: COLORS.bg_card,
     marginLeft: wp(4),
   },
   button: {
@@ -1224,7 +1224,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: fp(1.5),
-    color: '#333',
+    color: COLORS.text_secondary,
   },
   activeButtonText: {
     color: '#fff',

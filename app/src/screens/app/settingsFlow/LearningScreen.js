@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    backgroundColor: '#fff', // Needed for elevation to cast shadow
+    backgroundColor: '#171717', // Needed for elevation to cast shadow
     borderRadius: 50,
     paddingLeft: wp(10),
     paddingVertical: 12,
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '48%',
-    backgroundColor: '#fff',
+    backgroundColor: '#171717',
     borderRadius: 10,
     marginBottom: 15,
     overflow: 'hidden',
@@ -292,10 +292,10 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 14,
-    color: '#000',
+    color: '#F5F1E8',
   },
   modalContent: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#171717',
     paddingVertical: 10,
     borderRadius: 10,
   },
