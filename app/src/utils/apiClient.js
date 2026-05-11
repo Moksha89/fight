@@ -86,7 +86,7 @@ async function handleTokenRefresh() {
  * Parse the backend error response into a normalized error object
  */
 function parseErrorResponse(responseData, statusCode) {
-  // Backend structured error format
+  // Backend structured error format (nested under error key)
   if (responseData?.error?.code) {
     return {
       code: responseData.error.code,
@@ -97,6 +97,21 @@ function parseErrorResponse(responseData, statusCode) {
       errorId: responseData.error.id || null,
       fieldErrors: responseData.error.field_errors || null,
       details: responseData.error.details || null,
+      httpStatus: statusCode,
+    };
+  }
+
+  // Backend structured error format (flat — code at top level)
+  if (responseData?.code && typeof responseData.code === 'string' && responseData.code.includes('_')) {
+    return {
+      code: responseData.code,
+      message: responseData.message || 'An error occurred.',
+      messageHi: responseData.message_hi || '',
+      severity: responseData.severity || 'medium',
+      retryAllowed: responseData.retry_allowed !== false,
+      errorId: responseData.id || null,
+      fieldErrors: responseData.field_errors || null,
+      details: responseData.details || null,
       httpStatus: statusCode,
     };
   }

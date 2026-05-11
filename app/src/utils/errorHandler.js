@@ -61,7 +61,7 @@ const ERROR_MESSAGES = {
   // Validation
   VALIDATION_5001: {en: 'Required field is missing.', hi: 'आवश्यक फ़ील्ड गायब है।'},
   VALIDATION_5002: {en: 'Invalid format.', hi: 'अमान्य प्रारूप।'},
-  VALIDATION_5003: {en: 'Invalid value.', hi: 'अमान्य मान।'},
+  VALIDATION_5003: {en: 'Validation error. Please check your input.', hi: 'सत्यापन त्रुटि। कृपया अपना इनपुट जांचें।'},
 };
 
 // ─── Toast callback (set by app root) ───────────────────────────────────────
