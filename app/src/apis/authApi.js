@@ -80,6 +80,28 @@ export const getUserInfo = async (access = null) => {
   return {success: false, error: result.error?.message || 'Network error'};
 };
 
+export const loginWithPassword = async (identifier, password, otp) => {
+  const result = await apiRequest('/api/user/login/', {
+    method: 'POST',
+    body: JSON.stringify({identifier, password, otp}),
+  }, {auth: false});
+
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'loginWithPassword', silent: true});
+  return {success: false, data: result.data || {}, error: result.error};
+};
+
+export const registerUser = async (mobile, username, password, confirmPassword, otp) => {
+  const result = await apiRequest('/api/user/register/', {
+    method: 'POST',
+    body: JSON.stringify({mobile, username, password, confirmPassword, otp}),
+  }, {auth: false});
+
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'registerUser', silent: true});
+  return {success: false, data: result.data || {}, error: result.error};
+};
+
 export const updateUserInfo = async updatedData => {
   const result = await apiRequest('/api/user/me/', {
     method: 'PATCH',

@@ -88,7 +88,7 @@ const LotteryGiftLive = ({navigation}) => {
         />
         <AppText style={styles.liveBadge}>Live</AppText>
         <TouchableOpacity style={styles.refreshBtn}>
-          <Icon name="refresh" size={30} color="#000" />
+          <Icon name="refresh" size={30} color="#D4A843" />
         </TouchableOpacity>
       </View>
       <View>
@@ -106,19 +106,19 @@ const LotteryGiftLive = ({navigation}) => {
           <TouchableOpacity
             style={styles.iconBox}
             onPress={() => setActiveView('document')}>
-            <Ionicons name="document-text-outline" size={20} color="#000" />
+            <Ionicons name="document-text-outline" size={20} color="#D4A843" />
             <View style={styles.badge} />
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.dropdownBox, {width: wp(20)}]}>
             <AppText style={{marginRight: wp(3)}}>GIFT</AppText>
-            <Entypo name="chevron-down" size={20} color="#333" />
+            <Entypo name="chevron-down" size={20} color="#A8A29E" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.dropdownBox}>
-            <Ionicons name="ticket-outline" size={20} color="#000" />
+            <Ionicons name="ticket-outline" size={20} color="#D4A843" />
             <AppText style={styles.dropdownText}>BIKE</AppText>
-            <Entypo name="chevron-down" size={20} color="#333" />
+            <Entypo name="chevron-down" size={20} color="#A8A29E" />
           </TouchableOpacity>
         </View>
 

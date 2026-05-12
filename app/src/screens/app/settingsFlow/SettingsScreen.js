@@ -95,37 +95,37 @@ const SettingsScreen = ({navigation}) => {
           style={styles.itemRow}
           onPress={() => navigation.navigate('ProfileUpdateScreen')}>
           <AppText style={styles.itemText}>Profile</AppText>
-          <AntDesign name="right" size={18} color="#000" />
+          <AntDesign name="right" size={18} color="#A8A29E" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.itemRow}
           onPress={() => navigation.navigate('NotificationsScreen')}>
           <AppText style={styles.itemText}>Notifications</AppText>
-          <AntDesign name="right" size={18} color="#000" />
+          <AntDesign name="right" size={18} color="#A8A29E" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.itemRow}
           onPress={() => navigation.navigate('StatementScreen')}>
           <AppText style={styles.itemText}>Transaction History</AppText>
-          <AntDesign name="right" size={18} color="#000" />
+          <AntDesign name="right" size={18} color="#A8A29E" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.itemRow}
           onPress={() => navigation.navigate('ChangePasswordScreen')}>
           <AppText style={styles.itemText}>Change Password</AppText>
-          <AntDesign name="right" size={18} color="#000" />
+          <AntDesign name="right" size={18} color="#A8A29E" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.itemRow}
           onPress={() => navigation.navigate('SetLockScreen')}>
           <AppText style={styles.itemText}>Reset Login PIN</AppText>
-          <AntDesign name="right" size={18} color="#000" />
+          <AntDesign name="right" size={18} color="#A8A29E" />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.itemRow, {borderBottomWidth: 0}]}
           onPress={() => navigation.navigate('ReferralScreen')}>
           <AppText style={styles.itemText}>Referral & Earn</AppText>
-          <AntDesign name="right" size={18} color="#000" />
+          <AntDesign name="right" size={18} color="#A8A29E" />
         </TouchableOpacity>
         <View style={styles.hrLine} />
         <AppText style={styles.sectionLabel}>Contact / Support:</AppText>
@@ -139,7 +139,7 @@ const SettingsScreen = ({navigation}) => {
                 <Image source={item.image} style={styles.contactIcon} />
                 <AppText style={styles.itemText}>{item.name}</AppText>
               </View>
-              <AntDesign name="right" size={18} color="#000" />
+              <AntDesign name="right" size={18} color="#A8A29E" />
             </TouchableOpacity>
           ))}
         </View>

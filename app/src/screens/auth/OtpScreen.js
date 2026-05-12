@@ -108,7 +108,7 @@ const OtpScreen = ({route, navigation}) => {
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}>
-        <FontAwesome6 name="arrow-left-long" size={28} color="#333" />
+        <FontAwesome6 name="arrow-left-long" size={28} color="#F5F1E8" />
       </TouchableOpacity>
 
       <AppText style={styles.header}>Verify OTP</AppText>

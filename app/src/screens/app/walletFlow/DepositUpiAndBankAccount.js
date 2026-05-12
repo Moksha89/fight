@@ -366,7 +366,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                             UPI ID: {item.upi_id}
                           </AppText>
 
-                          <Icon name="copy" size={20} color="#000" />
+                          <Icon name="copy" size={20} color="#D4A843" />
                         </View>
                       </TouchableOpacity>
                     </View>
@@ -570,7 +570,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                             </AppText>
                             <TouchableOpacity
                               onPress={() => handleCopy(item.account_number)}>
-                              <Feather name="copy" size={fp(2)} color="#000" />
+                              <Feather name="copy" size={fp(2)} color="#D4A843" />
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -585,7 +585,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                             </AppText>
                             <TouchableOpacity
                               onPress={() => handleCopy('SBIN000012767')}>
-                              <Feather name="copy" size={fp(2)} color="#000" />
+                              <Feather name="copy" size={fp(2)} color="#D4A843" />
                             </TouchableOpacity>
                           </View>
                         </View>

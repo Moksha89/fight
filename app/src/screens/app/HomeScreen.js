@@ -398,7 +398,7 @@ const HomeScreen = ({navigation}) => {
             <FontAwesome6
               name="coins"
               size={20}
-              color={selectedGame === 'diceplay' ? '#fff' : '#000'}
+              color={selectedGame === 'diceplay' ? '#fff' : '#A8A29E'}
               style={{marginRight: 4}}
             />
             <AppText

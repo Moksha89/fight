@@ -75,14 +75,10 @@ export const AuthProvider = ({children}) => {
   }, [accessToken, refreshToken, checkPin, isPinSet, isProfileUpdated]);
 
   const login = async ({access, refresh}) => {
-    const pin = await storage.getItem('isPinSet');
-    const profile = await storage.getItem('isProfileUpdated');
-
     setAccessToken(access);
     setRefreshToken(refresh);
     setIsAuthenticated(true);
-    setIsPinSet(pin === 'true');
-    setIsProfileUpdated(profile === 'true');
+    setIsPinSet(true);
 
     // Getting User Info
     const userInfoResponse = await getUserInfo(access);
@@ -90,7 +86,19 @@ export const AuthProvider = ({children}) => {
     if (userInfoResponse.success) {
       const userData = userInfoResponse.data;
       setUserInfo(userData);
+
+      // Auto-detect if profile is already complete from backend
+      const hasProfile = !!(userData.username && userData.phoneNumber);
+      if (hasProfile) {
+        setIsProfileUpdated(true);
+        await storage.setItem('isProfileUpdated', 'true');
+      } else {
+        const profile = await storage.getItem('isProfileUpdated');
+        setIsProfileUpdated(profile === 'true');
+      }
     } else {
+      const profile = await storage.getItem('isProfileUpdated');
+      setIsProfileUpdated(profile === 'true');
       console.warn(
         'User info not fetched after login:',
         userInfoResponse.error || userInfoResponse.data,

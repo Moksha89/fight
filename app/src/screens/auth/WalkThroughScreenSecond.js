@@ -119,7 +119,7 @@ const WalkThroughScreenSecond = ({navigation}) => {
       {/* Top Header Row */}
       <View style={styles.topRow}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={38} color="#000" />
+          <Icon name="chevron-left" size={38} color="#F5F1E8" />
         </TouchableOpacity>
         <Status />
         <TouchableOpacity

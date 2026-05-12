@@ -522,12 +522,12 @@ export default function BettingControls({
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate('SettingsScreen')}>
-          <Icon name="cog" size={20} color="#333" />
+          <Icon name="cog" size={20} color="#A8A29E" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => setBetHistoryModalVisible(true)}>
-          <Icon name="file-document-outline" size={20} color="#333" />
+          <Icon name="file-document-outline" size={20} color="#A8A29E" />
         </TouchableOpacity>
         {/* Center Highlighted Button */}
 

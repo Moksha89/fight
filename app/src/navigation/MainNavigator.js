@@ -8,20 +8,15 @@ import storage from '../utils/storage';
 import {useAuth} from '../context/AuthContext';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
-import PinEnterScreen from '../screens/app/PinEnterScreen';
 import AppUnderMaintenanceScreen from '../screens/AppUnderMaintenanceScreen';
-import VideoSplashScreen from '../components/VideoSplashScreen';
 
 const MainNavigator = () => {
   const [authChecked, setAuthChecked] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
 
   const {
     isAuthenticated,
-    isPinSet,
     login,
     logout,
-    isLocked,
     isProfileUpdated,
     settings,
   } = useAuth();
@@ -51,11 +46,6 @@ const MainNavigator = () => {
     checkAuthStatus();
   }, []);
 
-  // Show splash screen first
-  if (showSplash) {
-    return <VideoSplashScreen onFinish={() => setShowSplash(false)} />;
-  }
-
   // Show loading while auth is still checking
   if (!authChecked) {
     return (
@@ -67,19 +57,15 @@ const MainNavigator = () => {
     );
   }
 
-  const navKey = `${isAuthenticated}-${isPinSet}-${isProfileUpdated}-${isLocked}`;
+  const navKey = `${isAuthenticated}-${isProfileUpdated}`;
 
   return (
     <SafeAreaProvider>
       <NavigationContainer key={navKey}>
         {settings['A']?.actionValue === 'Y' ? (
           <AppUnderMaintenanceScreen />
-        ) : isAuthenticated && isPinSet && isProfileUpdated ? (
-          isLocked ? (
-            <PinEnterScreen />
-          ) : (
-            <AppNavigator />
-          )
+        ) : isAuthenticated && isProfileUpdated ? (
+          <AppNavigator />
         ) : (
           <AuthNavigator />
         )}

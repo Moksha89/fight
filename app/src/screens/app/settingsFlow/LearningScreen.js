@@ -116,7 +116,7 @@ const LearningSchoolScreen = ({navigation}) => {
         <TouchableOpacity style={styles.languageButton} onPress={toggleModal}>
           <View style={styles.languageWrapper}>
             <AppText style={styles.languageText}>{selectedLanguage}</AppText>
-            <MaterialIcons name="arrow-drop-down" size={20} color="#333" />
+            <MaterialIcons name="arrow-drop-down" size={20} color="#A8A29E" />
           </View>
         </TouchableOpacity>
 

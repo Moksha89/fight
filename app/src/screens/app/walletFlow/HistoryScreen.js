@@ -89,7 +89,7 @@ const HistoryScreen = ({navigation}) => {
                 <MaterialCommunityIcons
                   name={getIconByType(item.transaction_type)}
                   size={23}
-                  color="#000"
+                  color="#D4A843"
                 />
               </View>
               <View style={{width: wp(50), marginRight: wp(5)}}>

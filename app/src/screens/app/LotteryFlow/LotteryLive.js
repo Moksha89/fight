@@ -96,7 +96,7 @@ const LotteryLive = ({numbers = [1, 15, 3, 9, 6], onRefresh, navigation}) => {
       <View style={styles.numbersWrapper}>
         {/* Refresh Icon */}
         <TouchableOpacity onPress={onRefresh} style={styles.refreshButton}>
-          <Ionicons name="refresh" size={20} color="#333" />
+          <Ionicons name="refresh" size={20} color="#A8A29E" />
         </TouchableOpacity>
         <View style={styles.divider} />
 
@@ -119,7 +119,7 @@ const LotteryLive = ({numbers = [1, 15, 3, 9, 6], onRefresh, navigation}) => {
         />
         <Text style={styles.liveBadge}>Live</Text>
         <TouchableOpacity style={styles.refreshBtn}>
-          <Icon name="refresh" size={30} color="#000" />
+          <Icon name="refresh" size={30} color="#D4A843" />
         </TouchableOpacity>
       </View>
       <View>
@@ -137,7 +137,7 @@ const LotteryLive = ({numbers = [1, 15, 3, 9, 6], onRefresh, navigation}) => {
           <TouchableOpacity
             style={styles.iconBox}
             onPress={() => setActiveView('document')}>
-            <Ionicons name="document-text-outline" size={20} color="#000" />
+            <Ionicons name="document-text-outline" size={20} color="#D4A843" />
 
             <View style={styles.badge} />
           </TouchableOpacity>

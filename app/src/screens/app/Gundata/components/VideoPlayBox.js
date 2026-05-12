@@ -309,7 +309,7 @@ function VideoPlayBox({
             <Text style={styles.liveBadge}>Live</Text>
           )}
           <TouchableOpacity style={styles.refreshBtn} onPress={handleRefresh}>
-            <Icon name="refresh" size={30} color="#000" />
+            <Icon name="refresh" size={30} color="#D4A843" />
           </TouchableOpacity>
         </View>
       ) : null}

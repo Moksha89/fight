@@ -99,7 +99,7 @@ const ReferralScreen = ({navigation}) => {
         <View style={styles.referralBox}>
           <AppText style={styles.referralCode}>{referralCode}</AppText>
           <TouchableOpacity onPress={handleCopy}>
-            <Icon name="copy" size={22} color="#000" />
+            <Icon name="copy" size={22} color="#D4A843" />
           </TouchableOpacity>
         </View>
       </View>
