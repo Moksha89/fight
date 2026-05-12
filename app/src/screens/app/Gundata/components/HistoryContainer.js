@@ -1,3 +1,4 @@
+// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import {StyleSheet, View, ScrollView} from 'react-native';
 import React, {useEffect, useState, useRef} from 'react';
 

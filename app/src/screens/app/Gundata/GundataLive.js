@@ -27,9 +27,9 @@ import AppText from '../../../components/AppText';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import VideoPlayBox from './components/VideoPlayBox';
+import {GameVideoBox, GameBetHistoryModal} from '../../../components/game';
 import BoardBar from './components/BoardBar';
-import BetHistoryModal from './components/BetHistoryModal';
+import ProvablyFairModal from './components/ProvablyFairModal';
 import FeatureUnderMaintenanceScreen from '../../FeatureUnderMaintenanceScreen';
 
 import {useAuth} from '../../../context/AuthContext';
@@ -465,11 +465,14 @@ const GundataLive = ({navigation}) => {
       isTranslucent
       lightStatusBar>
         
-      <BetHistoryModal
+      <GameBetHistoryModal
+        gameType="dice"
         visible={isBetHistoryModalVisible}
         onClose={() => setBetHistoryModalVisible(false)}
         bets={userBetHistory}
         setBets={setUserBetHistory}
+        fetchBetsApi={getDicePlayUserBets}
+        ProvablyFairModal={ProvablyFairModal}
       />
 
       {/* Dice Roll Animation Overlay */}
@@ -563,7 +566,8 @@ const GundataLive = ({navigation}) => {
         </Animated.View>
       </View>
 
-      <VideoPlayBox
+      <GameVideoBox
+        gameType="dice"
         activeChannel={activeBoardId ?? '0'}
         manualMatchData={manualMatchData}
         soundEnabled={soundEnabled}

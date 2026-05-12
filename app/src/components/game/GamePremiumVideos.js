@@ -1,43 +1,54 @@
-// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import {
   StyleSheet,
-  Text,
   View,
   Modal,
   ScrollView,
+  Image,
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React from 'react';
-import AppButton from '../../../../components/AppButton';
+import React, {useState} from 'react';
+import AppButton from '../AppButton';
+import AppText from '../AppText';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useTheme} from '../../context/ThemeContext';
+import {
+  responsiveHeight as hp,
+  responsiveWidth as wp,
+} from 'react-native-responsive-dimensions';
 
 const videoCards = [
   {
-    image: require('../../../../assets/images/savala.png'),
+    image: require('../../assets/images/savala.png'),
     title: 'Savala Vs Nemali',
   },
   {
-    image: require('../../../../assets/images/blackCock.png'),
+    image: require('../../assets/images/blackCock.png'),
     title: 'lack Cock Vs Fire Fight',
   },
   {
-    image: require('../../../../assets/images/blackCock.png'),
+    image: require('../../assets/images/blackCock.png'),
     title: 'lack Cock Vs Fire Fight',
   },
 ];
 
-export default function PremiumVideos() {
+export default function GamePremiumVideos() {
+  const {colors} = useTheme();
   const [subscribeVisible, setSubscribeVisible] = useState(false);
   const [showPremiumVideos, setShowPremiumVideos] = useState(false);
+
   return (
     <>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Premium Trail Videos</Text>
+        <AppText style={[styles.sectionTitle, {color: colors.text_primary}]}>
+          Premium Trail Videos
+        </AppText>
         <TouchableOpacity
           style={styles.subscribeContainer}
           onPress={() => setSubscribeVisible(true)}>
-          <Text style={styles.subscribeBtn}>Subscribe</Text>
+          <AppText style={{color: colors.gold, fontWeight: '500'}}>
+            Subscribe
+          </AppText>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.arrowIcon}
@@ -45,7 +56,7 @@ export default function PremiumVideos() {
           <Icon
             name={showPremiumVideos ? 'chevron-up' : 'chevron-down'}
             size={18}
-            color="#000000"
+            color={colors.text_primary}
           />
         </TouchableOpacity>
         <Modal
@@ -56,12 +67,14 @@ export default function PremiumVideos() {
           onRequestClose={() => setSubscribeVisible(false)}>
           <TouchableWithoutFeedback onPress={() => setSubscribeVisible(false)}>
             <View style={styles.modalOverlay}>
-              <View style={styles.modalContainer}>
+              <View style={[styles.modalContainer, {backgroundColor: colors.card}]}>
                 <View style={styles.handle} />
-                <Text style={styles.modalTitle}>Subscribe to Premium</Text>
-                <Text style={styles.modalContent}>
+                <AppText style={[styles.modalTitle, {color: colors.gold}]}>
+                  Subscribe to Premium
+                </AppText>
+                <AppText style={{color: colors.text_secondary}}>
                   Unlock all premium videos and features!
-                </Text>
+                </AppText>
                 <AppButton
                   onPress={() => console.log('Clicked')}
                   showArrow={true}
@@ -87,17 +100,15 @@ export default function PremiumVideos() {
           showsHorizontalScrollIndicator={false}
           style={styles.videosSection}>
           {videoCards.map((item, index) => (
-            <View key={index} style={styles.videoCard}>
+            <View key={index} style={[styles.videoCard, {backgroundColor: colors.card}]}>
               <Image source={item.image} style={styles.cardImage} />
-
               <View style={styles.bottomIcons}>
                 <Icon name="play-circle-outline" size={20} color="#fff" />
                 <Icon name="lock" size={18} color="#fff" />
               </View>
-
-              <Text numberOfLines={2} style={styles.cardTitle}>
+              <AppText numberOfLines={2} style={styles.cardTitle}>
                 {item.title}
-              </Text>
+              </AppText>
             </View>
           ))}
         </ScrollView>
@@ -121,16 +132,11 @@ const styles = StyleSheet.create({
     marginLeft: wp(30),
   },
   arrowIcon: {marginLeft: wp(2)},
-  subscribeBtn: {color: '#F5F1E8', fontWeight: '500'},
   videosSection: {
     flexDirection: 'row',
     marginTop: hp(1),
     marginBottom: hp(1),
     position: 'relative',
-  },
-  videoList: {
-    paddingHorizontal: wp(7),
-    overflow: 'visible',
   },
   videoCard: {
     width: wp(40),
@@ -139,5 +145,48 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginRight: wp(3.5),
     position: 'relative',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  handle: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#4a4a4a',
+    borderRadius: 3,
+    marginBottom: 16,
+  },
+  bottomIcons: {
+    position: 'absolute',
+    bottom: 4,
+    left: 4,
+    right: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  cardTitle: {
+    position: 'absolute',
+    bottom: 24,
+    left: 4,
+    color: '#fff',
+    fontSize: 10,
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 });
