@@ -10,7 +10,7 @@ import {
 
 import {useAuth} from '../../../context/AuthContext';
 import {useTheme} from '../../../context/ThemeContext';
-import COLORS from '../../context/designTokens';
+import COLORS from '../../../context/designTokens';
 
 import {createWithdrawal} from '../../../apis/walletApi';
 

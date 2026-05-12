@@ -27,7 +27,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import {useAuth} from '../../../context/AuthContext';
-import COLORS from '../../context/designTokens';
+import COLORS from '../../../context/designTokens';
 
 const ticketNumbers = Array.from({length: 15}, (_, i) => i + 1);
 const ticketsData = [

@@ -16,7 +16,7 @@ import HeaderComponent from '../../../components/HeaderComponent';
 
 import {apiRequest} from '../../../utils/apiClient';
 import {useTheme} from '../../../context/ThemeContext';
-import COLORS from '../../context/designTokens';
+import COLORS from '../../../context/designTokens';
 
 import {
   responsiveHeight as hp,

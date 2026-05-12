@@ -27,7 +27,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import AppUnderMaintenanceScreen from '../../AppUnderMaintenanceScreen';
-import COLORS from '../../context/designTokens';
+import COLORS from '../../../context/designTokens';
 
 // ============================= Lottery Gift =============================
 const giftData = [

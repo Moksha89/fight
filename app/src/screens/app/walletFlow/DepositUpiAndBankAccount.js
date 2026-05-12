@@ -41,7 +41,7 @@ import {
   createDepositRequest,
 } from '../../../apis/walletApi';
 import {useTheme} from '../../../context/ThemeContext';
-import COLORS from '../../context/designTokens';
+import COLORS from '../../../context/designTokens';
 
 const iconImages = {
   download: require('../../../assets/icons/download.png'),

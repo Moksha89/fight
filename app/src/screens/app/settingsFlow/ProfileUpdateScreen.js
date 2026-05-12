@@ -29,7 +29,7 @@ import {
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
 import {useTheme} from '../../../context/ThemeContext';
-import COLORS from '../../context/designTokens';
+import COLORS from '../../../context/designTokens';
 
 const ProfileUpdateScreen = ({navigation, route}) => {
   const {

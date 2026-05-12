@@ -22,7 +22,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useAuth} from '../../../context/AuthContext';
-import COLORS from '../../context/designTokens';
+import COLORS from '../../../context/designTokens';
 
 import Video from 'react-native-video';
 

@@ -35,7 +35,7 @@ import {createProductOrder} from '../../../apis/appApi';
 import {getOrderHistory} from '../../../apis/appApi';
 import OrderHistoryModal from './OrderHistoryModal';
 import {useAuth} from '../../../context/AuthContext';
-import COLORS from '../../context/designTokens';
+import COLORS from '../../../context/designTokens';
 
 const ProductCard = ({item, onBuy}) => {
   const renderCardContent = () => (
