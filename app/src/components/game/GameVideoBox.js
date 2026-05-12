@@ -96,7 +96,7 @@ function GameVideoBox({
           setIsLiveEnableToSee(false);
         }
       } else {
-        if ((balance < actionValue) & !bettingHistory) {
+        if ((balance < actionValue) && !bettingHistory) {
           setIsLiveEnableToSee(false);
         }
       }

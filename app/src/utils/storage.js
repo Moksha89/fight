@@ -10,6 +10,7 @@ export default {
     }
   },
   setItem: async (key, value) => {
+    if (value == null) return;
     await AsyncStorage.setItem(key, value.toString());
   },
   removeItem: async key => {
