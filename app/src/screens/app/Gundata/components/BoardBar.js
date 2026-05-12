@@ -11,6 +11,7 @@ import {
   responsiveWidth as wp,
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
+import COLORS from '../../../../context/designTokens';
 
 export default function BoardBar({
   boards,
@@ -87,10 +88,10 @@ const styles = StyleSheet.create({
     paddingVertical: hp(0.3),
     paddingHorizontal: wp(2.4),
     borderRadius: wp(1),
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.disabled,
   },
   activeButton: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
   },
   activeVirtualButton: {
     backgroundColor: '#4caf50',
@@ -104,17 +105,17 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#DC2626',
+    backgroundColor: COLORS.meron,
   },
   virtualTriangle: {
     borderBottomColor: '#4caf50',
   },
   buttonText: {
     fontSize: fp(1.5),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
   },
   activeButtonText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontWeight: 'bold',
   },
   triangle: {
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 8,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: '#d4a843',
+    borderBottomColor: COLORS.gold,
     position: 'absolute',
     left: 15,
     top: -12,

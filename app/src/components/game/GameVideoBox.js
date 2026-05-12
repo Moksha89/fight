@@ -18,6 +18,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
 import {useTheme} from '../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 
 import Video from 'react-native-video';
 import {WebView} from 'react-native-webview';
@@ -257,7 +258,7 @@ function GameVideoBox({
   if (isDice && isVirtualBoard) {
     const isUrgent = countdownSeconds > 0 && countdownSeconds <= 5;
     return (
-      <View style={[styles.videoContainer, {height: containerHeight, backgroundColor: '#1a1a2e'}]}>
+      <View style={[styles.videoContainer, {height: containerHeight, backgroundColor: COLORS.bg_surface}]}>
         <View style={styles.virtualArena}>
           {countdownSeconds > 0 ? (
             <View style={styles.virtualCountdown}>
@@ -265,7 +266,7 @@ function GameVideoBox({
                 style={[
                   styles.virtualCountdownText,
                   {color: colors.gold},
-                  isUrgent && {color: '#DC2626'},
+                  isUrgent && {color: colors.meron},
                 ]}>
                 {countdownSeconds}s
               </Text>
@@ -500,8 +501,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: wp(5),
     right: wp(5),
-    backgroundColor: '#DC2626',
-    color: '#fff',
+    backgroundColor: COLORS.meron,
+    color: COLORS.text_primary,
     paddingHorizontal: 6,
     borderRadius: 4,
   },
@@ -529,7 +530,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
-    color: '#fff',
+    color: COLORS.text_primary,
   },
   virtualArena: {
     flex: 1,
@@ -547,7 +548,7 @@ const styles = StyleSheet.create({
   },
   virtualSubtext: {
     fontSize: fp(1.4),
-    color: '#888',
+    color: COLORS.text_muted,
   },
   virtualDiceIcon: {
     fontSize: 48,
@@ -567,14 +568,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   virtualBadgeText: {
-    color: '#4caf50',
+    color: COLORS.success,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
   },
   hashDisplay: {
     fontSize: 9,
-    color: '#666',
+    color: COLORS.text_muted,
     marginTop: 6,
     fontFamily: 'monospace',
     opacity: 0.8,

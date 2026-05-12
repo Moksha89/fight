@@ -14,7 +14,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import AppText from '../../../../components/AppText';
 import {apiRequest} from '../../../../utils/apiClient';
-import {useTheme} from '../../../../context/ThemeContext';
 import COLORS from '../../../../context/designTokens';
 
 import {
@@ -202,7 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: hp(80),
@@ -214,7 +213,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -224,7 +223,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: fp(2),
     fontWeight: '700',
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
   },
   body: {
     paddingHorizontal: 16,
@@ -232,7 +231,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flexDirection: 'row',
-    backgroundColor: '#1F1A12',
+    backgroundColor: COLORS.bg_elevated,
     borderRadius: 10,
     padding: 12,
     gap: 8,
@@ -241,7 +240,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: fp(1.3),
-    color: '#666',
+    color: COLORS.text_muted,
     lineHeight: 18,
   },
   section: {
@@ -257,7 +256,7 @@ const styles = StyleSheet.create({
   hashBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: COLORS.bg_input,
     borderRadius: 8,
     padding: 12,
     gap: 8,
@@ -265,7 +264,7 @@ const styles = StyleSheet.create({
   hashText: {
     flex: 1,
     fontSize: fp(1.3),
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
     fontFamily: 'monospace',
   },
   seedRow: {
@@ -279,7 +278,7 @@ const styles = StyleSheet.create({
   seedValueWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: COLORS.bg_input,
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 8,
@@ -288,7 +287,7 @@ const styles = StyleSheet.create({
   seedValue: {
     flex: 1,
     fontSize: fp(1.3),
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
     fontFamily: 'monospace',
   },
   statusBanner: {

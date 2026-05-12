@@ -24,7 +24,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Feather from 'react-native-vector-icons/Feather';
 
 import AppText from '../../components/AppText';
@@ -349,7 +348,6 @@ const HomeScreen = ({navigation}) => {
                 style={{
                   height: '100%',
                   resizeMode: 'contain',
-                  // backgroundColor: '#D4A843',
                   width: '60%',
                 }}
               />
@@ -367,48 +365,24 @@ const HomeScreen = ({navigation}) => {
             style={[
               styles.gameButton,
               selectedGame === 'cockfight' && {
-                backgroundColor: '#1a1a1a',
-                borderColor: '#1a1a1a',
+                backgroundColor: themeColors.card,
+                borderColor: themeColors.card,
               },
             ]}
             onPress={() => setSelectedGame('cockfight')}>
             <MaterialIcons
               name="sports-soccer"
               size={18}
-              color={selectedGame === 'cockfight' ? '#fff' : '#1a1a1a'}
+              color={selectedGame === 'cockfight' ? themeColors.textPrimary : themeColors.textMuted}
             />
             <AppText
               style={[
                 styles.gameText,
-                selectedGame === 'cockfight' && {color: '#fff'},
+                selectedGame === 'cockfight' && {color: themeColors.textPrimary},
               ]}>
               Cock Fight
             </AppText>
           </TouchableOpacity>
-
-          {/* <TouchableOpacity
-            style={[
-              styles.gameButton,
-              selectedGame === 'diceplay' && {
-                backgroundColor: '#000',
-                borderColor: '#000',
-              },
-            ]}
-            onPress={() => setSelectedGame('diceplay')}>
-            <FontAwesome6
-              name="coins"
-              size={20}
-              color={selectedGame === 'diceplay' ? '#fff' : '#A8A29E'}
-              style={{marginRight: 4}}
-            />
-            <AppText
-              style={[
-                styles.gameText,
-                selectedGame === 'diceplay' && {color: '#fff'},
-              ]}>
-              Gundata
-            </AppText>
-          </TouchableOpacity> */}
 
           <View style={styles.toogleContainer}>
             <AppText style={styles.liveText}>LIVE</AppText>
@@ -489,7 +463,7 @@ const HomeScreen = ({navigation}) => {
                     })
                   }
                   style={[styles.box, {backgroundColor: 'rgba(239,68,68,0.12)'}]}>
-                  <AppText style={[styles.boxText, {color: '#BA2343'}]}>
+                  <AppText style={[styles.boxText, {color: themeColors.meron}]}>
                     {`1 : ${(1 + parseFloat(settings['R']?.actionValue)).toFixed(2)}`}
                   </AppText>
                 </TouchableOpacity>
@@ -499,8 +473,8 @@ const HomeScreen = ({navigation}) => {
                       activeChannel: 0,
                     })
                   }
-                  style={[styles.box, {backgroundColor: '#d4a843'}]}>
-                  <AppText style={[styles.boxText, {color: '#ffffff'}]}>
+                  style={[styles.box, {backgroundColor: themeColors.gold}]}>
+                  <AppText style={[styles.boxText, {color: themeColors.textOnGold || '#000'}]}>
                     24/7 Live
                   </AppText>
                 </TouchableOpacity>
@@ -510,8 +484,8 @@ const HomeScreen = ({navigation}) => {
                       activeChannel: 0,
                     })
                   }
-                  style={[styles.box, {backgroundColor: '#DAF5FF'}]}>
-                  <AppText style={[styles.boxText, {color: '#79B8CF'}]}>
+                  style={[styles.box, {backgroundColor: themeColors.wala + '1A'}]}>
+                  <AppText style={[styles.boxText, {color: themeColors.wala}]}>
                     {`1 : ${(1 + parseFloat(settings['S']?.actionValue)).toFixed(2)}`}
                   </AppText>
                 </TouchableOpacity>
@@ -575,21 +549,21 @@ const HomeScreen = ({navigation}) => {
                     <TouchableOpacity
                       onPress={() => navigation.navigate('LiveCockFight')}
                       style={[styles.box, {backgroundColor: 'rgba(239,68,68,0.12)'}]}>
-                      <AppText style={[styles.boxText, {color: '#BA2343'}]}>
+                      <AppText style={[styles.boxText, {color: themeColors.meron}]}>
                         {`1 : ${(1 + parseFloat(match.maxThresholdTeamA)).toFixed(2)}`}
                       </AppText>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => navigation.navigate('LiveCockFight')}
-                      style={[styles.box, {backgroundColor: '#d4a843'}]}>
-                      <AppText style={[styles.boxText, {color: '#ffffff'}]}>
+                      style={[styles.box, {backgroundColor: themeColors.gold}]}>
+                      <AppText style={[styles.boxText, {color: themeColors.textOnGold || '#000'}]}>
                         24/7 Live
                       </AppText>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => navigation.navigate('LiveCockFight')}
-                      style={[styles.box, {backgroundColor: '#DAF5FF'}]}>
-                      <AppText style={[styles.boxText, {color: '#79B8CF'}]}>
+                      style={[styles.box, {backgroundColor: themeColors.wala + '1A'}]}>
+                      <AppText style={[styles.boxText, {color: themeColors.wala}]}>
                         {`1 : ${(1 + parseFloat(match.maxThresholdTeamB)).toFixed(2)}`}
                       </AppText>
                     </TouchableOpacity>
@@ -600,7 +574,7 @@ const HomeScreen = ({navigation}) => {
                   <View
                     style={{
                       width: '100%',
-                      backgroundColor: '#d4a843',
+                      backgroundColor: themeColors.gold,
                       height: hp(5),
                       borderRadius: 10,
                       justifyContent: 'center',
@@ -608,7 +582,7 @@ const HomeScreen = ({navigation}) => {
                     }}>
                     <AppText
                       style={{
-                        color: '#fff',
+                        color: themeColors.textOnGold || '#000',
                         fontSize: fp(1.8),
                         textAlign: 'center',
                       }}>
@@ -669,8 +643,8 @@ const HomeScreen = ({navigation}) => {
               <View style={styles.box}>
                 <AppText style={styles.boxText}>Bet</AppText>
               </View>
-              <View style={[styles.box, {backgroundColor: '#d4a843'}]}>
-                <AppText style={[styles.boxText, {color: '#ffffff'}]}>
+              <View style={[styles.box, {backgroundColor: themeColors.gold}]}>
+                <AppText style={[styles.boxText, {color: themeColors.textOnGold || '#000'}]}>
                   Live
                 </AppText>
               </View>
@@ -893,7 +867,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   notifBadgeText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontSize: 9,
     fontWeight: '700',
   },
@@ -994,7 +968,7 @@ const styles = StyleSheet.create({
   },
 
   soonTag: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     borderRadius: 50,
     position: 'absolute',
     top: hp(-1),
@@ -1007,13 +981,12 @@ const styles = StyleSheet.create({
 
   soonText: {
     fontSize: fp(1.2),
-    color: '#fff',
+    color: COLORS.text_on_gold,
     marginBottom: 1,
     marginRight: wp(1),
   },
   popularGames: {
     height: hp(8),
-    // backgroundColor: '#D4A843',
     flexDirection: 'row',
     width: wp(92),
     marginLeft: wp(4),
@@ -1076,7 +1049,6 @@ const styles = StyleSheet.create({
     paddingBottom: hp(1),
     paddingRight: wp(7),
     paddingLeft: wp(4),
-    // backgroundColor: '#D4A843',
   },
   matchDate: {fontSize: fp(1.5), color: COLORS.text_muted, textAlign: 'center'},
   matchTitle: {
@@ -1089,7 +1061,6 @@ const styles = StyleSheet.create({
     width: wp(15),
     resizeMode: 'cover',
     height: hp(8),
-    // backgroundColor:'#ffcc00'
   },
   teamRow: {
     flexDirection: 'row',
@@ -1108,7 +1079,7 @@ const styles = StyleSheet.create({
   orangeCircle: {
     width: wp(2),
     height: wp(2),
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     borderRadius: 50,
     marginRight: wp(2),
   },
@@ -1129,7 +1100,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  highlightTitle: {color: '#fff', fontWeight: 'bold'},
+  highlightTitle: {color: COLORS.text_primary, fontWeight: 'bold'},
   highlightRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1138,7 +1109,7 @@ const styles = StyleSheet.create({
   card: {
     width: wp(41),
     padding: 10,
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     height: hp(12),
     overflow: 'hidden',
     justifyContent: 'space-between',
@@ -1156,7 +1127,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   cardTitle: {
-    color: '#fff',
+    color: COLORS.text_on_gold,
     fontSize: 14,
     fontWeight: 'bold',
     width: wp(25),
@@ -1167,7 +1138,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: hp(17),
     right: wp(7),
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
 
     borderRadius: 50,
     elevation: 5,
@@ -1191,14 +1162,14 @@ const styles = StyleSheet.create({
     borderRadius: wp(1),
   },
   activeButton: {
-    backgroundColor: '#d4a843', // activeChannel bg color
+    backgroundColor: COLORS.gold,
   },
   buttonText: {
     fontSize: fp(1.5),
     color: COLORS.text_secondary,
   },
   activeButtonText: {
-    color: '#fff',
+    color: COLORS.text_on_gold,
     fontWeight: 'bold',
   },
   triangle: {
@@ -1212,7 +1183,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 8,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: '#d4a843',
+    borderTopColor: COLORS.gold,
     position: 'absolute',
     left: 15,
     bottom: -8,
@@ -1322,7 +1293,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 40,
     zIndex: 30,
-    // backgroundColor: '#D4A843',
   },
   actionButton: {
     flexDirection: 'row',

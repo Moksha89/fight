@@ -238,7 +238,7 @@ const LiveCockFight = ({navigation, route}) => {
         onIconPress={() => navigation.navigate('DepositWithdrawl')}
         RightIconComponent={
           <>
-            <MaterialCommunityIcons name="wallet" size={16} color={'#ffffff'} />
+            <MaterialCommunityIcons name="wallet" size={16} color={COLORS.text_primary} />
             <AppText style={styles.walletText}>
               ₹{String(wallet.balanceWithBonus).split('.')[0]}
             </AppText>
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   header: {flexDirection: 'row', alignItems: 'center', padding: 12},
   headerTitle: {flex: 1, textAlign: 'center', fontWeight: 'bold', fontSize: 18},
   walletButton: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     borderRadius: wp(2),
     flexDirection: 'row',
     width: wp(25),
@@ -333,12 +333,12 @@ const styles = StyleSheet.create({
   },
   banner: {
     flexDirection: 'row',
-    backgroundColor: '#2D1F1A',
+    backgroundColor: COLORS.bg_elevated,
     justifyContent: 'space-between',
     paddingHorizontal: wp(4),
     paddingVertical: hp(0.5),
   },
-  bannerText: {fontSize: 13, color: '#F5F1E8'},
+  bannerText: {fontSize: 13, color: COLORS.text_primary},
   tabs: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   tab: {padding: 8},
   tabActive: {padding: 8, backgroundColor: 'orange', borderRadius: 16},
   tabText: {fontSize: 14},
-  tabTextActive: {fontSize: 14, color: '#fff'},
+  tabTextActive: {fontSize: 14, color: COLORS.text_primary},
   cardImage: {width: '100%', height: '100%'},
   bottomIcons: {
     flexDirection: 'row',
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: wp(1.5),
-    color: '#fff',
+    color: COLORS.text_primary,
     fontWeight: 'bold',
     fontSize: fp(1.5),
     paddingHorizontal: 6,
@@ -373,18 +373,18 @@ const styles = StyleSheet.create({
   iconWrapper: {
     position: 'absolute',
     right: wp(3),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: wp(3),
     padding: wp(0.5),
     bottom: hp(4.5),
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: '#00000088',
+    backgroundColor: COLORS.overlay,
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 40,
     height: 5,
-    backgroundColor: '#4a4a4a',
+    backgroundColor: COLORS.bg_chip_light,
     borderRadius: 3,
     marginBottom: 10,
   },
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     fontSize: 14,
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
   },
   closeButton: {
     marginTop: 20,

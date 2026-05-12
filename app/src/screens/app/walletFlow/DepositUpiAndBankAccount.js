@@ -41,6 +41,7 @@ import {
   createDepositRequest,
 } from '../../../apis/walletApi';
 import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 
 const iconImages = {
   download: require('../../../assets/icons/download.png'),
@@ -212,7 +213,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
           <MaterialIcons name="history" size={25} color={colors.text_primary} />
         }
         rightIconWrapperStyle={{
-          backgroundColor: '#d4a843',
+          backgroundColor: COLORS.gold,
         }}
       />
 
@@ -223,18 +224,18 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
             onPress={() => setActiveTab('upi')}
             style={[
               styles.button,
-              activeTab === 'upi' && {backgroundColor: '#d4a843'},
+              activeTab === 'upi' && {backgroundColor: COLORS.gold},
             ]}>
             <MaterialIcons
               name="qr-code-scanner"
               size={26}
-              color={activeTab === 'upi' ? '#ffffff' : '#A8A29E'}
+              color={activeTab === 'upi' ? COLORS.text_primary : COLORS.text_secondary}
               style={styles.iconImage}
             />
             <AppText
               style={[
                 styles.buttonText,
-                {color: activeTab === 'upi' ? '#fff' : '#A8A29E'},
+                {color: activeTab === 'upi' ? COLORS.text_primary : COLORS.text_secondary},
               ]}>
               Payment QR
             </AppText>
@@ -244,18 +245,18 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
             onPress={() => setActiveTab('bank')}
             style={[
               styles.button,
-              activeTab === 'bank' && {backgroundColor: '#d4a843'},
+              activeTab === 'bank' && {backgroundColor: COLORS.gold},
             ]}>
             <FontAwesome
               name="bank"
               size={20}
-              color={activeTab === 'bank' ? '#ffffff' : '#A8A29E'}
+              color={activeTab === 'bank' ? COLORS.text_primary : COLORS.text_secondary}
             />
 
             <AppText
               style={[
                 styles.buttonText,
-                {color: activeTab === 'bank' ? '#fff' : '#A8A29E'},
+                {color: activeTab === 'bank' ? COLORS.text_primary : COLORS.text_secondary},
               ]}>
               Bank Account
             </AppText>
@@ -320,7 +321,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                 <AppText
                   style={{
                     textAlign: 'center',
-                    color: '#797979',
+                    color: COLORS.text_muted,
                     marginVertical: hp(1.5),
                   }}>
                   Scan this QR and Make payment
@@ -362,7 +363,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                           style={{
                             flexDirection: 'row',
                             alignItems: 'center',
-                            // backgroundColor: '#ffcc00',
+                            // backgroundColor: COLORS.gold,
                           }}>
                           <AppText style={styles.cardSubText}>
                             UPI ID: {item.upi_id}
@@ -457,7 +458,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                     }
                     size={25}
                     color={
-                      isPlaying ? '#d4a843' : isMuted ? '#d4a843' : '#d4a843'
+                      isPlaying ? COLORS.gold : isMuted ? COLORS.gold : COLORS.gold
                     }
                   />
                 </TouchableOpacity>
@@ -692,12 +693,12 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
     paddingHorizontal: wp(3),
     fontSize: fp(2),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
   },
   uploadBox: {
     width: wp(34),
     height: hp(6),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: wp(2),
     justifyContent: 'space-evenly',
     alignItems: 'center',
@@ -707,7 +708,7 @@ const styles = StyleSheet.create({
   uploadIcon: {
     width: wp(6),
     height: wp(6),
-    tintColor: '#333',
+    tintColor: COLORS.bg_chip,
     resizeMode: 'contain',
   },
   qrCard: {
@@ -717,7 +718,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: wp(4),
     marginRight: wp(7),
-    // backgroundColor: '#ffcc00',
+    // backgroundColor: COLORS.gold,
   },
   cardIcons: {
     flexDirection: 'row',
@@ -731,11 +732,11 @@ const styles = StyleSheet.create({
   },
   cardSubText: {
     fontSize: fp(1.5),
-    color: '#111111',
+    color: COLORS.bg_surface,
     marginLeft: wp(4),
     marginTop: hp(0.5),
     marginRight: wp(2),
-    // backgroundColor: '#ffcc00',
+    // backgroundColor: COLORS.gold,
   },
   gameSelectionHeader: {
     flexDirection: 'row',
@@ -779,7 +780,7 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontWeight: '700',
     fontSize: fp(2),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     marginLeft: wp(4),
     marginBottom: hp(0.5),
   },
@@ -825,7 +826,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   amountBox: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     paddingVertical: hp(0.8),
     paddingHorizontal: wp(9),
     borderRadius: wp(2),
@@ -834,7 +835,7 @@ const styles = StyleSheet.create({
   amountText: {
     fontSize: fp(2),
     fontWeight: 'bold',
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
   },
 });
 

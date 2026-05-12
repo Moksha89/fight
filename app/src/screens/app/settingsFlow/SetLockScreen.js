@@ -18,6 +18,7 @@ import {
 import {useAuth} from '../../../context/AuthContext';
 
 import storage from '../../../utils/storage';
+import COLORS from '../../../context/designTokens';
 
 const SetLockScreen = ({navigation}) => {
   const {setIsPinSet, setCheckPin} = useAuth();
@@ -84,7 +85,7 @@ const SetLockScreen = ({navigation}) => {
           })
         }
         RightIconComponent={<Octicons name="home" size={17} color="#ffffff" />}
-        rightIconWrapperStyle={{backgroundColor: '#d4a843'}}
+        rightIconWrapperStyle={{backgroundColor: COLORS.gold}}
       />
       <AppText style={styles.header}>Set New Login PIN</AppText>
       <AppText style={styles.description}>

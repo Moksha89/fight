@@ -28,6 +28,7 @@ import AppScreen from '../components/AppScreen';
 import Video from 'react-native-video';
 
 import {fetchStatuses} from '../apis/authApi';
+import COLORS from '../context/designTokens';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
@@ -338,7 +339,6 @@ const styles = StyleSheet.create({
   categoryItemContainer: {
     alignItems: 'center',
     marginRight: wp(2.5),
-    // backgroundColor: '#ffcc00',
     height: hp(8),
     width: wp(13),
   },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     height: wp(13),
     borderRadius: 50,
     borderWidth: wp(1),
-    borderColor: '#ffa53f',
+    borderColor: COLORS.warning,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -356,12 +356,11 @@ const styles = StyleSheet.create({
     width: '90%',
     height: '90%',
     resizeMode: 'cover',
-    // backgroundColor: '#ffcc00',
   },
   categoryLabel: {
     marginTop: 4,
     fontSize: 10,
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
     textAlign: 'center',
   },
 
@@ -465,7 +464,7 @@ const styles = StyleSheet.create({
   },
   segmentProgressBar: {
     height: '100%',
-    backgroundColor: '#0B0B0B',
+    backgroundColor: COLORS.bg,
     borderRadius: 2,
   },
 

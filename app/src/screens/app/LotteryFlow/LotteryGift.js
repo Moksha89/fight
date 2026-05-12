@@ -10,7 +10,6 @@ import {
 import Swiper from 'react-native-swiper';
 import {fetchBanners} from '../../../apis/authApi';
 
-import LotteryUnderMaintenanceScreen from '../../FeatureUnderMaintenanceScreen';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -28,7 +27,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import AppUnderMaintenanceScreen from '../../AppUnderMaintenanceScreen';
-import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 
 // ============================= Lottery Gift =============================
 const giftData = [
@@ -338,13 +337,13 @@ export default function GiftPoolScreen({onSelect, navigation}) {
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name="wallet-outline" size={20} color="#fff" />
             <AppText
-              style={{color: '#fff', marginLeft: wp(3), fontWeight: 'bold'}}>
+              style={{color: COLORS.text_primary, marginLeft: wp(3), fontWeight: 'bold'}}>
               ₹125
             </AppText>
           </View>
         }
         rightIconWrapperStyle={{
-          backgroundColor: '#d4a843',
+          backgroundColor: COLORS.gold,
           borderColor: 'rgba(212,168,67,0.18)',
           borderWidth: 1,
           width: wp(25),
@@ -354,7 +353,7 @@ export default function GiftPoolScreen({onSelect, navigation}) {
           paddingHorizontal: wp(4),
         }}
         containerStyle={{
-          backgroundColor: '#171717',
+          backgroundColor: COLORS.bg_card,
           paddingHorizontal: wp(7),
           borderRadius: wp(2),
           width: wp(100),
@@ -485,7 +484,7 @@ const styles = StyleSheet.create({
   medalPlaceText: {
     position: 'absolute',
     fontSize: fp(0.9),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     top: hp(0.55),
   },
   title: {
@@ -497,7 +496,7 @@ const styles = StyleSheet.create({
   timer: {fontSize: fp(1.5), color: '#433F3F', fontWeight: '600'},
   buttonArea: {alignItems: 'flex-end'},
   activeBtn: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     borderRadius: 8,
     width: wp(20),
     height: hp(3),
@@ -506,9 +505,9 @@ const styles = StyleSheet.create({
     marginTop: hp(1.5),
     marginBottom: hp(3.5),
   },
-  activeText: {color: '#fff', fontWeight: 'bold'},
+  activeText: {color: COLORS.text_primary, fontWeight: 'bold'},
   lockedBtn: {
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.disabled,
     width: wp(20),
     borderRadius: 8,
     height: hp(3),
@@ -517,7 +516,7 @@ const styles = StyleSheet.create({
     marginTop: hp(1.5),
     marginBottom: hp(3.5),
   },
-  lockedText: {color: '#fff', fontWeight: 'bold'},
+  lockedText: {color: COLORS.text_primary, fontWeight: 'bold'},
   walletNote: {
     fontSize: fp(1.1),
     textAlign: 'center',
@@ -529,14 +528,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     left: 0,
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     width: wp(30),
     alignItems: 'center',
     borderTopRightRadius: 12,
   },
 
   comingSoonText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontSize: fp(1.4),
   },
   selection: {
@@ -557,11 +556,11 @@ const styles = StyleSheet.create({
     // marginLeft: wp(7),
   },
   selectedText: {
-    color: '#d4a843',
+    color: COLORS.gold,
   },
   underline: {
     height: hp(0.3),
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     width: wp(14),
     marginTop: hp(1),
     marginLeft: wp(1),
@@ -581,14 +580,14 @@ const styles = StyleSheet.create({
     width: wp(90),
   },
   dot: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     width: 8,
     height: 8,
     borderRadius: 4,
     marginHorizontal: 4,
   },
   activeDot: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     width: 10,
     height: 10,
     borderRadius: 5,
@@ -610,7 +609,7 @@ const styles = StyleSheet.create({
     paddingRight: wp(4),
   },
   cardTop: {marginBottom: hp(3)},
-  label: {fontSize: 14, color: '#666', marginTop: hp(1.2), marginBottom: hp(1)},
+  label: {fontSize: 14, color: COLORS.text_muted, marginTop: hp(1.2), marginBottom: hp(1)},
   amount: {fontSize: fp(2.5), fontWeight: '500'},
   moneyPriceDetails: {
     flexDirection: 'row',
@@ -629,7 +628,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     width: wp(35),
-    // backgroundColor: '#ffcc00',
+    // backgroundColor: COLORS.gold,
   },
   meta: {fontSize: 12, color: '#444'},
   moneyButtonArea: {alignItems: 'flex-end', gap: hp(2), marginBottom: hp(3)},
@@ -643,13 +642,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonActive: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.disabled,
   },
   buttonText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontWeight: 'bold',
   },
   buttonTextDisabled: {

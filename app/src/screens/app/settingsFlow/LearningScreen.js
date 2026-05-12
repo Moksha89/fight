@@ -21,6 +21,7 @@ import Modal from 'react-native-modal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {fetchLearningData} from '../../../apis/appApi';
 import TutorialVideoModal from '../../../components/TutorialVideoModal';
+import COLORS from '../../../context/designTokens';
 
 const LearningSchoolScreen = ({navigation}) => {
   const [learningData, setLearningData] = useState([]);
@@ -95,7 +96,7 @@ const LearningSchoolScreen = ({navigation}) => {
         onBackPress={() => navigation.goBack()}
         onIconPress={() => navigation.navigate('HomeScreen')}
         RightIconComponent={<Octicons name="home" size={17} color="#ffffff" />}
-        rightIconWrapperStyle={{backgroundColor: '#d4a843'}}
+        rightIconWrapperStyle={{backgroundColor: COLORS.gold}}
       />
 
       {/* Search & Language */}
@@ -149,7 +150,7 @@ const LearningSchoolScreen = ({navigation}) => {
           contentContainerStyle={{paddingBottom: 20}}
           ListEmptyComponent={
             <AppText
-              style={{textAlign: 'center', marginTop: 20, color: '#999'}}>
+              style={{textAlign: 'center', marginTop: 20, color: COLORS.text_muted}}>
               No videos found
             </AppText>
           }
@@ -209,20 +210,20 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    backgroundColor: '#171717', // Needed for elevation to cast shadow
+    backgroundColor: COLORS.bg_card, // Needed for elevation to cast shadow
     borderRadius: 50,
     paddingLeft: wp(10),
     paddingVertical: 12,
     fontSize: 14,
     elevation: 5, // Higher value for more prominent shadow
-    shadowColor: '#000',
+    shadowColor: COLORS.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
   },
   languageButton: {
     marginLeft: 10,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: COLORS.bg_chip,
     borderRadius: 30,
     paddingHorizontal: 15,
     justifyContent: 'center',
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '48%',
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: 10,
     marginBottom: 15,
     overflow: 'hidden',
@@ -262,13 +263,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: hp(10),
     right: wp(2),
-    backgroundColor: '#000',
+    backgroundColor: COLORS.bg,
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
   },
   durationText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontSize: 12,
   },
   cardBody: {
@@ -292,10 +293,10 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 14,
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
   },
   modalContent: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     paddingVertical: 10,
     borderRadius: 10,
   },

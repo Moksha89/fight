@@ -16,6 +16,7 @@ import HeaderComponent from '../../../components/HeaderComponent';
 
 import {apiRequest} from '../../../utils/apiClient';
 import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 
 import {
   responsiveHeight as hp,
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   card: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: 16,
     padding: 24,
     shadowColor: '#000',
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: fp(1.4),
     fontWeight: '600',
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
     marginBottom: 6,
   },
   inputWrapper: {
@@ -196,20 +197,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(212,168,67,0.18)',
     borderRadius: 10,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: COLORS.bg_input,
   },
   input: {
     flex: 1,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: fp(1.7),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
   },
   eyeBtn: {
     padding: 12,
   },
   submitBtn: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitText: {
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     fontSize: fp(1.8),
     fontWeight: '700',
   },
