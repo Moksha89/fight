@@ -1,9 +1,49 @@
+import base64
+import logging
+import os
+
+from cryptography.fernet import Fernet, InvalidToken
 from django.db import models
 from utility.storageClasses import AzurePublicStorage
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 import re
 from django.conf import settings
+
+logger = logging.getLogger("kokoroko.sms")
+
+
+def _get_fernet():
+    """Return a Fernet instance using SMS_SETTINGS_ENCRYPTION_KEY env var."""
+    key = os.environ.get("SMS_SETTINGS_ENCRYPTION_KEY", "")
+    if not key:
+        return None
+    if len(key) < 32:
+        key = base64.urlsafe_b64encode(key.ljust(32, "\0")[:32].encode()).decode()
+    return Fernet(key.encode() if isinstance(key, str) else key)
+
+
+def encrypt_value(plaintext):
+    """Encrypt a string. Returns ciphertext or plaintext if no key configured."""
+    if not plaintext:
+        return ""
+    f = _get_fernet()
+    if f is None:
+        return plaintext
+    return f.encrypt(plaintext.encode()).decode()
+
+
+def decrypt_value(ciphertext):
+    """Decrypt a string. Returns plaintext or the original string on failure."""
+    if not ciphertext:
+        return ""
+    f = _get_fernet()
+    if f is None:
+        return ciphertext
+    try:
+        return f.decrypt(ciphertext.encode()).decode()
+    except (InvalidToken, Exception):
+        return ciphertext
 
 
 class Setting(models.Model):
@@ -308,3 +348,127 @@ class LearningVideo(models.Model):
     class Meta:
         verbose_name = ("Learning Video")
         verbose_name_plural = ("4. Learning Videos")
+
+
+# ========================= SMS Provider Settings ======================
+
+class SmsProviderSetting(models.Model):
+    PROVIDER_CHOICES = [
+        ('none', 'None / Disabled'),
+        ('msg91', 'MSG91'),
+        ('twilio', 'Twilio'),
+    ]
+
+    provider = models.CharField(
+        max_length=10, choices=PROVIDER_CHOICES, default='none',
+        help_text="Active SMS provider for OTP delivery.",
+    )
+    is_enabled = models.BooleanField(
+        default=False,
+        help_text="Master switch — if off, no SMS is sent regardless of provider.",
+    )
+    default_country_code = models.CharField(
+        max_length=5, default='91',
+        help_text="Default country code for mobile numbers (e.g. 91 for India).",
+    )
+
+    # MSG91 fields
+    msg91_auth_key_enc = models.TextField(
+        blank=True, default='', verbose_name="MSG91 Auth Key (encrypted)",
+    )
+    msg91_template_id = models.CharField(
+        max_length=200, blank=True, default='',
+        verbose_name="MSG91 Template ID",
+    )
+    msg91_sender_id = models.CharField(
+        max_length=20, blank=True, default='',
+        verbose_name="MSG91 Sender ID / Header",
+    )
+    msg91_route = models.CharField(
+        max_length=10, blank=True, default='',
+        verbose_name="MSG91 Route",
+    )
+    msg91_entity_id = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name="MSG91 DLT Entity ID",
+    )
+    msg91_base_url = models.URLField(
+        blank=True, default='https://control.msg91.com/api/v5/otp',
+        verbose_name="MSG91 API Base URL",
+    )
+
+    # Twilio fields
+    twilio_account_sid_enc = models.TextField(
+        blank=True, default='', verbose_name="Twilio Account SID (encrypted)",
+    )
+    twilio_auth_token_enc = models.TextField(
+        blank=True, default='', verbose_name="Twilio Auth Token (encrypted)",
+    )
+    twilio_from_number = models.CharField(
+        max_length=20, blank=True, default='',
+        verbose_name="Twilio From Number",
+    )
+    twilio_messaging_service_sid = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name="Twilio Messaging Service SID",
+    )
+
+    # OTP message template
+    otp_message_template = models.CharField(
+        max_length=500, blank=True,
+        default='Your KOKOROKO OTP is {otp}. It is valid for 5 minutes. Do not share it with anyone.',
+        help_text="OTP message template. Use {otp} as placeholder.",
+    )
+
+    # Test / status tracking
+    last_test_status = models.CharField(
+        max_length=20, blank=True, default='',
+        choices=[('', 'Never tested'), ('success', 'Success'), ('failed', 'Failed')],
+    )
+    last_test_error = models.TextField(blank=True, default='')
+    last_test_at = models.DateTimeField(null=True, blank=True)
+    last_test_mobile = models.CharField(max_length=20, blank=True, default='')
+
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='+',
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "SMS Provider Setting"
+        verbose_name_plural = "SMS Provider Settings"
+
+    def __str__(self):
+        return f"SMS Config — {self.get_provider_display()}"
+
+    def save(self, *args, **kwargs):
+        if not self.pk and SmsProviderSetting.objects.exists():
+            existing = SmsProviderSetting.objects.first()
+            self.pk = existing.pk
+        super().save(*args, **kwargs)
+
+    # -- Encrypted field helpers --
+    def set_msg91_auth_key(self, value):
+        self.msg91_auth_key_enc = encrypt_value(value) if value else ''
+
+    def get_msg91_auth_key(self):
+        return decrypt_value(self.msg91_auth_key_enc)
+
+    def set_twilio_account_sid(self, value):
+        self.twilio_account_sid_enc = encrypt_value(value) if value else ''
+
+    def get_twilio_account_sid(self):
+        return decrypt_value(self.twilio_account_sid_enc)
+
+    def set_twilio_auth_token(self, value):
+        self.twilio_auth_token_enc = encrypt_value(value) if value else ''
+
+    def get_twilio_auth_token(self):
+        return decrypt_value(self.twilio_auth_token_enc)
+
+    @classmethod
+    def get_config(cls):
+        """Return the singleton config, creating one with defaults if needed."""
+        obj, _ = cls.objects.get_or_create(pk=1, defaults={'provider': 'none'})
+        return obj

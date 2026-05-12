@@ -176,15 +176,30 @@ class UserViewSet(viewsets.GenericViewSet):
 
         # Attempt to deliver OTP via SMS gateway
         from utility.sms import send_otp_sms
-        send_otp_sms(resolved_mobile, otp)
+        sms_ok, sms_err = send_otp_sms(resolved_mobile, otp)
 
         # Log OTP request
         if user:
-            log_auth_event(user, "otp_requested", request, {"mobile": resolved_mobile})
+            log_auth_event(user, "otp_requested", request, {"mobile": resolved_mobile, "sms_sent": sms_ok})
 
         # Mask mobile number in response for privacy
         masked = resolved_mobile[:2] + "****" + resolved_mobile[-2:] if len(resolved_mobile) > 4 else resolved_mobile
-        return Response({"message": f"OTP sent to {masked}", "mobile": resolved_mobile}, status=status.HTTP_200_OK)
+
+        if sms_ok:
+            return Response({"message": f"OTP sent to {masked}", "mobile": resolved_mobile}, status=status.HTTP_200_OK)
+
+        # SMS failed — still return success-like response so OTP can be
+        # retrieved by testers in staging; but include a hint if SMS is
+        # not configured at all (provider=none).
+        from utility.sms import _get_sms_config
+        cfg = _get_sms_config()
+        if cfg["provider"] == "none" or not cfg["is_enabled"]:
+            return Response({"message": f"OTP generated for {masked}", "mobile": resolved_mobile}, status=status.HTTP_200_OK)
+
+        return Response(
+            {"error": "Unable to send OTP right now. Please try again."},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
 
     @action(detail=False, methods=["post"])
     def verifyotp(self, request):

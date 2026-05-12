@@ -72,6 +72,7 @@ def _admin_sidebar_html(active_path=""):
         <a href="/base/setting/"{_cls("/base/setting/")}><i>settings</i>App Settings</a>
         <a href="/admin-api/theme-settings/"{_cls("/admin-api/theme-settings/")}><i>palette</i>Theme Settings</a>
         <a href="/admin-api/feature-controls/"{_cls("/admin-api/feature-controls/")}><i>tune</i>Feature Controls</a>
+        <a href="/admin-api/sms-settings/"{_cls("/admin-api/sms-settings/")}><i>sms</i>SMS Settings</a>
     </div>
     <div class="sb-divider"></div>
     <div class="sb-section">
@@ -1413,6 +1414,523 @@ def admin_run_backup(request):
     log_admin_action(request, "manual_backup", {"results": {k: v for k, v in results.items()}})
     return JsonResponse({"status": "ok", "results": results})
 
+
+# ─── SMS Settings Admin Views ─────────────────────────────────────────────────
+
+def _require_superuser(request):
+    """Returns an error response if the user is not a superuser, else None."""
+    if not request.user.is_superuser:
+        return JsonResponse({"error": "Superuser access required."}, status=403)
+    return None
+
+
+@staff_member_required
+def admin_sms_settings_get(request):
+    """Return current SMS settings as JSON (secrets masked)."""
+    perm_err = _require_superuser(request)
+    if perm_err:
+        return perm_err
+
+    from base.models import SmsProviderSetting
+    cfg = SmsProviderSetting.get_config()
+
+    def _mask(val, show=4):
+        if not val:
+            return ""
+        if len(val) <= show:
+            return "*" * len(val)
+        return val[:show] + "*" * (len(val) - show)
+
+    return JsonResponse({
+        "provider": cfg.provider,
+        "is_enabled": cfg.is_enabled,
+        "default_country_code": cfg.default_country_code,
+        "msg91_auth_key_set": bool(cfg.msg91_auth_key_enc),
+        "msg91_auth_key_masked": _mask(cfg.get_msg91_auth_key()),
+        "msg91_template_id": cfg.msg91_template_id,
+        "msg91_sender_id": cfg.msg91_sender_id,
+        "msg91_route": cfg.msg91_route,
+        "msg91_entity_id": cfg.msg91_entity_id,
+        "msg91_base_url": cfg.msg91_base_url,
+        "twilio_account_sid_set": bool(cfg.twilio_account_sid_enc),
+        "twilio_account_sid_masked": _mask(cfg.get_twilio_account_sid()),
+        "twilio_auth_token_set": bool(cfg.twilio_auth_token_enc),
+        "twilio_auth_token_masked": _mask(cfg.get_twilio_auth_token()),
+        "twilio_from_number": cfg.twilio_from_number,
+        "twilio_messaging_service_sid": cfg.twilio_messaging_service_sid,
+        "otp_message_template": cfg.otp_message_template,
+        "last_test_status": cfg.last_test_status,
+        "last_test_error": cfg.last_test_error,
+        "last_test_at": cfg.last_test_at.isoformat() if cfg.last_test_at else None,
+        "last_test_mobile": cfg.last_test_mobile,
+        "updated_at": cfg.updated_at.isoformat() if cfg.updated_at else None,
+    })
+
+
+@staff_member_required
+def admin_sms_settings_save(request):
+    """Save SMS settings via POST. Secrets are only updated if non-empty."""
+    perm_err = _require_superuser(request)
+    if perm_err:
+        return perm_err
+
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    from base.models import SmsProviderSetting
+    cfg = SmsProviderSetting.get_config()
+
+    changes = {}
+
+    for field in ["provider", "default_country_code", "msg91_template_id",
+                  "msg91_sender_id", "msg91_route", "msg91_entity_id",
+                  "msg91_base_url", "twilio_from_number",
+                  "twilio_messaging_service_sid", "otp_message_template"]:
+        if field in data:
+            old_val = getattr(cfg, field, "")
+            new_val = str(data[field]).strip()
+            if old_val != new_val:
+                changes[field] = {"from": old_val, "to": new_val}
+            setattr(cfg, field, new_val)
+
+    if "is_enabled" in data:
+        new_enabled = bool(data["is_enabled"])
+        if cfg.is_enabled != new_enabled:
+            changes["is_enabled"] = {"from": cfg.is_enabled, "to": new_enabled}
+        cfg.is_enabled = new_enabled
+
+    if data.get("msg91_auth_key"):
+        cfg.set_msg91_auth_key(data["msg91_auth_key"])
+        changes["msg91_auth_key"] = "updated"
+
+    if data.get("twilio_account_sid"):
+        cfg.set_twilio_account_sid(data["twilio_account_sid"])
+        changes["twilio_account_sid"] = "updated"
+
+    if data.get("twilio_auth_token"):
+        cfg.set_twilio_auth_token(data["twilio_auth_token"])
+        changes["twilio_auth_token"] = "updated"
+
+    cfg.updated_by = request.user
+    cfg.save()
+
+    if changes:
+        safe_changes = {k: v for k, v in changes.items()
+                        if k not in ("msg91_auth_key", "twilio_account_sid", "twilio_auth_token")}
+        log_admin_action(request, "sms_settings_updated", {"changes": safe_changes})
+
+    return JsonResponse({"status": "ok"})
+
+
+@staff_member_required
+def admin_sms_test(request):
+    """Send a test OTP to a mobile number."""
+    perm_err = _require_superuser(request)
+    if perm_err:
+        return perm_err
+
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    mobile = data.get("mobile", "").strip()
+    if not mobile or len(mobile) < 10:
+        return JsonResponse({"error": "Valid mobile number required."}, status=400)
+
+    provider_override = data.get("provider", None)
+
+    from utility.sms import send_test_otp
+    success, test_otp, err = send_test_otp(mobile, provider_override)
+
+    log_admin_action(request, "sms_test_sent", {
+        "mobile_masked": mobile[:2] + "****" + mobile[-2:] if len(mobile) > 4 else "****",
+        "provider": provider_override or "active",
+        "success": success,
+    })
+
+    result = {"success": success}
+    if err:
+        result["error"] = err
+    return JsonResponse(result)
+
+
+@staff_member_required
+def admin_sms_settings_page(request):
+    """Render the SMS Settings admin page."""
+    perm_err = _require_superuser(request)
+    if perm_err:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("Superuser access required.")
+
+    sidebar_css = _admin_sidebar_css()
+    sidebar_html = _admin_sidebar_html("/admin-api/sms-settings/")
+    return HttpResponse(f'''<!DOCTYPE html>
+<html><head>
+<title>SMS Settings | Kokoroko Admin</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+* {{ margin:0; padding:0; box-sizing:border-box; }}
+{sidebar_css}
+body {{ font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#0B0B0B; color:#F5F1E8; min-height:100vh; }}
+.topbar {{ background:#141414; padding:16px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2a2a2a; }}
+.topbar h1 {{ font-size:20px; color:#D4A843; }}
+.container {{ max-width:1200px; margin:0 auto; padding:24px; padding-bottom:80px; }}
+.grid {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:20px; }}
+.card {{ background:#141414; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden; }}
+.card-header {{ padding:16px 20px; background:#1a1a1a; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2a2a2a; }}
+.card-header h3 {{ display:flex; align-items:center; gap:8px; font-size:15px; }}
+.card-header .material-icons {{ color:#D4A843; font-size:20px; }}
+.card-body {{ padding:16px 20px; }}
+.field {{ margin-bottom:14px; }}
+.field label {{ display:block; font-size:12px; color:#999; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }}
+.field input, .field select, .field textarea {{ width:100%; background:#1a1a1a; border:1px solid #333; color:#F5F1E8; padding:8px 12px; border-radius:6px; font-size:13px; }}
+.field textarea {{ min-height:60px; resize:vertical; }}
+.field select {{ appearance:auto; }}
+.field .hint {{ font-size:11px; color:#666; margin-top:3px; }}
+.field .secret-row {{ display:flex; gap:8px; align-items:center; }}
+.field .secret-row input {{ flex:1; }}
+.field .secret-status {{ font-size:11px; padding:2px 6px; border-radius:4px; }}
+.secret-set {{ background:rgba(34,197,94,0.15); color:#22c55e; }}
+.secret-unset {{ background:rgba(239,68,68,0.15); color:#ef4444; }}
+.toggle-row {{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; }}
+.switch {{ position:relative; width:44px; height:24px; flex-shrink:0; }}
+.switch input {{ opacity:0; width:0; height:0; }}
+.slider {{ position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#333; border-radius:24px; transition:.3s; }}
+.slider:before {{ content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#888; border-radius:50%; transition:.3s; }}
+input:checked + .slider {{ background:#D4A843; }}
+input:checked + .slider:before {{ transform:translateX(20px); background:#fff; }}
+.save-bar {{ position:fixed; bottom:0; left:220px; right:0; background:#141414; border-top:1px solid #2a2a2a; padding:12px 24px; display:flex; justify-content:flex-end; gap:12px; z-index:100; }}
+.btn {{ padding:10px 24px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.15s; }}
+.btn-primary {{ background:#D4A843; color:#000; }}
+.btn-primary:hover {{ background:#e0b654; }}
+.btn-secondary {{ background:#333; color:#ccc; }}
+.btn-secondary:hover {{ background:#444; }}
+.btn-danger {{ background:#ef4444; color:#fff; }}
+.btn-danger:hover {{ background:#dc2626; }}
+.btn:disabled {{ opacity:0.5; cursor:not-allowed; }}
+.status-badge {{ display:inline-block; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:600; }}
+.status-success {{ background:rgba(34,197,94,0.15); color:#22c55e; }}
+.status-failed {{ background:rgba(239,68,68,0.15); color:#ef4444; }}
+.status-none {{ background:rgba(156,163,175,0.15); color:#9ca3af; }}
+.test-result {{ margin-top:12px; padding:12px; border-radius:8px; font-size:13px; display:none; }}
+.test-success {{ background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:#22c55e; }}
+.test-failed {{ background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; }}
+.toast {{ position:fixed; top:20px; right:20px; padding:12px 20px; border-radius:8px; color:#fff; font-size:14px; z-index:9999; display:none; }}
+.toast-success {{ background:#22c55e; }}
+.toast-error {{ background:#ef4444; }}
+.provider-section {{ display:none; }}
+.provider-section.active {{ display:block; }}
+.preview-box {{ background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:12px; font-size:13px; color:#ccc; margin-top:8px; }}
+</style>
+</head>
+<body>
+{sidebar_html}
+<div id="kk-main">
+<div class="topbar"><h1><i class="material-icons" style="color:#D4A843;margin-right:4px;">sms</i> SMS Settings</h1></div>
+<div class="container">
+<div class="grid">
+
+<!-- General Settings Card -->
+<div class="card">
+<div class="card-header"><h3><i class="material-icons">settings</i> General Settings</h3></div>
+<div class="card-body">
+<div class="field">
+<label>Active SMS Provider</label>
+<select id="sms-provider">
+<option value="none">None / Disabled</option>
+<option value="msg91">MSG91</option>
+<option value="twilio">Twilio</option>
+</select>
+</div>
+<div class="toggle-row">
+<span style="font-size:13px;color:#ccc;">Enable SMS Sending</span>
+<label class="switch"><input type="checkbox" id="sms-enabled"><span class="slider"></span></label>
+</div>
+<div class="field">
+<label>Default Country Code</label>
+<input type="text" id="country-code" value="91" maxlength="5" style="width:80px;">
+</div>
+<div class="field">
+<label>OTP Message Template</label>
+<textarea id="otp-template"></textarea>
+<div class="hint">Use {{otp}} as the OTP placeholder.</div>
+</div>
+<div class="field">
+<label>Message Preview</label>
+<div class="preview-box" id="msg-preview"></div>
+</div>
+</div>
+</div>
+
+<!-- MSG91 Settings Card -->
+<div class="card provider-section" id="msg91-card">
+<div class="card-header"><h3><i class="material-icons">cloud</i> MSG91 Settings</h3></div>
+<div class="card-body">
+<div class="field">
+<label>Auth Key</label>
+<div class="secret-row">
+<input type="password" id="msg91-auth-key" placeholder="Enter new auth key to update">
+<span class="secret-status" id="msg91-key-status"></span>
+</div>
+<div class="hint">Leave blank to keep existing key.</div>
+</div>
+<div class="field">
+<label>Template ID</label>
+<input type="text" id="msg91-template-id">
+</div>
+<div class="field">
+<label>Sender ID / Header</label>
+<input type="text" id="msg91-sender-id" maxlength="20">
+</div>
+<div class="field">
+<label>Route</label>
+<input type="text" id="msg91-route" placeholder="e.g. 4" maxlength="10">
+</div>
+<div class="field">
+<label>DLT Entity ID</label>
+<input type="text" id="msg91-entity-id">
+</div>
+<div class="field">
+<label>API Base URL</label>
+<input type="text" id="msg91-base-url" value="https://control.msg91.com/api/v5/otp">
+</div>
+</div>
+</div>
+
+<!-- Twilio Settings Card -->
+<div class="card provider-section" id="twilio-card">
+<div class="card-header"><h3><i class="material-icons">phone_forwarded</i> Twilio Settings</h3></div>
+<div class="card-body">
+<div class="field">
+<label>Account SID</label>
+<div class="secret-row">
+<input type="password" id="twilio-sid" placeholder="Enter new Account SID to update">
+<span class="secret-status" id="twilio-sid-status"></span>
+</div>
+<div class="hint">Leave blank to keep existing value.</div>
+</div>
+<div class="field">
+<label>Auth Token</label>
+<div class="secret-row">
+<input type="password" id="twilio-token" placeholder="Enter new Auth Token to update">
+<span class="secret-status" id="twilio-token-status"></span>
+</div>
+<div class="hint">Leave blank to keep existing value.</div>
+</div>
+<div class="field">
+<label>From Number</label>
+<input type="text" id="twilio-from" placeholder="+1XXXXXXXXXX">
+</div>
+<div class="field">
+<label>Messaging Service SID</label>
+<input type="text" id="twilio-msid" placeholder="Optional — use instead of From Number">
+</div>
+</div>
+</div>
+
+<!-- Test OTP Card -->
+<div class="card">
+<div class="card-header"><h3><i class="material-icons">science</i> Send Test OTP</h3></div>
+<div class="card-body">
+<div class="field">
+<label>Test Mobile Number</label>
+<input type="text" id="test-mobile" placeholder="e.g. 9876543210">
+</div>
+<button class="btn btn-secondary" id="btn-test" onclick="sendTestOtp()" style="width:100%;">
+<i class="material-icons" style="font-size:16px;vertical-align:middle;">send</i> Send Test OTP
+</button>
+<div class="test-result" id="test-result"></div>
+<div style="margin-top:14px;font-size:12px;color:#666;">
+<div><strong>Last test:</strong> <span id="last-test-info">—</span></div>
+</div>
+</div>
+</div>
+
+</div><!-- /grid -->
+</div><!-- /container -->
+
+<div class="save-bar">
+<button class="btn btn-secondary" onclick="loadConfig()">Reset</button>
+<button class="btn btn-primary" id="btn-save" onclick="saveConfig()">
+<i class="material-icons" style="font-size:16px;vertical-align:middle;">save</i> Save Settings
+</button>
+</div>
+</div><!-- /kk-main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+function getCookie(name) {{
+    var v = document.cookie.match('(^|;)\\\\s*'+name+'=([^;]*)');
+    return v ? decodeURIComponent(v[2]) : '';
+}}
+function showToast(msg, type) {{
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast toast-' + type;
+    t.style.display = 'block';
+    setTimeout(function() {{ t.style.display = 'none'; }}, 3000);
+}}
+function updateProviderSections() {{
+    var p = document.getElementById('sms-provider').value;
+    document.getElementById('msg91-card').className = 'card provider-section' + (p === 'msg91' ? ' active' : '');
+    document.getElementById('twilio-card').className = 'card provider-section' + (p === 'twilio' ? ' active' : '');
+}}
+function updatePreview() {{
+    var tpl = document.getElementById('otp-template').value || 'Your KOKOROKO OTP is {{otp}}.';
+    document.getElementById('msg-preview').textContent = tpl.replace('{{otp}}', '123456');
+}}
+
+function loadConfig() {{
+    fetch('/admin-api/sms-settings/get/', {{
+        headers: {{'X-CSRFToken': getCookie('csrftoken')}}
+    }})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(d) {{
+        document.getElementById('sms-provider').value = d.provider || 'none';
+        document.getElementById('sms-enabled').checked = d.is_enabled;
+        document.getElementById('country-code').value = d.default_country_code || '91';
+        document.getElementById('otp-template').value = d.otp_message_template || '';
+        document.getElementById('msg91-template-id').value = d.msg91_template_id || '';
+        document.getElementById('msg91-sender-id').value = d.msg91_sender_id || '';
+        document.getElementById('msg91-route').value = d.msg91_route || '';
+        document.getElementById('msg91-entity-id').value = d.msg91_entity_id || '';
+        document.getElementById('msg91-base-url').value = d.msg91_base_url || 'https://control.msg91.com/api/v5/otp';
+        document.getElementById('twilio-from').value = d.twilio_from_number || '';
+        document.getElementById('twilio-msid').value = d.twilio_messaging_service_sid || '';
+
+        // Clear secret inputs
+        document.getElementById('msg91-auth-key').value = '';
+        document.getElementById('twilio-sid').value = '';
+        document.getElementById('twilio-token').value = '';
+
+        // Secret status badges
+        var ks = document.getElementById('msg91-key-status');
+        ks.textContent = d.msg91_auth_key_set ? 'Set: ' + d.msg91_auth_key_masked : 'Not set';
+        ks.className = 'secret-status ' + (d.msg91_auth_key_set ? 'secret-set' : 'secret-unset');
+
+        var ss = document.getElementById('twilio-sid-status');
+        ss.textContent = d.twilio_account_sid_set ? 'Set: ' + d.twilio_account_sid_masked : 'Not set';
+        ss.className = 'secret-status ' + (d.twilio_account_sid_set ? 'secret-set' : 'secret-unset');
+
+        var ts = document.getElementById('twilio-token-status');
+        ts.textContent = d.twilio_auth_token_set ? 'Set: ' + d.twilio_auth_token_masked : 'Not set';
+        ts.className = 'secret-status ' + (d.twilio_auth_token_set ? 'secret-set' : 'secret-unset');
+
+        // Last test info
+        var lti = document.getElementById('last-test-info');
+        if (d.last_test_at) {{
+            var statusCls = d.last_test_status === 'success' ? 'status-success' : 'status-failed';
+            lti.innerHTML = '<span class="status-badge ' + statusCls + '">' + d.last_test_status + '</span> '
+                + d.last_test_mobile + ' at ' + new Date(d.last_test_at).toLocaleString()
+                + (d.last_test_error ? ' — ' + d.last_test_error : '');
+        }} else {{
+            lti.textContent = 'Never tested';
+        }}
+
+        updateProviderSections();
+        updatePreview();
+    }})
+    .catch(function(e) {{ showToast('Failed to load config: ' + e, 'error'); }});
+}}
+
+function saveConfig() {{
+    var data = {{
+        provider: document.getElementById('sms-provider').value,
+        is_enabled: document.getElementById('sms-enabled').checked,
+        default_country_code: document.getElementById('country-code').value,
+        otp_message_template: document.getElementById('otp-template').value,
+        msg91_template_id: document.getElementById('msg91-template-id').value,
+        msg91_sender_id: document.getElementById('msg91-sender-id').value,
+        msg91_route: document.getElementById('msg91-route').value,
+        msg91_entity_id: document.getElementById('msg91-entity-id').value,
+        msg91_base_url: document.getElementById('msg91-base-url').value,
+        twilio_from_number: document.getElementById('twilio-from').value,
+        twilio_messaging_service_sid: document.getElementById('twilio-msid').value
+    }};
+    // Only send secrets if the user typed something
+    var mk = document.getElementById('msg91-auth-key').value;
+    if (mk) data.msg91_auth_key = mk;
+    var ts = document.getElementById('twilio-sid').value;
+    if (ts) data.twilio_account_sid = ts;
+    var tt = document.getElementById('twilio-token').value;
+    if (tt) data.twilio_auth_token = tt;
+
+    document.getElementById('btn-save').disabled = true;
+    fetch('/admin-api/sms-settings/save/', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}},
+        body: JSON.stringify(data)
+    }})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(d) {{
+        if (d.status === 'ok') {{
+            showToast('Settings saved', 'success');
+            loadConfig();
+        }} else {{
+            showToast(d.error || 'Save failed', 'error');
+        }}
+    }})
+    .catch(function(e) {{ showToast('Error: ' + e, 'error'); }})
+    .finally(function() {{ document.getElementById('btn-save').disabled = false; }});
+}}
+
+function sendTestOtp() {{
+    var mobile = document.getElementById('test-mobile').value.trim();
+    if (!mobile || mobile.length < 10) {{
+        showToast('Enter a valid mobile number', 'error');
+        return;
+    }}
+    var btn = document.getElementById('btn-test');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    var result = document.getElementById('test-result');
+    result.style.display = 'none';
+
+    fetch('/admin-api/sms-settings/test/', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}},
+        body: JSON.stringify({{mobile: mobile}})
+    }})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(d) {{
+        result.style.display = 'block';
+        if (d.success) {{
+            result.className = 'test-result test-success';
+            result.textContent = 'Test OTP sent successfully!';
+        }} else {{
+            result.className = 'test-result test-failed';
+            result.textContent = 'Failed: ' + (d.error || 'Unknown error');
+        }}
+        loadConfig();
+    }})
+    .catch(function(e) {{
+        result.style.display = 'block';
+        result.className = 'test-result test-failed';
+        result.textContent = 'Error: ' + e;
+    }})
+    .finally(function() {{
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:16px;vertical-align:middle;">send</i> Send Test OTP';
+    }});
+}}
+
+document.getElementById('sms-provider').addEventListener('change', updateProviderSections);
+document.getElementById('otp-template').addEventListener('input', updatePreview);
+loadConfig();
+</script>
+</body></html>''')
+
+
 urlpatterns = [
     # Media files (before admin catch-all, no auth required)
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
@@ -1432,6 +1950,10 @@ urlpatterns = [
     path('admin-api/feature-controls/', admin_feature_controls_page, name='admin_feature_controls'),
     path('admin-api/get-feature-controls/', get_feature_controls_api, name='get_feature_controls_api'),
     path('admin-api/set-feature-controls/', set_feature_controls_api, name='set_feature_controls_api'),
+    path('admin-api/sms-settings/', admin_sms_settings_page, name='admin_sms_settings'),
+    path('admin-api/sms-settings/get/', admin_sms_settings_get, name='admin_sms_settings_get'),
+    path('admin-api/sms-settings/save/', admin_sms_settings_save, name='admin_sms_settings_save'),
+    path('admin-api/sms-settings/test/', admin_sms_test, name='admin_sms_test'),
     path('health/', health_check_view, name='health_check'),
     path('', admin.site.urls),
 ]
