@@ -459,7 +459,7 @@ const GundataLive = ({navigation}) => {
 
   return (
     <AppScreen
-      style={{position: 'relative', backgroundColor: '#f3f3f3'}}
+      style={{position: 'relative', backgroundColor: '#0B0B0B'}}
       isTranslucent
       lightStatusBar>
         
@@ -773,12 +773,12 @@ const styles = StyleSheet.create({
   },
   banner: {
     flexDirection: 'row',
-    backgroundColor: '#FFE7DD',
+    backgroundColor: '#2D1F1A',
     justifyContent: 'space-between',
     paddingHorizontal: wp(4),
     paddingVertical: hp(0.5),
   },
-  bannerText: {fontSize: 13},
+  bannerText: {fontSize: 13, color: '#F5F1E8'},
   bannerContent: {
     flexDirection: 'row',
     alignItems: 'center',

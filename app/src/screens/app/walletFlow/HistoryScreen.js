@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(4),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F3F3F3',
+    backgroundColor: '#2a2a2a',
     marginRight: wp(5),
   },
 

@@ -84,7 +84,7 @@ const TicketScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {},
   headerSection: {
-    backgroundColor: '#f3f4f5',
+    backgroundColor: '#171717',
     paddingHorizontal: wp(7),
     borderRadius: wp(2),
     width: wp(100),

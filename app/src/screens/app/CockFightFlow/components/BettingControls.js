@@ -602,7 +602,7 @@ export default function BettingControls({
               setAutoBetEnabled(!autoBetEnabled);
               if (autoBetEnabled) setAutoBetTeam(null);
             }}>
-            <AppText style={{color: autoBetEnabled ? '#000' : '#666', fontSize: fp(1.5), fontWeight: '700'}}>
+            <AppText style={{color: autoBetEnabled ? '#fff' : '#666', fontSize: fp(1.5), fontWeight: '700'}}>
               {autoBetEnabled ? 'ON' : 'OFF'}
             </AppText>
           </TouchableOpacity>

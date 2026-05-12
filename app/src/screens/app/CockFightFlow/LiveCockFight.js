@@ -332,12 +332,12 @@ const styles = StyleSheet.create({
   },
   banner: {
     flexDirection: 'row',
-    backgroundColor: '#FFE7DD',
+    backgroundColor: '#2D1F1A',
     justifyContent: 'space-between',
     paddingHorizontal: wp(4),
     paddingVertical: hp(0.5),
   },
-  bannerText: {fontSize: 13},
+  bannerText: {fontSize: 13, color: '#F5F1E8'},
   tabs: {
     flexDirection: 'row',
     justifyContent: 'space-around',

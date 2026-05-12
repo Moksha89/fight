@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: fp(2),
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#F5F1E8',
   },
   body: {
     paddingHorizontal: 16,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flexDirection: 'row',
-    backgroundColor: '#fef9e7',
+    backgroundColor: '#1F1A12',
     borderRadius: 10,
     padding: 12,
     gap: 8,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   hashBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#1a1a1a',
     borderRadius: 8,
     padding: 12,
     gap: 8,
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   seedValueWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#1a1a1a',
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 8,

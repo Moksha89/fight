@@ -226,13 +226,13 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
             <MaterialIcons
               name="qr-code-scanner"
               size={26}
-              color={activeTab === 'upi' ? '#ffffff' : '#000000'}
+              color={activeTab === 'upi' ? '#ffffff' : '#A8A29E'}
               style={styles.iconImage}
             />
             <AppText
               style={[
                 styles.buttonText,
-                {color: activeTab === 'upi' ? '#fff' : '#000'},
+                {color: activeTab === 'upi' ? '#fff' : '#A8A29E'},
               ]}>
               Payment QR
             </AppText>
@@ -247,13 +247,13 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
             <FontAwesome
               name="bank"
               size={20}
-              color={activeTab === 'bank' ? '#ffffff' : '#000000'}
+              color={activeTab === 'bank' ? '#ffffff' : '#A8A29E'}
             />
 
             <AppText
               style={[
                 styles.buttonText,
-                {color: activeTab === 'bank' ? '#fff' : '#000'},
+                {color: activeTab === 'bank' ? '#fff' : '#A8A29E'},
               ]}>
               Bank Account
             </AppText>

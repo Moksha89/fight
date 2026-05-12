@@ -129,7 +129,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
               styles.speedButton,
               speedType === 'N' && {backgroundColor: '#3b82f6', borderColor: '#3b82f6'},
             ]}>
-            <AppText style={[styles.speedTitle, {color: speedType === 'N' ? '#fff' : '#000'}]}>Normal</AppText>
+            <AppText style={[styles.speedTitle, {color: speedType === 'N' ? '#fff' : '#A8A29E'}]}>Normal</AppText>
             <AppText style={[styles.speedSub, {color: speedType === 'N' ? '#ddd' : '#666'}]}>Up to 6 hours</AppText>
           </TouchableOpacity>
 
@@ -139,7 +139,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
               styles.speedButton,
               speedType === 'E' && {backgroundColor: '#f59e0b', borderColor: '#f59e0b'},
             ]}>
-            <AppText style={[styles.speedTitle, {color: speedType === 'E' ? '#fff' : '#000'}]}>⚡ Express</AppText>
+            <AppText style={[styles.speedTitle, {color: speedType === 'E' ? '#fff' : '#A8A29E'}]}>⚡ Express</AppText>
             <AppText style={[styles.speedSub, {color: speedType === 'E' ? '#fff' : '#666'}]}>~30 min | 2.5% fee</AppText>
           </TouchableOpacity>
         </View>
@@ -170,12 +170,12 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
               style={[
                 styles.upiSection,
                 {
-                  borderColor: activeTab === 'upi' ? '#ffffff' : '#000000',
+                  borderColor: activeTab === 'upi' ? '#ffffff' : '#A8A29E',
                 },
               ]}>
               <AppText
                 style={{
-                  color: activeTab === 'upi' ? '#ffffff' : '#000000',
+                  color: activeTab === 'upi' ? '#ffffff' : '#A8A29E',
                   fontSize: fp(1.4),
                 }}>
                 UPI
@@ -184,7 +184,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
             <AppText
               style={[
                 styles.buttonText,
-                {color: activeTab === 'upi' ? '#fff' : '#000'},
+                {color: activeTab === 'upi' ? '#fff' : '#A8A29E'},
               ]}>
               UPI ID
             </AppText>
@@ -199,12 +199,12 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
             <FontAwesome
               name="bank"
               size={20}
-              color={activeTab === 'bank' ? '#ffffff' : '#000000'}
+              color={activeTab === 'bank' ? '#ffffff' : '#A8A29E'}
             />
             <AppText
               style={[
                 styles.buttonText,
-                {color: activeTab === 'bank' ? '#fff' : '#000'},
+                {color: activeTab === 'bank' ? '#fff' : '#A8A29E'},
               ]}>
               Bank Account
             </AppText>
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   feePreview: {
     width: wp(90),
-    backgroundColor: '#f8f4eb',
+    backgroundColor: '#1F1A12',
     borderWidth: 1,
     borderColor: '#d4a843',
     borderRadius: wp(2),

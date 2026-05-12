@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   content: {},
 
   headerSection: {
-    backgroundColor: '#f3f4f5',
+    backgroundColor: '#171717',
     paddingHorizontal: wp(7),
     borderRadius: wp(2),
     width: wp(100),
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 50,
-    backgroundColor: '#F3F3F3',
+    backgroundColor: '#2a2a2a',
     marginHorizontal: wp(1),
     justifyContent: 'center',
     alignItems: 'center',

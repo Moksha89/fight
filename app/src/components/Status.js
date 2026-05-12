@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
   categoryLabel: {
     marginTop: 4,
     fontSize: 10,
-    color: '#555',
+    color: '#A8A29E',
     textAlign: 'center',
   },
 

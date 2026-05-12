@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   languageButton: {
     marginLeft: 10,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#2a2a2a',
     borderRadius: 30,
     paddingHorizontal: 15,
     justifyContent: 'center',

@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   },
   summaryItem: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#171717',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#2a2a2a',
   },
   filterTabActive: {
     backgroundColor: '#D4A843',

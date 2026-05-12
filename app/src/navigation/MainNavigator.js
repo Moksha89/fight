@@ -60,8 +60,8 @@ const MainNavigator = () => {
   if (!authChecked) {
     return (
       <SafeAreaProvider>
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <ActivityIndicator size="large" color="#000" />
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0B0B0B'}}>
+          <ActivityIndicator size="large" color="#D4A843" />
         </View>
       </SafeAreaProvider>
     );

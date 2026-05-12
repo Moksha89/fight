@@ -24,7 +24,7 @@ export default function AppButton({
       <Text
         style={
           buttonLight
-            ? [styles.buttonText, {color: '#000'}, textStyle]
+            ? [styles.buttonText, {color: '#D4A843'}, textStyle]
             : [styles.buttonText, textStyle]
         }>
         {children}
@@ -33,7 +33,7 @@ export default function AppButton({
         <MaterialIcons
           name={iconName}
           size={iconSize}
-          color={iconColor || (buttonLight ? '#000' : '#fff')}
+          color={iconColor || (buttonLight ? '#D4A843' : '#fff')}
         />
       )}
     </View>

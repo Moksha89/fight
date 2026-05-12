@@ -136,7 +136,7 @@ export default ReferralScreen;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffefe8',
+    backgroundColor: '#1F1A12',
     borderRadius: wp(4),
     paddingHorizontal: wp(10),
     paddingVertical: hp(4.5),
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: wp(86),
     borderWidth: 1,
-    borderColor: '#DEDEDE',
+    borderColor: 'rgba(212,168,67,0.18)',
     height: hp(7),
     paddingHorizontal: wp(6),
     marginBottom: hp(3),
@@ -200,13 +200,13 @@ const styles = StyleSheet.create({
     marginLeft: wp(5),
   },
   videoCard: {
-    backgroundColor: '#f6f6f6',
+    backgroundColor: '#171717',
     borderRadius: 16,
     width: wp(40),
     marginLeft: wp(5),
     borderWidth: wp(0.1),
     overflow: 'hidden',
-    borderColor: '#f6f6f6f',
+    borderColor: 'rgba(212,168,67,0.18)',
   },
   videoTitle: {
     marginTop: 12,

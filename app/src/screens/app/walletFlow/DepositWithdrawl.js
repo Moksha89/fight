@@ -260,12 +260,12 @@ const DepositWithdrawl = ({navigation}) => {
                         styles.upiSection,
                         {
                           borderColor:
-                            selectedMode === 'upi' ? '#ffffff' : '#000000',
+                            selectedMode === 'upi' ? '#ffffff' : '#A8A29E',
                         },
                       ]}>
                       <AppText
                         style={{
-                          color: selectedMode === 'upi' ? '#ffffff' : '#000000',
+                          color: selectedMode === 'upi' ? '#ffffff' : '#A8A29E',
                           fontSize: fp(1.4),
                         }}>
                         UPI
@@ -274,7 +274,7 @@ const DepositWithdrawl = ({navigation}) => {
                     <MaterialIcons
                       name="qr-code-scanner"
                       size={18}
-                      color={selectedMode === 'upi' ? '#ffffff' : '#000000'}
+                      color={selectedMode === 'upi' ? '#ffffff' : '#A8A29E'}
                       style={styles.iconImage}
                     />
                   </View>
@@ -310,7 +310,7 @@ const DepositWithdrawl = ({navigation}) => {
                 <Feather
                   name="credit-card"
                   size={24}
-                  color={selectedMode === 'bank' ? '#ffffff' : '#000000'}
+                  color={selectedMode === 'bank' ? '#ffffff' : '#A8A29E'}
                 />
                 <AppText
                   style={[
@@ -566,12 +566,12 @@ const DepositWithdrawl = ({navigation}) => {
                     styles.upiSection,
                     {
                       borderColor:
-                        selectedMode === 'upi' ? '#ffffff' : '#000000',
+                        selectedMode === 'upi' ? '#ffffff' : '#A8A29E',
                     },
                   ]}>
                   <AppText
                     style={{
-                      color: selectedMode === 'upi' ? '#ffffff' : '#000000',
+                      color: selectedMode === 'upi' ? '#ffffff' : '#A8A29E',
                       fontSize: fp(1.4),
                     }}>
                     UPI
@@ -610,7 +610,7 @@ const DepositWithdrawl = ({navigation}) => {
                 <Feather
                   name="credit-card"
                   size={24}
-                  color={selectedMode === 'bank' ? '#ffffff' : '#000000'}
+                  color={selectedMode === 'bank' ? '#ffffff' : '#A8A29E'}
                 />
                 <FontAwesome
                   name="star"
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
     height: hp(5),
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#2a2a2a',
   },
   depositProgress: {
     position: 'absolute',
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
     borderWidth: wp(0.2),
     borderTopLeftRadius: wp(6),
     borderTopRightRadius: wp(6),
-    borderColor: '#DBDBDB',
+    borderColor: 'rgba(212,168,67,0.18)',
     paddingHorizontal: wp(10),
     // paddingVertical: hp(1),
   },
@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
     alignItems: 'center',
     justifyContent: 'center',
-    borderColor: '#DDDDDD',
+    borderColor: 'rgba(212,168,67,0.18)',
     borderWidth: wp(0.2),
     marginTop: hp(2),
   },
@@ -750,7 +750,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   activeButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#D4A843',
     height: hp(4.5),
   },
   buttonText: {
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.gold,
   },
   iconImage: {
-    tintColor: '#000',
+    tintColor: '#A8A29E',
   },
   activeIcon: {
     tintColor: '#fff',
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   amountActiveButton: {
-    backgroundColor: '#000000',
+    backgroundColor: '#D4A843',
   },
   amountText: {
     color: '#F5F1E8',
@@ -870,7 +870,7 @@ const styles = StyleSheet.create({
     width: wp(90),
     height: hp(6),
     borderRadius: wp(2),
-    backgroundColor: '#FFE7DD',
+    backgroundColor: '#2D1F1A',
     marginTop: hp(3),
     flexDirection: 'row',
     justifyContent: 'space-evenly',

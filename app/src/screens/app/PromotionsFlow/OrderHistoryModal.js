@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginVertical: 10,
     padding: 10,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#171717',
     borderRadius: 6,
   },
   historyImage: {width: 60, height: 60, borderRadius: 6},
