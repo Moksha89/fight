@@ -506,7 +506,7 @@ class DepositRequestAdmin(admin.ModelAdmin):
                                 amount=amount
                             )
 
-                        wallet, isCreated = Wallet.objects.get_or_create(
+                        wallet, isCreated = Wallet.objects.select_for_update().get_or_create(
                             user=customer)
 
                         wallet.balance = F('balance') + amount
@@ -591,7 +591,7 @@ class DepositRequestAdmin(admin.ModelAdmin):
                             amount=amount
                         )
 
-                    wallet, _ = Wallet.objects.get_or_create(user=customer)
+                    wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
 
                     wallet.balance = F('balance') + amount
                     wallet.fundsIn = F('fundsIn') + amount
@@ -881,7 +881,7 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
                         amount=amount
                     )
 
-                    wallet = withdrawal.customer.wallet
+                    wallet = Wallet.objects.select_for_update().get(pk=withdrawal.customer.wallet.pk)
 
                     wallet.fundsOut = F('fundsOut') + amount
                     wallet.save()
@@ -925,7 +925,7 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
                     missing_info += 1
                     continue
 
-                wallet, _ = Wallet.objects.get_or_create(user=customer)
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
 
                 wallet.balance = F('balance') + amount
                 wallet.save()
