@@ -36,10 +36,19 @@ logger = logging.getLogger("kokoroko.security")
 
 
 def _generate_otp():
-    """Generate OTP. Uses static '123456' until real SMS gateway is integrated."""
-    # TODO: Switch to random OTP once SMS gateway is live:
-    # return str(random.randint(100000, 999999))
-    return "123456"
+    """Generate a secure random 6-digit OTP.
+
+    In development/staging, a fixed OTP can be used by setting both:
+      OTP_ALLOW_FIXED=true  and  OTP_FIXED_CODE=123456
+    in the environment. When those vars are absent or OTP_ALLOW_FIXED is
+    not "true", a cryptographically random code is always generated.
+    """
+    import os
+    if os.environ.get("OTP_ALLOW_FIXED", "").lower() == "true":
+        fixed = os.environ.get("OTP_FIXED_CODE", "")
+        if fixed.isdigit() and len(fixed) == 6:
+            return fixed
+    return str(random.randint(100000, 999999))
 
 
 class SubscriptionViewSet(viewsets.ViewSet):
@@ -61,6 +70,9 @@ class SubscriptionViewSet(viewsets.ViewSet):
             return Response({"detail": "Insufficient balance for subscription."}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
+            wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
+            if (wallet.balance - wallet.bonusDebt) < cost:
+                return Response({"detail": "Insufficient balance for subscription."}, status=status.HTTP_400_BAD_REQUEST)
             wallet.balance = F('balance') - cost
             wallet.save()
             WalletHistory.objects.create(
@@ -161,6 +173,10 @@ class UserViewSet(viewsets.GenericViewSet):
             mobile=resolved_mobile,
             defaults={'otp': otp}
         )
+
+        # Attempt to deliver OTP via SMS gateway
+        from utility.sms import send_otp_sms
+        send_otp_sms(resolved_mobile, otp)
 
         # Log OTP request
         if user:

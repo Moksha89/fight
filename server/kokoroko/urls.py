@@ -298,12 +298,12 @@ def admin_dashboard_stats(request):
     # Pending requests (no status field - just count all)
     try:
         from wallet.models import DepositRequest
-        pending_deposits = DepositRequest.objects.filter(status=P ).count()
+        pending_deposits = DepositRequest.objects.filter(status='P').count()
     except:
         pending_deposits = 0
     try:
         from wallet.models import WithdrawalRequest
-        pending_withdrawals = WithdrawalRequest.objects.filter(status=P ).count()
+        pending_withdrawals = WithdrawalRequest.objects.filter(status='P').count()
     except:
         pending_withdrawals = 0
 

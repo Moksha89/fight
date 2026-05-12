@@ -108,7 +108,8 @@ class DicePlayMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
         dice_number = data["diceNumber"]
 
         with transaction.atomic():
-            wallet.refresh_from_db()
+            from wallet.models import Wallet
+            wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
             if wallet.balance < amount:
                 raise KokorokoError(
                     ErrorCode.BET_INSUFFICIENT_BALANCE,

@@ -40,10 +40,33 @@ class Wallet(models.Model):
     def __str__(self):
         return f"Wallet of {self.user}"
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.balance < 0:
+            raise ValidationError({"balance": "Wallet balance cannot be negative."})
+        if self.fundsIn < 0:
+            raise ValidationError({"fundsIn": "Funds-in cannot be negative."})
+        if self.fundsOut < 0:
+            raise ValidationError({"fundsOut": "Funds-out cannot be negative."})
+
     class Meta:
         verbose_name = "Wallet"
         verbose_name_plural = "5. Wallets"
         ordering = ['-balance']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(balance__gte=0),
+                name="wallet_balance_non_negative",
+            ),
+            models.CheckConstraint(
+                check=models.Q(fundsIn__gte=0),
+                name="wallet_funds_in_non_negative",
+            ),
+            models.CheckConstraint(
+                check=models.Q(fundsOut__gte=0),
+                name="wallet_funds_out_non_negative",
+            ),
+        ]
 
 
 # ========================= Customer Wallet History ======================

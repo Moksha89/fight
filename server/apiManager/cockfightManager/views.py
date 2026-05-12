@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from cockfightManager.models import *
 from .serializers import *
 
-from wallet.models import WalletHistory
+from wallet.models import Wallet, WalletHistory
 
 from django.db import transaction
 from django.db.models import F
@@ -56,7 +56,7 @@ class CockfightMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Wallet deduction & bet creation inside transaction
         with transaction.atomic():
-            wallet.refresh_from_db()
+            wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
             if wallet.balance < amount:
                 return Response({"detail": "Insufficient wallet balance."}, status=status.HTTP_400_BAD_REQUEST)
 

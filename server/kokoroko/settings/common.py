@@ -130,6 +130,7 @@ INSTALLED_APPS = [
     "cockfightManager",
     "dicePlayManager",
     "lotteryManager",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
@@ -208,10 +209,10 @@ AUTH_PASSWORD_VALIDATORS = [
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer", "JWT",),
     "JWT_SECRET_KEY": SECRET_KEY,
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ.get("JWT_ACCESS_LIFETIME_MINUTES", "30"))),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
 }
 
@@ -334,7 +335,8 @@ CHANNEL_LAYERS = {
 # =============================================================================
 
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
+
+_PRODUCTION_CORS_ORIGINS = [
     "http://api.roosterrun.io",
     "http://roosterrun.io",
     "https://roosterrun.io",
@@ -345,10 +347,21 @@ CORS_ALLOWED_ORIGINS = [
     "http://155.117.46.249",
     "http://155.117.46.249:8080",
     "http://155.117.46.249:8081",
+]
+
+_DEV_CORS_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8080",
     "http://localhost:8081",
 ]
+
+# Include localhost origins only in development
+_cors_extra = os.environ.get("CORS_EXTRA_ORIGINS", "")
+_cors_extra_list = [o.strip() for o in _cors_extra.split(",") if o.strip()] if _cors_extra else []
+
+CORS_ALLOWED_ORIGINS = _PRODUCTION_CORS_ORIGINS + _cors_extra_list
+if DEBUG:
+    CORS_ALLOWED_ORIGINS += _DEV_CORS_ORIGINS
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 CORS_ALLOW_CREDENTIALS = True
 

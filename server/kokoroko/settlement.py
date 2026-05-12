@@ -124,7 +124,8 @@ def _credit_wallet(bet, payout, settlement_id, description):
         return
 
     with db_transaction.atomic():
-        wallet = bet.customer.wallet
+        from wallet.models import Wallet
+        wallet = Wallet.objects.select_for_update().get(pk=bet.customer.wallet.pk)
         amount_decimal = Decimal(str(payout))
         wallet.balance = F("balance") + amount_decimal
         wallet.save()
@@ -148,7 +149,8 @@ def refund_bet(bet, reason="Admin refund"):
     refund_id = f"REFUND-{uuid.uuid4().hex[:12].upper()}"
 
     with db_transaction.atomic():
-        wallet = bet.customer.wallet
+        from wallet.models import Wallet
+        wallet = Wallet.objects.select_for_update().get(pk=bet.customer.wallet.pk)
         amount = Decimal(str(bet.amount))
         wallet.balance = F("balance") + amount
         wallet.save()
