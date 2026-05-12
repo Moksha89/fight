@@ -12,6 +12,7 @@ import AppButton from '../AppButton';
 import AppText from '../AppText';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useTheme} from '../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 import {
   responsiveHeight as hp,
   responsiveWidth as wp,
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
   handle: {
     width: 40,
     height: 5,
-    backgroundColor: '#4a4a4a',
+    backgroundColor: COLORS.bg_chip_light,
     borderRadius: 3,
     marginBottom: 16,
   },
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 24,
     left: 4,
-    color: '#fff',
+    color: COLORS.text_primary,
     fontSize: 10,
   },
   cardImage: {

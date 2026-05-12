@@ -12,6 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HeaderComponent from '../../../components/HeaderComponent';
 import AppText from '../../../components/AppText';
 import AppScreen from '../../../components/AppScreen';
+import COLORS from '../../../context/designTokens';
 
 const TicketScreen = ({navigation}) => {
   return (
@@ -25,7 +26,7 @@ const TicketScreen = ({navigation}) => {
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name="wallet-outline" size={20} color="#fff" />
             <AppText
-              style={{color: '#fff', marginLeft: wp(3), fontWeight: 'bold'}}>
+              style={{color: COLORS.text_primary, marginLeft: wp(3), fontWeight: 'bold'}}>
               ₹125
             </AppText>
           </View>
@@ -84,7 +85,7 @@ const TicketScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {},
   headerSection: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     paddingHorizontal: wp(7),
     borderRadius: wp(2),
     width: wp(100),
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
     height: hp(8),
   },
   headerIcon: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     borderColor: 'rgba(212,168,67,0.18)',
     borderWidth: 1,
     width: wp(27),

@@ -16,6 +16,7 @@ import LottieView from 'lottie-react-native';
 
 import {useAuth} from '../../context/AuthContext';
 import {useTheme} from '../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 import {useNavigation} from '@react-navigation/native';
 
 import {
@@ -282,7 +283,7 @@ export default function GameBettingControls({
         {/* Meron */}
         <TouchableOpacity onPress={() => placeBetOnTeam(1)}>
           <LinearGradient
-            colors={isBetAllowedAtCurrentChannel ? ['#AB0C0A', '#450504'] : ['#AB0C0A', '#111111']}
+            colors={isBetAllowedAtCurrentChannel ? [colors.meron_dark, '#450504'] : [colors.meron_dark, colors.bg_surface]}
             style={styles.chooseBettingCard}>
             <AppText style={[styles.bettingRatio, {marginBottom: hp(7)}]}>
               {!isNaN(betRatio[0]) ? `${(1 + betRatio[0]).toFixed(2)}X` : betRatio[0]}
@@ -305,7 +306,7 @@ export default function GameBettingControls({
         {/* Draw */}
         <TouchableOpacity onPress={() => placeBetOnTeam(3)}>
           <LinearGradient
-            colors={isBetAllowedAtCurrentChannel ? ['#5DC55D', '#2D5F2D'] : ['#5DC55D', '#111111']}
+            colors={isBetAllowedAtCurrentChannel ? [colors.success, '#2D5F2D'] : [colors.success, colors.bg_surface]}
             style={[styles.chooseBettingCard, {width: wp(26), height: hp(15), borderRadius: wp(2.9)}]}>
             <AppText style={[styles.bettingRatio, {marginBottom: hp(7)}]}>
               {!isNaN(betRatio[2]) ? `${(1 + betRatio[2]).toFixed(2)}X` : betRatio[2]}
@@ -328,7 +329,7 @@ export default function GameBettingControls({
         {/* Wala */}
         <TouchableOpacity onPress={() => placeBetOnTeam(2)}>
           <LinearGradient
-            colors={isBetAllowedAtCurrentChannel ? ['#0C2E5E', '#1960C4'] : ['#0C2E5E', '#111111']}
+            colors={isBetAllowedAtCurrentChannel ? ['#0C2E5E', colors.wala] : ['#0C2E5E', colors.bg_surface]}
             style={styles.chooseBettingCard}>
             <AppText style={[styles.bettingRatio, {marginBottom: hp(7)}]}>
               {!isNaN(betRatio[1]) ? `${(1 + betRatio[1]).toFixed(2)}X` : betRatio[1]}
@@ -382,7 +383,7 @@ export default function GameBettingControls({
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.betPlaceButton, !isBetAllowedAtCurrentChannel && {backgroundColor: '#bfbfbf'}]}
+          style={[styles.betPlaceButton, !isBetAllowedAtCurrentChannel && {backgroundColor: colors.disabled}]}
           onPress={() => {
             if (!isBetAllowedAtCurrentChannel) {
               ToastAndroid.show('Wait for new match to start...', ToastAndroid.SHORT);
@@ -400,7 +401,7 @@ export default function GameBettingControls({
           ) : isBettingButtonEnable ? (
             <View style={{flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', width: '90%'}}>
               <Icon name="check" size={fp(2.5)} color="#fff" />
-              <AppText style={{color: '#fff', fontSize: fp(1.8)}}>Place Bet...</AppText>
+              <AppText style={{color: colors.text_on_gold, fontSize: fp(1.8)}}>Place Bet...</AppText>
             </View>
           ) : (
             <LottieView
@@ -430,7 +431,7 @@ export default function GameBettingControls({
                 setAutoBetEnabled(!autoBetEnabled);
                 if (autoBetEnabled) setAutoBetTeam(null);
               }}>
-              <AppText style={{color: autoBetEnabled ? '#fff' : '#666', fontSize: fp(1.5), fontWeight: '700'}}>
+              <AppText style={{color: autoBetEnabled ? colors.text_primary : colors.text_muted, fontSize: fp(1.5), fontWeight: '700'}}>
                 {autoBetEnabled ? 'ON' : 'OFF'}
               </AppText>
             </TouchableOpacity>
@@ -438,24 +439,24 @@ export default function GameBettingControls({
           {autoBetEnabled && (
             <View style={styles.autoBetTeamRow}>
               <TouchableOpacity
-                style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 1 ? '#DC2626' : '#333'}]}
+                style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 1 ? colors.meron : colors.bg_chip}]}
                 onPress={() => setAutoBetTeam(1)}>
-                <AppText style={{color: '#fff', fontSize: fp(1.5), fontWeight: '600'}}>Meron</AppText>
+                <AppText style={{color: colors.text_primary, fontSize: fp(1.5), fontWeight: '600'}}>Meron</AppText>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 2 ? '#2563EB' : '#333'}]}
+                style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 2 ? colors.wala : colors.bg_chip}]}
                 onPress={() => setAutoBetTeam(2)}>
-                <AppText style={{color: '#fff', fontSize: fp(1.5), fontWeight: '600'}}>Wala</AppText>
+                <AppText style={{color: colors.text_primary, fontSize: fp(1.5), fontWeight: '600'}}>Wala</AppText>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 3 ? '#7C3AED' : '#333'}]}
+                style={[styles.autoBetTeamBtn, {backgroundColor: autoBetTeam === 3 ? colors.draw_alt : colors.bg_chip}]}
                 onPress={() => setAutoBetTeam(3)}>
-                <AppText style={{color: '#fff', fontSize: fp(1.5), fontWeight: '600'}}>Draw</AppText>
+                <AppText style={{color: colors.text_primary, fontSize: fp(1.5), fontWeight: '600'}}>Draw</AppText>
               </TouchableOpacity>
             </View>
           )}
           {autoBetEnabled && autoBetTeam && (
-            <AppText style={{color: '#999', fontSize: fp(1.3), textAlign: 'center', marginTop: 4}}>
+            <AppText style={{color: colors.text_muted, fontSize: fp(1.3), textAlign: 'center', marginTop: 4}}>
               Auto-betting ₹{betAmount} on {autoBetTeam === 1 ? 'Meron' : autoBetTeam === 2 ? 'Wala' : 'Draw'} each round
             </AppText>
           )}
@@ -473,7 +474,7 @@ const styles = StyleSheet.create({
   },
   bettingHeading: {
     textAlign: 'center',
-    color: '#ffffff',
+    color: COLORS.text_primary,
     fontSize: fp(2),
     fontWeight: '700',
     marginVertical: hp(1),
@@ -492,7 +493,7 @@ const styles = StyleSheet.create({
     paddingTop: hp(1.5),
     position: 'relative',
   },
-  bettingRatio: {color: '#ffffff', fontSize: fp(2)},
+  bettingRatio: {color: COLORS.text_primary, fontSize: fp(2)},
   coinAmountContainer: {
     position: 'absolute',
     top: hp(4.3),
@@ -503,14 +504,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   amountText: {
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     fontSize: fp(2),
     textAlign: 'center',
   },
   container: {
     width: wp(90),
     flexDirection: 'row',
-    backgroundColor: '#1F1A12',
+    backgroundColor: COLORS.bg_elevated,
     paddingHorizontal: wp(3),
     alignItems: 'center',
     borderRadius: wp(2),
@@ -520,13 +521,13 @@ const styles = StyleSheet.create({
     paddingVertical: hp(1),
   },
   iconButton: {
-    backgroundColor: '#2a2520',
+    backgroundColor: COLORS.bg_chip,
     borderRadius: 10,
     padding: 12,
     position: 'relative',
   },
   betPlaceButton: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     width: wp(35),
     paddingVertical: hp(1.2),
     borderRadius: wp(2),
@@ -535,14 +536,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   comingSoonText: {
-    color: '#666',
+    color: COLORS.text_muted,
     fontSize: fp(1.5),
     fontWeight: '600',
   },
   autoBetContainer: {
     marginHorizontal: wp(5),
     marginTop: hp(1),
-    backgroundColor: '#1a1a1a',
+    backgroundColor: COLORS.bg_input,
     borderRadius: wp(2),
     padding: wp(3),
   },
@@ -552,12 +553,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   autoBetTitle: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontSize: fp(1.7),
     fontWeight: '600',
   },
   autoBetToggle: {
-    backgroundColor: '#333',
+    backgroundColor: COLORS.bg_chip,
     paddingHorizontal: wp(4),
     paddingVertical: hp(0.5),
     borderRadius: wp(2),

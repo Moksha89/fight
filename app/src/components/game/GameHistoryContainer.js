@@ -9,6 +9,7 @@ import {
 
 import AppText from '../AppText';
 import {useTheme} from '../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 
 /**
  * Shared game history container for CockFight and Gundata/Dice.
@@ -34,10 +35,10 @@ export default function GameHistoryContainer({
 
   const rows = 7;
   const teamColorMap = {
-    1: '#BA2343', // Red / Meron
-    2: '#0000FF', // Blue / Wala
-    3: '#43A048', // Green / Draw
-    4: '#808080', // Gray (cancelled)
+    1: COLORS.meron, // Red / Meron
+    2: COLORS.wala, // Blue / Wala
+    3: COLORS.success, // Green / Draw
+    4: COLORS.text_muted, // Gray (cancelled)
   };
 
   function processMatchHistory(results = []) {
@@ -86,7 +87,7 @@ export default function GameHistoryContainer({
         ? autoMatchHistory
         : manualMatchHistory[activeChannel] || [];
     return results.slice(-60).map(m => ({
-      color: teamColorMap[m.winTeam] || '#808080',
+      color: teamColorMap[m.winTeam] || COLORS.text_muted,
       label:
         teamLabels[m.winTeam] || '?',
       id: m.id || m.matchId,
@@ -141,19 +142,19 @@ export default function GameHistoryContainer({
           </View>
           <View style={styles.colorDetails}>
             <View
-              style={[styles.bettingColor, {backgroundColor: '#43A048'}]}
+              style={[styles.bettingColor, {backgroundColor: COLORS.success}]}
             />
             <AppText style={{color: colors.text_primary}}>Draw</AppText>
           </View>
           <View style={styles.colorDetails}>
             <View
-              style={[styles.bettingColor, {backgroundColor: '#0000FF'}]}
+              style={[styles.bettingColor, {backgroundColor: COLORS.wala}]}
             />
             <AppText style={{color: colors.text_primary}}>Wala</AppText>
           </View>
           <View style={styles.colorDetails}>
             <View
-              style={[styles.bettingColor, {backgroundColor: '#bfbfbf'}]}
+              style={[styles.bettingColor, {backgroundColor: COLORS.disabled}]}
             />
             <AppText style={{color: colors.text_primary}}>Cancle</AppText>
           </View>
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
     width: wp(2),
     height: wp(2),
     borderRadius: 999,
-    backgroundColor: '#BA2343',
+    backgroundColor: COLORS.meron,
     marginBottom: hp(0.5),
   },
   column: {
@@ -278,7 +279,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   beadDotText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontSize: fp(1.1),
     fontWeight: '700',
   },

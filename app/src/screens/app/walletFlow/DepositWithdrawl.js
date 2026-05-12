@@ -20,6 +20,7 @@ import {
 
 import {useAuth} from '../../../context/AuthContext';
 import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../../context/designTokens';
 
 import {
   getCurrentDeposit,
@@ -37,9 +38,7 @@ import AppText from '../../../components/AppText';
 import AppButton from '../../../components/AppButton';
 import HeaderComponent from '../../../components/HeaderComponent';
 import TutorialVideoModal from '../../../components/TutorialVideoModal';
-const audioFileURL =
-  'https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3';
-import SoundPlayer from 'react-native-sound-player';
+
 const DepositWithdrawl = ({navigation}) => {
   const {colors} = useTheme();
   const [activeTab, setActiveTab] = useState('deposit');
@@ -261,12 +260,12 @@ const DepositWithdrawl = ({navigation}) => {
                         styles.upiSection,
                         {
                           borderColor:
-                            selectedMode === 'upi' ? '#ffffff' : '#A8A29E',
+                            selectedMode === 'upi' ? COLORS.text_primary : COLORS.text_secondary,
                         },
                       ]}>
                       <AppText
                         style={{
-                          color: selectedMode === 'upi' ? '#ffffff' : '#A8A29E',
+                          color: selectedMode === 'upi' ? COLORS.text_primary : COLORS.text_secondary,
                           fontSize: fp(1.4),
                         }}>
                         UPI
@@ -275,14 +274,14 @@ const DepositWithdrawl = ({navigation}) => {
                     <MaterialIcons
                       name="qr-code-scanner"
                       size={18}
-                      color={selectedMode === 'upi' ? '#ffffff' : '#A8A29E'}
+                      color={selectedMode === 'upi' ? COLORS.text_primary : COLORS.text_secondary}
                       style={styles.iconImage}
                     />
                   </View>
                   <FontAwesome
                     name="star"
                     size={22}
-                    color={selectedMode === 'upi' ? '#ffffff' : '#bfbfbf'}
+                    color={selectedMode === 'upi' ? COLORS.text_primary : COLORS.disabled}
                   />
                 </View>
                 <AppText
@@ -311,7 +310,7 @@ const DepositWithdrawl = ({navigation}) => {
                 <Feather
                   name="credit-card"
                   size={24}
-                  color={selectedMode === 'bank' ? '#ffffff' : '#A8A29E'}
+                  color={selectedMode === 'bank' ? COLORS.text_primary : COLORS.text_secondary}
                 />
                 <AppText
                   style={[
@@ -439,7 +438,7 @@ const DepositWithdrawl = ({navigation}) => {
                   isPlaying ? 'pause' : isMuted ? 'volume-off' : 'volume-up'
                 }
                 size={25}
-                color={isPlaying ? '#d4a843' : isMuted ? '#d4a843' : '#d4a843'}
+                color={isPlaying ? COLORS.gold : isMuted ? COLORS.gold : COLORS.gold}
               />
             </TouchableOpacity>
           </View> */}
@@ -494,14 +493,14 @@ const DepositWithdrawl = ({navigation}) => {
           )}
           <View style={styles.paymentInformation}>
             <AppText style={{width: wp(40)}}>Speed</AppText>
-            <AppText style={{fontWeight: '700', color: currentWithdrawal?.speed_type === 'E' ? '#f59e0b' : '#3b82f6'}}>
+            <AppText style={{fontWeight: '700', color: currentWithdrawal?.speed_type === 'E' ? COLORS.warning : COLORS.info}}>
               {currentWithdrawal?.speed_type === 'E' ? '⚡ Express' : 'Normal'}
             </AppText>
           </View>
           {currentWithdrawal?.fee_amount > 0 && (
             <View style={styles.paymentInformation}>
               <AppText style={{width: wp(40)}}>Fee (2.5%)</AppText>
-              <AppText style={{color: '#ef4444'}}>-₹{currentWithdrawal.fee_amount}</AppText>
+              <AppText style={{color: COLORS.danger}}>-₹{currentWithdrawal.fee_amount}</AppText>
             </View>
           )}
           <View style={[styles.paymentInformation, {marginTop: hp(5)}]}>
@@ -515,7 +514,7 @@ const DepositWithdrawl = ({navigation}) => {
               ₹ {currentWithdrawal?.payout_amount > 0 ? currentWithdrawal.payout_amount : currentWithdrawal?.withdrawal_amount}
             </AppText>
             {currentWithdrawal?.fee_amount > 0 && (
-              <AppText style={{fontSize: fp(1.4), color: '#999', textAlign: 'center'}}>
+              <AppText style={{fontSize: fp(1.4), color: COLORS.text_muted, textAlign: 'center'}}>
                 (₹{currentWithdrawal.withdrawal_amount} - ₹{currentWithdrawal.fee_amount} fee)
               </AppText>
             )}
@@ -567,12 +566,12 @@ const DepositWithdrawl = ({navigation}) => {
                     styles.upiSection,
                     {
                       borderColor:
-                        selectedMode === 'upi' ? '#ffffff' : '#A8A29E',
+                        selectedMode === 'upi' ? COLORS.text_primary : COLORS.text_secondary,
                     },
                   ]}>
                   <AppText
                     style={{
-                      color: selectedMode === 'upi' ? '#ffffff' : '#A8A29E',
+                      color: selectedMode === 'upi' ? COLORS.text_primary : COLORS.text_secondary,
                       fontSize: fp(1.4),
                     }}>
                     UPI
@@ -581,7 +580,7 @@ const DepositWithdrawl = ({navigation}) => {
                 <FontAwesome
                   name="star"
                   size={22}
-                  color={selectedMode === 'upi' ? '#ffffff' : '#bfbfbf'}
+                  color={selectedMode === 'upi' ? COLORS.text_primary : COLORS.disabled}
                 />
               </View>
               <AppText
@@ -611,12 +610,12 @@ const DepositWithdrawl = ({navigation}) => {
                 <Feather
                   name="credit-card"
                   size={24}
-                  color={selectedMode === 'bank' ? '#ffffff' : '#A8A29E'}
+                  color={selectedMode === 'bank' ? COLORS.text_primary : COLORS.text_secondary}
                 />
                 <FontAwesome
                   name="star"
                   size={22}
-                  color={selectedMode === 'bank' ? '#ffffff' : '#bfbfbf'}
+                  color={selectedMode === 'bank' ? COLORS.text_primary : COLORS.disabled}
                 />
               </View>
               <AppText
@@ -671,7 +670,7 @@ const DepositWithdrawl = ({navigation}) => {
                   isPlaying ? 'pause' : isMuted ? 'volume-off' : 'volume-up'
                 }
                 size={25}
-                color={isPlaying ? '#d4a843' : isMuted ? '#d4a843' : '#d4a843'}
+                color={isPlaying ? COLORS.gold : isMuted ? COLORS.gold : COLORS.gold}
               />
             </TouchableOpacity>
           </View> */}
@@ -703,7 +702,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: wp(2),
     height: hp(5),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     alignItems: 'center',
     marginLeft: wp(5),
   },
@@ -713,13 +712,13 @@ const styles = StyleSheet.create({
     height: hp(5),
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2a2a2a',
+    backgroundColor: COLORS.bg_chip,
   },
   depositProgress: {
     position: 'absolute',
     height: hp(65),
     bottom: 0,
-    backgroundColor: '#1F1A12',
+    backgroundColor: COLORS.bg_elevated,
     width: wp(100),
     marginTop: hp(4),
     borderWidth: wp(0.2),
@@ -733,12 +732,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: hp(3),
-    // backgroundColor: '#ffcc00',
+    // backgroundColor: COLORS.gold,
   },
   amount: {
     width: wp(78),
     height: hp(7),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: wp(2),
     alignItems: 'center',
     justifyContent: 'center',
@@ -751,15 +750,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   activeButton: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     height: hp(4.5),
   },
   buttonText: {
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     fontSize: fp(1.6),
   },
   activeButtonText: {
-    color: '#fff',
+    color: COLORS.text_primary,
   },
   modeSelection: {
     width: wp(90),
@@ -772,33 +771,33 @@ const styles = StyleSheet.create({
   upiButton: {
     width: wp(43),
     height: hp(15.5),
-    backgroundColor: '#2a2a2a',
+    backgroundColor: COLORS.bg_chip,
     borderRadius: wp(2),
     paddingHorizontal: wp(4),
     paddingVertical: hp(2),
   },
   selectedButton: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
   },
   iconImage: {
-    tintColor: '#A8A29E',
+    tintColor: COLORS.text_secondary,
   },
   activeIcon: {
-    tintColor: '#fff',
+    tintColor: COLORS.text_primary,
   },
   paymentTypeText: {
     fontSize: 16,
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     marginVertical: 5,
     marginTop: hp(3.8),
     fontWeight: '700',
   },
   commissionText: {
     fontSize: 12,
-    color: '#6B6560',
+    color: COLORS.text_muted,
   },
   selectedText: {
-    color: '#fff',
+    color: COLORS.text_primary,
   },
   icons: {
     flexDirection: 'row',
@@ -848,7 +847,7 @@ const styles = StyleSheet.create({
     marginTop: hp(2.5),
   },
   amountButton: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     width: wp(16),
     borderRadius: wp(1),
     height: hp(3.5),
@@ -856,14 +855,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   amountActiveButton: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
   },
   amountText: {
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     fontSize: fp(1.5),
   },
   activeText: {
-    color: '#ffffff',
+    color: COLORS.text_primary,
   },
 
   //   ======================= Withdrawal Section ========================
@@ -871,7 +870,7 @@ const styles = StyleSheet.create({
     width: wp(90),
     height: hp(6),
     borderRadius: wp(2),
-    backgroundColor: '#2D1F1A',
+    backgroundColor: COLORS.bg_elevated,
     marginTop: hp(3),
     flexDirection: 'row',
     justifyContent: 'space-evenly',
@@ -922,7 +921,7 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontWeight: '600',
     fontSize: fp(2),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     marginLeft: wp(4),
     // marginBottom: hp(0.5),
   },

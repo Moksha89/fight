@@ -26,6 +26,7 @@ import AppScreen from '../../../components/AppScreen';
 import HeaderComponent from '../../../components/HeaderComponent';
 import TutorialVideoModal from '../../../components/TutorialVideoModal';
 import {getReferralCode} from '../../../apis/appApi';
+import COLORS from '../../../context/designTokens';
 
 const ReferralScreen = ({navigation}) => {
   const [showTutorialModal, setShowTutorialModal] = React.useState(false);
@@ -82,7 +83,7 @@ const ReferralScreen = ({navigation}) => {
           })
         }
         RightIconComponent={<Octicons name="home" size={17} color="#ffffff" />}
-        rightIconWrapperStyle={{backgroundColor: '#d4a843'}}
+        rightIconWrapperStyle={{backgroundColor: COLORS.gold}}
       />
 
       {/* Referral Card */}
@@ -136,7 +137,7 @@ export default ReferralScreen;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#1F1A12',
+    backgroundColor: COLORS.bg_elevated,
     borderRadius: wp(4),
     paddingHorizontal: wp(10),
     paddingVertical: hp(4.5),
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
   },
   referralBox: {
     flexDirection: 'row',
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     padding: wp(4),
     borderRadius: 12,
     alignItems: 'center',
@@ -200,7 +201,7 @@ const styles = StyleSheet.create({
     marginLeft: wp(5),
   },
   videoCard: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: 16,
     width: wp(40),
     marginLeft: wp(5),

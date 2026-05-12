@@ -10,6 +10,7 @@ import {
 
 import {useAuth} from '../../../context/AuthContext';
 import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../../context/designTokens';
 
 import {createWithdrawal} from '../../../apis/walletApi';
 
@@ -117,7 +118,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
           <MaterialIcons name="history" size={25} color={colors.text_primary} />
         }
         rightIconWrapperStyle={{
-          backgroundColor: '#d4a843',
+          backgroundColor: COLORS.gold,
         }}
       />
 
@@ -129,20 +130,20 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
             onPress={() => setSpeedType('N')}
             style={[
               styles.speedButton,
-              speedType === 'N' && {backgroundColor: '#3b82f6', borderColor: '#3b82f6'},
+              speedType === 'N' && {backgroundColor: COLORS.info, borderColor: COLORS.info},
             ]}>
-            <AppText style={[styles.speedTitle, {color: speedType === 'N' ? '#fff' : '#A8A29E'}]}>Normal</AppText>
-            <AppText style={[styles.speedSub, {color: speedType === 'N' ? '#ddd' : '#666'}]}>Up to 6 hours</AppText>
+            <AppText style={[styles.speedTitle, {color: speedType === 'N' ? COLORS.text_primary : COLORS.text_secondary}]}>Normal</AppText>
+            <AppText style={[styles.speedSub, {color: speedType === 'N' ? '#ddd' : COLORS.text_muted}]}>Up to 6 hours</AppText>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setSpeedType('E')}
             style={[
               styles.speedButton,
-              speedType === 'E' && {backgroundColor: '#f59e0b', borderColor: '#f59e0b'},
+              speedType === 'E' && {backgroundColor: COLORS.warning, borderColor: COLORS.warning},
             ]}>
-            <AppText style={[styles.speedTitle, {color: speedType === 'E' ? '#fff' : '#A8A29E'}]}>⚡ Express</AppText>
-            <AppText style={[styles.speedSub, {color: speedType === 'E' ? '#fff' : '#666'}]}>~30 min | 2.5% fee</AppText>
+            <AppText style={[styles.speedTitle, {color: speedType === 'E' ? COLORS.text_primary : COLORS.text_secondary}]}>⚡ Express</AppText>
+            <AppText style={[styles.speedSub, {color: speedType === 'E' ? COLORS.text_primary : COLORS.text_muted}]}>~30 min | 2.5% fee</AppText>
           </TouchableOpacity>
         </View>
 
@@ -166,18 +167,18 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
             onPress={() => setActiveTab('upi')}
             style={[
               styles.button,
-              activeTab === 'upi' && {backgroundColor: '#d4a843'},
+              activeTab === 'upi' && {backgroundColor: COLORS.gold},
             ]}>
             <View
               style={[
                 styles.upiSection,
                 {
-                  borderColor: activeTab === 'upi' ? '#ffffff' : '#A8A29E',
+                  borderColor: activeTab === 'upi' ? COLORS.text_primary : COLORS.text_secondary,
                 },
               ]}>
               <AppText
                 style={{
-                  color: activeTab === 'upi' ? '#ffffff' : '#A8A29E',
+                  color: activeTab === 'upi' ? COLORS.text_primary : COLORS.text_secondary,
                   fontSize: fp(1.4),
                 }}>
                 UPI
@@ -186,7 +187,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
             <AppText
               style={[
                 styles.buttonText,
-                {color: activeTab === 'upi' ? '#fff' : '#A8A29E'},
+                {color: activeTab === 'upi' ? COLORS.text_primary : COLORS.text_secondary},
               ]}>
               UPI ID
             </AppText>
@@ -196,17 +197,17 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
             onPress={() => setActiveTab('bank')}
             style={[
               styles.button,
-              activeTab === 'bank' && {backgroundColor: '#d4a843'},
+              activeTab === 'bank' && {backgroundColor: COLORS.gold},
             ]}>
             <FontAwesome
               name="bank"
               size={20}
-              color={activeTab === 'bank' ? '#ffffff' : '#A8A29E'}
+              color={activeTab === 'bank' ? COLORS.text_primary : COLORS.text_secondary}
             />
             <AppText
               style={[
                 styles.buttonText,
-                {color: activeTab === 'bank' ? '#fff' : '#A8A29E'},
+                {color: activeTab === 'bank' ? COLORS.text_primary : COLORS.text_secondary},
               ]}>
               Bank Account
             </AppText>
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
     paddingHorizontal: wp(3),
     fontSize: fp(2),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     marginBottom: hp(2),
   },
 
@@ -372,7 +373,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
     borderWidth: 1.5,
     borderColor: 'rgba(212,168,67,0.18)',
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
   },
   speedTitle: {
     fontSize: fp(1.9),
@@ -384,9 +385,9 @@ const styles = StyleSheet.create({
   },
   feePreview: {
     width: wp(90),
-    backgroundColor: '#1F1A12',
+    backgroundColor: COLORS.bg_elevated,
     borderWidth: 1,
-    borderColor: '#d4a843',
+    borderColor: COLORS.gold,
     borderRadius: wp(2),
     padding: wp(3),
     marginBottom: hp(2),
@@ -398,16 +399,16 @@ const styles = StyleSheet.create({
   },
   feeLabel: {
     fontSize: fp(1.6),
-    color: '#666',
+    color: COLORS.text_muted,
   },
   feeValue: {
     fontSize: fp(1.6),
-    color: '#ef4444',
+    color: COLORS.danger,
     fontWeight: '600',
   },
   payoutValue: {
     fontSize: fp(1.7),
-    color: '#10b981',
+    color: COLORS.success,
     fontWeight: '700',
   },
 });

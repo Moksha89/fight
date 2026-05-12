@@ -22,7 +22,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../../context/designTokens';
 
 import Video from 'react-native-video';
 
@@ -68,7 +68,7 @@ const LotteryGiftLive = ({navigation}) => {
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name="wallet-outline" size={20} color="#fff" />
             <AppText
-              style={{color: '#fff', marginLeft: wp(3), fontWeight: 'bold'}}>
+              style={{color: COLORS.text_primary, marginLeft: wp(3), fontWeight: 'bold'}}>
               ₹{String(wallet.balanceWithBonus).split('.')[0]}
             </AppText>
           </View>
@@ -192,7 +192,7 @@ const LotteryGiftLive = ({navigation}) => {
                     styles.historyCard,
                     {
                       backgroundColor: ticket.status?.includes('In Progress')
-                        ? '#FFFFFF'
+                        ? COLORS.text_primary
                         : '#EEEEEE',
                       borderColor: ticket.status?.includes('In Progress')
                         ? '#DDDDDD'
@@ -225,7 +225,7 @@ const LotteryGiftLive = ({navigation}) => {
                           }}>
                           Tickets – {ticket.numbers.join(', ')}
                         </AppText>
-                        <AppText style={{color: '#999', fontSize: fp(1.6)}}>
+                        <AppText style={{color: COLORS.text_muted, fontSize: fp(1.6)}}>
                           {ticket.date} | {ticket.time}
                         </AppText>
                       </View>
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   content: {},
 
   headerSection: {
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     paddingHorizontal: wp(7),
     borderRadius: wp(2),
     width: wp(100),
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     height: hp(9),
   },
   headerIcon: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     borderColor: 'rgba(212,168,67,0.18)',
     borderWidth: 1,
     width: wp(27),
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 50,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: COLORS.bg_chip,
     marginHorizontal: wp(1),
     justifyContent: 'center',
     alignItems: 'center',
@@ -341,14 +341,14 @@ const styles = StyleSheet.create({
   divider: {
     width: 1,
     height: hp(5),
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.disabled,
     marginHorizontal: wp(3),
   },
   refreshButton: {
     marginLeft: wp(4),
   },
   walletIcon: {flexDirection: 'row', alignItems: 'center'},
-  walletAmount: {color: '#fff', marginLeft: wp(2), fontWeight: 'bold'},
+  walletAmount: {color: COLORS.text_primary, marginLeft: wp(2), fontWeight: 'bold'},
 
   ticketImage: {
     width: '100%',
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   iconBox: {
     width: 40,
     height: 40,
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   medalPlaceText: {
     position: 'absolute',
     fontSize: fp(1.2),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     top: hp(1.65),
   },
   icon: {
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   dropdownBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     paddingHorizontal: 12,
     borderRadius: 10,
     height: hp(4.5),
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: fp(1.8),
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
     marginRight: wp(5),
     marginLeft: wp(2),
   },
@@ -448,19 +448,19 @@ const styles = StyleSheet.create({
     marginLeft: wp(4),
   },
   timeSlot: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: COLORS.bg_chip,
     borderRadius: wp(1),
     paddingVertical: 7,
     paddingHorizontal: 16,
   },
   timeSlotSelected: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
   },
   timeSlotText: {
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
   },
   timeSlotTextSelected: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontWeight: 'bold',
   },
 
@@ -477,17 +477,17 @@ const styles = StyleSheet.create({
     height: wp(8),
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2a2a2a',
+    backgroundColor: COLORS.bg_chip,
     borderRadius: 8,
   },
   numberBoxSelected: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
   },
   numberText: {
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
   },
   numberTextSelected: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontWeight: 'bold',
   },
   videoContainer: {position: 'relative', marginTop: hp(1)},
@@ -496,8 +496,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: wp(5),
     right: wp(5),
-    backgroundColor: '#DC2626',
-    color: '#fff',
+    backgroundColor: COLORS.meron,
+    color: COLORS.text_primary,
     paddingHorizontal: 6,
     borderRadius: 4,
   },
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: wp(7),
     right: wp(7),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     padding: wp(1.5),
     borderRadius: 30,
   },
@@ -541,13 +541,13 @@ const styles = StyleSheet.create({
   historyLeftContent: {flexDirection: 'row', alignItems: 'center'},
   progressText: {
     fontSize: fp(1.6),
-    color: '#999',
+    color: COLORS.text_muted,
   },
   lotteryNumbers: {
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 2,
@@ -563,14 +563,14 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     justifyContent: 'center',
     alignItems: 'center',
   },
   progressBar: {
     width: '100%',
     height: 6,
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.disabled,
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     height: hp(7),
   },
   totalText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontWeight: '600',
     fontSize: fp(2.5),
   },
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   buyText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontSize: fp(2.2),
   },
 });

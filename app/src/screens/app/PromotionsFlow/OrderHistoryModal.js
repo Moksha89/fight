@@ -12,6 +12,7 @@ import {getOrderHistory} from '../../../apis/appApi';
 import HeaderComponent from '../../../components/HeaderComponent';
 
 import AppText from '../../../components/AppText';
+import COLORS from '../../../context/designTokens';
 
 const OrderHistoryModal = ({visible, onClose}) => {
   const [historyData, setHistoryData] = useState([]);
@@ -105,14 +106,14 @@ const OrderHistoryModal = ({visible, onClose}) => {
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {flex: 1, padding: 20, backgroundColor: '#171717'},
+  modalContainer: {flex: 1, padding: 20, backgroundColor: COLORS.bg_card},
 
   closeButtonText: {color: 'white', fontWeight: 'bold'},
   historyItem: {
     flexDirection: 'row',
     marginVertical: 10,
     padding: 10,
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: 6,
   },
   historyImage: {width: 60, height: 60, borderRadius: 6},
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
   progressFill: {
     width: '50%', // Half filled
     height: '100%',
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
   },
   progressText: {
     fontSize: 12,

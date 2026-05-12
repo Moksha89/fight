@@ -461,7 +461,7 @@ const GundataLive = ({navigation}) => {
 
   return (
     <AppScreen
-      style={{position: 'relative', backgroundColor: '#0B0B0B'}}
+      style={{position: 'relative', backgroundColor: COLORS.bg}}
       isTranslucent
       lightStatusBar>
         
@@ -506,7 +506,7 @@ const GundataLive = ({navigation}) => {
           <TouchableOpacity
             style={styles.diceAnimationClose}
             onPress={() => setShowDiceAnimation(false)}>
-            <Text style={{color: '#fff', fontSize: 14}}>Tap to close</Text>
+            <Text style={{color: COLORS.text_primary, fontSize: 14}}>Tap to close</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -680,7 +680,7 @@ const GundataLive = ({navigation}) => {
             style={[
               styles.betPlaceButton,
               (!isBetAllowedAtCurrentChannel || !selectedDice || betAmount <= 0) && {
-                backgroundColor: '#bfbfbf',
+                backgroundColor: COLORS.disabled,
               },
             ]}
             onPress={() => {
@@ -779,12 +779,12 @@ const styles = StyleSheet.create({
   },
   banner: {
     flexDirection: 'row',
-    backgroundColor: '#2D1F1A',
+    backgroundColor: COLORS.bg_elevated,
     justifyContent: 'space-between',
     paddingHorizontal: wp(4),
     paddingVertical: hp(0.5),
   },
-  bannerText: {fontSize: 13, color: '#F5F1E8'},
+  bannerText: {fontSize: 13, color: COLORS.text_primary},
   bannerContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -853,7 +853,7 @@ const styles = StyleSheet.create({
   diceAmountText: {
     fontWeight: 'bold',
     fontSize: fp(1.6),
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
   },
   coinsRow: {
     flexDirection: 'row',
@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   betPlaceButton: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     width: wp(35),
     paddingVertical: hp(1.2),
     borderRadius: wp(2),
@@ -890,7 +890,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pleaseWaitText: {
-    color: '#666',
+    color: COLORS.text_muted,
     fontSize: fp(1.8),
   },
   placeBetContent: {
@@ -900,12 +900,12 @@ const styles = StyleSheet.create({
     width: '90%',
   },
   placeBetText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontSize: fp(1.8),
   },
   bettingResultsSection: {
     width: wp(95),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     marginLeft: wp(2.5),
     marginTop: hp(1),
     flexDirection: 'row',
@@ -979,12 +979,12 @@ const styles = StyleSheet.create({
   diceAnimationFace: {
     width: wp(14),
     height: wp(14),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     borderRadius: wp(2),
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: COLORS.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -1000,7 +1000,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   diceAnimationPayout: {
-    color: '#888',
+    color: COLORS.text_muted,
     fontSize: fp(1.6),
   },
   diceAnimationWinner: {

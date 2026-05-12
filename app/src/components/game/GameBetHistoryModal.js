@@ -18,6 +18,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AppText from '../AppText';
 import AppBadge from '../AppBadge';
 import {useTheme} from '../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 
 /**
  * Shared bet history modal for CockFight and Gundata/Dice.
@@ -41,19 +42,19 @@ const teamMap = {
 
 const getTeamColor = team => {
   switch (team) {
-    case 1: return '#BA2343';
-    case 2: return '#0000FF';
-    case 3: return '#43A048';
-    default: return '#808080';
+    case 1: return COLORS.meron;
+    case 2: return COLORS.wala;
+    case 3: return COLORS.success;
+    default: return COLORS.text_muted;
   }
 };
 
 // CockFight color logic
 const getCockfightColor = (matchWinStatus, betTeam) => {
-  if (matchWinStatus === 4) return '#888';
-  if (matchWinStatus === 0) return '#FFA500';
-  if (matchWinStatus === betTeam) return '#43A048';
-  return '#BA2343';
+  if (matchWinStatus === 4) return COLORS.text_muted;
+  if (matchWinStatus === 0) return COLORS.warning;
+  if (matchWinStatus === betTeam) return COLORS.success;
+  return COLORS.meron;
 };
 
 const getCockfightAmountText = item => {
@@ -69,9 +70,9 @@ const getCockfightAmountText = item => {
 
 // Dice color logic
 const getDiceColor = matchWinStatus => {
-  if (matchWinStatus === 0) return '#FFA500';
-  if (matchWinStatus === 1) return '#43A048';
-  return '#BA2343';
+  if (matchWinStatus === 0) return COLORS.warning;
+  if (matchWinStatus === 1) return COLORS.success;
+  return COLORS.meron;
 };
 
 const getDiceWinTotal = item => {
@@ -184,11 +185,11 @@ const GameBetHistoryModal = ({
                 styles.amount,
                 {
                   color:
-                    color === '#888'
-                      ? '#888'
+                    color === COLORS.text_muted
+                      ? COLORS.text_muted
                       : amountText.startsWith('+')
-                      ? '#43A048'
-                      : '#BA2343',
+                      ? COLORS.success
+                      : COLORS.meron,
                 },
               ]}>
               {amountText}
@@ -213,7 +214,7 @@ const GameBetHistoryModal = ({
     return (
       <View style={[styles.card, {backgroundColor: colors.card}]}>
         <View style={styles.left}>
-          <View style={[styles.diceBadge, {backgroundColor: '#5C6BC0'}]}>
+          <View style={[styles.diceBadge, {backgroundColor: colors.wala_light}]}>
             <Text style={styles.diceBadgeText}>{item.diceNumber}</Text>
           </View>
           <View style={styles.textInfo}>
@@ -244,7 +245,7 @@ const GameBetHistoryModal = ({
             <AppText
               style={[
                 styles.amount,
-                {color: amountText.startsWith('+') ? '#43A048' : '#BA2343'},
+                {color: amountText.startsWith('+') ? colors.success : colors.meron},
               ]}>
               {amountText}
             </AppText>
@@ -305,7 +306,7 @@ export default GameBetHistoryModal;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: '#00000070',
+    backgroundColor: COLORS.overlay,
     justifyContent: 'flex-end',
   },
   dimmedArea: {
@@ -358,7 +359,7 @@ const styles = StyleSheet.create({
     marginRight: wp(3),
   },
   diceBadgeText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontWeight: 'bold',
     fontSize: fp(1.8),
   },

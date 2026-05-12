@@ -10,8 +10,11 @@ import {
 
 import AppScreen from '../components/AppScreen';
 import AppText from '../components/AppText';
+import {useTheme} from '../context/ThemeContext';
+import COLORS from '../context/designTokens';
 
 const AppUnderMaintenance = ({nav}) => {
+  const {colors} = useTheme();
   return (
     <AppScreen style={styles.mainContainer} isTranslucent={true}>
       <LottieView
@@ -20,16 +23,16 @@ const AppUnderMaintenance = ({nav}) => {
         loop
         style={styles.lottie}
       />
-      <AppText style={styles.maintenanceText}>Under Maintenance!</AppText>
+      <AppText style={[styles.maintenanceText, {color: colors.textSecondary}]}>Under Maintenance!</AppText>
       <AppText style={styles.description}>
         App is currently under maintenance. We're upgrading the
         experience. Please check back soon for thrilling new matches!
       </AppText>
       {nav ? (
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, {backgroundColor: colors.gold}]}
           onPress={() => nav.navigate('HomeScreen', {index: 0})}>
-          <AppText style={styles.buttonText}>Return To Home</AppText>
+          <AppText style={[styles.buttonText, {color: colors.textOnGold || '#000'}]}>Return To Home</AppText>
         </TouchableOpacity>
       ) : null}
     </AppScreen>
@@ -50,7 +53,7 @@ const styles = StyleSheet.create({
     marginTop: hp(4),
     fontSize: fp(3),
     fontWeight: 'bold',
-    color: '#A8A29E',
+    color: COLORS.text_secondary,
   },
   description: {
     paddingHorizontal: wp(10),
@@ -62,13 +65,13 @@ const styles = StyleSheet.create({
   button: {
     width: wp(80),
     height: hp(6),
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     borderRadius: wp(1.5),
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: hp(4),
   },
-  buttonText: {color: '#ffffff', fontSize: fp(2), fontWeight: '600'},
+  buttonText: {color: COLORS.text_secondary, fontSize: fp(2), fontWeight: '600'}, // set dynamically
 });
 
 export default AppUnderMaintenance;

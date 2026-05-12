@@ -9,6 +9,7 @@ import {useAuth} from '../context/AuthContext';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 import AppUnderMaintenanceScreen from '../screens/AppUnderMaintenanceScreen';
+import COLORS from '../context/designTokens';
 
 const MainNavigator = () => {
   const [authChecked, setAuthChecked] = useState(false);
@@ -50,8 +51,8 @@ const MainNavigator = () => {
   if (!authChecked) {
     return (
       <SafeAreaProvider>
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0B0B0B'}}>
-          <ActivityIndicator size="large" color="#D4A843" />
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.bg}}>
+          <ActivityIndicator size="large" color={COLORS.gold} />
         </View>
       </SafeAreaProvider>
     );

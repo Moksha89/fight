@@ -29,6 +29,7 @@ import {
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
 import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../../context/designTokens';
 
 const ProfileUpdateScreen = ({navigation, route}) => {
   const {
@@ -129,7 +130,7 @@ const ProfileUpdateScreen = ({navigation, route}) => {
       <TextInput
         editable={false}
         placeholder="Mobile Number"
-        style={[styles.input, {backgroundColor: '#1a1a1a'}]}
+        style={[styles.input, {backgroundColor: COLORS.bg_input}]}
         keyboardType="phone-pad"
         value={userInfo.phoneNumber || userInfo.email}
       />
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
     fontSize: fp(1.9),
     marginBottom: hp(3),
     marginLeft: wp(5),
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
     width: wp(90),
     height: hp(6.5),
   },
@@ -218,13 +219,13 @@ const styles = StyleSheet.create({
     height: wp(5),
     borderRadius: wp(2.5),
     borderWidth: 2,
-    borderColor: '#d4a843',
+    borderColor: COLORS.gold,
     marginRight: wp(3),
     alignItems: 'center',
     justifyContent: 'center',
   },
   selectedCircle: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     width: wp(3),
     height: wp(3),
     borderRadius: 50,

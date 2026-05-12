@@ -35,7 +35,7 @@ import {createProductOrder} from '../../../apis/appApi';
 import {getOrderHistory} from '../../../apis/appApi';
 import OrderHistoryModal from './OrderHistoryModal';
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../../context/designTokens';
 
 const ProductCard = ({item, onBuy}) => {
   const renderCardContent = () => (
@@ -214,7 +214,7 @@ const PromotionsScreen = ({navigation}) => {
         RightIconComponent={
           <Octicons name="history" size={17} color="#ffffff" />
         }
-        rightIconWrapperStyle={{backgroundColor: '#d4a843'}}
+        rightIconWrapperStyle={{backgroundColor: COLORS.gold}}
       />
       <OrderHistoryModal
         visible={isHistoryVisible}
@@ -372,12 +372,12 @@ const PromotionsScreen = ({navigation}) => {
 export default PromotionsScreen;
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: '#0B0B0B', paddingTop: hp(4.5)},
+  container: {backgroundColor: COLORS.bg, paddingTop: hp(4.5)},
   card: {
     width: wp(44),
     borderRadius: wp(3),
     marginBottom: hp(2),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     position: 'relative',
     overflow: 'hidden',
     height: hp(31),
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   cardImageDiv: {
     width: wp(44),
     height: hp(20),
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -403,10 +403,10 @@ const styles = StyleSheet.create({
   priceDetails: {position: 'absolute', bottom: hp(0.5), left: wp(3)},
   originalPrice: {
     fontSize: fp(1.6),
-    color: '#bfbfbf',
+    color: COLORS.disabled,
     textDecorationLine: 'line-through',
   },
-  price: {fontSize: fp(2.5), color: '#F5F1E8', fontWeight: '700'},
+  price: {fontSize: fp(2.5), color: COLORS.text_primary, fontWeight: '700'},
   buyButton: {
     position: 'absolute',
     bottom: 0,
@@ -415,28 +415,28 @@ const styles = StyleSheet.create({
     height: wp(12),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#bfbfbf',
+    backgroundColor: COLORS.disabled,
     borderTopLeftRadius: wp(3),
   },
   lockInfo: {
     width: wp(30),
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     height: hp(2),
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomRightRadius: wp(3),
   },
-  addSymbol: {fontSize: fp(3.5), color: '#ffffff'},
+  addSymbol: {fontSize: fp(3.5), color: COLORS.text_primary},
   lockMessage: {fontSize: 12},
-  modalFullScreen: {paddingHorizontal: wp(7), flex: 1, backgroundColor: '#171717'},
+  modalFullScreen: {paddingHorizontal: wp(7), flex: 1, backgroundColor: COLORS.bg_card},
   rightIconText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     marginLeft: wp(3),
     fontWeight: '500',
   },
   iconButton: {
-    backgroundColor: '#d4a843',
+    backgroundColor: COLORS.gold,
     width: wp(25),
     height: hp(4),
     flexDirection: 'row',

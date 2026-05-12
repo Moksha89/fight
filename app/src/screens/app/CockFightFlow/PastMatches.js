@@ -22,6 +22,7 @@ import AppText from '../../../components/AppText';
 import TutorialVideoModal from '../../../components/TutorialVideoModal';
 import {fetchHighlights} from '../../../apis/authApi';
 import HeaderComponent from '../../../components/HeaderComponent';
+import COLORS from '../../../context/designTokens';
 const PastMatches = ({navigation}) => {
   const [highlights, setHighlights] = useState([]);
   const [isMatchModalVisible, setMatchModalVisible] = useState(false);
@@ -79,12 +80,12 @@ const PastMatches = ({navigation}) => {
           <>
             <Icon name="play-arrow" size={fp(2.5)} color="#fff" />
             <AppText
-              style={{color: '#fff', fontWeight: '500', fontSize: fp(1.7)}}>
+              style={{color: COLORS.text_primary, fontWeight: '500', fontSize: fp(1.7)}}>
               Live
             </AppText>
           </>
         }
-        rightIconWrapperStyle={{backgroundColor: '#d4a843', width: wp(20)}}
+        rightIconWrapperStyle={{backgroundColor: COLORS.gold, width: wp(20)}}
       />
       {/* Match List */}
       <FlatList
@@ -110,7 +111,7 @@ export default PastMatches;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0B0B0B',
+    backgroundColor: COLORS.bg,
     paddingTop: hp(3.5),
   },
   header: {
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fp(2),
     fontWeight: '700',
-    color: '#F5F1E8',
+    color: COLORS.text_primary,
   },
   liveButton: {
     flexDirection: 'row',
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(3),
     overflow: 'hidden',
     elevation: 3,
-    backgroundColor: '#171717',
+    backgroundColor: COLORS.bg_card,
     width: wp(86),
     height: hp(18),
   },
@@ -160,12 +161,12 @@ const styles = StyleSheet.create({
     left: wp(3),
   },
   matchText: {
-    color: '#fff',
+    color: COLORS.text_primary,
     fontWeight: '700',
     fontSize: fp(2),
   },
   dateText: {
-    color: '#eee',
+    color: COLORS.border,
     fontSize: fp(1.6),
     marginTop: hp(0.3),
   },

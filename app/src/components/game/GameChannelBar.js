@@ -15,6 +15,7 @@ import {
 
 import AppText from '../AppText';
 import {useTheme} from '../../context/ThemeContext';
+import COLORS from '../../context/designTokens';
 
 export default function GameChannelBar({
   availableChannels,
@@ -91,7 +92,7 @@ export default function GameChannelBar({
             style={[
               styles.buttonText,
               {color: colors.text_primary},
-              activeChannel == id && {color: '#fff', fontWeight: 'bold'},
+              activeChannel == id && {color: colors.text_primary, fontWeight: 'bold'},
             ]}>
             {title}
           </AppText>
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(0.3),
     paddingHorizontal: wp(2.4),
     borderRadius: wp(1),
-    backgroundColor: '#555',
+    backgroundColor: COLORS.border_chip,
   },
   buttonText: {
     fontSize: fp(1.5),
