@@ -52,12 +52,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    color: '#000',
+    color: '#F5F1E8',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#6B6560',
     textAlign: 'center',
     paddingHorizontal: 10,
     marginBottom: 20,
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#171717',
     borderRadius: 16,
     elevation: 3,
     shadowColor: '#000',

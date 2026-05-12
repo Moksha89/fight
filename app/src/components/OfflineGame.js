@@ -63,7 +63,7 @@ export default function DinoGame() {
       </View>
 
       <TouchableOpacity
-        style={[styles.actionButton, gameOver ? {backgroundColor: '#000'} : {}]}
+        style={[styles.actionButton, gameOver ? {backgroundColor: '#d4a843'} : {}]}
         onPress={gameOver ? resetGame : jump}>
         <Text style={[styles.buttonText]}>{gameOver ? 'Restart' : 'Jump'}</Text>
       </TouchableOpacity>
@@ -84,17 +84,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#000',
+    color: '#F5F1E8',
   },
   gameArea: {
     width: 300,
     height: 150,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#1a1a1a',
     overflow: 'hidden',
     position: 'relative',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: 'rgba(212,168,67,0.18)',
   },
   dino: {
     width: 30,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   obstacle: {
     width: 10,
     height: 40,
-    backgroundColor: '#000',
+    backgroundColor: '#D4A843',
     position: 'absolute',
     bottom: 0,
     borderRadius: 10,

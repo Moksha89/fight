@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     height: hp(6),
     borderRadius: 50,
     borderColor: '#CA0000',
-    backgroundColor: '#FFEDED',
+    backgroundColor: 'rgba(239,68,68,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: wp(0.1),
