@@ -102,6 +102,39 @@ export const registerUser = async (mobile, username, password, confirmPassword, 
   return {success: false, data: result.data || {}, error: result.error};
 };
 
+export const forgotPasswordRequestOtp = async mobile => {
+  const result = await apiRequest('/api/user/forgot-password/request-otp/', {
+    method: 'POST',
+    body: JSON.stringify({mobile}),
+  }, {auth: false});
+
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'forgotPasswordRequestOtp', silent: true});
+  return {success: false, data: result.data || {}, error: result.error};
+};
+
+export const forgotPasswordVerifyOtp = async (mobile, otp) => {
+  const result = await apiRequest('/api/user/forgot-password/verify-otp/', {
+    method: 'POST',
+    body: JSON.stringify({mobile, otp}),
+  }, {auth: false});
+
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'forgotPasswordVerifyOtp', silent: true});
+  return {success: false, data: result.data || {}, error: result.error};
+};
+
+export const forgotPasswordReset = async (reset_token, new_password, confirm_password) => {
+  const result = await apiRequest('/api/user/forgot-password/reset/', {
+    method: 'POST',
+    body: JSON.stringify({reset_token, new_password, confirm_password}),
+  }, {auth: false});
+
+  if (result.success) return {success: true, data: result.data};
+  handleError(result.error, {context: 'forgotPasswordReset', silent: true});
+  return {success: false, data: result.data || {}, error: result.error};
+};
+
 export const updateUserInfo = async updatedData => {
   const result = await apiRequest('/api/user/me/', {
     method: 'PATCH',
