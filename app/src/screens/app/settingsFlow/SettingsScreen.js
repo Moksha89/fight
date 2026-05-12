@@ -19,7 +19,7 @@ import SoundPlayer from 'react-native-sound-player';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 import {useAuth} from '../../../context/AuthContext';
-import COLORS from '../../../context/designTokens';
+import {useTheme} from '../../../context/ThemeContext';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -30,6 +30,7 @@ import AppText from '../../../components/AppText';
 
 const SettingsScreen = ({navigation}) => {
   const {logout, setIsLocked, settings} = useAuth();
+  const {colors} = useTheme();
 
   const supportOptions = [
     {
@@ -63,10 +64,10 @@ const SettingsScreen = ({navigation}) => {
     <AppScreen isTranslucent lightStatusBar style={styles.container}>
       <HeaderComponent
         title="Profile & Settings "
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.canGoBack() && navigation.goBack()}
         onIconPress={() => setIsLocked(true)}
-        RightIconComponent={<Octicons name="lock" size={17} color="#ffffff" />}
-        rightIconWrapperStyle={{backgroundColor: COLORS.gold}}
+        RightIconComponent={<Octicons name="lock" size={17} color={colors.text_primary} />}
+        rightIconWrapperStyle={{backgroundColor: colors.gold}}
         containerStyle={{}}
       />
       <ScrollView
@@ -79,75 +80,75 @@ const SettingsScreen = ({navigation}) => {
           style={styles.banner}
           onPress={() => navigation.navigate('LearningScreen')}>
           <Image
-            source={require('../../../assets/images/banner.png')} // replace with your banner image
+            source={require('../../../assets/images/banner.png')}
             style={styles.bannerImage}
             resizeMode="cover"
           />
           <FontAwesome6
             name="arrow-right-long"
             size={24}
-            color="#ffffff"
+            color={colors.text_primary}
             style={styles.bannerArrow}
           />
         </TouchableOpacity>
-        <AppText style={styles.sectionLabel}>Account:</AppText>
+        <AppText style={[styles.sectionLabel, {color: colors.text_secondary}]}>Account:</AppText>
         <TouchableOpacity
-          style={styles.itemRow}
+          style={[styles.itemRow, {borderBottomColor: colors.border}]}
           onPress={() => navigation.navigate('ProfileUpdateScreen')}>
-          <AppText style={styles.itemText}>Profile</AppText>
-          <AntDesign name="right" size={18} color="#A8A29E" />
+          <AppText style={[styles.itemText, {color: colors.text_primary}]}>Profile</AppText>
+          <AntDesign name="right" size={18} color={colors.text_secondary} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.itemRow}
+          style={[styles.itemRow, {borderBottomColor: colors.border}]}
           onPress={() => navigation.navigate('NotificationsScreen')}>
-          <AppText style={styles.itemText}>Notifications</AppText>
-          <AntDesign name="right" size={18} color="#A8A29E" />
+          <AppText style={[styles.itemText, {color: colors.text_primary}]}>Notifications</AppText>
+          <AntDesign name="right" size={18} color={colors.text_secondary} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.itemRow}
+          style={[styles.itemRow, {borderBottomColor: colors.border}]}
           onPress={() => navigation.navigate('StatementScreen')}>
-          <AppText style={styles.itemText}>Transaction History</AppText>
-          <AntDesign name="right" size={18} color="#A8A29E" />
+          <AppText style={[styles.itemText, {color: colors.text_primary}]}>Transaction History</AppText>
+          <AntDesign name="right" size={18} color={colors.text_secondary} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.itemRow}
+          style={[styles.itemRow, {borderBottomColor: colors.border}]}
           onPress={() => navigation.navigate('ChangePasswordScreen')}>
-          <AppText style={styles.itemText}>Change Password</AppText>
-          <AntDesign name="right" size={18} color="#A8A29E" />
+          <AppText style={[styles.itemText, {color: colors.text_primary}]}>Change Password</AppText>
+          <AntDesign name="right" size={18} color={colors.text_secondary} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.itemRow}
+          style={[styles.itemRow, {borderBottomColor: colors.border}]}
           onPress={() => navigation.navigate('SetLockScreen')}>
-          <AppText style={styles.itemText}>Reset Login PIN</AppText>
-          <AntDesign name="right" size={18} color="#A8A29E" />
+          <AppText style={[styles.itemText, {color: colors.text_primary}]}>Reset Login PIN</AppText>
+          <AntDesign name="right" size={18} color={colors.text_secondary} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.itemRow, {borderBottomWidth: 0}]}
           onPress={() => navigation.navigate('ReferralScreen')}>
-          <AppText style={styles.itemText}>Referral & Earn</AppText>
-          <AntDesign name="right" size={18} color="#A8A29E" />
+          <AppText style={[styles.itemText, {color: colors.text_primary}]}>Referral & Earn</AppText>
+          <AntDesign name="right" size={18} color={colors.text_secondary} />
         </TouchableOpacity>
-        <View style={styles.hrLine} />
-        <AppText style={styles.sectionLabel}>Contact / Support:</AppText>
+        <View style={[styles.hrLine, {backgroundColor: colors.border}]} />
+        <AppText style={[styles.sectionLabel, {color: colors.text_secondary}]}>Contact / Support:</AppText>
         <View style={{marginBottom: hp(20)}}>
           {supportOptions.map((item, index) => (
             <TouchableOpacity
-              style={styles.itemRow}
+              style={[styles.itemRow, {borderBottomColor: colors.border}]}
               key={index}
               onPress={() => Linking.openURL(item.link)}>
               <View style={styles.contactRow}>
                 <Image source={item.image} style={styles.contactIcon} />
-                <AppText style={styles.itemText}>{item.name}</AppText>
+                <AppText style={[styles.itemText, {color: colors.text_primary}]}>{item.name}</AppText>
               </View>
-              <AntDesign name="right" size={18} color="#A8A29E" />
+              <AntDesign name="right" size={18} color={colors.text_secondary} />
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
       {/* Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={() => logout()}>
-        <AppText style={styles.logoutText}>Log out</AppText>
-        <AntDesign name="poweroff" size={20} color="#E53935" />
+      <TouchableOpacity style={[styles.logoutButton, {backgroundColor: 'rgba(239,68,68,0.12)'}]} onPress={() => logout()}>
+        <AppText style={[styles.logoutText, {color: colors.danger}]}>Log out</AppText>
+        <AntDesign name="poweroff" size={20} color={colors.danger} />
       </TouchableOpacity>
     </AppScreen>
   );
@@ -181,7 +182,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 0.5,
-    borderBottomColor: '#eee',
   },
   itemText: {
     fontSize: fp(1.7),
@@ -190,7 +190,6 @@ const styles = StyleSheet.create({
   hrLine: {
     width: wp(86),
     height: hp(0.1),
-    backgroundColor: '#2a2a2a',
     marginTop: hp(1),
     marginBottom: hp(2.5),
   },
@@ -207,7 +206,6 @@ const styles = StyleSheet.create({
   logoutButton: {
     flexDirection: 'row',
     borderRadius: 12,
-    backgroundColor: 'rgba(239,68,68,0.12)',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: wp(86),
@@ -216,11 +214,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: hp(5),
     left: wp(7),
-    outlineColor: '#CA0000',
-    outlineWidth: wp(0.2),
   },
   logoutText: {
-    color: '#CA0000',
     fontSize: fp(2),
   },
   watchTutorialsSection: {
@@ -240,7 +235,6 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontWeight: '700',
     fontSize: fp(2),
-    color: '#F5F1E8',
     marginLeft: wp(4),
     marginBottom: hp(0.5),
   },

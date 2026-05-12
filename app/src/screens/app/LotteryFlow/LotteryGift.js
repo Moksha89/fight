@@ -28,6 +28,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import AppUnderMaintenanceScreen from '../../AppUnderMaintenanceScreen';
+import {useTheme} from '../../../context/ThemeContext';
 
 // ============================= Lottery Gift =============================
 const giftData = [
@@ -496,7 +497,7 @@ const styles = StyleSheet.create({
   timer: {fontSize: fp(1.5), color: '#433F3F', fontWeight: '600'},
   buttonArea: {alignItems: 'flex-end'},
   activeBtn: {
-    backgroundColor: '#ff6a00',
+    backgroundColor: '#D4A843',
     borderRadius: 8,
     width: wp(20),
     height: hp(3),

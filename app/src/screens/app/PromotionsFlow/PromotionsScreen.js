@@ -35,6 +35,7 @@ import {createProductOrder} from '../../../apis/appApi';
 import {getOrderHistory} from '../../../apis/appApi';
 import OrderHistoryModal from './OrderHistoryModal';
 import {useAuth} from '../../../context/AuthContext';
+import {useTheme} from '../../../context/ThemeContext';
 
 const ProductCard = ({item, onBuy}) => {
   const renderCardContent = () => (
@@ -419,7 +420,7 @@ const styles = StyleSheet.create({
   },
   lockInfo: {
     width: wp(30),
-    backgroundColor: '#ffcc00',
+    backgroundColor: '#D4A843',
     height: hp(2),
     position: 'absolute',
     alignItems: 'center',

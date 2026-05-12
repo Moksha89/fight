@@ -4,7 +4,6 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 
@@ -13,6 +12,8 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AppText from '../../components/AppText';
 import AppScreen from '../../components/AppScreen';
 import HeaderComponent from '../../components/HeaderComponent';
+import AppLoader from '../../components/AppLoader';
+import EmptyState from '../../components/EmptyState';
 
 import {
   connectNotificationWebSocket,
@@ -27,7 +28,7 @@ import {
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
 
-import COLORS from '../../context/designTokens';
+import {useTheme} from '../../context/ThemeContext';
 
 const NOTIF_ICONS = {
   DEPOSIT_SUBMITTED: 'account_balance',
@@ -44,25 +45,25 @@ const NOTIF_ICONS = {
   default: 'notifications',
 };
 
-const NOTIF_COLORS = {
-  DEPOSIT_APPROVED: COLORS.success,
-  BET_WON: COLORS.success,
-  BONUS_RECEIVED: COLORS.gold,
-  DEPOSIT_REJECTED: COLORS.meron_light,
-  WITHDRAWAL_REJECTED: COLORS.meron_light,
-  BET_LOST: COLORS.meron_light,
-  default: COLORS.gold,
-};
-
 const NotificationsScreen = ({navigation}) => {
+  const {colors} = useTheme();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const NOTIF_COLORS = {
+    DEPOSIT_APPROVED: colors.success,
+    BET_WON: colors.success,
+    BONUS_RECEIVED: colors.gold,
+    DEPOSIT_REJECTED: colors.danger,
+    WITHDRAWAL_REJECTED: colors.danger,
+    BET_LOST: colors.danger,
+    default: colors.gold,
+  };
+
   useEffect(() => {
     connectNotificationWebSocket(handleNotification, setUnreadCount);
-    // Request initial list
     setTimeout(() => {
       requestNotificationsList();
     }, 500);
@@ -114,37 +115,27 @@ const NotificationsScreen = ({navigation}) => {
     const iconColor = NOTIF_COLORS[type] || NOTIF_COLORS.default;
 
     return (
-      <View style={[styles.notifItem, !item.read && styles.notifUnread]}>
+      <View style={[styles.notifItem, {borderBottomColor: colors.border}, !item.read && {backgroundColor: colors.surface_elevated}]}>
         <View style={[styles.notifIcon, {backgroundColor: iconColor + '15'}]}>
           <MaterialIcons name={iconName} size={22} color={iconColor} />
         </View>
         <View style={styles.notifContent}>
-          <AppText style={styles.notifTitle} numberOfLines={1}>
+          <AppText style={[styles.notifTitle, {color: colors.text_primary}]} numberOfLines={1}>
             {item.title || type.replace(/_/g, ' ')}
           </AppText>
           {item.body ? (
-            <AppText style={styles.notifBody} numberOfLines={2}>
+            <AppText style={[styles.notifBody, {color: colors.text_muted}]} numberOfLines={2}>
               {item.body}
             </AppText>
           ) : null}
-          <AppText style={styles.notifTime}>
+          <AppText style={[styles.notifTime, {color: colors.text_muted}]}>
             {getTimeAgo(item.created_at)}
           </AppText>
         </View>
-        {!item.read && <View style={styles.unreadDot} />}
+        {!item.read && <View style={[styles.unreadDot, {backgroundColor: colors.gold}]} />}
       </View>
     );
   };
-
-  const renderEmpty = () => (
-    <View style={styles.emptyState}>
-      <MaterialIcons name="notifications-none" size={56} color="#ccc" />
-      <AppText style={styles.emptyText}>No notifications yet</AppText>
-      <AppText style={styles.emptySubtext}>
-        You'll see bet results, deposit/withdrawal updates, and more here.
-      </AppText>
-    </View>
-  );
 
   return (
     <AppScreen>
@@ -153,25 +144,34 @@ const NotificationsScreen = ({navigation}) => {
         onBackPress={() => navigation.goBack()}
         RightIconComponent={
           unreadCount > 0 ? (
-            <MaterialIcons name="done-all" size={24} color="#D4A843" />
+            <MaterialIcons name="done-all" size={24} color={colors.gold} />
           ) : null
         }
         onIconPress={handleMarkAllRead}
       />
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#D4A843" />
-        </View>
+        <AppLoader fullScreen text="Loading notifications..." />
       ) : (
         <FlatList
           data={notifications}
           keyExtractor={(item, index) => `notif-${index}-${item.created_at}`}
           renderItem={renderItem}
-          ListEmptyComponent={renderEmpty}
+          ListEmptyComponent={
+            <EmptyState
+              icon="notifications-none"
+              title="No notifications yet"
+              message="You'll see bet results, deposit/withdrawal updates, and more here."
+            />
+          }
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.gold}
+              colors={[colors.gold]}
+            />
           }
         />
       )}
@@ -180,11 +180,6 @@ const NotificationsScreen = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   listContent: {
     paddingHorizontal: wp(4),
     paddingBottom: 24,
@@ -196,10 +191,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  notifUnread: {
-    backgroundColor: '#1F1A12',
   },
   notifIcon: {
     width: 40,
@@ -215,43 +206,20 @@ const styles = StyleSheet.create({
   notifTitle: {
     fontSize: fp(1.6),
     fontWeight: '600',
-    color: COLORS.text_primary,
   },
   notifBody: {
     fontSize: fp(1.4),
-    color: COLORS.text_muted,
     marginTop: 2,
   },
   notifTime: {
     fontSize: fp(1.2),
-    color: COLORS.text_label,
     marginTop: 3,
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: COLORS.gold,
     marginLeft: 8,
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: hp(15),
-  },
-  emptyText: {
-    marginTop: 12,
-    fontSize: fp(1.8),
-    fontWeight: '600',
-    color: COLORS.text_muted,
-  },
-  emptySubtext: {
-    marginTop: 6,
-    fontSize: fp(1.4),
-    color: COLORS.text_label,
-    textAlign: 'center',
-    paddingHorizontal: wp(10),
   },
 });
 

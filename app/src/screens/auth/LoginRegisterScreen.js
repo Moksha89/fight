@@ -5,10 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 
 import {
@@ -21,9 +21,11 @@ import AppScreen from '../../components/AppScreen';
 import AppText from '../../components/AppText';
 import {getOtp, loginWithPassword, registerUser} from '../../apis/authApi';
 import {useAuth} from '../../context/AuthContext';
+import {useTheme} from '../../context/ThemeContext';
 import storage from '../../utils/storage';
 
 const LoginRegisterScreen = ({navigation}) => {
+  const {colors, radius, spacing} = useTheme();
   const [activeTab, setActiveTab] = useState('login');
   const [step, setStep] = useState('form'); // 'form' or 'otp'
   const [error, setError] = useState('');
@@ -169,20 +171,27 @@ const LoginRegisterScreen = ({navigation}) => {
 
   const renderOtpInputs = () => (
     <View style={styles.otpContainer}>
-      <AppText style={styles.label}>ENTER OTP</AppText>
+      <AppText style={[styles.label, {color: colors.text_secondary}]}>ENTER OTP</AppText>
       <View style={styles.otpRow}>
         {otp.map((digit, i) => (
           <TextInput
             key={i}
             ref={ref => (otpRefs.current[i] = ref)}
-            style={styles.otpInput}
+            style={[
+              styles.otpInput,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                color: colors.text_primary,
+              },
+            ]}
             value={digit}
             onChangeText={val => handleOtpChange(val, i)}
             onKeyPress={e => handleOtpKeyPress(e, i)}
             keyboardType="numeric"
             maxLength={1}
-            placeholderTextColor="#666"
-            selectionColor="#D4A843"
+            placeholderTextColor={colors.text_muted}
+            selectionColor={colors.gold}
           />
         ))}
       </View>
@@ -197,7 +206,7 @@ const LoginRegisterScreen = ({navigation}) => {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled">
-          <View style={styles.card}>
+          <View style={[styles.card, {backgroundColor: colors.card, borderColor: colors.border}]}>
             {/* Logo */}
             <View style={styles.logoSection}>
               <Image
@@ -205,32 +214,40 @@ const LoginRegisterScreen = ({navigation}) => {
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <AppText style={styles.brandName}>Kokoroko</AppText>
-              <AppText style={styles.subtitle}>
+              <AppText style={[styles.brandName, {color: colors.gold}]}>Kokoroko</AppText>
+              <AppText style={[styles.subtitle, {color: colors.text_secondary}]}>
                 {activeTab === 'login' ? 'Welcome back' : 'Create your account'}
               </AppText>
             </View>
 
             {/* Tabs */}
-            <View style={styles.tabsContainer}>
+            <View style={[styles.tabsContainer, {backgroundColor: colors.surface}]}>
               <TouchableOpacity
-                style={[styles.tab, activeTab === 'login' && styles.tabActive]}
+                style={[
+                  styles.tab,
+                  activeTab === 'login' && {backgroundColor: colors.gold},
+                ]}
                 onPress={() => switchTab('login')}>
                 <AppText
                   style={[
                     styles.tabText,
-                    activeTab === 'login' && styles.tabTextActive,
+                    {color: colors.text_secondary},
+                    activeTab === 'login' && {color: colors.background},
                   ]}>
                   Login
                 </AppText>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.tab, activeTab === 'register' && styles.tabActive]}
+                style={[
+                  styles.tab,
+                  activeTab === 'register' && {backgroundColor: colors.gold},
+                ]}
                 onPress={() => switchTab('register')}>
                 <AppText
                   style={[
                     styles.tabText,
-                    activeTab === 'register' && styles.tabTextActive,
+                    {color: colors.text_secondary},
+                    activeTab === 'register' && {color: colors.background},
                   ]}>
                   Register
                 </AppText>
@@ -239,8 +256,8 @@ const LoginRegisterScreen = ({navigation}) => {
 
             {/* Error */}
             {error ? (
-              <View style={styles.errorBox}>
-                <AppText style={styles.errorText}>{error}</AppText>
+              <View style={[styles.errorBox, {backgroundColor: 'rgba(239,68,68,0.15)'}]}>
+                <AppText style={[styles.errorText, {color: colors.danger}]}>{error}</AppText>
               </View>
             ) : null}
 
@@ -248,42 +265,42 @@ const LoginRegisterScreen = ({navigation}) => {
             {activeTab === 'login' && (
               <View>
                 <View style={styles.formGroup}>
-                  <AppText style={styles.label}>MOBILE NUMBER</AppText>
+                  <AppText style={[styles.label, {color: colors.text_secondary}]}>MOBILE NUMBER</AppText>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {backgroundColor: colors.surface, borderColor: colors.border, color: colors.text_primary}]}
                     placeholder="Enter mobile number"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={colors.text_muted}
                     value={loginMobile}
                     onChangeText={setLoginMobile}
                     keyboardType="default"
                     autoCapitalize="none"
-                    selectionColor="#D4A843"
+                    selectionColor={colors.gold}
                   />
                 </View>
                 <View style={styles.formGroup}>
-                  <AppText style={styles.label}>PASSWORD</AppText>
+                  <AppText style={[styles.label, {color: colors.text_secondary}]}>PASSWORD</AppText>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {backgroundColor: colors.surface, borderColor: colors.border, color: colors.text_primary}]}
                     placeholder="Enter password"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={colors.text_muted}
                     value={loginPassword}
                     onChangeText={setLoginPassword}
                     secureTextEntry
-                    selectionColor="#D4A843"
+                    selectionColor={colors.gold}
                   />
                 </View>
                 {step === 'otp' && renderOtpInputs()}
                 <TouchableOpacity
-                  style={styles.authBtn}
+                  style={[styles.authBtn, {backgroundColor: colors.gold}]}
                   onPress={handleLogin}
                   disabled={isLoading}>
-                  <AppText style={styles.authBtnText}>
-                    {isLoading
-                      ? 'Please wait...'
-                      : step === 'form'
-                      ? 'Send OTP & Login'
-                      : 'Verify & Login'}
-                  </AppText>
+                  {isLoading ? (
+                    <ActivityIndicator color={colors.background} />
+                  ) : (
+                    <AppText style={[styles.authBtnText, {color: colors.background}]}>
+                      {step === 'form' ? 'Send OTP & Login' : 'Verify & Login'}
+                    </AppText>
+                  )}
                 </TouchableOpacity>
               </View>
             )}
@@ -292,65 +309,65 @@ const LoginRegisterScreen = ({navigation}) => {
             {activeTab === 'register' && (
               <View>
                 <View style={styles.formGroup}>
-                  <AppText style={styles.label}>MOBILE NUMBER</AppText>
+                  <AppText style={[styles.label, {color: colors.text_secondary}]}>MOBILE NUMBER</AppText>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {backgroundColor: colors.surface, borderColor: colors.border, color: colors.text_primary}]}
                     placeholder="10-digit mobile number"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={colors.text_muted}
                     value={regMobile}
                     onChangeText={setRegMobile}
                     keyboardType="phone-pad"
-                    selectionColor="#D4A843"
+                    selectionColor={colors.gold}
                   />
                 </View>
                 <View style={styles.formGroup}>
-                  <AppText style={styles.label}>USERNAME</AppText>
+                  <AppText style={[styles.label, {color: colors.text_secondary}]}>USERNAME</AppText>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {backgroundColor: colors.surface, borderColor: colors.border, color: colors.text_primary}]}
                     placeholder="Choose a username"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={colors.text_muted}
                     value={regUsername}
                     onChangeText={setRegUsername}
                     autoCapitalize="none"
-                    selectionColor="#D4A843"
+                    selectionColor={colors.gold}
                   />
                 </View>
                 <View style={styles.formGroup}>
-                  <AppText style={styles.label}>PASSWORD</AppText>
+                  <AppText style={[styles.label, {color: colors.text_secondary}]}>PASSWORD</AppText>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {backgroundColor: colors.surface, borderColor: colors.border, color: colors.text_primary}]}
                     placeholder="Min 6 characters"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={colors.text_muted}
                     value={regPassword}
                     onChangeText={setRegPassword}
                     secureTextEntry
-                    selectionColor="#D4A843"
+                    selectionColor={colors.gold}
                   />
                 </View>
                 <View style={styles.formGroup}>
-                  <AppText style={styles.label}>CONFIRM PASSWORD</AppText>
+                  <AppText style={[styles.label, {color: colors.text_secondary}]}>CONFIRM PASSWORD</AppText>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, {backgroundColor: colors.surface, borderColor: colors.border, color: colors.text_primary}]}
                     placeholder="Re-enter password"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={colors.text_muted}
                     value={regConfirm}
                     onChangeText={setRegConfirm}
                     secureTextEntry
-                    selectionColor="#D4A843"
+                    selectionColor={colors.gold}
                   />
                 </View>
                 {step === 'otp' && renderOtpInputs()}
                 <TouchableOpacity
-                  style={styles.authBtn}
+                  style={[styles.authBtn, {backgroundColor: colors.gold}]}
                   onPress={handleRegister}
                   disabled={isLoading}>
-                  <AppText style={styles.authBtnText}>
-                    {isLoading
-                      ? 'Please wait...'
-                      : step === 'form'
-                      ? 'Send OTP & Register'
-                      : 'Verify & Register'}
-                  </AppText>
+                  {isLoading ? (
+                    <ActivityIndicator color={colors.background} />
+                  ) : (
+                    <AppText style={[styles.authBtnText, {color: colors.background}]}>
+                      {step === 'form' ? 'Send OTP & Register' : 'Verify & Register'}
+                    </AppText>
+                  )}
                 </TouchableOpacity>
               </View>
             )}
@@ -364,7 +381,6 @@ const LoginRegisterScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0B0B0B',
   },
   keyboardView: {
     flex: 1,
@@ -377,13 +393,11 @@ const styles = StyleSheet.create({
     paddingVertical: hp(4),
   },
   card: {
-    backgroundColor: '#1a1a1a',
     borderRadius: 16,
     padding: wp(7),
     width: '100%',
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
   },
   logoSection: {
     alignItems: 'center',
@@ -398,17 +412,14 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: fp(2.8),
     fontWeight: '800',
-    color: '#D4A843',
     letterSpacing: -0.5,
   },
   subtitle: {
-    color: '#a0a0a0',
     fontSize: fp(1.6),
     marginTop: 4,
   },
   tabsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#111111',
     borderRadius: 10,
     padding: 3,
     marginBottom: hp(2.5),
@@ -419,25 +430,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
   },
-  tabActive: {
-    backgroundColor: '#D4A843',
-  },
   tabText: {
     fontSize: fp(1.6),
     fontWeight: '600',
-    color: '#a0a0a0',
-  },
-  tabTextActive: {
-    color: '#000',
   },
   errorBox: {
-    backgroundColor: 'rgba(239,68,68,0.15)',
     borderRadius: 8,
     padding: wp(3),
     marginBottom: hp(1.5),
   },
   errorText: {
-    color: '#ef4444',
     fontSize: fp(1.5),
     textAlign: 'center',
   },
@@ -447,18 +449,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: fp(1.2),
     fontWeight: '600',
-    color: '#a0a0a0',
     marginBottom: 5,
     letterSpacing: 0.8,
   },
   input: {
-    backgroundColor: '#111111',
     borderWidth: 1,
-    borderColor: '#2a2a2a',
     borderRadius: 10,
     paddingVertical: hp(1.5),
     paddingHorizontal: wp(4),
-    color: '#f0f0f0',
     fontSize: fp(1.7),
     fontFamily: 'System',
   },
@@ -472,24 +470,19 @@ const styles = StyleSheet.create({
   otpInput: {
     width: wp(11),
     height: wp(12),
-    backgroundColor: '#111111',
     borderWidth: 1,
-    borderColor: '#2a2a2a',
     borderRadius: 10,
     textAlign: 'center',
-    color: '#f0f0f0',
     fontSize: fp(2.2),
     fontWeight: '600',
   },
   authBtn: {
-    backgroundColor: '#D4A843',
     borderRadius: 10,
     paddingVertical: hp(1.6),
     alignItems: 'center',
     marginTop: hp(1),
   },
   authBtnText: {
-    color: '#000',
     fontSize: fp(1.7),
     fontWeight: '600',
   },

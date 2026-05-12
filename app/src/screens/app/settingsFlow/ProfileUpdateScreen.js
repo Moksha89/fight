@@ -7,7 +7,15 @@ import storage from '../../../utils/storage';
 
 import {updateUserInfo} from '../../../apis/authApi';
 
-import {View, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 
 import AppScreen from '../../../components/AppScreen';
 import AppText from '../../../components/AppText';
@@ -20,6 +28,7 @@ import {
   responsiveWidth as wp,
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
+import {useTheme} from '../../../context/ThemeContext';
 
 const ProfileUpdateScreen = ({navigation, route}) => {
   const {
@@ -30,6 +39,7 @@ const ProfileUpdateScreen = ({navigation, route}) => {
     isLocked,
     setIsLocked,
   } = useAuth();
+  const {colors} = useTheme();
 
   const [gender, setGender] = useState('');
   const [name, setName] = useState('');
@@ -110,10 +120,10 @@ const ProfileUpdateScreen = ({navigation, route}) => {
         }
         RightIconComponent={
           isFirstTime ? null : (
-            <Octicons name="home" size={17} color="#ffffff" />
+            <Octicons name="home" size={17} color={colors.text_primary} />
           )
         }
-        rightIconWrapperStyle={{backgroundColor: '#d4a843'}}
+        rightIconWrapperStyle={{backgroundColor: colors.gold}}
         containerStyle={{marginBottom: hp(4)}}
       />
       <TextInput
