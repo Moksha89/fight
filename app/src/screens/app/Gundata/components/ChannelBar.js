@@ -1,3 +1,4 @@
+// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,

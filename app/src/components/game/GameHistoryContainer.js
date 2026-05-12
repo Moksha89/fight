@@ -1,6 +1,5 @@
-// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import {StyleSheet, View, ScrollView} from 'react-native';
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useMemo} from 'react';
 
 import {
   responsiveHeight as hp,
@@ -8,25 +7,37 @@ import {
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
 
-import AppText from '../../../../components/AppText';
+import AppText from '../AppText';
+import {useTheme} from '../../context/ThemeContext';
 
-export default function HistoryContainer({
+/**
+ * Shared game history container for CockFight and Gundata/Dice.
+ *
+ * Props:
+ *  - activeChannel: current channel/board id
+ *  - autoMatchHistory: array of auto-match results
+ *  - manualMatchHistory: object mapping channel id → array of results
+ *  - showBeadRoad: (default true) show the bead road section (cockfight uses it)
+ *  - teamLabels: optional {1: 'Meron', 2: 'Wala', 3: 'Draw'} for bead road labels
+ */
+export default function GameHistoryContainer({
   activeChannel,
   autoMatchHistory,
   manualMatchHistory,
+  showBeadRoad = true,
+  teamLabels = {1: 'M', 2: 'W', 3: 'D'},
 }) {
+  const {colors} = useTheme();
   const historyScrollViewRef = useRef(null);
 
-  const [activeChannelMatchHistory, setActiveChannelMatchHistory] = useState(
-    [],
-  );
+  const [activeChannelMatchHistory, setActiveChannelMatchHistory] = useState([]);
 
   const rows = 7;
   const teamColorMap = {
-    1: '#BA2343', // Red
-    2: '#0000FF', // Blue
-    3: '#43A048', // Green
-    4: '#808080', // Gray (if used)
+    1: '#BA2343', // Red / Meron
+    2: '#0000FF', // Blue / Wala
+    3: '#43A048', // Green / Draw
+    4: '#808080', // Gray (cancelled)
   };
 
   function processMatchHistory(results = []) {
@@ -47,9 +58,8 @@ export default function HistoryContainer({
       columns[columns.length - 1][rowIndex] = color;
       rowIndex++;
 
-      // If rowIndex reaches the limit, force next one to start a new column
       if (rowIndex === rows) {
-        currentColor = null; // Reset so next will always push new column
+        currentColor = null;
       }
     });
 
@@ -68,52 +78,84 @@ export default function HistoryContainer({
     }
   }, [activeChannel, autoMatchHistory, manualMatchHistory]);
 
-  const beadRoadData = React.useMemo(() => {
-    const results = activeChannel == 0 ? autoMatchHistory : (manualMatchHistory[activeChannel] || []);
+  // Bead road data (only used when showBeadRoad is true)
+  const beadRoadData = useMemo(() => {
+    if (!showBeadRoad) return [];
+    const results =
+      activeChannel == 0
+        ? autoMatchHistory
+        : manualMatchHistory[activeChannel] || [];
     return results.slice(-60).map(m => ({
       color: teamColorMap[m.winTeam] || '#808080',
-      label: m.winTeam === 1 ? 'M' : m.winTeam === 2 ? 'W' : m.winTeam === 3 ? 'D' : '?',
+      label:
+        teamLabels[m.winTeam] || '?',
       id: m.id || m.matchId,
     }));
-  }, [activeChannel, autoMatchHistory, manualMatchHistory]);
+  }, [activeChannel, autoMatchHistory, manualMatchHistory, showBeadRoad]);
 
   const beadScrollRef = useRef(null);
 
   return (
     <View style={styles.bettingSection}>
-      {/* Bead Road */}
-      <View style={styles.beadRoadContainer}>
-        <AppText style={styles.beadRoadTitle}>Bead Road</AppText>
-        <ScrollView
-          ref={beadScrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.beadRoadRow}
-          onContentSizeChange={() => beadScrollRef.current?.scrollToEnd({animated: true})}>
-          {beadRoadData.map((item, i) => (
-            <View key={i} style={[styles.beadDot, {backgroundColor: item.color}]}>
-              <AppText style={styles.beadDotText}>{item.label}</AppText>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-      <View style={styles.bettingResultsSection}>
+      {/* Bead Road (cockfight only) */}
+      {showBeadRoad && (
+        <View style={[styles.beadRoadContainer, {backgroundColor: colors.card}]}>
+          <AppText style={[styles.beadRoadTitle, {color: colors.text_secondary}]}>
+            Bead Road
+          </AppText>
+          <ScrollView
+            ref={beadScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.beadRoadRow}
+            onContentSizeChange={() =>
+              beadScrollRef.current?.scrollToEnd({animated: true})
+            }>
+            {beadRoadData.map((item, i) => (
+              <View
+                key={i}
+                style={[styles.beadDot, {backgroundColor: item.color}]}>
+                <AppText style={styles.beadDotText}>{item.label}</AppText>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Grid history */}
+      <View
+        style={[
+          styles.bettingResultsSection,
+          {backgroundColor: colors.card},
+          !showBeadRoad && {
+            borderTopLeftRadius: wp(4),
+            borderTopRightRadius: wp(4),
+            marginTop: hp(1),
+            paddingVertical: hp(3),
+          },
+        ]}>
         <View style={styles.bettinResultLeft}>
           <View style={styles.colorDetails}>
             <View style={styles.bettingColor} />
-            <AppText>Meron</AppText>
+            <AppText style={{color: colors.text_primary}}>Meron</AppText>
           </View>
           <View style={styles.colorDetails}>
-            <View style={[styles.bettingColor, {backgroundColor: '#43A048'}]} />
-            <AppText>Draw</AppText>
+            <View
+              style={[styles.bettingColor, {backgroundColor: '#43A048'}]}
+            />
+            <AppText style={{color: colors.text_primary}}>Draw</AppText>
           </View>
           <View style={styles.colorDetails}>
-            <View style={[styles.bettingColor, {backgroundColor: '#0000FF'}]} />
-            <AppText>Wala</AppText>
+            <View
+              style={[styles.bettingColor, {backgroundColor: '#0000FF'}]}
+            />
+            <AppText style={{color: colors.text_primary}}>Wala</AppText>
           </View>
           <View style={styles.colorDetails}>
-            <View style={[styles.bettingColor, {backgroundColor: '#bfbfbf'}]} />
-            <AppText>Cancle</AppText>
+            <View
+              style={[styles.bettingColor, {backgroundColor: '#bfbfbf'}]}
+            />
+            <AppText style={{color: colors.text_primary}}>Cancle</AppText>
           </View>
         </View>
         <ScrollView
@@ -160,14 +202,12 @@ export default function HistoryContainer({
 const styles = StyleSheet.create({
   bettingSection: {
     width: wp(100),
-    // borderRadius: wp(3),
     overflow: 'hidden',
     position: 'relative',
     marginTop: hp(0.5),
   },
   bettingResultsSection: {
     width: wp(95),
-    backgroundColor: '#171717',
     marginLeft: wp(2.5),
     paddingHorizontal: wp(3),
     paddingVertical: hp(2),
@@ -187,7 +227,7 @@ const styles = StyleSheet.create({
   bettingColor: {
     width: wp(2),
     height: wp(2),
-    borderRadius: '50%',
+    borderRadius: 999,
     backgroundColor: '#BA2343',
     marginBottom: hp(0.5),
   },
@@ -213,7 +253,6 @@ const styles = StyleSheet.create({
   beadRoadContainer: {
     width: wp(95),
     marginLeft: wp(2.5),
-    backgroundColor: '#171717',
     borderTopLeftRadius: wp(4),
     borderTopRightRadius: wp(4),
     paddingHorizontal: wp(3),
@@ -223,7 +262,6 @@ const styles = StyleSheet.create({
   beadRoadTitle: {
     fontSize: fp(1.5),
     fontWeight: '700',
-    color: '#A8A29E',
     marginBottom: hp(0.5),
   },
   beadRoadRow: {
@@ -244,4 +282,5 @@ const styles = StyleSheet.create({
     fontSize: fp(1.1),
     fontWeight: '700',
   },
+  grid: {},
 });

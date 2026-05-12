@@ -1,8 +1,6 @@
-// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   DeviceEventEmitter,
@@ -15,7 +13,10 @@ import {
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
 
-export default function ChannelBar({
+import AppText from '../AppText';
+import {useTheme} from '../../context/ThemeContext';
+
+export default function GameChannelBar({
   availableChannels,
   activeChannel,
   setActiveChannel,
@@ -24,6 +25,8 @@ export default function ChannelBar({
   musicEnabled,
   setMusicEnabled,
 }) {
+  const {colors} = useTheme();
+
   const playBackgroundMusic = () => {
     try {
       SoundPlayer.loadSoundFile('background_music', 'mp3');
@@ -79,16 +82,22 @@ export default function ChannelBar({
       {Object.entries(availableChannels).map(([id, title]) => (
         <TouchableOpacity
           key={id}
-          style={[styles.button, activeChannel == id && styles.activeButton]}
+          style={[
+            styles.button,
+            activeChannel == id && {backgroundColor: colors.gold},
+          ]}
           onPress={() => setActiveChannel(id)}>
-          <Text
+          <AppText
             style={[
               styles.buttonText,
-              activeChannel == id && styles.activeButtonText,
+              {color: colors.text_primary},
+              activeChannel == id && {color: '#fff', fontWeight: 'bold'},
             ]}>
             {title}
-          </Text>
-          {activeChannel == id && <View style={styles.triangle} />}
+          </AppText>
+          {activeChannel == id && (
+            <View style={[styles.triangle, {borderBottomColor: colors.gold}]} />
+          )}
         </TouchableOpacity>
       ))}
 
@@ -97,7 +106,7 @@ export default function ChannelBar({
           <MaterialCommunityIcons
             name={soundEnabled ? 'volume-high' : 'volume-off'}
             size={24}
-            color="#000000"
+            color={colors.text_primary}
           />
         </TouchableOpacity>
 
@@ -105,7 +114,7 @@ export default function ChannelBar({
           <MaterialCommunityIcons
             name={musicEnabled ? 'music' : 'music-off'}
             size={20}
-            color="#000000"
+            color={colors.text_primary}
           />
         </TouchableOpacity>
       </View>
@@ -127,18 +136,10 @@ const styles = StyleSheet.create({
     paddingVertical: hp(0.3),
     paddingHorizontal: wp(2.4),
     borderRadius: wp(1),
-    backgroundColor: '#ccc',
-  },
-  activeButton: {
-    backgroundColor: '#d4a843', // active bg color
+    backgroundColor: '#555',
   },
   buttonText: {
     fontSize: fp(1.5),
-    color: '#F5F1E8',
-  },
-  activeButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   triangle: {
     marginTop: 4,
@@ -151,7 +152,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 8,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: '#d4a843',
     position: 'absolute',
     left: 15,
     top: -12,
