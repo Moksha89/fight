@@ -1108,7 +1108,7 @@ def set_feature_controls_api(request):
         if key in current and isinstance(vals, dict):
             current[key].update(vals)
     _save_feature_config(current)
-    log_admin_action(request, "feature_controls_updated", {"changes": data})
+    log_admin_action(request.user, "feature_controls_updated", "system", "feature_controls", {"changes": data}, request)
     return JsonResponse({"status": "ok", "config": current})
 
 @staff_member_required
@@ -1411,7 +1411,7 @@ def admin_run_backup(request):
         return JsonResponse({"error": "POST required"}, status=405)
     from kokoroko.backup import run_all_backups
     results = run_all_backups()
-    log_admin_action(request, "manual_backup", {"results": {k: v for k, v in results.items()}})
+    log_admin_action(request.user, "manual_backup", "system", "backup", {"results": {k: v for k, v in results.items()}}, request)
     return JsonResponse({"status": "ok", "results": results})
 
 
@@ -1522,7 +1522,7 @@ def admin_sms_settings_save(request):
     if changes:
         safe_changes = {k: v for k, v in changes.items()
                         if k not in ("msg91_auth_key", "twilio_account_sid", "twilio_auth_token")}
-        log_admin_action(request, "sms_settings_updated", {"changes": safe_changes})
+        log_admin_action(request.user, "sms_settings_updated", "sms_settings", "1", {"changes": safe_changes}, request)
 
     return JsonResponse({"status": "ok"})
 
@@ -1551,11 +1551,11 @@ def admin_sms_test(request):
     from utility.sms import send_test_otp
     success, test_otp, err = send_test_otp(mobile, provider_override)
 
-    log_admin_action(request, "sms_test_sent", {
+    log_admin_action(request.user, "sms_test_sent", "sms_settings", "test", {
         "mobile_masked": mobile[:2] + "****" + mobile[-2:] if len(mobile) > 4 else "****",
         "provider": provider_override or "active",
         "success": success,
-    })
+    }, request)
 
     result = {"success": success}
     if err:
