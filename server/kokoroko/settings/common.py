@@ -359,8 +359,12 @@ _DEV_CORS_ORIGINS = [
 _cors_extra = os.environ.get("CORS_EXTRA_ORIGINS", "")
 _cors_extra_list = [o.strip() for o in _cors_extra.split(",") if o.strip()] if _cors_extra else []
 
+# DEBUG is defined in devConfig/prodConfig which import common first,
+# so use globals().get() to safely check without NameError.
+_debug = globals().get("DEBUG", os.environ.get("DJANGO_ENV") != "prod")
+
 CORS_ALLOWED_ORIGINS = _PRODUCTION_CORS_ORIGINS + _cors_extra_list
-if DEBUG:
+if _debug:
     CORS_ALLOWED_ORIGINS += _DEV_CORS_ORIGINS
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 CORS_ALLOW_CREDENTIALS = True
