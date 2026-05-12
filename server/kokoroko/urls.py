@@ -1630,6 +1630,9 @@ input:checked + .slider:before {{ transform:translateX(20px); background:#fff; }
 .provider-section {{ display:none; }}
 .provider-section.active {{ display:block; }}
 .preview-box {{ background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:12px; font-size:13px; color:#ccc; margin-top:8px; }}
+.warning-banner {{ background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.4); border-radius:10px; padding:14px 20px; margin-bottom:20px; display:flex; align-items:center; gap:10px; font-size:14px; color:#eab308; }}
+.warning-banner .material-icons {{ font-size:22px; }}
+.warning-banner.hidden {{ display:none; }}
 </style>
 </head>
 <body>
@@ -1637,6 +1640,10 @@ input:checked + .slider:before {{ transform:translateX(20px); background:#fff; }
 <div id="kk-main">
 <div class="topbar"><h1><i class="material-icons" style="color:#D4A843;margin-right:4px;">sms</i> SMS Settings</h1></div>
 <div class="container">
+<div class="warning-banner" id="provider-warning">
+<i class="material-icons">warning</i>
+<span><strong>SMS provider is disabled.</strong> Users will not receive OTP SMS until MSG91 or Twilio is configured. Before public launch, configure either MSG91 (Auth Key, Template ID, Sender ID, Entity ID) or Twilio (Account SID, Auth Token, From Number).</span>
+</div>
 <div class="grid">
 
 <!-- General Settings Card -->
@@ -1784,6 +1791,8 @@ function updateProviderSections() {{
     var p = document.getElementById('sms-provider').value;
     document.getElementById('msg91-card').className = 'card provider-section' + (p === 'msg91' ? ' active' : '');
     document.getElementById('twilio-card').className = 'card provider-section' + (p === 'twilio' ? ' active' : '');
+    var warn = document.getElementById('provider-warning');
+    if (warn) warn.className = 'warning-banner' + (p !== 'none' ? ' hidden' : '');
 }}
 function updatePreview() {{
     var tpl = document.getElementById('otp-template').value || 'Your KOKOROKO OTP is {{otp}}.';
