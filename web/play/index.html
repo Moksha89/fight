@@ -189,6 +189,9 @@
             width: 36px; height: 36px; border-radius: 50%;
             cursor: pointer; transition: all 0.2s; border: none; background: none;
         }
+        .header-action-btn.notification-btn { background: rgba(212,168,67,0.1); }
+        .header-action-btn.notification-btn .material-icons { color: var(--gold); font-size: 20px; }
+        .header-action-btn.notification-btn:hover { background: rgba(212,168,67,0.25); }
         .header-action-btn.deposit-btn { background: rgba(16,185,129,0.15); }
         .header-action-btn.deposit-btn .material-icons { color: #10b981; font-size: 20px; }
         .header-action-btn.deposit-btn:hover { background: rgba(16,185,129,0.3); }
@@ -747,6 +750,7 @@
         .bet-item .bet-result.won { background: rgba(34,197,94,0.15); color: #22c55e; }
         .bet-item .bet-result.lost { background: rgba(239,68,68,0.15); color: #ef4444; }
         .bet-item .bet-result.pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .bet-item .bet-result.cancelled { background: rgba(156,163,175,0.15); color: #9ca3af; }
         /* Cockfight Two-Column Layout */
         .cockfight-layout { display: flex; gap: 16px; align-items: flex-start; }
         .cockfight-layout .cockfight-left { flex: 1; min-width: 0; }
@@ -1183,7 +1187,7 @@
                 </div>
             </div>
             <div class="header-right">
-                <button class="header-action-btn" onclick="navigate('sec-notifications')" title="Notifications" style="position:relative;">
+                <button class="header-action-btn notification-btn" onclick="navigate('sec-notifications')" title="Notifications" style="position:relative;">
                     <span class="material-icons">notifications</span>
                     <span id="header-notif-badge" style="display:none;position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;">0</span>
                 </button>
@@ -1836,6 +1840,20 @@
     </a>
 
     <script>
+    // ===== CURRENCY FORMATTING HELPERS =====
+    function formatCurrencyShort(amount) {
+        var num = parseFloat(amount) || 0;
+        if (num < 0) return '-' + formatCurrencyShort(-num);
+        if (num >= 10000000) return (num / 10000000).toFixed(2) + ' Cr';
+        if (num >= 100000) return (num / 100000).toFixed(2) + ' L';
+        if (num >= 1000) return num.toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        return num.toFixed(2);
+    }
+    function formatCurrencyFull(amount) {
+        var num = parseFloat(amount) || 0;
+        return num.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
     // Custom confirm modal (replaces browser confirm())
     function customConfirm(message, {title = 'Confirm', icon = '⚡', okText = 'Confirm', cancelText = 'Cancel', danger = false} = {}) {
         return new Promise((resolve) => {
@@ -2496,15 +2514,15 @@
                 const data = await res.json();
                 userInfo = data;
                 localStorage.setItem('userInfo', JSON.stringify(data));
-                document.getElementById('wallet-balance').textContent = parseFloat(data.wallet_balance || 0).toFixed(2);
-                document.getElementById('wallet-balance-large').textContent = parseFloat(data.wallet_balance || 0).toFixed(2);
+                document.getElementById('wallet-balance').textContent = formatCurrencyShort(data.wallet_balance || 0);
+                document.getElementById('wallet-balance-large').textContent = formatCurrencyFull(data.wallet_balance || 0);
                 // Exposure & bonus
                 const exposure = parseFloat(data.exposure || 0);
                 const bonus = parseFloat(data.wallet_balance || 0) - parseFloat(data.available_balance || 0) - exposure;
                 const expEl = document.getElementById('wallet-exposure');
                 const bonEl = document.getElementById('wallet-bonus');
-                if (expEl) expEl.textContent = '₹' + exposure.toFixed(2);
-                if (bonEl) bonEl.textContent = '₹' + Math.max(0, bonus).toFixed(2);
+                if (expEl) expEl.textContent = '₹' + formatCurrencyShort(exposure);
+                if (bonEl) bonEl.textContent = '₹' + formatCurrencyShort(Math.max(0, bonus));
                 document.getElementById('profile-name').textContent = data.username || 'User';
                 document.getElementById('profile-phone').textContent = data.phoneNumber || '';
                 document.getElementById('pd-name').textContent = data.username || 'User';
@@ -3222,9 +3240,11 @@
         recentBets.forEach(b => {
             const team = teamNames[b.betTeam] || 'Unknown';
             const cls = teamClasses[b.betTeam] || '';
-            let result = 'pending', resultCls = 'pending';
-            if (b.matchWinStatus === 1) { result = 'Won'; resultCls = 'won'; }
-            else if (b.matchWinStatus === 2) { result = 'Lost'; resultCls = 'lost'; }
+            let result = 'Pending', resultCls = 'pending';
+            if (b.matchWinStatus === 0) { result = 'Pending'; resultCls = 'pending'; }
+            else if (b.matchWinStatus === 4) { result = 'Cancelled'; resultCls = 'cancelled'; }
+            else if (b.matchWinStatus === b.betTeam) { result = 'Won'; resultCls = 'won'; }
+            else { result = 'Lost'; resultCls = 'lost'; }
             const fightNum = b.matchNumber || b.match_number || b.matchId || '';
             html += `<div class="bet-item">
                 <div class="bet-team ${cls}">${team}</div>
@@ -3555,12 +3575,12 @@
             try {
                 var data = JSON.parse(e.data);
                 if (data.balance !== undefined) {
-                    document.getElementById('wallet-balance').textContent = parseFloat(data.balance).toFixed(2);
-                    document.getElementById('wallet-balance-large').textContent = parseFloat(data.balance).toFixed(2);
+                    document.getElementById('wallet-balance').textContent = formatCurrencyShort(data.balance);
+                    document.getElementById('wallet-balance-large').textContent = formatCurrencyFull(data.balance);
                 }
                 if (data.exposure !== undefined) {
                     var expEl = document.getElementById('wallet-exposure');
-                    if (expEl) expEl.textContent = '₹' + parseFloat(data.exposure).toFixed(2);
+                    if (expEl) expEl.textContent = '₹' + formatCurrencyShort(data.exposure);
                 }
             } catch(err) {}
         };
