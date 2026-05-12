@@ -17,7 +17,7 @@ import AppText from '../../../../components/AppText';
 import LottieView from 'lottie-react-native';
 
 import {useAuth} from '../../../../context/AuthContext';
-import COLORS from '../../../../context/designTokens';
+import {useTheme} from '../../../../context/ThemeContext';
 
 import {useNavigation} from '@react-navigation/native';
 
@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   betPlaceButton: {
-    backgroundColor: COLORS.gold,
+    backgroundColor: '#D4A843',
     width: wp(35),
     paddingVertical: hp(1.2),
     borderRadius: wp(2),
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
   },
   autoBetToggleActive: {
-    backgroundColor: COLORS.gold,
+    backgroundColor: '#D4A843',
   },
   autoBetTeamRow: {
     flexDirection: 'row',

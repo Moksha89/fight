@@ -42,6 +42,7 @@ import AppText from '../../../components/AppText';
 import AppScreen from '../../../components/AppScreen';
 
 import {useAuth} from '../../../context/AuthContext';
+import {useTheme} from '../../../context/ThemeContext';
 import COLORS from '../../../context/designTokens';
 
 import FeatureUnderMaintenanceScreen from '../../FeatureUnderMaintenanceScreen';
@@ -49,6 +50,7 @@ import HistoryContainer from './components/HistoryContainer';
 
 const LiveCockFight = ({navigation, route}) => {
   const {wallet, settings} = useAuth();
+  const {colors} = useTheme();
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [isBetHistoryModalVisible, setBetHistoryModalVisible] = useState(false);
@@ -318,7 +320,7 @@ const styles = StyleSheet.create({
   header: {flexDirection: 'row', alignItems: 'center', padding: 12},
   headerTitle: {flex: 1, textAlign: 'center', fontWeight: 'bold', fontSize: 18},
   walletButton: {
-    backgroundColor: COLORS.gold,
+    backgroundColor: colors.gold,
     borderRadius: wp(2),
     flexDirection: 'row',
     width: wp(25),

@@ -4,7 +4,6 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 
@@ -14,9 +13,13 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import AppText from '../../../components/AppText';
 import AppScreen from '../../../components/AppScreen';
 import HeaderComponent from '../../../components/HeaderComponent';
+import AppLoader from '../../../components/AppLoader';
+import EmptyState from '../../../components/EmptyState';
+import AppBadge from '../../../components/AppBadge';
 
 import {apiRequest} from '../../../utils/apiClient';
 import {useAuth} from '../../../context/AuthContext';
+import {useTheme} from '../../../context/ThemeContext';
 
 import {
   responsiveHeight as hp,
@@ -33,6 +36,7 @@ const FILTERS = [
 
 const StatementScreen = ({navigation}) => {
   const {wallet} = useAuth();
+  const {colors} = useTheme();
   const [transactions, setTransactions] = useState([]);
   const [filteredTxns, setFilteredTxns] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -112,36 +116,29 @@ const StatementScreen = ({navigation}) => {
   const renderItem = ({item}) => {
     const credit = isCredit(item);
     return (
-      <View style={styles.txnItem}>
-        <View style={[styles.txnIcon, credit ? styles.creditIcon : styles.debitIcon]}>
+      <View style={[styles.txnItem, {borderBottomColor: colors.border}]}>
+        <View style={[styles.txnIcon, {backgroundColor: credit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'}]}>
           <MaterialIcons
             name={credit ? 'arrow_downward' : 'arrow_upward'}
             size={18}
-            color={credit ? '#22c55e' : '#ef4444'}
+            color={credit ? colors.success : colors.danger}
           />
         </View>
         <View style={styles.txnDetails}>
-          <AppText style={styles.txnDesc} numberOfLines={1}>
+          <AppText style={[styles.txnDesc, {color: colors.text_primary}]} numberOfLines={1}>
             {item.description}
           </AppText>
-          <AppText style={styles.txnDate}>{item.date}</AppText>
+          <AppText style={[styles.txnDate, {color: colors.text_muted}]}>{item.date}</AppText>
           {item.hash ? (
-            <AppText style={styles.txnHash}>#{item.hash}</AppText>
+            <AppText style={[styles.txnHash, {color: colors.text_muted}]}>#{item.hash}</AppText>
           ) : null}
         </View>
-        <AppText style={[styles.txnAmount, credit ? styles.creditText : styles.debitText]}>
+        <AppText style={[styles.txnAmount, {color: credit ? colors.success : colors.danger}]}>
           {credit ? '+' : '-'}₹{item.amount}
         </AppText>
       </View>
     );
   };
-
-  const renderEmpty = () => (
-    <View style={styles.emptyState}>
-      <MaterialIcons name="receipt-long" size={48} color="#666" />
-      <AppText style={styles.emptyText}>No transactions found</AppText>
-    </View>
-  );
 
   return (
     <AppScreen>
@@ -152,9 +149,9 @@ const StatementScreen = ({navigation}) => {
 
       {/* Wallet Summary */}
       <View style={styles.summaryRow}>
-        <View style={styles.summaryItem}>
-          <AppText style={styles.summaryLabel}>Balance</AppText>
-          <AppText style={[styles.summaryValue, styles.creditText]}>
+        <View style={[styles.summaryItem, {backgroundColor: colors.card}]}>
+          <AppText style={[styles.summaryLabel, {color: colors.text_muted}]}>Balance</AppText>
+          <AppText style={[styles.summaryValue, {color: colors.success}]}>
             ₹{formatAmount(wallet?.balanceWithBonus || wallet?.balance || 0)}
           </AppText>
         </View>
@@ -165,12 +162,17 @@ const StatementScreen = ({navigation}) => {
         {FILTERS.map(f => (
           <TouchableOpacity
             key={f.key}
-            style={[styles.filterTab, activeFilter === f.key && styles.filterTabActive]}
+            style={[
+              styles.filterTab,
+              {backgroundColor: colors.surface_elevated},
+              activeFilter === f.key && {backgroundColor: colors.gold},
+            ]}
             onPress={() => setActiveFilter(f.key)}>
             <AppText
               style={[
                 styles.filterLabel,
-                activeFilter === f.key && styles.filterLabelActive,
+                {color: colors.text_muted},
+                activeFilter === f.key && {color: colors.background},
               ]}>
               {f.label}
             </AppText>
@@ -180,18 +182,27 @@ const StatementScreen = ({navigation}) => {
 
       {/* Transaction List */}
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#D4A843" />
-        </View>
+        <AppLoader fullScreen text="Loading statement..." />
       ) : (
         <FlatList
           data={filteredTxns}
           keyExtractor={(item, index) => `txn-${index}-${item.date}`}
           renderItem={renderItem}
-          ListEmptyComponent={renderEmpty}
+          ListEmptyComponent={
+            <EmptyState
+              icon="receipt-long"
+              title="No transactions found"
+              message="Your transaction history will appear here"
+            />
+          }
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.gold}
+              colors={[colors.gold]}
+            />
           }
         />
       )}
@@ -207,14 +218,12 @@ const styles = StyleSheet.create({
   },
   summaryItem: {
     flex: 1,
-    backgroundColor: '#171717',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
   },
   summaryLabel: {
     fontSize: fp(1.4),
-    color: '#888',
     fontWeight: '600',
     textTransform: 'uppercase',
   },
@@ -233,18 +242,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#2a2a2a',
-  },
-  filterTabActive: {
-    backgroundColor: '#D4A843',
   },
   filterLabel: {
     fontSize: fp(1.5),
     fontWeight: '600',
-    color: '#666',
-  },
-  filterLabelActive: {
-    color: '#fff',
   },
   listContent: {
     paddingHorizontal: wp(4),
@@ -255,7 +256,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   txnIcon: {
     width: 36,
@@ -265,48 +265,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 12,
   },
-  creditIcon: {
-    backgroundColor: 'rgba(34,197,94,0.1)',
-  },
-  debitIcon: {
-    backgroundColor: 'rgba(239,68,68,0.1)',
-  },
   txnDetails: {
     flex: 1,
   },
   txnDesc: {
     fontSize: fp(1.6),
     fontWeight: '600',
-    color: '#1a1a1a',
   },
   txnDate: {
     fontSize: fp(1.3),
-    color: '#888',
     marginTop: 2,
   },
   txnHash: {
     fontSize: fp(1.2),
-    color: '#aaa',
     marginTop: 1,
   },
   txnAmount: {
     fontSize: fp(1.7),
     fontWeight: '700',
-  },
-  creditText: {
-    color: '#22c55e',
-  },
-  debitText: {
-    color: '#ef4444',
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingTop: hp(10),
-  },
-  emptyText: {
-    marginTop: 12,
-    color: '#888',
-    fontSize: fp(1.6),
   },
   loadingContainer: {
     flex: 1,

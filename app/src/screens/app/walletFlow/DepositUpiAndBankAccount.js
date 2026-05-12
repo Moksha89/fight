@@ -40,6 +40,7 @@ import {
   getDepositPaymentOptions,
   createDepositRequest,
 } from '../../../apis/walletApi';
+import {useTheme} from '../../../context/ThemeContext';
 
 const iconImages = {
   download: require('../../../assets/icons/download.png'),
@@ -47,6 +48,7 @@ const iconImages = {
 };
 
 const DepositUpiAndBankAccount = ({navigation, route}) => {
+  const {colors} = useTheme();
   const [screenWidth, setScreenWidth] = useState(
     Dimensions.get('window').width,
   );
@@ -207,7 +209,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
         onBackPress={() => navigation.goBack()}
         onIconPress={() => navigation.navigate('HistoryScreen')}
         RightIconComponent={
-          <MaterialIcons name="history" size={25} color="#ffffff" />
+          <MaterialIcons name="history" size={25} color={colors.text_primary} />
         }
         rightIconWrapperStyle={{
           backgroundColor: '#d4a843',
@@ -291,7 +293,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                 <View style={styles.inputRow}>
                   <TextInput
                     placeholder="Ex: 787654321568"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.text_muted}
                     style={styles.input}
                     value={utrId}
                     keyboardType="numeric"
@@ -300,7 +302,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                   <TouchableOpacity
                     style={styles.uploadBox}
                     onPress={pickImage}>
-                    <AntDesign name="upload" size={20} color="#000000" />
+                    <AntDesign name="upload" size={20} color={colors.background} />
                     <AppText style={{textAlign: 'center'}}>Screenshot</AppText>
                   </TouchableOpacity>
                 </View>
@@ -310,7 +312,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                 <TextInput
                   placeholder="Enter amount"
                   keyboardType="numeric"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.text_muted}
                   value={depositAmount}
                   onChangeText={e => setDepositAmount(e)}
                   style={[styles.input, {width: wp(90)}]}
@@ -366,7 +368,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                             UPI ID: {item.upi_id}
                           </AppText>
 
-                          <Icon name="copy" size={20} color="#D4A843" />
+                          <Icon name="copy" size={20} color={colors.gold} />
                         </View>
                       </TouchableOpacity>
                     </View>
@@ -383,7 +385,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                       <FontAwesome
                         name="youtube-play"
                         size={18}
-                        color="#ff0000"
+                        color={colors.danger}
                       />
                       <AppText style={{marginLeft: wp(2)}}>
                         Watch Tutorial
@@ -436,7 +438,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                 onPress={handleConfirmDeposit}
                 buttonStyle={styles.loginButton}
                 iconName="arrow-right-alt"
-                iconColor="#ffffff"
+                iconColor={colors.text_primary}
                 disabled={isLoading}
                 iconSize={35}>
                 {isLoading ? 'Please Wait...' : 'Confirm Deposit'}
@@ -445,7 +447,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                 <TouchableOpacity
                   style={styles.watchTutorialsButton}
                   onPress={handleOpenModal}>
-                  <Feather name="youtube" size={20} color="#FF0A0A" />
+                  <Feather name="youtube" size={20} color={colors.danger} />
                   <AppText style={styles.tutorialText}>Watch Tutorials</AppText>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={togglePlayPauseMute}>
@@ -496,7 +498,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                 <View style={styles.inputRow}>
                   <TextInput
                     placeholder="Ex: 787654321568"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.text_muted}
                     style={[styles.input]}
                     value={utrId}
                     keyboardType="numeric"
@@ -505,7 +507,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                   <TouchableOpacity
                     style={styles.uploadBox}
                     onPress={pickImage}>
-                    <AntDesign name="upload" size={20} color="#000000" />
+                    <AntDesign name="upload" size={20} color={colors.background} />
                     <AppText style={{textAlign: 'center'}}>Screenshot </AppText>
                   </TouchableOpacity>
                 </View>
@@ -517,7 +519,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                   keyboardType="numeric"
                   value={depositAmount}
                   onChangeText={e => setDepositAmount(e)}
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.text_muted}
                   style={[styles.input, {width: wp(90), marginBottom: hp(1.5)}]}
                 />
                 <View style={styles.gameSelectionHeader}>
@@ -530,7 +532,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                     <FontAwesome
                       name="youtube-play"
                       size={18}
-                      color="#ff0000"
+                      color={colors.danger}
                     />
                     <AppText style={{marginLeft: wp(2)}}>
                       Watch Tutorial
@@ -570,7 +572,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                             </AppText>
                             <TouchableOpacity
                               onPress={() => handleCopy(item.account_number)}>
-                              <Feather name="copy" size={fp(2)} color="#D4A843" />
+                              <Feather name="copy" size={fp(2)} color={colors.gold} />
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -585,7 +587,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                             </AppText>
                             <TouchableOpacity
                               onPress={() => handleCopy('SBIN000012767')}>
-                              <Feather name="copy" size={fp(2)} color="#D4A843" />
+                              <Feather name="copy" size={fp(2)} color={colors.gold} />
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -620,7 +622,7 @@ const DepositUpiAndBankAccount = ({navigation, route}) => {
                 iconName="arrow-right-alt"
                 disabled={isLoading}
                 onPress={handleConfirmDeposit}
-                iconColor="#ffffff"
+                iconColor={colors.text_primary}
                 iconSize={35}>
                 {isLoading ? 'Please Wait...' : 'Confirm Deposit'}
               </AppButton>

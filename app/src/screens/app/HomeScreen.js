@@ -349,7 +349,7 @@ const HomeScreen = ({navigation}) => {
                 style={{
                   height: '100%',
                   resizeMode: 'contain',
-                  // backgroundColor: '#ffcc00',
+                  // backgroundColor: '#D4A843',
                   width: '60%',
                 }}
               />
@@ -488,7 +488,7 @@ const HomeScreen = ({navigation}) => {
                       activeChannel: 0,
                     })
                   }
-                  style={[styles.box, {backgroundColor: '#FFE8E8'}]}>
+                  style={[styles.box, {backgroundColor: 'rgba(239,68,68,0.12)'}]}>
                   <AppText style={[styles.boxText, {color: '#BA2343'}]}>
                     {`1 : ${(1 + parseFloat(settings['R']?.actionValue)).toFixed(2)}`}
                   </AppText>
@@ -574,7 +574,7 @@ const HomeScreen = ({navigation}) => {
                   <View style={styles.ratioContainer}>
                     <TouchableOpacity
                       onPress={() => navigation.navigate('LiveCockFight')}
-                      style={[styles.box, {backgroundColor: '#FFE8E8'}]}>
+                      style={[styles.box, {backgroundColor: 'rgba(239,68,68,0.12)'}]}>
                       <AppText style={[styles.boxText, {color: '#BA2343'}]}>
                         {`1 : ${(1 + parseFloat(match.maxThresholdTeamA)).toFixed(2)}`}
                       </AppText>
@@ -806,36 +806,7 @@ const HomeScreen = ({navigation}) => {
         }}>
         <FontAwesome name="comment" size={25} color="#fff" />
       </TouchableOpacity>
-      <View style={styles.bottomTabs}>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => navigation.navigate('HomeScreen')}>
-          <MaterialIcons name="home" size={30} color={themeColors.gold} />
-          <AppText style={[styles.iconName, {color: themeColors.gold}]}>Home</AppText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => navigation.navigate('PromotionsScreen')}>
-          <MaterialIcons name="sports-soccer" size={26} color="#808080" />
-          <AppText style={styles.iconName}>Promotion</AppText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => navigation.navigate('DepositWithdrawl')}>
-          <MaterialIcons
-            name="account-balance-wallet"
-            size={26}
-            color="#808080"
-          />
-          <AppText style={styles.iconName}>Wallet</AppText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => navigation.navigate('SettingsScreen')}>
-          <Feather name="user" size={24} color="#808080" />
-          <AppText style={styles.iconName}>Profile</AppText>
-        </TouchableOpacity>
-      </View>
+      {/* Bottom tabs now handled by BottomTabNavigator */}
     </AppScreen>
   );
 };
@@ -1042,7 +1013,7 @@ const styles = StyleSheet.create({
   },
   popularGames: {
     height: hp(8),
-    // backgroundColor: '#ffcc00',
+    // backgroundColor: '#D4A843',
     flexDirection: 'row',
     width: wp(92),
     marginLeft: wp(4),
@@ -1105,7 +1076,7 @@ const styles = StyleSheet.create({
     paddingBottom: hp(1),
     paddingRight: wp(7),
     paddingLeft: wp(4),
-    // backgroundColor: '#ffcc00',
+    // backgroundColor: '#D4A843',
   },
   matchDate: {fontSize: fp(1.5), color: COLORS.text_muted, textAlign: 'center'},
   matchTitle: {
@@ -1167,7 +1138,7 @@ const styles = StyleSheet.create({
   card: {
     width: wp(41),
     padding: 10,
-    backgroundColor: '#ffcc00',
+    backgroundColor: '#D4A843',
     height: hp(12),
     overflow: 'hidden',
     justifyContent: 'space-between',
@@ -1351,7 +1322,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 40,
     zIndex: 30,
-    // backgroundColor: '#ffcc00',
+    // backgroundColor: '#D4A843',
   },
   actionButton: {
     flexDirection: 'row',

@@ -17,6 +17,7 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {getDicePlayUserBets} from '../../../../apis/dicePlayApi';
 import ProvablyFairModal from './ProvablyFairModal';
+import {useTheme} from '../../../../context/ThemeContext';
 import COLORS from '../../../../context/designTokens';
 
 const getColor = (matchWinStatus) => {

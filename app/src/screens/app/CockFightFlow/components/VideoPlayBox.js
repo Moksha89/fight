@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: wp(5),
     right: wp(5),
-    backgroundColor: '#FF4000',
+    backgroundColor: '#DC2626',
     color: '#fff',
     paddingHorizontal: 6,
     borderRadius: 4,
