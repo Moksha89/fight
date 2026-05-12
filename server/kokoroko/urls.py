@@ -101,6 +101,39 @@ def deposit_action_view(request, pk, action):
     from wallet.models import DepositRequest, Wallet, WalletHistory
     from django.db.models import F
     from django.db import transaction as db_transaction
+    from django.middleware.csrf import get_token
+
+    if action not in ('accept', 'reject'):
+        msg.error(request, "Invalid action.")
+        return redirect('/wallet/depositrequest/')
+
+    # GET → show confirmation page; POST → perform action
+    if request.method != 'POST':
+        try:
+            deposit = DepositRequest.objects.get(pk=pk)
+        except DepositRequest.DoesNotExist:
+            msg.error(request, f"Deposit #{pk} not found.")
+            return redirect('/wallet/depositrequest/')
+
+        customer_name = deposit.customer.username if deposit.customer else 'Unknown'
+        amount = deposit.confirm_amount or deposit.deposit_amount
+        csrf_token = get_token(request)
+        color = "#10b981" if action == 'accept' else "#ef4444"
+        label = "Accept" if action == 'accept' else "Reject"
+        html = f'''<!DOCTYPE html><html><head><title>{label} Deposit #{pk}</title>
+        <style>body{{font-family:Arial,sans-serif;max-width:450px;margin:80px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
+        .card{{background:#1c2128;border-radius:12px;padding:30px;border:1px solid #30363d;text-align:center;}}
+        .btn{{background:{color};color:#fff;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;width:100%;margin-top:15px;}}
+        .back{{display:inline-block;margin-top:15px;color:#8b949e;text-decoration:none;}}
+        .info{{color:#8b949e;font-size:14px;margin:8px 0;}}</style></head><body>
+        <div class="card"><h2 style="color:{color};">{label} Deposit</h2>
+        <p class="info">Customer: <b>{customer_name}</b></p>
+        <p class="info">Amount: <b>₹{amount}</b></p>
+        <p class="info">UTR: <b>{deposit.utr_id or '-'}</b></p>
+        <form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+        <button type="submit" class="btn">Confirm {label}</button></form>
+        <a href="/wallet/depositrequest/" class="back">← Cancel</a></div></body></html>'''
+        return HttpResponse(html)
 
     try:
         if action == 'accept':
@@ -116,7 +149,7 @@ def deposit_action_view(request, pk, action):
                 amount = deposit.confirm_amount if deposit.confirm_amount else deposit.deposit_amount
                 if not deposit.confirm_amount:
                     deposit.confirm_amount = deposit.deposit_amount
-                wallet, _ = Wallet.objects.get_or_create(user=customer)
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
                 wallet.balance = F('balance') + amount
                 wallet.fundsIn = F('fundsIn') + amount
                 wallet.save()
@@ -147,7 +180,7 @@ def deposit_action_view(request, pk, action):
                 if not customer:
                     msg.warning(request, f"Deposit #{pk} has no customer.")
                     return redirect('/wallet/depositrequest/')
-                wallet, _ = Wallet.objects.get_or_create(user=customer)
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
                 WalletHistory.objects.create(
                     wallet=wallet, transaction_type='D', change=deposit.deposit_amount,
                     isSuccess=False, description=f"Rejected: {deposit.infoNote or 'No remarks'}"
@@ -178,6 +211,39 @@ def withdrawal_action_view(request, pk, action):
     from wallet.models import WithdrawalRequest, Wallet, WalletHistory
     from django.db.models import F
     from django.db import transaction as db_transaction
+    from django.middleware.csrf import get_token
+
+    if action not in ('approve', 'reject', 'handle'):
+        msg.error(request, "Invalid action.")
+        return redirect('/wallet/withdrawalrequest/')
+
+    # GET → show confirmation page; POST → perform action
+    if request.method != 'POST':
+        try:
+            wd = WithdrawalRequest.objects.get(pk=pk)
+        except WithdrawalRequest.DoesNotExist:
+            msg.error(request, f"Withdrawal #{pk} not found.")
+            return redirect('/wallet/withdrawalrequest/')
+
+        customer_name = wd.customer.username if wd.customer else 'Unknown'
+        amount = wd.withdrawal_amount
+        csrf_token = get_token(request)
+        labels = {'approve': ('Approve', '#10b981'), 'reject': ('Reject', '#ef4444'), 'handle': ('Handle', '#3b82f6')}
+        label, color = labels[action]
+        html = f'''<!DOCTYPE html><html><head><title>{label} Withdrawal #{pk}</title>
+        <style>body{{font-family:Arial,sans-serif;max-width:450px;margin:80px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
+        .card{{background:#1c2128;border-radius:12px;padding:30px;border:1px solid #30363d;text-align:center;}}
+        .btn{{background:{color};color:#fff;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;width:100%;margin-top:15px;}}
+        .back{{display:inline-block;margin-top:15px;color:#8b949e;text-decoration:none;}}
+        .info{{color:#8b949e;font-size:14px;margin:8px 0;}}</style></head><body>
+        <div class="card"><h2 style="color:{color};">{label} Withdrawal</h2>
+        <p class="info">Customer: <b>{customer_name}</b></p>
+        <p class="info">Amount: <b>₹{amount}</b></p>
+        <p class="info">Status: <b>{wd.get_status_display()}</b></p>
+        <form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+        <button type="submit" class="btn">Confirm {label}</button></form>
+        <a href="/wallet/withdrawalrequest/" class="back">← Cancel</a></div></body></html>'''
+        return HttpResponse(html)
 
     try:
         if action == 'approve':
@@ -207,7 +273,7 @@ def withdrawal_action_view(request, pk, action):
                     return redirect('/wallet/withdrawalrequest/')
                 customer = wd.customer
                 amount = wd.withdrawal_amount
-                wallet, _ = Wallet.objects.get_or_create(user=customer)
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
                 wallet.balance = F('balance') + amount
                 wallet.save()
                 WalletHistory.objects.create(
