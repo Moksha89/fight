@@ -3729,7 +3729,7 @@
         html += '<label style="font-size:11px;color:var(--text-muted);margin-bottom:4px;display:block;">Amount per number</label>';
         // D2.1: Helper text for max 5 numbers
         html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;opacity:0.7;">Select up to 5 numbers. Amount applies to each.</div>';
-        html += '<input type="number" class="dice-bet-input" id="dice-bet-amount" placeholder="Enter amount per number" min="10" value="' + (diceBetAmount || '') + '" oninput="diceAmountChanged(this.value)" style="width:100%;margin-bottom:10px;box-sizing:border-box;">';
+        html += '<input type="number" class="dice-bet-input" id="dice-bet-amount" placeholder="Enter amount per number" min="10" value="' + (diceBetAmount || '') + '" oninput="diceAmountChanged(this.value)" style="width:100%;margin-bottom:10px;box-sizing:border-box;color:#F5F1E8;-webkit-text-fill-color:#F5F1E8;">';
         // Quick chips
         html += '<div class="dice-chips-row">';
         var chips = [50, 100, 200, 500, 1000, 2500];
