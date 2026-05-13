@@ -27,6 +27,14 @@ export const connectUserWebSocket = (accessToken, setWallet) => {
     try {
       const message = JSON.parse(event.data);
 
+      // Respond to server heartbeat ping
+      if (message.type === 'ping') {
+        if (userSocket && userSocket.readyState === WebSocket.OPEN) {
+          userSocket.send(JSON.stringify({type: 'pong'}));
+        }
+        return;
+      }
+
       if (message.type === 'wallet_update') {
         if (message?.balance) {
           setWallet({

@@ -42,6 +42,12 @@ export const connectDiceMatchWebSocket = async (
   DiceMatchSocket.onmessage = event => {
     try {
       const message = JSON.parse(event.data);
+      if (message.type === 'ping') {
+        if (DiceMatchSocket && DiceMatchSocket.readyState === WebSocket.OPEN) {
+          DiceMatchSocket.send(JSON.stringify({type: 'pong'}));
+        }
+        return;
+      }
       if (message.type === 'dice_match_update' && message.data != null) {
         const raw = message.data;
         const wsData = Array.isArray(raw)
@@ -156,6 +162,12 @@ export const connectDiceMatchResultWebSocket = async (
   DiceResultSocket.onmessage = async event => {
     try {
       const message = JSON.parse(event.data);
+      if (message.type === 'ping') {
+        if (DiceResultSocket && DiceResultSocket.readyState === WebSocket.OPEN) {
+          DiceResultSocket.send(JSON.stringify({type: 'pong'}));
+        }
+        return;
+      }
       if (message.type === 'dice_match_result' && message.data) {
         const data = message.data;
         const boardId = data.board;
