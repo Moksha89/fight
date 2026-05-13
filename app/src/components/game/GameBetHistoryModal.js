@@ -83,12 +83,12 @@ const getDiceWinTotal = item => {
 };
 
 const getDiceAmountText = item => {
-  if (item.matchWinStatus === 0) return 'In Progress';
+  if (item.matchWinStatus === 0) return '—';
   if (item.matchWinStatus === 1) {
     const total = getDiceWinTotal(item);
-    return `+${total}`;
+    return `+₹${total.toLocaleString('en-IN')}`;
   }
-  return `-${item.amount}`;
+  return '₹0';
 };
 
 const GameBetHistoryModal = ({
@@ -237,14 +237,14 @@ const GameBetHistoryModal = ({
         <View style={styles.right}>
           {item.matchWinStatus === 0 ? (
             <View style={{alignItems: 'flex-end'}}>
-              <AppText style={[styles.inProgress, {color: colors.text_muted}]}>In Progress</AppText>
-              <AppText style={styles.amount}>{item.amount}</AppText>
+              <AppText style={[styles.inProgress, {color: colors.text_muted}]}>Pending</AppText>
+              <AppText style={[styles.amount, {color: colors.text_muted}]}>₹{item.amount}</AppText>
             </View>
           ) : (
             <AppText
               style={[
                 styles.amount,
-                {color: amountText.startsWith('+') ? '#43A048' : '#BA2343'},
+                {color: item.matchWinStatus === 1 ? '#43A048' : '#888'},
               ]}>
               {amountText}
             </AppText>

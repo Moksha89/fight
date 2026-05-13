@@ -60,9 +60,21 @@ export const connectDiceMatchWebSocket = async (
                 matches: [...(prevBoard.matches || [])],
               };
             }
-            const completed = (prevBoard.matches || []).filter(
+            // D3: Preserve completed matches (cache up to 20)
+            const prevCompleted = (prevBoard.matches || []).filter(
               m => m.isWinnerDeclared,
             );
+            const wsCompleted = (wsBoard.matches || []).filter(
+              m => m.isWinnerDeclared,
+            );
+            // Merge and deduplicate completed matches by id
+            const completedMap = new Map();
+            [...prevCompleted, ...wsCompleted].forEach(m => {
+              completedMap.set(String(m.id), m);
+            });
+            const completed = [...completedMap.values()]
+              .sort((a, b) => (b.id || 0) - (a.id || 0))
+              .slice(0, 20);
             const undecidedFromWs = (wsBoard.matches || []).filter(
               m => !m.isWinnerDeclared,
             );
