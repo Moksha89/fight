@@ -37,12 +37,12 @@ const getWinTotal = (item) => {
 };
 
 const getAmountText = (item) => {
-  if (item.matchWinStatus === 0) return 'In Progress';
+  if (item.matchWinStatus === 0) return '—';
   if (item.matchWinStatus === 1) {
     const total = getWinTotal(item);
-    return `+${total}`;
+    return `+₹${total.toLocaleString('en-IN')}`;
   }
-  return `-${item.amount}`;
+  return '₹0';
 };
 
 const BetHistoryModal = ({bets, setBets, visible, onClose}) => {

@@ -12,6 +12,10 @@ import {
   Alert,
   ToastAndroid,
   Vibration,
+  TextInput,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 
 import {
@@ -88,17 +92,20 @@ import fiveThousandCoinActive from '../../../assets/icons/5000CoinActive.png';
 import twentyFiveThousandCoinActive from '../../../assets/icons/25000CoinActive.png';
 
 const coins = [
-  {id: 50, normal: fiftyCoin, active: fiftyCoinActive},
-  {id: 100, normal: hundredCoin, active: hundredCoinActive},
-  {id: 500, normal: fiveHundredCoin, active: fiveHundredCoinActive},
-  {id: 1000, normal: thousandCoin, active: thousandCoinActive},
-  {id: 5000, normal: fiveThousandCoin, active: fiveThousandCoinActive},
+  {id: 50, normal: fiftyCoin, active: fiftyCoinActive, label: '₹50'},
+  {id: 100, normal: hundredCoin, active: hundredCoinActive, label: '₹100'},
+  {id: 500, normal: fiveHundredCoin, active: fiveHundredCoinActive, label: '₹500'},
+  {id: 1000, normal: thousandCoin, active: thousandCoinActive, label: '₹1K'},
+  {id: 5000, normal: fiveThousandCoin, active: fiveThousandCoinActive, label: '₹5K'},
   {
     id: 25000,
     normal: twentyFiveThousandCoin,
     active: twentyFiveThousandCoinActive,
+    label: '₹25K',
   },
 ];
+
+const MAX_SELECTED_NUMBERS = 5;
 
 const DICE_NUMBERS = [1, 2, 3, 4, 5, 6];
 
@@ -115,12 +122,18 @@ const GundataLive = ({navigation}) => {
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState(100);
-  // Only one dice can have a bet at a time: selectedDice 1-6 or null, betAmount for that dice (capped at wallet).
-  const [selectedDice, setSelectedDice] = useState(null);
+  // D3: Multi-number selection (1-5 numbers)
+  const [selectedNumbers, setSelectedNumbers] = useState([]);
   const [betAmount, setBetAmount] = useState(0);
+  const [customAmountText, setCustomAmountText] = useState('');
+  const [isRollingPhase, setIsRollingPhase] = useState(false);
   const [isBetHistoryModalVisible, setBetHistoryModalVisible] = useState(false);
   const [isBettingButtonEnable, setIsBettingButtonEnable] = useState(true);
   const [countdownSeconds, setCountdownSeconds] = useState(0);
+  // D3: Provably Fair modal for completed rounds
+  const [fairModalVisible, setFairModalVisible] = useState(false);
+  const [fairMatchId, setFairMatchId] = useState(null);
+  const [fairCommitHash, setFairCommitHash] = useState(null);
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [animationDice, setAnimationDice] = useState([]);
   const [showWinConfetti, setShowWinConfetti] = useState(false);
@@ -238,7 +251,7 @@ const GundataLive = ({navigation}) => {
         Animated.timing(anim.rotate, {toValue: Math.random() * 10, duration: 2500, useNativeDriver: true}),
       ]).start();
     });
-    setTimeout(() => setShowWinConfetti(false), 3000);
+    setTimeout(() => setShowWinConfetti(false), 6000);
   }, [confettiAnims]);
 
   // Show dice roll animation when a result comes in
@@ -263,7 +276,8 @@ const GundataLive = ({navigation}) => {
       const totalWin = winBets.reduce((sum, b) => sum + parseFloat(b.winning_amount || b.amount || 0), 0);
       setTimeout(() => triggerConfetti(totalWin), 1000);
     }
-    setTimeout(() => setShowDiceAnimation(false), 4000);
+    setIsRollingPhase(false);
+    setTimeout(() => setShowDiceAnimation(false), 6000);
   }, [userBetHistory, triggerConfetti]);
 
   // Derive from boardsData so match-update WS changes (isBettingEnabled) apply immediately
@@ -384,68 +398,129 @@ const GundataLive = ({navigation}) => {
     maxDiceBetAllowed > 0 ? maxDiceBetAllowed : balance,
   );
 
-  // When user changes coin, update current dice bet (capped at balance and max allowed)
+  // D3: When user changes coin, update betAmount (only if amount was set via chip)
   useEffect(() => {
-    if (selectedDice != null && betAmount > 0) {
+    if (betAmount > 0 && !customAmountText) {
       setBetAmount(Math.min(selectedCoin, effectiveBetCap));
     }
   }, [selectedCoin, effectiveBetCap]);
+
+  // D3: Total bet calculation
+  const totalBet = betAmount * selectedNumbers.length;
+
+  // D3: Set rolling phase when countdown hits 0 and we don't have a result yet
+  useEffect(() => {
+    if (countdownSeconds === 0 && liveMatch && !liveMatch.isWinnerDeclared && liveMatch.isBettingEnabled === false) {
+      setIsRollingPhase(true);
+    } else if (countdownSeconds > 0 || !liveMatch || liveMatch.isWinnerDeclared) {
+      setIsRollingPhase(false);
+    }
+  }, [countdownSeconds, liveMatch?.id, liveMatch?.isBettingEnabled, liveMatch?.isWinnerDeclared]);
 
   if (settings['C']?.actionValue === 'Y')
     return (
       <FeatureUnderMaintenanceScreen navigation={navigation} />
     );
 
+  // D3: Multi-number toggle (1-5 numbers)
   const handleDicePress = (num) => {
-    if (selectedDice === num) {
-      const next = betAmount + selectedCoin;
-      if (maxDiceBetAllowed > 0 && next > maxDiceBetAllowed) {
-        setBetAmount(effectiveBetCap);
-        Alert.alert('Info', `Max allowed is ${maxDiceBetAllowed}`);
-      } else {
-        setBetAmount(prev => Math.min(prev + selectedCoin, effectiveBetCap));
-      }
+    if (selectedNumbers.includes(num)) {
+      setSelectedNumbers(prev => prev.filter(n => n !== num));
     } else {
-      setSelectedDice(num);
-      setBetAmount(Math.min(selectedCoin, effectiveBetCap));
+      if (selectedNumbers.length >= MAX_SELECTED_NUMBERS) {
+        ToastAndroid.show(`You can select up to ${MAX_SELECTED_NUMBERS} numbers.`, ToastAndroid.SHORT);
+        return;
+      }
+      setSelectedNumbers(prev => [...prev, num]);
+      if (betAmount === 0 && !customAmountText) {
+        setBetAmount(Math.min(selectedCoin, effectiveBetCap));
+      }
     }
   };
 
+  const handleClearSelection = () => {
+    setSelectedNumbers([]);
+    setBetAmount(0);
+    setCustomAmountText('');
+  };
+
+  const handleCoinPress = (coinValue) => {
+    setSelectedCoin(coinValue);
+    setCustomAmountText('');
+    const capped = Math.min(coinValue, effectiveBetCap);
+    setBetAmount(capped);
+  };
+
+  const handleCustomAmountChange = (text) => {
+    setCustomAmountText(text);
+    const parsed = parseInt(text, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      setBetAmount(Math.min(parsed, effectiveBetCap));
+    } else if (text === '') {
+      setBetAmount(0);
+    }
+  };
+
+  // D3: Multi-number place bet — sequential API calls with partial failure handling
   const handlePlaceBet = async () => {
     if (!liveMatch?.id) {
-      Alert.alert('No live match. Wait for a match to start.');
+      Alert.alert('No live match', 'Wait for a match to start.');
       return;
     }
 
-    if (!selectedDice || betAmount <= 0) {
-      Alert.alert('Select one dice number and add amount.');
+    if (selectedNumbers.length === 0 || betAmount <= 0) {
+      Alert.alert('Invalid bet', 'Select at least one number and enter amount.');
       return;
     }
 
-    if (betAmount > balance) {
-      Alert.alert('Insufficient balance.');
+    if (totalBet > balance) {
+      Alert.alert('Insufficient balance', `Total ₹${totalBet.toLocaleString('en-IN')} exceeds balance ₹${Math.floor(balance).toLocaleString('en-IN')}.`);
       return;
     }
     if (maxDiceBetAllowed > 0 && betAmount > maxDiceBetAllowed) {
-      Alert.alert(`Max allowed is ${maxDiceBetAllowed}`);
+      Alert.alert('Limit exceeded', `Max allowed per number is ₹${maxDiceBetAllowed}`);
       return;
     }
 
     setIsBettingButtonEnable(false);
+    Keyboard.dismiss();
 
-    const result = await placeDicePlayBet(liveMatch.id, selectedDice, betAmount);
+    const successes = [];
+    const failures = [];
+
+    for (const num of selectedNumbers) {
+      const result = await placeDicePlayBet(liveMatch.id, num, betAmount);
+      if (result?.bet) {
+        successes.push({num, bet: result.bet});
+      } else {
+        const errMsg = result?.message || result?.error?.detail || 'Failed';
+        failures.push({num, error: errMsg});
+      }
+    }
 
     setIsBettingButtonEnable(true);
 
-    if (result?.bet) {
-      setUserBetHistory(prev => [result.bet, ...prev]);
-      setSelectedDice(null);
-      setBetAmount(0);
-      setBetHistoryModalVisible(true);
-      ToastAndroid.show('Bet placed successfully', ToastAndroid.SHORT);
+    if (successes.length > 0) {
+      setUserBetHistory(prev => [...successes.map(s => s.bet), ...prev]);
       Vibration.vibrate(500);
+    }
+
+    if (failures.length === 0) {
+      ToastAndroid.show(`${successes.length} bet${successes.length > 1 ? 's' : ''} placed successfully`, ToastAndroid.SHORT);
+      setSelectedNumbers([]);
+      setBetAmount(0);
+      setCustomAmountText('');
+    } else if (successes.length === 0) {
+      ToastAndroid.show(`All ${failures.length} bet${failures.length > 1 ? 's' : ''} failed`, ToastAndroid.LONG);
     } else {
-      ToastAndroid.show('Failed to place bet', ToastAndroid.SHORT);
+      const failNums = failures.map(f => `Dice ${f.num}`).join(', ');
+      Alert.alert(
+        'Partial Success',
+        `${successes.length} bet${successes.length > 1 ? 's' : ''} placed. ${failures.length} failed: ${failNums} — ${failures[0].error}`,
+      );
+      setSelectedNumbers([]);
+      setBetAmount(0);
+      setCustomAmountText('');
     }
   };
 
@@ -588,10 +663,52 @@ const GundataLive = ({navigation}) => {
           toggleSound={toggleSound}
         />
 
+        {/* D3: Recent Results Strip */}
+        {displayMatchHistory.length > 0 && (
+          <View style={styles.recentResultsStrip}>
+            <Text style={styles.recentResultsLabel}>Recent Results</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingHorizontal: 4}}>
+              {displayMatchHistory.slice(-15).map((match, idx) => {
+                const rolls = getDiceRollsForMatch(match);
+                const counts = {};
+                rolls.forEach(f => { counts[f] = (counts[f] || 0) + 1; });
+                const winners = Object.entries(counts).filter(([_, c]) => c >= 2).map(([n]) => parseInt(n));
+                return (
+                  <View key={`rr-${match?.id ?? idx}`} style={styles.recentResultCard}>
+                    <Text style={styles.recentResultRound}>#{match.daily_match_number || idx + 1}</Text>
+                    <View style={styles.recentResultDiceRow}>
+                      {rolls.map((face, i) => (
+                        <View key={i} style={[styles.recentResultDice, winners.includes(face) && styles.recentResultDiceWinner]}>
+                          <Image source={diceImages[face]} style={styles.recentResultDiceImg} />
+                        </View>
+                      ))}
+                    </View>
+                    {winners.length > 0 && (
+                      <Text style={styles.recentResultWinText}>{winners.join(', ')}</Text>
+                    )}
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* D3: Rolling Phase Indicator */}
+        {isRollingPhase && !showDiceAnimation && (
+          <View style={styles.rollingIndicator}>
+            <Icon name="dice-multiple" size={28} color="#D4A843" />
+            <Text style={styles.rollingIndicatorText}>ROLLING DICE...</Text>
+            <Text style={styles.rollingSubtext}>Result coming soon</Text>
+          </View>
+        )}
+
         <ImageBackground
           source={foldedPaper}
           style={styles.background}
           resizeMode="cover">
+          {/* D3: Helper text */}
+          <Text style={styles.helperText}>Select up to 5 numbers. Amount applies to each.</Text>
+
           <View style={styles.diceRow}>
             {[1, 2, 3].map(num => (
               <TouchableOpacity
@@ -599,7 +716,7 @@ const GundataLive = ({navigation}) => {
                 style={[
                   styles.dice,
                   num === 2 && styles.middleDice,
-                  selectedDice === num && styles.diceSelected,
+                  selectedNumbers.includes(num) && styles.diceSelected,
                 ]}
                 onPress={() => handleDicePress(num)}
                 activeOpacity={0.7}>
@@ -607,9 +724,9 @@ const GundataLive = ({navigation}) => {
                   <View style={styles.dicePendingDot} />
                 )}
                 <AppText style={styles.diceNumber}>{num}</AppText>
-                {selectedDice === num && betAmount > 0 ? (
+                {selectedNumbers.includes(num) ? (
                   <View style={styles.diceBorder}>
-                    <AppText style={styles.diceAmountText}>{betAmount}</AppText>
+                    <Icon name="check-circle" size={24} color="#D4A843" />
                   </View>
                 ) : (
                   <Image style={styles.diceImage} source={diceImages[num]} />
@@ -628,7 +745,7 @@ const GundataLive = ({navigation}) => {
                 style={[
                   styles.dice,
                   num === 5 && styles.middleDice,
-                  selectedDice === num && styles.diceSelected,
+                  selectedNumbers.includes(num) && styles.diceSelected,
                 ]}
                 onPress={() => handleDicePress(num)}
                 activeOpacity={0.7}>
@@ -636,9 +753,9 @@ const GundataLive = ({navigation}) => {
                   <View style={styles.dicePendingDot} />
                 )}
                 <AppText style={styles.diceNumber}>{num}</AppText>
-                {selectedDice === num && betAmount > 0 ? (
+                {selectedNumbers.includes(num) ? (
                   <View style={styles.diceBorder}>
-                    <AppText style={styles.diceAmountText}>{betAmount}</AppText>
+                    <Icon name="check-circle" size={24} color="#D4A843" />
                   </View>
                 ) : (
                   <Image style={styles.diceImage} source={diceImages[num]} />
@@ -655,7 +772,7 @@ const GundataLive = ({navigation}) => {
               <TouchableOpacity
                 style={{width: wp(10), aspectRatio: 1}}
                 key={c.id}
-                onPress={() => setSelectedCoin(c.id)}>
+                onPress={() => handleCoinPress(c.id)}>
                 <Image
                   source={selectedCoin === c.id ? c.active : c.normal}
                   style={{width: '100%', height: '100%', resizeMode: 'contain'}}
@@ -665,6 +782,40 @@ const GundataLive = ({navigation}) => {
           </View>
         </ImageBackground>
 
+        {/* D3: Amount Input + Total Calculation */}
+        <View style={styles.amountSection}>
+          <View style={styles.amountInputRow}>
+            <TextInput
+              style={styles.amountInput}
+              placeholder="Custom amount"
+              placeholderTextColor="#666"
+              keyboardType="numeric"
+              value={customAmountText}
+              onChangeText={handleCustomAmountChange}
+              returnKeyType="done"
+              onSubmitEditing={Keyboard.dismiss}
+            />
+            {selectedNumbers.length > 0 && (
+              <TouchableOpacity style={styles.clearButton} onPress={handleClearSelection}>
+                <Text style={styles.clearButtonText}>Clear All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          {selectedNumbers.length > 0 && betAmount > 0 && (
+            <View style={styles.totalRow}>
+              <Text style={styles.totalText}>
+                ₹{betAmount.toLocaleString('en-IN')} × {selectedNumbers.length} number{selectedNumbers.length > 1 ? 's' : ''} = </Text>
+              <Text style={styles.totalAmount}>₹{totalBet.toLocaleString('en-IN')} total</Text>
+            </View>
+          )}
+          {selectedNumbers.length > 0 && (
+            <Text style={styles.selectedNumbersText}>
+              Selected: {selectedNumbers.sort((a, b) => a - b).join(', ')}
+            </Text>
+          )}
+        </View>
+
+        {/* D3: Controls with Place Bet */}
         <View style={styles.controls}>
           <TouchableOpacity
             style={styles.iconButton}
@@ -679,39 +830,44 @@ const GundataLive = ({navigation}) => {
           <TouchableOpacity
             style={[
               styles.betPlaceButton,
-              (!isBetAllowedAtCurrentChannel || !selectedDice || betAmount <= 0) && {
-                backgroundColor: '#bfbfbf',
+              (!isBetAllowedAtCurrentChannel || selectedNumbers.length === 0 || betAmount <= 0) && {
+                backgroundColor: '#555',
               },
             ]}
             onPress={() => {
               if (!isBetAllowedAtCurrentChannel) {
                 ToastAndroid.show('Wait for betting to open...', ToastAndroid.SHORT);
-              } else if (!selectedDice || betAmount <= 0) {
-                ToastAndroid.show('Select one dice and add amount', ToastAndroid.SHORT);
+              } else if (selectedNumbers.length === 0 || betAmount <= 0) {
+                ToastAndroid.show('Select numbers and enter amount', ToastAndroid.SHORT);
               } else if (isBettingButtonEnable) {
                 handlePlaceBet();
               }
             }}
             disabled={!isBettingButtonEnable}>
             {!isBetAllowedAtCurrentChannel ? (
-              <Text style={styles.pleaseWaitText}>Please wait...</Text>
-            ) : isBettingButtonEnable ? (
-              <View style={styles.placeBetContent}>
-                <Icon name="check" size={fp(2.5)} color={colors.text_primary} />
-                <AppText style={styles.placeBetText}>Place Bet...</AppText>
-              </View>
+              <Text style={styles.pleaseWaitText}>Betting closed</Text>
+            ) : !isBettingButtonEnable ? (
+              <Text style={styles.placingText}>Placing...</Text>
             ) : (
-              <Text style={styles.pleaseWaitText}>Please wait...</Text>
+              <View style={styles.placeBetContent}>
+                <Icon name="check" size={fp(2.5)} color="#fff" />
+                <AppText style={styles.placeBetText}>Place Bet</AppText>
+              </View>
             )}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.navigate('DepositWithdrawl')}>
-            <Ionicons name="wallet-outline" size={20} color="#000000" />
+            <Ionicons name="wallet-outline" size={20} color="#A8A29E" />
           </TouchableOpacity>
         </View>
 
+        {/* D3: Match History with Provably Fair per round */}
         <View style={styles.bettingResultsSection}>
+          <View style={styles.historyHeader}>
+            <Text style={styles.historyTitle}>Match History</Text>
+            <Text style={styles.historySubtitle}>{displayMatchHistory.length} rounds</Text>
+          </View>
           <ScrollView
             ref={historyScrollViewRef}
             horizontal
@@ -725,25 +881,38 @@ const GundataLive = ({navigation}) => {
             contentContainerStyle={styles.historyScrollContent}>
             <View>
               <View style={styles.resultHeaderRow}>
-                {displayMatchHistory.map((_, colIndex) => (
+                {displayMatchHistory.map((match, colIndex) => (
                   <View key={`h-${colIndex}`} style={styles.headerCell}>
-                    <Text style={styles.headerText}>{colIndex + 1}</Text>
+                    <Text style={styles.headerText}>#{match.daily_match_number || colIndex + 1}</Text>
                   </View>
                 ))}
               </View>
               <View style={{flexDirection: 'row'}}>
                 {displayMatchHistory.map((match, colIndex) => {
                   const rolls = getDiceRollsForMatch(match);
+                  const counts = {};
+                  rolls.forEach(f => { counts[f] = (counts[f] || 0) + 1; });
+                  const winners = Object.entries(counts).filter(([_, c]) => c >= 2).map(([n]) => parseInt(n));
                   return (
                     <View key={`m-${match?.id ?? colIndex}`} style={styles.resultColumn}>
                       {rolls.map((diceValue, rowIndex) => (
-                        <View key={rowIndex} style={styles.resultCell}>
+                        <View key={rowIndex} style={[styles.resultCell, winners.includes(diceValue) && styles.resultCellWinner]}>
                           <Image
                             source={diceImages[diceValue] || dice_1}
                             style={styles.resultDice}
                           />
                         </View>
                       ))}
+                      {/* D3: Verify button for completed rounds */}
+                      <TouchableOpacity
+                        style={styles.verifyButton}
+                        onPress={() => {
+                          setFairMatchId(match.id);
+                          setFairCommitHash(match.commitment_hash || match.game_hash || null);
+                          setFairModalVisible(true);
+                        }}>
+                        <Text style={styles.verifyButtonText}>Verify</Text>
+                      </TouchableOpacity>
                     </View>
                   );
                 })}
@@ -752,6 +921,14 @@ const GundataLive = ({navigation}) => {
           </ScrollView>
         </View>
       </ScrollView>
+
+      {/* D3: Provably Fair Modal for completed rounds */}
+      <ProvablyFairModal
+        visible={fairModalVisible}
+        onClose={() => setFairModalVisible(false)}
+        matchId={fairMatchId}
+        commitmentHash={fairCommitHash}
+      />
     </AppScreen>
   );
 };
@@ -864,25 +1041,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(12),
   },
   controls: {
-    width: wp(90),
+    width: wp(94),
     flexDirection: 'row',
-    backgroundColor: '#EFEFEF',
+    backgroundColor: '#1a1a1a',
     paddingHorizontal: wp(3),
     alignItems: 'center',
     borderRadius: wp(2),
-    marginTop: wp(3),
-    marginLeft: wp(5),
+    marginTop: wp(2),
+    marginLeft: wp(3),
     justifyContent: 'space-between',
     paddingVertical: hp(1),
   },
   iconButton: {
-    backgroundColor: '#DDD',
+    backgroundColor: '#2a2a2a',
     borderRadius: 10,
     padding: 12,
   },
   betPlaceButton: {
     backgroundColor: '#d4a843',
-    width: wp(35),
+    width: wp(38),
     paddingVertical: hp(1.2),
     borderRadius: wp(2),
     alignItems: 'center',
@@ -890,8 +1067,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pleaseWaitText: {
-    color: '#666',
+    color: '#999',
+    fontSize: fp(1.6),
+  },
+  placingText: {
+    color: '#fff',
     fontSize: fp(1.8),
+    fontWeight: '600',
   },
   placeBetContent: {
     flexDirection: 'row',
@@ -902,52 +1084,229 @@ const styles = StyleSheet.create({
   placeBetText: {
     color: '#fff',
     fontSize: fp(1.8),
+    fontWeight: '700',
   },
+  // D3: Amount section
+  amountSection: {
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(1),
+    backgroundColor: '#0B0B0B',
+  },
+  amountInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  amountInput: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#333',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: fp(1.8),
+    fontWeight: '600',
+    color: '#F5F1E8',
+  },
+  clearButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: '#2a2a2a',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#444',
+  },
+  clearButtonText: {
+    color: '#D4A843',
+    fontSize: fp(1.4),
+    fontWeight: '600',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  totalText: {
+    color: '#A8A29E',
+    fontSize: fp(1.5),
+  },
+  totalAmount: {
+    color: '#D4A843',
+    fontSize: fp(1.7),
+    fontWeight: '700',
+  },
+  selectedNumbersText: {
+    color: '#888',
+    fontSize: fp(1.3),
+    marginTop: 4,
+  },
+  // D3: Helper text
+  helperText: {
+    fontSize: fp(1.3),
+    color: '#888',
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  // D3: Recent results strip
+  recentResultsStrip: {
+    backgroundColor: '#111',
+    paddingVertical: hp(0.8),
+    paddingHorizontal: wp(2),
+  },
+  recentResultsLabel: {
+    color: '#888',
+    fontSize: fp(1.2),
+    fontWeight: '600',
+    marginBottom: 4,
+    marginLeft: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  recentResultCard: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    marginRight: 8,
+    alignItems: 'center',
+    minWidth: wp(22),
+  },
+  recentResultRound: {
+    color: '#666',
+    fontSize: fp(1.1),
+    marginBottom: 3,
+  },
+  recentResultDiceRow: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  recentResultDice: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  recentResultDiceWinner: {
+    borderWidth: 1,
+    borderColor: '#D4A843',
+    borderRadius: 3,
+  },
+  recentResultDiceImg: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  recentResultWinText: {
+    color: '#D4A843',
+    fontSize: fp(1.0),
+    marginTop: 2,
+    fontWeight: '700',
+  },
+  // D3: Rolling indicator
+  rollingIndicator: {
+    backgroundColor: '#1a1a2e',
+    paddingVertical: hp(2),
+    alignItems: 'center',
+    marginHorizontal: wp(3),
+    borderRadius: wp(2),
+    marginTop: hp(0.5),
+    gap: 6,
+  },
+  rollingIndicatorText: {
+    color: '#D4A843',
+    fontSize: fp(2.2),
+    fontWeight: '800',
+    letterSpacing: 2,
+  },
+  rollingSubtext: {
+    color: '#888',
+    fontSize: fp(1.4),
+  },
+  // Match history section
   bettingResultsSection: {
     width: wp(95),
     backgroundColor: '#171717',
     marginLeft: wp(2.5),
     marginTop: hp(1),
-    flexDirection: 'row',
     borderTopLeftRadius: wp(4),
     borderTopRightRadius: wp(4),
     overflow: 'hidden',
+    paddingBottom: hp(2),
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: wp(4),
+    paddingTop: hp(1.5),
+    paddingBottom: hp(0.5),
+  },
+  historyTitle: {
+    color: '#F5F1E8',
+    fontSize: fp(1.6),
+    fontWeight: '700',
+  },
+  historySubtitle: {
+    color: '#666',
+    fontSize: fp(1.2),
   },
   historyScrollContent: {
     flexGrow: 1,
+    paddingHorizontal: wp(2),
   },
   resultHeaderRow: {
     flexDirection: 'row',
   },
   headerCell: {
     width: wp(12),
-    height: wp(6),
+    height: wp(5),
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: wp(0.1),
     borderColor: 'rgba(212,168,67,0.18)',
   },
   headerText: {
-    fontWeight: 'bold',
-    fontSize: 12,
+    fontWeight: '600',
+    fontSize: 10,
+    color: '#888',
   },
   resultColumn: {
     flexDirection: 'column',
+    alignItems: 'center',
   },
   resultCell: {
     width: wp(12),
     height: wp(8),
     borderRightWidth: wp(0.1),
     borderTopWidth: wp(0.1),
-    borderColor: '#BDBDBD',
+    borderColor: '#333',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  resultCellWinner: {
+    backgroundColor: 'rgba(212,168,67,0.15)',
   },
   resultDice: {
     width: '60%',
     height: '60%',
     resizeMode: 'contain',
     borderRadius: wp(1),
+  },
+  // D3: Verify button in history
+  verifyButton: {
+    marginTop: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#D4A843',
+    alignItems: 'center',
+  },
+  verifyButtonText: {
+    color: '#D4A843',
+    fontSize: fp(1.0),
+    fontWeight: '600',
   },
   // Dice animation overlay styles
   diceAnimationOverlay: {
