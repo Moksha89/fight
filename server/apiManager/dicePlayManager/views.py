@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
 from django.db.models import F
+from kokoroko.throttles import DiceBetThrottle, HistoryThrottle
 
 from dicePlayManager.models import Board, DicePlayMatch, DicePlayMatchBet
 from dicePlayManager.tasks import auto_roll_virtual_match, create_next_virtual_round
@@ -92,7 +93,8 @@ class DicePlayMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
             .order_by("-createdDate")
         )
 
-    @action(detail=False, methods=["post"], url_path="place-bet")
+    @action(detail=False, methods=["post"], url_path="place-bet",
+            throttle_classes=[DiceBetThrottle])
     def place_bet(self, request):
         serializer = PlaceDiceBetSerializer(
             data=request.data, context={"request": request}

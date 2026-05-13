@@ -5,6 +5,7 @@ from cockfightManager.models import *
 from .serializers import *
 
 from wallet.models import Wallet, WalletHistory
+from kokoroko.throttles import CockfightBetThrottle
 
 from django.db import transaction
 from django.db.models import F
@@ -23,7 +24,8 @@ class CockfightMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return CockfightMatchBet.objects.filter(customer=self.request.user).order_by('-createdDate')
 
-    @action(detail=False, methods=['post'], url_path='place-bet')
+    @action(detail=False, methods=['post'], url_path='place-bet',
+            throttle_classes=[CockfightBetThrottle])
     def place_bet(self, request):
         serializer = PlaceBetSerializer(
             data=request.data, context={'request': request})
