@@ -892,7 +892,8 @@
         .dice-mybets-compact td { padding: 5px 6px; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
         /* Match history cards */
         .dice-match-cards { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; }
-        .dice-match-card { min-width: 180px; flex-shrink: 0; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 10px 12px; }
+        .dice-match-card { min-width: 180px; flex-shrink: 0; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 10px 12px; transition: border-color 0.2s; }
+        .dice-match-card:hover { border-color: var(--gold-border); }
         .dice-match-card-title { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
         .dice-match-card-dice { display: flex; gap: 3px; margin-bottom: 4px; flex-wrap: wrap; }
         .dice-match-card-dice .mface { width: 22px; height: 22px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8B0000; background: linear-gradient(135deg, #F5F1E8, #E8E0D0); border: 1px solid #D4C9B8; }
@@ -900,7 +901,7 @@
         .dice-match-card-nums { font-size: 10px; color: var(--text-muted); }
         .dice-match-card-win { font-size: 11px; color: var(--gold); font-weight: 700; }
         .dice-match-card-nowinner { font-size: 11px; color: var(--danger); font-weight: 600; }
-        .dice-round-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 10px; }
+        .dice-round-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         .dice-round-id { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
         .dice-round-id .rid { color: var(--gold); font-weight: 700; }
         .dice-round-id .badge-v { background: var(--gold); color: #000; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px; margin-left: 4px; }
@@ -914,32 +915,62 @@
         .dice-status-badge.closed { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
         .dice-status-badge.rolling { background: rgba(212,168,67,0.15); color: var(--gold); border: 1px solid rgba(212,168,67,0.3); animation: dicePulse 0.6s ease-in-out infinite alternate; }
         @keyframes dicePulse { from { opacity: 0.7; } to { opacity: 1; } }
-        @keyframes diceShake { 0%,100%{transform:translateX(0) rotate(0)} 15%{transform:translateX(-4px) rotate(-3deg)} 30%{transform:translateX(4px) rotate(3deg)} 45%{transform:translateX(-3px) rotate(-2deg)} 60%{transform:translateX(3px) rotate(2deg)} 75%{transform:translateX(-1px) rotate(-1deg)} 90%{transform:translateX(1px) rotate(1deg)} }
-        @keyframes diceBounceIn { 0%{transform:scale(0);opacity:0} 50%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
-        @keyframes diceWinGlow { 0%,100%{box-shadow:0 0 8px rgba(212,168,67,0.4)} 50%{box-shadow:0 0 20px rgba(212,168,67,0.8)} }
+        @keyframes diceShake { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-5px,2px) rotate(-4deg)} 40%{transform:translate(5px,-2px) rotate(4deg)} 60%{transform:translate(-3px,1px) rotate(-2deg)} 80%{transform:translate(3px,-1px) rotate(2deg)} }
+        @keyframes diceBounceIn { 0%{transform:scale(0) translateY(20px);opacity:0} 60%{transform:scale(1.12) translateY(-4px);opacity:1} 80%{transform:scale(0.95) translateY(2px)} 100%{transform:scale(1) translateY(0)} }
+        @keyframes diceWinGlow { 0%,100%{box-shadow:0 0 8px rgba(212,168,67,0.4),inset 0 0 2px rgba(212,168,67,0.1)} 50%{box-shadow:0 0 24px rgba(212,168,67,0.8),inset 0 0 6px rgba(212,168,67,0.2)} }
         @keyframes confettiFall { 0%{transform:translateY(-10px) rotate(0);opacity:1} 100%{transform:translateY(60px) rotate(360deg);opacity:0} }
+        @keyframes diceRollingBounce { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-6px) rotate(8deg)} 50%{transform:translateY(0) rotate(-5deg)} 75%{transform:translateY(-3px) rotate(3deg)} }
+        @keyframes diceMugShake { 0%,100%{transform:translate(0,0) rotate(0)} 10%{transform:translate(-3px,1px) rotate(-2deg)} 20%{transform:translate(4px,-1px) rotate(3deg)} 30%{transform:translate(-4px,2px) rotate(-3deg)} 40%{transform:translate(3px,-2px) rotate(2deg)} 50%{transform:translate(-2px,1px) rotate(-1deg)} 60%{transform:translate(3px,0) rotate(2deg)} 70%{transform:translate(-2px,-1px) rotate(-2deg)} 80%{transform:translate(2px,1px) rotate(1deg)} 90%{transform:translate(-1px,0) rotate(-1deg)} }
+        @keyframes diceRevealLift { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(-100px) scale(0.8);opacity:0} }
+        @keyframes diceRollingShadow { 0%,100%{opacity:0.6;transform:translateX(-50%) scaleX(1)} 50%{opacity:0.3;transform:translateX(-50%) scaleX(0.85)} }
+        @keyframes diceResultLabel { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes diceConfettiPop { 0%{transform:scale(0) rotate(0);opacity:1} 50%{transform:scale(1.2) rotate(180deg);opacity:0.8} 100%{transform:scale(0) rotate(360deg);opacity:0} }
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .dice-mug-svg, .dice-result-face, .dice-pick-card, .dice-rolling-placeholder,
+            .dice-status-badge.rolling, .dice-match-card, .dice-confetti-particle { animation: none !important; transition-duration: 0.01ms !important; }
+            .dice-mug-svg.shaking { animation: none !important; }
+            .dice-mug-svg.lifted { transform: translateY(-80px); opacity: 0; transition-duration: 0.01ms !important; }
+        }
 
         /* Mug + Dice visual area */
-        .dice-visual-area { position: relative; background: linear-gradient(180deg, #2D1F1A 0%, #1a1209 100%); border-radius: var(--radius); padding: 20px; margin-bottom: 10px; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(212,168,67,0.15); }
-        .dice-velvet-mat { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 320px; height: 50px; background: radial-gradient(ellipse at center, #6B1A1A 0%, #4A1212 70%, transparent 100%); border-radius: 50%; opacity: 0.6; }
-        .dice-mug-svg { position: relative; z-index: 2; transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s; }
-        .dice-mug-svg.shaking { animation: diceShake 0.15s linear infinite; }
-        .dice-mug-svg.lifted { transform: translateY(-80px); opacity: 0; }
-        .dice-result-grid { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 3; }
-        .dice-result-face { width: 52px; height: 52px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #8B0000; background: linear-gradient(135deg, #F5F1E8, #E8E0D0); border: 1px solid #D4C9B8; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
-        .dice-result-face.bouncing { animation: diceBounceIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
-        .dice-result-face.winner { animation: diceWinGlow 1s ease-in-out infinite; border-color: var(--gold); }
-        .dice-result-label { font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center; z-index: 3; position: relative; }
+        .dice-visual-area { position: relative; background: linear-gradient(180deg, #2D1F1A 0%, #1a1209 100%); border-radius: var(--radius); padding: 24px 20px 20px; margin-bottom: 10px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(212,168,67,0.2); box-shadow: inset 0 2px 20px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2); }
+        .dice-velvet-mat { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 340px; height: 55px; background: radial-gradient(ellipse at center, #6B1A1A 0%, #4A1212 60%, transparent 100%); border-radius: 50%; opacity: 0.6; }
+        .dice-velvet-mat.rolling-shadow { animation: diceRollingShadow 0.8s ease-in-out infinite; }
+        .dice-mug-svg { position: relative; z-index: 2; transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+        .dice-mug-svg.shaking { animation: diceMugShake 0.25s linear infinite; filter: drop-shadow(0 4px 12px rgba(212,168,67,0.2)); }
+        .dice-mug-svg.lifted { animation: diceRevealLift 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        .dice-result-grid { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 3; }
+        .dice-result-face { width: 56px; height: 56px; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; background: linear-gradient(145deg, #FAFAF5, #E8E0D0); border: 1.5px solid #C8BCA8; box-shadow: 0 3px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6); }
+        .dice-result-face.bouncing { animation: diceBounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
+        .dice-result-face.winner { animation: diceWinGlow 1.2s ease-in-out infinite; border-color: var(--gold); background: linear-gradient(145deg, #FFF8E8, #F0E0C0); }
+        .dice-result-label { font-size: 11px; color: var(--text-muted); margin-top: 10px; text-align: center; z-index: 3; position: relative; animation: diceResultLabel 0.3s ease-out; }
+        /* CSS dice pip faces */
+        .dice-pip-grid { display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); width: 100%; height: 100%; padding: 7px; gap: 1px; }
+        .dice-pip { width: 9px; height: 9px; border-radius: 50%; background: #8B0000; display: flex; align-items: center; justify-content: center; margin: auto; }
+        .dice-pip.hide { visibility: hidden; }
+        /* Small pips for match history / recent */
+        .dice-pip-sm { display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); width: 100%; height: 100%; padding: 3px; gap: 0px; }
+        .dice-pip-sm .pip { width: 4px; height: 4px; border-radius: 50%; background: #8B0000; margin: auto; }
+        .dice-pip-sm .pip.hide { visibility: hidden; }
+        /* Rolling placeholder dice */
+        .dice-rolling-wrap { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 3; }
+        .dice-rolling-placeholder { width: 56px; height: 56px; border-radius: 10px; background: linear-gradient(145deg, #FAFAF5, #E8E0D0); border: 1.5px solid #C8BCA8; box-shadow: 0 3px 8px rgba(0,0,0,0.35); animation: diceRollingBounce 0.4s ease-in-out infinite; display: flex; align-items: center; justify-content: center; font-size: 20px; color: rgba(139,0,0,0.3); }
+        .dice-rolling-text { font-size: 12px; color: var(--gold); margin-top: 10px; text-align: center; z-index: 3; position: relative; animation: dicePulse 0.8s ease-in-out infinite alternate; letter-spacing: 1px; font-weight: 600; }
+        /* Phase indicator */
+        .dice-phase-label { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px; z-index: 3; position: relative; }
 
         /* Number picker */
         .dice-picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-        .dice-pick-card { position: relative; border: 2px solid var(--border); border-radius: var(--radius); background: var(--bg-card); padding: 14px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; user-select: none; }
-        .dice-pick-card:hover { border-color: var(--gold); background: rgba(212,168,67,0.08); }
-        .dice-pick-card.selected { border-color: var(--gold); background: rgba(212,168,67,0.15); box-shadow: 0 0 0 3px rgba(212,168,67,0.2); }
+        .dice-pick-card { position: relative; border: 2px solid var(--border); border-radius: var(--radius); background: var(--bg-card); padding: 14px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s ease; user-select: none; }
+        .dice-pick-card:hover { border-color: var(--gold); background: rgba(212,168,67,0.08); transform: translateY(-1px); }
+        .dice-pick-card.selected { border-color: var(--gold); background: rgba(212,168,67,0.15); box-shadow: 0 0 0 3px rgba(212,168,67,0.2), 0 4px 12px rgba(212,168,67,0.15); }
         .dice-pick-card.selected::after { content: '✓'; position: absolute; top: 4px; right: 6px; font-size: 12px; color: var(--gold); font-weight: 700; }
-        .dice-pick-card.win-highlight { border-color: var(--success); background: rgba(34,197,94,0.12); animation: diceWinGlow 1s ease-in-out infinite; }
+        .dice-pick-card.win-highlight { border-color: var(--success); background: rgba(34,197,94,0.12); box-shadow: 0 0 16px rgba(34,197,94,0.3); animation: diceWinGlow 1s ease-in-out infinite; }
         .dice-pick-card.disabled { opacity: 0.5; pointer-events: none; }
-        .dice-pick-num { width: 42px; height: 42px; border-radius: 10px; background: var(--gold); color: #000; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; box-shadow: 0 2px 8px rgba(212,168,67,0.3); }
+        .dice-pick-num { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(145deg, #F0D78C, #D4A843); color: #000; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 2px 8px rgba(212,168,67,0.3), inset 0 1px 0 rgba(255,255,255,0.3); }
+        .dice-pick-num .dice-pip-grid { padding: 6px; }
+        .dice-pick-num .dice-pip { width: 7px; height: 7px; background: #4A3000; }
         .dice-pick-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; }
 
         /* Bet controls */
@@ -955,15 +986,18 @@
         .dice-bet-row { display: flex; gap: 8px; align-items: center; }
         .dice-bet-input { flex: 1; padding: 10px 12px; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-primary); font-size: 14px; font-weight: 600; }
         .dice-bet-input:focus { border-color: var(--gold); outline: none; }
-        .dice-place-btn { padding: 10px 24px; border-radius: 8px; background: var(--gold); color: #000; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-        .dice-place-btn:hover { background: var(--gold-dark); }
-        .dice-place-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .dice-place-btn { padding: 12px 24px; border-radius: 8px; background: linear-gradient(135deg, #D4A843, #B8922E); color: #000; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 2px 8px rgba(212,168,67,0.3); letter-spacing: 0.3px; }
+        .dice-place-btn:hover { background: linear-gradient(135deg, #F0D78C, #D4A843); box-shadow: 0 4px 16px rgba(212,168,67,0.4); transform: translateY(-1px); }
+        .dice-place-btn:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; transform: none; }
         .dice-total-row { margin-top: 8px; font-size: 12px; color: var(--text-secondary); text-align: right; }
         .dice-total-row b { color: var(--gold); font-size: 14px; }
 
         /* Recent results strip */
-        .dice-recent-strip { display: flex; gap: 4px; overflow-x: auto; padding: 8px 0; margin-bottom: 10px; }
-        .dice-recent-item { min-width: 36px; padding: 4px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+        .dice-recent-strip { display: flex; gap: 4px; overflow-x: auto; padding: 8px 0; margin-bottom: 10px; scrollbar-width: thin; scrollbar-color: rgba(212,168,67,0.2) transparent; }
+        .dice-recent-strip::-webkit-scrollbar { height: 3px; }
+        .dice-recent-strip::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.3); border-radius: 3px; }
+        .dice-recent-item { min-width: 40px; padding: 4px 6px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--text-muted); flex-shrink: 0; transition: border-color 0.2s; }
+        .dice-recent-item:hover { border-color: var(--gold-border); }
         .dice-recent-item .rnum { font-size: 11px; font-weight: 700; color: var(--text-primary); }
         .dice-recent-item .rwin { color: var(--gold); font-weight: 700; }
 
@@ -990,13 +1024,18 @@
         .dice-bet-pending { color: var(--warning); font-weight: 600; }
 
         /* Result overlay */
-        .dice-result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .dice-result-card { padding: 24px 40px; border-radius: 16px; text-align: center; animation: diceBounceIn 0.4s ease-out forwards; pointer-events: auto; }
-        .dice-result-card.win { background: linear-gradient(135deg, #1a1209, #2D1F1A); border: 2px solid var(--gold); box-shadow: 0 0 40px rgba(212,168,67,0.3); }
-        .dice-result-card.loss { background: linear-gradient(135deg, #1a0909, #2D1A1A); border: 2px solid var(--danger); box-shadow: 0 0 20px rgba(239,68,68,0.2); }
-        .dice-result-emoji { font-size: 48px; margin-bottom: 8px; }
-        .dice-result-text { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
-        .dice-result-amount { font-size: 18px; font-weight: 700; }
+        .dice-result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0,0,0,0.3); animation: confirmFadeIn 0.2s ease; }
+        .dice-result-card { padding: 28px 44px; border-radius: 20px; text-align: center; animation: diceBounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; pointer-events: auto; position: relative; overflow: hidden; }
+        .dice-result-card.win { background: linear-gradient(135deg, #1a1209, #2D1F1A); border: 2px solid var(--gold); box-shadow: 0 0 60px rgba(212,168,67,0.3), 0 0 120px rgba(212,168,67,0.1); }
+        .dice-result-card.win::before { content: ''; position: absolute; inset: -2px; border-radius: 20px; background: linear-gradient(45deg, transparent 30%, rgba(212,168,67,0.1) 50%, transparent 70%); background-size: 200% 200%; animation: diceShimmer 2s linear infinite; z-index: 0; }
+        @keyframes diceShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .dice-result-card.loss { background: linear-gradient(135deg, #1a0909, #2D1A1A); border: 1px solid rgba(239,68,68,0.3); box-shadow: 0 0 20px rgba(239,68,68,0.1); }
+        .dice-result-emoji { font-size: 52px; margin-bottom: 10px; position: relative; z-index: 1; }
+        .dice-result-text { font-size: 26px; font-weight: 800; margin-bottom: 6px; position: relative; z-index: 1; }
+        .dice-result-amount { font-size: 20px; font-weight: 700; position: relative; z-index: 1; }
+        /* Confetti container */
+        .dice-confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; overflow: hidden; }
+        .dice-confetti-particle { position: absolute; width: 8px; height: 8px; border-radius: 2px; opacity: 0; }
 
         /* Section tabs for history */
         .dice-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
@@ -1163,9 +1202,23 @@
             .dice-desktop-layout { flex-direction: column; }
             .dice-right-col { width: 100%; }
             .dice-picker-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-            .dice-pick-num { width: 36px; height: 36px; font-size: 18px; }
-            .dice-result-face { width: 44px; height: 44px; font-size: 20px; }
-            .dice-visual-area { min-height: 150px; padding: 14px; }
+            .dice-result-face { width: 44px; height: 44px; }
+            .dice-result-face .dice-pip-grid { padding: 5px; }
+            .dice-result-face .dice-pip { width: 7px; height: 7px; }
+            .dice-rolling-placeholder { width: 44px; height: 44px; font-size: 16px; }
+            .dice-visual-area { min-height: 160px; padding: 14px; }
+            .dice-pick-num { width: 38px; height: 38px; }
+            .dice-pick-num .dice-pip-grid { padding: 4px; }
+            .dice-pick-num .dice-pip { width: 6px; height: 6px; }
+            .dice-pick-card { padding: 10px 0; }
+            .dice-phase-label { font-size: 9px; }
+            .dice-rolling-text { font-size: 10px; }
+            .dice-result-card { padding: 20px 28px; }
+            .dice-result-emoji { font-size: 40px; }
+            .dice-result-text { font-size: 20px; }
+            .dice-result-amount { font-size: 16px; }
+            .dice-match-card { min-width: 150px; padding: 8px 10px; }
+            .dice-round-bar { padding: 8px 10px; }
             .game-cards { grid-template-columns: 1fr; }
             .stats-bar { grid-template-columns: repeat(3, 1fr); gap: 8px; }
             .match-teams { padding: 14px; }
@@ -1174,6 +1227,23 @@
 
         @media (min-width: 769px) {
             .bottom-nav { display: none !important; }
+        }
+
+        /* Desktop polish: larger screens */
+        @media (min-width: 1440px) {
+            .dice-visual-area { min-height: 240px; padding: 28px; }
+            .dice-result-face { width: 62px; height: 62px; }
+            .dice-result-face .dice-pip { width: 10px; height: 10px; }
+            .dice-rolling-placeholder { width: 62px; height: 62px; }
+            .dice-pick-num { width: 48px; height: 48px; }
+            .dice-match-cards { gap: 12px; }
+        }
+        @media (min-width: 2560px) {
+            .dice-game-wrap { max-width: 1400px; }
+            .dice-visual-area { min-height: 280px; padding: 32px; }
+            .dice-result-face { width: 68px; height: 68px; }
+            .dice-result-face .dice-pip { width: 11px; height: 11px; }
+            .dice-rolling-placeholder { width: 68px; height: 68px; }
         }
 
         /* Info card */
@@ -3290,6 +3360,62 @@
     let diceActiveTab = 'history'; // history|mybets
     let diceBetSubmitting = false; // Fix #4: prevent double-click
     let diceCompletedCache = []; // Fix #2: persistent match history cache
+    let diceRevealTimer = null; // D2: track reveal animation timer
+
+    // D2: Render CSS pip pattern for a dice face value (1-6)
+    function dicePipHTML(val, size) {
+        // size: 'lg' for main result, 'sm' for match history/recent, 'pick' for number picker
+        var cls = size === 'sm' ? 'dice-pip-sm' : 'dice-pip-grid';
+        var pipCls = size === 'sm' ? 'pip' : 'dice-pip';
+        // Pip positions: 3x3 grid (TL,TC,TR,ML,MC,MR,BL,BC,BR)
+        // 1=MC, 2=TR+BL, 3=TR+MC+BL, 4=TL+TR+BL+BR, 5=TL+TR+MC+BL+BR, 6=TL+TR+ML+MR+BL+BR
+        var layouts = {
+            1: [0,0,0, 0,1,0, 0,0,0],
+            2: [0,0,1, 0,0,0, 1,0,0],
+            3: [0,0,1, 0,1,0, 1,0,0],
+            4: [1,0,1, 0,0,0, 1,0,1],
+            5: [1,0,1, 0,1,0, 1,0,1],
+            6: [1,0,1, 1,0,1, 1,0,1]
+        };
+        var l = layouts[val] || layouts[1];
+        var h = '<div class="' + cls + '">';
+        for (var i = 0; i < 9; i++) {
+            h += '<div class="' + pipCls + (l[i] ? '' : ' hide') + '"></div>';
+        }
+        h += '</div>';
+        return h;
+    }
+
+    // D2: Spawn confetti particles for win celebration
+    function diceSpawnConfetti() {
+        var container = document.createElement('div');
+        container.className = 'dice-confetti-container';
+        var colors = ['#D4A843','#F0D78C','#22C55E','#F59E0B','#EF4444','#3B82F6','#EC4899'];
+        for (var i = 0; i < 40; i++) {
+            var p = document.createElement('div');
+            p.className = 'dice-confetti-particle';
+            p.style.left = (Math.random() * 100) + '%';
+            p.style.top = '-10px';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            p.style.width = (4 + Math.random() * 8) + 'px';
+            p.style.height = (4 + Math.random() * 8) + 'px';
+            p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            var dur = 1.5 + Math.random() * 2;
+            var delay = Math.random() * 0.8;
+            var drift = -60 + Math.random() * 120;
+            p.style.animation = 'none';
+            p.style.opacity = '1';
+            p.style.transition = 'none';
+            // Use inline keyframe via JS
+            p.animate([
+                { transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: 1 },
+                { transform: 'translateY(' + (window.innerHeight + 20) + 'px) translateX(' + drift + 'px) rotate(' + (360 + Math.random()*360) + 'deg)', opacity: 0 }
+            ], { duration: dur * 1000, delay: delay * 1000, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', fill: 'forwards' });
+            container.appendChild(p);
+        }
+        document.body.appendChild(container);
+        setTimeout(function() { if (container.parentNode) container.remove(); }, 4500);
+    }
 
     async function loadDiceGames() {
         try {
@@ -3457,44 +3583,85 @@
 
         // Mug + Dice visual area
         html += '<div class="dice-visual-area">';
-        html += '<div class="dice-velvet-mat"></div>';
-        var mugClass = 'dice-mug-svg';
-        if (diceAnimState === 'rolling') mugClass += ' shaking';
-        if (diceAnimState === 'reveal' || diceAnimState === 'highlight') mugClass += ' lifted';
-        html += '<svg class="' + mugClass + '" width="80" height="72" viewBox="0 0 100 90">';
-        html += '<defs><linearGradient id="brassG" x1="0" y1="0" x2="1" y2="0.6">';
-        html += '<stop offset="0" stop-color="#8B6914"/><stop offset=".3" stop-color="#D4A843"/><stop offset=".5" stop-color="#F0D78C"/><stop offset=".7" stop-color="#B8860B"/><stop offset="1" stop-color="#8B6914"/>';
-        html += '</linearGradient></defs>';
-        html += '<path d="M20,85 Q20,20 30,10 L70,10 Q80,20 80,85 Z" fill="url(#brassG)" stroke="#8B6914" stroke-width="1"/>';
-        html += '<ellipse cx="50" cy="10" rx="25" ry="6" fill="#F0D78C" stroke="#8B6914" stroke-width=".5"/>';
-        html += '<ellipse cx="50" cy="85" rx="30" ry="5" fill="#8B6914" stroke="#B8860B" stroke-width=".5"/>';
-        html += '<rect x="25" y="40" width="50" height="3" fill="#F0D78C" opacity=".5"/>';
-        html += '</svg>';
+        var matClass = 'dice-velvet-mat';
+        if (diceAnimState === 'rolling') matClass += ' rolling-shadow';
+        html += '<div class="' + matClass + '"></div>';
 
-        var showFaces = [];
-        var showWinners = [];
-        if ((diceAnimState === 'reveal' || diceAnimState === 'highlight') && liveMatch) {
-            showFaces = getDiceRolls(liveMatch);
-            showWinners = getDiceWinners(showFaces);
-        } else if (lastFaces.length === 6) {
-            showFaces = lastFaces;
-            showWinners = lastWinners;
-        }
-        if (showFaces.length === 6) {
-            html += '<div class="dice-result-grid">';
-            showFaces.forEach(function(f, idx) {
-                var isW = showWinners.indexOf(f) >= 0;
-                var cls = 'dice-result-face';
-                if (diceAnimState === 'reveal') cls += ' bouncing';
-                if (isW && (diceAnimState === 'highlight' || diceAnimState === 'idle')) cls += ' winner';
-                var delay = diceAnimState === 'reveal' ? (idx * 0.12) + 's' : '0s';
-                html += '<div class="' + cls + '" style="animation-delay:' + delay + ';">' + f + '</div>';
-            });
+        // D2: Phase-aware visual states
+        if (diceAnimState === 'rolling') {
+            // ROLLING: Show mug shaking with placeholder dice underneath (hidden by mug)
+            html += '<div class="dice-phase-label">Shaking Dice...</div>';
+            html += '<svg class="dice-mug-svg shaking" width="90" height="80" viewBox="0 0 100 90">';
+            html += '<defs><linearGradient id="brassG" x1="0" y1="0" x2="1" y2="0.6">';
+            html += '<stop offset="0" stop-color="#8B6914"/><stop offset=".3" stop-color="#D4A843"/><stop offset=".5" stop-color="#F0D78C"/><stop offset=".7" stop-color="#B8860B"/><stop offset="1" stop-color="#8B6914"/>';
+            html += '</linearGradient></defs>';
+            html += '<path d="M20,85 Q20,20 30,10 L70,10 Q80,20 80,85 Z" fill="url(#brassG)" stroke="#8B6914" stroke-width="1.5"/>';
+            html += '<ellipse cx="50" cy="10" rx="25" ry="6" fill="#F0D78C" stroke="#8B6914" stroke-width=".5"/>';
+            html += '<ellipse cx="50" cy="85" rx="30" ry="5" fill="#8B6914" stroke="#B8860B" stroke-width=".5"/>';
+            html += '<rect x="25" y="40" width="50" height="3" fill="#F0D78C" opacity=".4"/>';
+            html += '</svg>';
+            html += '<div class="dice-rolling-wrap">';
+            for (var rp = 0; rp < 6; rp++) {
+                html += '<div class="dice-rolling-placeholder" style="animation-delay:' + (rp * 0.07) + 's;">?</div>';
+            }
             html += '</div>';
-            if (showWinners.length > 0) {
-                html += '<div class="dice-result-label">Winners: ' + showWinners.join(', ') + ' (appeared 2+ times)</div>';
-            } else {
-                html += '<div class="dice-result-label">No number appeared 2+ times</div>';
+            html += '<div class="dice-rolling-text">Revealing soon...</div>';
+        } else if (diceAnimState === 'reveal' || diceAnimState === 'highlight') {
+            // REVEAL/HIGHLIGHT: Mug lifts, dice appear
+            html += '<svg class="dice-mug-svg lifted" width="90" height="80" viewBox="0 0 100 90">';
+            html += '<defs><linearGradient id="brassG" x1="0" y1="0" x2="1" y2="0.6">';
+            html += '<stop offset="0" stop-color="#8B6914"/><stop offset=".3" stop-color="#D4A843"/><stop offset=".5" stop-color="#F0D78C"/><stop offset=".7" stop-color="#B8860B"/><stop offset="1" stop-color="#8B6914"/>';
+            html += '</linearGradient></defs>';
+            html += '<path d="M20,85 Q20,20 30,10 L70,10 Q80,20 80,85 Z" fill="url(#brassG)" stroke="#8B6914" stroke-width="1.5"/>';
+            html += '<ellipse cx="50" cy="10" rx="25" ry="6" fill="#F0D78C" stroke="#8B6914" stroke-width=".5"/>';
+            html += '<ellipse cx="50" cy="85" rx="30" ry="5" fill="#8B6914" stroke="#B8860B" stroke-width=".5"/>';
+            html += '<rect x="25" y="40" width="50" height="3" fill="#F0D78C" opacity=".4"/>';
+            html += '</svg>';
+            var revFaces = liveMatch ? getDiceRolls(liveMatch) : [];
+            var revWinners = getDiceWinners(revFaces);
+            if (revFaces.length === 6) {
+                html += '<div class="dice-result-grid">';
+                revFaces.forEach(function(f, idx) {
+                    var isW = revWinners.indexOf(f) >= 0;
+                    var cls = 'dice-result-face';
+                    if (diceAnimState === 'reveal') cls += ' bouncing';
+                    if (isW && diceAnimState === 'highlight') cls += ' winner';
+                    var delay = diceAnimState === 'reveal' ? (idx * 0.1) + 's' : '0s';
+                    html += '<div class="' + cls + '" style="animation-delay:' + delay + ';">' + dicePipHTML(f, 'lg') + '</div>';
+                });
+                html += '</div>';
+                if (revWinners.length > 0) {
+                    html += '<div class="dice-result-label">Winners: ' + revWinners.join(', ') + ' (appeared 2+ times)</div>';
+                } else {
+                    html += '<div class="dice-result-label" style="color:var(--text-muted);">No number appeared 2+ times</div>';
+                }
+            }
+        } else {
+            // IDLE / BETTING: Show mug resting + last result (or waiting state)
+            html += '<svg class="dice-mug-svg" width="90" height="80" viewBox="0 0 100 90">';
+            html += '<defs><linearGradient id="brassG" x1="0" y1="0" x2="1" y2="0.6">';
+            html += '<stop offset="0" stop-color="#8B6914"/><stop offset=".3" stop-color="#D4A843"/><stop offset=".5" stop-color="#F0D78C"/><stop offset=".7" stop-color="#B8860B"/><stop offset="1" stop-color="#8B6914"/>';
+            html += '</linearGradient></defs>';
+            html += '<path d="M20,85 Q20,20 30,10 L70,10 Q80,20 80,85 Z" fill="url(#brassG)" stroke="#8B6914" stroke-width="1.5"/>';
+            html += '<ellipse cx="50" cy="10" rx="25" ry="6" fill="#F0D78C" stroke="#8B6914" stroke-width=".5"/>';
+            html += '<ellipse cx="50" cy="85" rx="30" ry="5" fill="#8B6914" stroke="#B8860B" stroke-width=".5"/>';
+            html += '<rect x="25" y="40" width="50" height="3" fill="#F0D78C" opacity=".4"/>';
+            html += '</svg>';
+            if (lastFaces.length === 6) {
+                html += '<div class="dice-result-grid">';
+                lastFaces.forEach(function(f) {
+                    var isW = lastWinners.indexOf(f) >= 0;
+                    var cls = 'dice-result-face' + (isW ? ' winner' : '');
+                    html += '<div class="' + cls + '">' + dicePipHTML(f, 'lg') + '</div>';
+                });
+                html += '</div>';
+                if (lastWinners.length > 0) {
+                    html += '<div class="dice-result-label">Last result — Winners: ' + lastWinners.join(', ') + '</div>';
+                } else {
+                    html += '<div class="dice-result-label">Last result — No winners</div>';
+                }
+            } else if (isBettingOpen) {
+                html += '<div class="dice-phase-label" style="margin-top:8px;">Place your bets!</div>';
             }
         }
         html += '</div>';
@@ -3510,7 +3677,7 @@
             if (winH) cls += ' win-highlight';
             if (disabled) cls += ' disabled';
             html += '<div class="' + cls + '" onclick="diceToggleNumber(' + i + ')">';
-            html += '<div class="dice-pick-num">' + i + '</div>';
+            html += '<div class="dice-pick-num">' + dicePipHTML(i, 'pick') + '</div>';
             html += '<div class="dice-pick-label">' + ['One','Two','Three','Four','Five','Six'][i-1] + '</div>';
             html += '</div>';
         }
@@ -3529,11 +3696,9 @@
                 html += '<div class="dice-match-card-title">Round #' + (m.daily_match_number || m.id) + '</div>';
                 html += '<div class="dice-match-card-dice">';
                 faces.forEach(function(f) {
-                    html += '<span class="mface' + (winSet.has(f) ? ' mwin' : '') + '">' + f + '</span>';
+                    html += '<span class="mface' + (winSet.has(f) ? ' mwin' : '') + '">' + dicePipHTML(f, 'sm') + '</span>';
                 });
                 html += '</div>';
-                var nums = faces.map(function(f) { return f; });
-                html += '<div class="dice-match-card-nums">[' + nums.join(', ') + ']</div>';
                 if (wins.length > 0) {
                     html += '<div class="dice-match-card-win">Win: ' + wins.join(', ') + '</div>';
                 } else {
@@ -3758,12 +3923,16 @@
         var overlay = document.createElement('div');
         overlay.className = 'dice-result-overlay';
         if (isWin) {
+            diceSpawnConfetti();
             overlay.innerHTML = '<div class="dice-result-card win"><div class="dice-result-emoji">🎉</div><div class="dice-result-text" style="color:var(--gold);">YOU WON!</div>' + (amount > 0 ? '<div class="dice-result-amount" style="color:var(--success);">+₹' + amount.toLocaleString('en-IN') + '</div>' : '') + '</div>';
         } else {
             overlay.innerHTML = '<div class="dice-result-card loss"><div class="dice-result-emoji">😔</div><div class="dice-result-text" style="color:var(--danger);">Better Luck Next Time</div></div>';
         }
         document.body.appendChild(overlay);
-        setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 3500);
+        // Click to dismiss
+        overlay.addEventListener('click', function() { if (overlay.parentNode) overlay.remove(); });
+        var autoTime = isWin ? 4000 : 2500;
+        setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, autoTime);
     }
 
     // ===== BET HISTORY ON COCKFIGHT PAGE =====
@@ -4161,7 +4330,10 @@
                 var msg = JSON.parse(e.data);
                 if (msg.type === 'dice_match_update' && msg.data) {
                     diceBoards = msg.data;
-                    renderDiceGames();
+                    // D2: Don't re-render during reveal animation sequence (would disrupt animation)
+                    if (diceAnimState !== 'rolling' && diceAnimState !== 'reveal' && diceAnimState !== 'highlight') {
+                        renderDiceGames();
+                    }
                 }
             } catch(err) {}
         };
@@ -4177,13 +4349,18 @@
                     var match = msg.data;
                     if (!match) return;
                     diceLastResult = match;
-                    // Trigger animation sequence: rolling -> reveal -> highlight
+                    // D2: Clear any pending reveal timers
+                    if (diceRevealTimer) { clearTimeout(diceRevealTimer); diceRevealTimer = null; }
+                    // D2: Improved reveal sequence with better timing
+                    // Step 1: Rolling (mug shaking, placeholder dice) — 1.8s
                     diceAnimState = 'rolling';
                     renderDiceGames();
-                    setTimeout(function() {
+                    diceRevealTimer = setTimeout(function() {
+                        // Step 2: Reveal (mug lifts, dice bounce in) — 1s
                         diceAnimState = 'reveal';
                         renderDiceGames();
-                        setTimeout(function() {
+                        diceRevealTimer = setTimeout(function() {
+                            // Step 3: Highlight (winners glow) — 2s
                             diceAnimState = 'highlight';
                             renderDiceGames();
                             // Check if user had bets on this match
@@ -4194,19 +4371,25 @@
                                 return String(b.match) === String(match.id) || (b.match_info && String(b.match_info.id) === String(match.id));
                             });
                             var winBets = userBetsOnMatch.filter(function(b) { return winSet.has(b.diceNumber); });
-                            setTimeout(function() {
+                            diceRevealTimer = setTimeout(function() {
+                                // Step 4: Win/loss feedback
                                 if (winBets.length > 0) {
                                     var totalWin = winBets.reduce(function(s,b) { return s + (b.payout_amount || b.amount * 2 || 0); }, 0);
                                     diceShowResultOverlay(true, totalWin);
                                 } else if (userBetsOnMatch.length > 0) {
                                     diceShowResultOverlay(false, 0);
                                 }
-                                diceAnimState = 'idle';
-                                loadDiceGames();
+                                // Step 5: Update data, stay on highlight briefly
                                 loadDiceMyBets();
+                                diceRevealTimer = setTimeout(function() {
+                                    // Step 6: Transition to idle, refresh
+                                    diceAnimState = 'idle';
+                                    diceRevealTimer = null;
+                                    loadDiceGames();
+                                }, 2000);
                             }, 1500);
-                        }, 1200);
-                    }, 2000);
+                        }, 1000);
+                    }, 1800);
                 }
             } catch(err) {}
         };
@@ -4239,8 +4422,15 @@
                         }
                         diceTimerTick();
                     }
-                    // Phase change triggers fresh data
-                    loadDiceGames();
+                    // D2: Set rolling animation when phase changes to shuffling
+                    var newPhase = msg.data.phase || msg.data.virtual_phase || '';
+                    if (newPhase === 'shuffling' && diceAnimState !== 'rolling' && diceAnimState !== 'reveal' && diceAnimState !== 'highlight') {
+                        diceAnimState = 'rolling';
+                        renderDiceGames();
+                    } else if (diceAnimState !== 'rolling' && diceAnimState !== 'reveal' && diceAnimState !== 'highlight') {
+                        // Phase change triggers fresh data only if not in animation
+                        loadDiceGames();
+                    }
                 }
             } catch(err) {}
         };
