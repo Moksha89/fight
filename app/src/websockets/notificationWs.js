@@ -45,6 +45,13 @@ export const connectNotificationWebSocket = async (onNotification, setUnreadCoun
     try {
       const message = JSON.parse(event.data);
 
+      if (message.type === 'ping') {
+        if (notifSocket && notifSocket.readyState === WebSocket.OPEN) {
+          notifSocket.send(JSON.stringify({type: 'pong'}));
+        }
+        return;
+      }
+
       if (message.type === 'notification_init') {
         if (typeof setUnreadCount === 'function') {
           setUnreadCount(message.unread_count || 0);

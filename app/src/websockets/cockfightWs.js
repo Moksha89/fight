@@ -50,6 +50,12 @@ export const connectMatchWebSocket = async (
   MatchSocket.onmessage = event => {
     try {
       const message = JSON.parse(event.data);
+      if (message.type === 'ping') {
+        if (MatchSocket && MatchSocket.readyState === WebSocket.OPEN) {
+          MatchSocket.send(JSON.stringify({type: 'pong'}));
+        }
+        return;
+      }
       if (message.type === 'accepting_auto_bet_update') {
         handleAutoMatchUpdate(message.data);
       } else if (message.type === 'manual_match_update') {
@@ -198,6 +204,12 @@ export const connectMatchHistoryWebSocket = async (
   MatchHistorySocket.onmessage = event => {
     try {
       const message = JSON.parse(event.data);
+      if (message.type === 'ping') {
+        if (MatchHistorySocket && MatchHistorySocket.readyState === WebSocket.OPEN) {
+          MatchHistorySocket.send(JSON.stringify({type: 'pong'}));
+        }
+        return;
+      }
       if (message.type === 'auto_match_result') {
         const data = message.data;
         setUserBetHistory(prev => {

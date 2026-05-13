@@ -135,6 +135,11 @@ class SmartWebSocket {
         this.lastMessageAt = Date.now();
         try {
           const message = JSON.parse(event.data);
+          // Respond to server ping with pong, don't forward to app
+          if (message.type === 'ping') {
+            this.send({type: 'pong'});
+            return;
+          }
           this.options.onMessage(message);
         } catch (err) {
           console.error(`[WS:${this.name}] Failed to parse message:`, err);
