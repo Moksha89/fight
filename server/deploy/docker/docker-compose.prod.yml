@@ -1,0 +1,95 @@
+networks:
+  kokoroko-net:
+    driver: bridge
+
+services:
+  prod-server:
+    build: .
+    container_name: kokoroko-prod-server
+    command: >
+      sh -c "sh ./.helpers/production/wait_for_mysql.sh python manage.py migrate &&
+            python manage.py collectstatic --noinput &&
+            daphne -b 0.0.0.0 -p 8000 kokoroko.asgi:application"
+    environment:
+      - DJANGO_ENV=prod
+    env_file:
+      - .env
+    volumes:
+      - .:/server
+      - media_data:/server/media
+      - static_data:/server/staticfiles
+    ports:
+      # SECURITY: Bind to localhost only — Nginx proxies from 127.0.0.1
+      # This prevents direct public access to Daphne on port 8000
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - kokoroko-net
+    restart: unless-stopped
+
+  celery-worker:
+    build: .
+    container_name: kokoroko-celery-worker
+    command: celery -A kokoroko worker --loglevel=info
+    environment:
+      - DJANGO_ENV=prod
+    env_file:
+      - .env
+    volumes:
+      - .:/server
+      - media_data:/server/media
+    depends_on:
+      - redis
+      - mysql
+    networks:
+      - kokoroko-net
+    restart: unless-stopped
+
+  celery-beat:
+    build: .
+    container_name: kokoroko-celery-beat
+    command: celery -A kokoroko beat --loglevel=info
+    environment:
+      - DJANGO_ENV=prod
+    env_file:
+      - .env
+    volumes:
+      - .:/server
+    depends_on:
+      - redis
+      - mysql
+    networks:
+      - kokoroko-net
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: kokoroko-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - kokoroko-net
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:latest
+    container_name: kokoroko-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kokoroko_sandbox
+      MYSQL_USER: kokoroko
+      MYSQL_PASSWORD: kokoroko123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - kokoroko-net
+
+volumes:
+  redis_data:
+  mysql_data:
+  media_data:
+  static_data:

@@ -102,6 +102,14 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "60/minute",
         "user": "120/minute",
+        # Per-endpoint throttle scopes (see kokoroko/throttles.py)
+        "cockfight_bet": "15/minute",
+        "dice_bet": "20/minute",
+        "wallet_info": "30/minute",
+        "deposit_request": "10/hour",
+        "withdrawal_request": "5/hour",
+        "history": "60/minute",
+        "admin_action": "60/minute",
     },
 }
 
