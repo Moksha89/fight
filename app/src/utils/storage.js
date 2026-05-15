@@ -7,10 +7,19 @@ export default {
       return value;
     } catch (error) {
       console.error('Storage Get Error:', error);
+      return null;
     }
   },
   setItem: async (key, value) => {
-    await AsyncStorage.setItem(key, value.toString());
+    try {
+      if (value == null) {
+        await AsyncStorage.removeItem(key);
+        return;
+      }
+      await AsyncStorage.setItem(key, String(value));
+    } catch (error) {
+      console.error('Storage Set Error:', error);
+    }
   },
   removeItem: async key => {
     try {
