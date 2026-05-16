@@ -106,7 +106,7 @@ const DepositWithdrawl = ({navigation}) => {
     if (success) {
       setCurrentDeposit(null);
     } else {
-      Alert('Failed to cancel deposit request');
+      Alert.alert('Error', 'Failed to cancel deposit request');
     }
   };
 
@@ -115,7 +115,7 @@ const DepositWithdrawl = ({navigation}) => {
     if (success) {
       setCurrentWithdrawal(null);
     } else {
-      Alert('Failed to cancel deposit request');
+      Alert.alert('Error', 'Failed to cancel withdrawal request');
     }
   };
 
