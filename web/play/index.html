@@ -2245,7 +2245,7 @@
         if (!phone || phone.length < 10) { showForgotError('Enter a valid 10-digit mobile number'); return; }
         document.getElementById('forgot-error').style.display = 'none';
         try {
-            var res = await fetch(API_BASE + '/user/getotp/', {
+            var res = await fetch(API + '/user/getotp/', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({phone_number: phone})
             });
@@ -2268,7 +2268,7 @@
         if (newPw !== confirmPw) { showForgotError('Passwords do not match'); return; }
         document.getElementById('forgot-error').style.display = 'none';
         try {
-            var res = await fetch(API_BASE + '/user/reset-password/', {
+            var res = await fetch(API + '/user/reset-password/', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({phone_number: phone, otp: otp, new_password: newPw})
             });
