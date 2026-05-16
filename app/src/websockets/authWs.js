@@ -1,6 +1,6 @@
 // userSocket.js — wallet update WebSocket with reconnect control
 import {baseWSEndpoint as BASE_URL} from '../Config/baseEndpoint';
-import storage from '../utils/storage';
+import {getSecureItem} from '../utils/secureStorage';
 
 let userSocket = null;
 let reconnectTimeout = null;
@@ -11,8 +11,8 @@ const MAX_RECONNECT_DELAY = 30000;
 export const connectUserWebSocket = async (accessToken, setWallet) => {
   shouldReconnect = true;
 
-  // Re-read token from storage if not provided (reconnect path)
-  const token = accessToken || (await storage.getItem('accessToken'));
+  // Re-read token from secure storage if not provided (reconnect path)
+  const token = accessToken || (await getSecureItem('accessToken'));
   if (!token || typeof setWallet !== 'function') {
     console.warn('[WS] Invalid parameters — no token or setWallet');
     return;

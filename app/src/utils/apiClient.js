@@ -9,8 +9,9 @@
  * - Request/response logging
  */
 
-import storage from './storage';
+import {getSecureItem, setSecureItem} from './secureStorage';
 import {baseApiEndpoint as BASE_URL} from '../Config/baseEndpoint';
+import {handleError} from './errorHandler';
 
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1000;
@@ -43,7 +44,7 @@ function sleep(ms) {
  */
 async function refreshAccessToken() {
   try {
-    const refreshToken = await storage.getItem('refreshToken');
+    const refreshToken = await getSecureItem('refreshToken');
     if (!refreshToken) return null;
 
     const response = await fetch(`${BASE_URL}/auth/jwt/refresh`, {
@@ -54,7 +55,7 @@ async function refreshAccessToken() {
 
     if (response.ok) {
       const data = await response.json();
-      await storage.setItem('accessToken', data.access);
+      await setSecureItem('accessToken', data.access);
       return data.access;
     }
 
@@ -70,7 +71,7 @@ async function refreshAccessToken() {
 let refreshPromise = null;
 
 async function getValidToken() {
-  const token = await storage.getItem('accessToken');
+  const token = await getSecureItem('accessToken');
   return token;
 }
 
@@ -234,17 +235,19 @@ export async function apiRequest(path, options = {}, config = {}) {
           };
         }
 
-        // Refresh failed — session expired
+        // Refresh failed — session expired, trigger forced logout
+        const expiredError = {
+          code: 'AUTH_1001',
+          message: 'Your session has expired. Please login again.',
+          messageHi: 'आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।',
+          severity: 'medium',
+          retryAllowed: false,
+          httpStatus: 401,
+        };
+        handleError(expiredError, {context: 'tokenRefresh'});
         return {
           success: false,
-          error: {
-            code: 'AUTH_1001',
-            message: 'Your session has expired. Please login again.',
-            messageHi: 'आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।',
-            severity: 'medium',
-            retryAllowed: false,
-            httpStatus: 401,
-          },
+          error: expiredError,
           status: 401,
           sessionExpired: true,
         };

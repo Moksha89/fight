@@ -1,5 +1,5 @@
 import {baseWSEndpoint as BASE_URL} from '../Config/baseEndpoint';
-
+import {getSecureItem} from '../utils/secureStorage';
 import storage from '../utils/storage';
 
 let MatchSocket = null;
@@ -16,7 +16,7 @@ export const connectMatchWebSocket = async (
   console.log('[WS] connectMatchWebSocket called');
   MatchShouldReconnect = true; // Set to true before connecting
 
-  const accessToken = await storage.getItem('accessToken');
+  const accessToken = await getSecureItem('accessToken');
   if (
     !accessToken ||
     typeof handleAutoMatchUpdate !== 'function' ||
@@ -129,7 +129,7 @@ export const connectMatchHistoryWebSocket = async (
   console.log('[WS] connectMatchHistoryWebSocket called');
   MatchHistoryShouldReconnect = true; // Set to true before connecting
 
-  const accessToken = await storage.getItem('accessToken');
+  const accessToken = await getSecureItem('accessToken');
   if (
     !accessToken ||
     typeof setAutoMatchHistory !== 'function' ||
