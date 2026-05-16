@@ -1,26 +1,41 @@
-// userSocket.js
+// userSocket.js — wallet update WebSocket with reconnect control
 import {baseWSEndpoint as BASE_URL} from '../Config/baseEndpoint';
+import {getSecureItem} from '../utils/secureStorage';
 
 let userSocket = null;
+let reconnectTimeout = null;
+let shouldReconnect = true;
+let retryCount = 0;
+const MAX_RECONNECT_DELAY = 30000;
 
-export const connectUserWebSocket = (accessToken, setWallet) => {
-  if (!accessToken || typeof setWallet !== 'function') {
-    console.warn('[WS] Invalid parameters');
+export const connectUserWebSocket = async (accessToken, setWallet) => {
+  shouldReconnect = true;
+
+  // Re-read token from secure storage if not provided (reconnect path)
+  const token = accessToken || (await getSecureItem('accessToken'));
+  if (!token || typeof setWallet !== 'function') {
+    console.warn('[WS] Invalid parameters — no token or setWallet');
     return;
   }
 
   // Avoid duplicate socket connections
-  if (userSocket && userSocket.readyState !== WebSocket.CLOSED) {
-    console.warn('[WS] Socket already connected or connecting.');
-    return;
+  if (userSocket) {
+    if (
+      userSocket.readyState === WebSocket.OPEN ||
+      userSocket.readyState === WebSocket.CONNECTING
+    ) {
+      console.warn('[WS] Socket already connected or connecting.');
+      return;
+    }
+    userSocket = null;
   }
 
-  const socketUrl = `${BASE_URL}/ws/user/?token=${accessToken}`;
+  const socketUrl = `${BASE_URL}/ws/user/?token=${token}`;
   userSocket = new WebSocket(socketUrl);
 
   userSocket.onopen = () => {
     console.log('[WS] User WebSocket connected');
-    // No need to send anything from client
+    retryCount = 0;
   };
 
   userSocket.onmessage = event => {
@@ -35,7 +50,6 @@ export const connectUserWebSocket = (accessToken, setWallet) => {
             bonusDebt: message.bonusDebt,
           });
         }
-        // console.log('[WS] User update:', message);
       } else {
         console.warn('[WS] Unhandled message:', message);
       }
@@ -52,16 +66,34 @@ export const connectUserWebSocket = (accessToken, setWallet) => {
     console.log('[WS] User WebSocket closed:', event.reason || 'No reason');
     userSocket = null;
 
-    // Retry after 5 seconds
-    reconnectTimeout = setTimeout(() => {
-      connectUserWebSocket(accessToken, setWallet);
-    }, 3000);
+    if (shouldReconnect) {
+      const delay = Math.min(
+        500 * Math.pow(2, retryCount),
+        MAX_RECONNECT_DELAY,
+      );
+      retryCount++;
+      console.log(
+        `[WS] User reconnecting in ${delay}ms (attempt ${retryCount})`,
+      );
+      reconnectTimeout = setTimeout(() => {
+        connectUserWebSocket(null, setWallet);
+      }, delay);
+    } else {
+      console.log('[WS] Not reconnecting (intentional close)');
+    }
   };
 };
 
 export const closeUserWebSocket = () => {
+  console.log('[WS] Closing User WebSocket...');
+  shouldReconnect = false;
+
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
+
   if (userSocket) {
-    console.log('[WS] Closing User WebSocket...');
     userSocket.close();
     userSocket = null;
   }

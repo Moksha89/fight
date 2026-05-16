@@ -16,8 +16,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import {useAuth} from '../../../context/AuthContext';
-
-import storage from '../../../utils/storage';
+import {hashPin} from '../../../utils/pinHash';
 
 const SetLockScreen = ({navigation}) => {
   const {setIsPinSet, setCheckPin} = useAuth();
@@ -29,10 +28,9 @@ const SetLockScreen = ({navigation}) => {
         alert('Set 4-digit PIN, for secure login!');
         return;
       }
+      const pinHashed = hashPin(pinValue);
       setIsPinSet(true);
-      setCheckPin(pinValue);
-
-      await storage.setItem('checkPin', pinValue);
+      setCheckPin(pinHashed);
 
       navigation.goBack();
     } catch (error) {
@@ -103,6 +101,7 @@ const SetLockScreen = ({navigation}) => {
             textAlign="center"
             style={styles.input}
             ref={inputRefs[index]}
+            secureTextEntry={true}
           />
         ))}
       </View>

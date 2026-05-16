@@ -10,9 +10,8 @@ import {
   Linking,
 } from 'react-native';
 
-import storage from '../../utils/storage';
-
 import {useAuth} from '../../context/AuthContext';
+import {verifyPin} from '../../utils/pinHash';
 
 import {
   responsiveHeight as hp,
@@ -38,7 +37,7 @@ const PinEnterScreen = ({navigation}) => {
   const [otp, setOtp] = useState(['', '', '', '']);
   const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
-  const {logout, setIsLocked, settings} = useAuth();
+  const {logout, setIsLocked, settings, checkPin} = useAuth();
 
   const [screenDimensions, setScreenDimensions] = useState(
     Dimensions.get('window'),
@@ -85,9 +84,8 @@ const PinEnterScreen = ({navigation}) => {
   };
   const handleLogin = async () => {
     const enteredPin = otp.join('');
-    const storedPin = await storage.getItem('checkPin');
 
-    if (enteredPin === storedPin) {
+    if (verifyPin(enteredPin, checkPin)) {
       setIsLocked(false);
     } else {
       alert('Incorrect PIN');
@@ -127,7 +125,7 @@ const PinEnterScreen = ({navigation}) => {
             textAlignVertical="center"
             ref={inputRefs[index]}
             selectionColor="#d4a843"
-            // secureTextEntry={true}
+            secureTextEntry={true}
             accessible={true}
             accessibilityLabel={`Digit ${index + 1}`}
           />
