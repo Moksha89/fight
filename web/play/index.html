@@ -442,12 +442,12 @@
         .sidebar-item:hover { background: var(--bg); color: var(--text-primary); }
         .sidebar-item.active {
             background: var(--gold-bg);
-            color: var(--gold-dark);
+            color: var(--gold);
             border-left-color: var(--gold);
             font-weight: 600;
         }
         .sidebar-item .material-icons { font-size: 20px; }
-        .sidebar-item.active .material-icons { color: var(--gold-dark); }
+        .sidebar-item.active .material-icons { color: var(--gold); }
         .sidebar-item .badge {
             margin-left: auto;
             background: var(--danger);
@@ -653,11 +653,12 @@
         .social-link.instagram svg { fill: #e4405f; }
 
         .section-label {
+            font-family: 'Sora', sans-serif;
             font-size: 15px; font-weight: 700; margin-bottom: 14px;
             display: flex; align-items: center; gap: 8px;
             color: var(--text-primary);
         }
-        .section-label .material-icons { font-size: 20px; color: var(--gold-dark); }
+        .section-label .material-icons { font-size: 20px; color: var(--gold); }
 
         /* ===== MATCH CARDS (Arena) ===== */
         .match-card {
@@ -720,14 +721,14 @@
         }
         .odds-value.meron { color: #ef4444; }
         .odds-value.wala { color: #3b82f6; }
-        .odds-value.draw { color: #a855f7; }
+        .odds-value.draw { color: var(--draw-light); }
         .odds-team {
             font-size: 13px; font-weight: 700; display: flex;
             align-items: center; justify-content: center; gap: 4px;
         }
         .odds-team.meron { color: #ef4444; }
         .odds-team.wala { color: #3b82f6; }
-        .odds-team.draw { color: #a855f7; }
+        .odds-team.draw { color: var(--draw-light); }
 
         /* Rooster Mascots */
         .mascot-row {
@@ -852,7 +853,7 @@
         .win-counter .dot { width: 10px; height: 10px; border-radius: 50%; }
         .win-counter .dot.meron { background: #ef4444; }
         .win-counter .dot.wala { background: #3b82f6; }
-        .win-counter .dot.draw { background: #22c55e; }
+        .win-counter .dot.draw { background: var(--draw-light); }
         .win-counter span { color: var(--text-secondary); }
 
         /* Ratio (hidden - system-determined) */
@@ -878,9 +879,10 @@
         .wallet-actions { display: flex; gap: 10px; }
         .wallet-action-btn {
             flex: 1; padding: 11px; border-radius: 10px;
-            font-size: 13px; font-weight: 600;
+            font-size: 13px; font-weight: 700;
             cursor: pointer; border: none;
-            font-family: inherit; transition: all 0.2s;
+            font-family: 'Sora', sans-serif; transition: all 0.2s;
+            letter-spacing: 0.3px;
         }
         /* Deposit/Withdrawal Modal (Premium Glass) */
         .dep-modal-overlay {
@@ -927,9 +929,9 @@
         .dep-pending-banner button { margin-left: auto; background: #dc2626; color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 600; }
         /* Wallet Summary */
         .wallet-summary { display: flex; gap: 8px; margin-top: 16px; margin-bottom: 12px; }
-        .wallet-summary-item { flex: 1; background: var(--bg); border-radius: var(--radius); padding: 12px; text-align: center; }
+        .wallet-summary-item { flex: 1; background: rgba(20,20,20,0.6); border-radius: var(--radius-lg); padding: 12px; text-align: center; border: 1px solid rgba(212,168,67,0.08); }
         .wallet-summary-item .ws-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-        .wallet-summary-item .ws-value { font-size: 16px; font-weight: 700; margin-top: 4px; }
+        .wallet-summary-item .ws-value { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; margin-top: 4px; }
         .wallet-summary-item .ws-value.credit { color: var(--success); }
         .wallet-summary-item .ws-value.debit { color: var(--danger); }
         /* Bet History Panel */
@@ -941,7 +943,7 @@
         .bet-item .bet-team { font-weight: 600; font-size: 13px; min-width: 60px; }
         .bet-item .bet-team.meron { color: #dc2626; }
         .bet-item .bet-team.wala { color: #2563eb; }
-        .bet-item .bet-team.draw { color: #7c3aed; }
+        .bet-item .bet-team.draw { color: var(--draw-light); }
         .bet-item .bet-info { flex: 1; font-size: 12px; color: var(--text-secondary); }
         .bet-item .bet-result { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
         .bet-item .bet-result.won { background: rgba(34,197,94,0.15); color: #22c55e; }
@@ -968,7 +970,7 @@
         .mh-winner { font-weight: 600; font-size: 13px; }
         .mh-winner.meron { color: #ef4444; }
         .mh-winner.wala { color: #3b82f6; }
-        .mh-winner.draw { color: #a855f7; }
+        .mh-winner.draw { color: var(--draw-light); }
         .mh-date { font-size: 11px; color: var(--text-muted); }
         .mh-proof { display: flex; gap: 4px; justify-content: flex-end; }
         .proof-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; font-size: 14px; text-decoration: none; transition: all 0.2s; }
@@ -996,7 +998,7 @@
         .match-result-banner .mrb-winner { font-size: 20px; font-weight: 700; }
         .match-result-banner .mrb-winner.meron { color: #ef4444; }
         .match-result-banner .mrb-winner.wala { color: #3b82f6; }
-        .match-result-banner .mrb-winner.draw { color: #a78bfa; }
+        .match-result-banner .mrb-winner.draw { color: var(--draw-light); }
         .match-result-banner .mrb-user-result { margin-top: 8px; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 16px; display: inline-block; }
         .match-result-banner .mrb-user-result.won { background: #16a34a; }
         .match-result-banner .mrb-user-result.lost { background: #dc2626; }
@@ -1021,7 +1023,7 @@
         @keyframes koPulse { from { transform: scale(1); } to { transform: scale(1.08); } }
         .wo-ko-text.meron { color: #ef4444; }
         .wo-ko-text.wala { color: #3b82f6; }
-        .wo-ko-text.draw { color: #a855f7; }
+        .wo-ko-text.draw { color: var(--draw-light); }
         .wo-winner-name {
             font-size: 28px; font-weight: 700; color: #fff; margin-top: 8px;
             text-transform: uppercase; letter-spacing: 3px;
@@ -1107,7 +1109,7 @@
             font-size: 12px; font-weight: 600;
             color: var(--text-secondary); transition: all 0.2s;
         }
-        .stmt-tab.active { background: var(--bg-white); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+        .stmt-tab.active { background: linear-gradient(180deg, #D4A843 0%, #A67C2E 100%); color: #000; font-weight: 700; box-shadow: var(--gold-glow); }
 
         .txn-item {
             display: flex; align-items: center; gap: 12px;
@@ -2397,7 +2399,7 @@
             ? ['#ef4444','#dc2626','#f87171','#fca5a5','#d4a843','#fff']
             : winTeam === 2
             ? ['#3b82f6','#2563eb','#60a5fa','#93c5fd','#d4a843','#fff']
-            : ['#a855f7','#7c3aed','#c084fc','#d4a843','#fff','#fbbf24'];
+            : ['#22c55e','#16a34a','#4ade80','#d4a843','#fff','#fbbf24'];
         for (let i = 0; i < 60; i++) {
             const piece = document.createElement('div');
             piece.className = 'confetti-piece';
@@ -2415,7 +2417,7 @@
     }
 
     function spawnSparks(winTeam) {
-        const color = winTeam === 1 ? '#ef4444' : winTeam === 2 ? '#3b82f6' : '#a855f7';
+        const color = winTeam === 1 ? '#ef4444' : winTeam === 2 ? '#3b82f6' : '#22c55e';
         const burst = document.createElement('div');
         burst.className = 'spark-burst';
         for (let i = 0; i < 24; i++) {
