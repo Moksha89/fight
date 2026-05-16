@@ -9,8 +9,8 @@
  * - Request/response logging
  */
 
-import storage from './storage';
 import {baseApiEndpoint as BASE_URL} from '../Config/baseEndpoint';
+import {loadTokens, saveTokens, updateAccessToken} from './tokenStorage';
 
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1000;
@@ -43,7 +43,7 @@ function sleep(ms) {
  */
 async function refreshAccessToken() {
   try {
-    const refreshToken = await storage.getItem('refreshToken');
+    const {refreshToken} = await loadTokens();
     if (!refreshToken) return null;
 
     const response = await fetch(`${BASE_URL}/auth/jwt/refresh`, {
@@ -54,7 +54,7 @@ async function refreshAccessToken() {
 
     if (response.ok) {
       const data = await response.json();
-      await storage.setItem('accessToken', data.access);
+      await updateAccessToken(data.access);
       return data.access;
     }
 
@@ -70,8 +70,8 @@ async function refreshAccessToken() {
 let refreshPromise = null;
 
 async function getValidToken() {
-  const token = await storage.getItem('accessToken');
-  return token;
+  const {accessToken} = await loadTokens();
+  return accessToken;
 }
 
 async function handleTokenRefresh() {

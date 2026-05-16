@@ -10,7 +10,7 @@ import {
   Linking,
 } from 'react-native';
 
-import storage from '../../utils/storage';
+import {verifyPin} from '../../utils/pinStorage';
 
 import {useAuth} from '../../context/AuthContext';
 
@@ -85,9 +85,9 @@ const PinEnterScreen = ({navigation}) => {
   };
   const handleLogin = async () => {
     const enteredPin = otp.join('');
-    const storedPin = await storage.getItem('checkPin');
+    const isValid = await verifyPin(enteredPin);
 
-    if (enteredPin === storedPin) {
+    if (isValid) {
       setIsLocked(false);
     } else {
       alert('Incorrect PIN');
@@ -127,7 +127,7 @@ const PinEnterScreen = ({navigation}) => {
             textAlignVertical="center"
             ref={inputRefs[index]}
             selectionColor="#d4a843"
-            // secureTextEntry={true}
+            secureTextEntry={true}
             accessible={true}
             accessibilityLabel={`Digit ${index + 1}`}
           />
