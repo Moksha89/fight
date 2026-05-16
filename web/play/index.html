@@ -81,6 +81,154 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         .hidden { display: none !important; }
 
+        /* ===== REUSABLE DESIGN TOKENS (Kokoroko Premium) ===== */
+
+        /* Premium Card — dark elevated surface with gold border */
+        .premium-card {
+            background: rgba(20,20,20,0.7);
+            border: 1px solid rgba(212,168,67,0.12);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Glass Card — frosted glass with backdrop blur */
+        .glass-card {
+            background: rgba(20,20,20,0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212,168,67,0.12);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        /* Gold Button — primary CTA with glow */
+        .gold-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 12px 24px;
+            background: linear-gradient(180deg, #D4A843 0%, #A67C2E 100%);
+            color: #000; border: none; border-radius: var(--radius);
+            font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: var(--gold-glow); letter-spacing: 0.3px;
+        }
+        .gold-btn:hover { transform: translateY(-1px); box-shadow: 0 0 20px rgba(212,168,67,0.8), 0 0 40px rgba(212,168,67,0.5); }
+        .gold-btn:active { transform: translateY(0); }
+        .gold-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Outline Button — secondary action with gold border */
+        .outline-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px 20px;
+            background: transparent; color: var(--gold);
+            border: 1px solid rgba(212,168,67,0.3); border-radius: var(--radius);
+            font-family: 'Sora', sans-serif; font-weight: 600; font-size: 13px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .outline-btn:hover { background: rgba(212,168,67,0.08); border-color: var(--gold); }
+
+        /* Section Header — title with icon */
+        .section-header {
+            font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700;
+            color: var(--text-primary);
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 12px;
+        }
+        .section-header .material-icons { font-size: 20px; color: var(--gold); }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+        }
+        .status-badge.open, .status-badge.approved { background: rgba(22,163,74,0.12); color: var(--draw-light); border: 1px solid rgba(22,163,74,0.2); }
+        .status-badge.closed, .status-badge.rejected { background: rgba(220,38,38,0.12); color: var(--meron-light); }
+        .status-badge.pending { background: rgba(245,158,11,0.12); color: var(--warning); }
+        .status-badge.result { background: rgba(212,168,67,0.12); color: var(--gold); }
+
+        /* Live Badge — pulsing indicator */
+        .live-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; font-weight: 700; color: var(--draw-light);
+            background: rgba(22,163,74,0.12); padding: 4px 10px; border-radius: 12px;
+            border: 1px solid rgba(22,163,74,0.2);
+            animation: livePulse 1.5s infinite;
+        }
+
+        /* Wallet Chip — compact balance display */
+        .wallet-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.2);
+            border-radius: 20px; padding: 6px 14px;
+            font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700;
+            color: var(--gold);
+        }
+
+        /* Game Banner — full-width promo card */
+        .game-banner {
+            background: rgba(20,20,20,0.6); border-radius: var(--radius-lg);
+            border: 1px solid rgba(212,168,67,0.12); overflow: hidden;
+            position: relative; cursor: pointer; transition: all 0.25s;
+        }
+        .game-banner:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,168,67,0.12); }
+
+        /* Betting Card — match/round betting area */
+        .betting-card {
+            background: rgba(20,20,20,0.7); backdrop-filter: blur(10px);
+            border: 1px solid rgba(212,168,67,0.12);
+            border-radius: var(--radius-lg); overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        /* Amount Chip — bet amount selector */
+        .amount-chip {
+            padding: 8px 14px; border-radius: 20px;
+            font-size: 13px; font-weight: 700;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(212,168,67,0.15);
+            color: var(--text-primary); cursor: pointer; transition: all 0.2s;
+            font-family: 'Sora', sans-serif;
+        }
+        .amount-chip:hover, .amount-chip.selected { background: rgba(212,168,67,0.12); border-color: var(--gold); color: var(--gold); }
+
+        /* Bottom Nav Item */
+        .bottom-nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            padding: 4px 8px; cursor: pointer; transition: color 0.2s;
+            background: none; border: none; color: var(--text-muted);
+            font-size: 10px; font-weight: 500;
+        }
+        .bottom-nav-item.active { color: var(--gold); font-weight: 700; }
+        .bottom-nav-item .material-icons { font-size: 22px; }
+
+        /* Sticky Action Bar — fixed bottom bet/action area */
+        .sticky-action-bar {
+            position: sticky; bottom: 0; left: 0; right: 0;
+            background: rgba(20,20,20,0.95); backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(212,168,67,0.12);
+            padding: 12px 16px; z-index: 50;
+        }
+
+        /* Result Dot — bead road / scorecard dots */
+        .result-dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            display: inline-block; border: 2px solid;
+        }
+        .result-dot.meron { background: var(--meron); border-color: #991b1b; }
+        .result-dot.wala { background: var(--wala); border-color: #1e40af; }
+        .result-dot.draw { background: var(--draw); border-color: #15803d; }
+
+        /* Dice Result Chip — number display for Gundata */
+        .dice-result-chip {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: var(--radius);
+            font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 800;
+            background: rgba(20,20,20,0.6); border: 1px solid rgba(212,168,67,0.1);
+            color: var(--text-primary);
+        }
+        .dice-result-chip.winner { background: rgba(212,168,67,0.15); border-color: var(--gold); color: var(--gold); }
+        .dice-result-chip.repeated { background: rgba(22,163,74,0.15); border-color: var(--draw); color: var(--draw-light); box-shadow: 0 0 8px rgba(22,163,74,0.3); }
+
         /* ===== AUTH (Premium Glassmorphism) ===== */
         .auth-container {
             min-height: 100vh;
@@ -1172,8 +1320,8 @@
             <div id="auth-error" class="auth-error"></div>
             <div id="login-form">
                 <div class="form-group">
-                    <label>Mobile Number</label>
-                    <input type="text" id="login-identifier" placeholder="Enter mobile number">
+                    <label>Mobile Number / Username</label>
+                    <input type="text" id="login-identifier" placeholder="Enter mobile number or username">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
@@ -1192,7 +1340,7 @@
                 </div>
                 <button class="auth-btn" id="login-btn" onclick="handleLogin()">Send OTP & Login</button>
                 <div style="text-align:center;margin-top:12px;">
-                    <a onclick="showForgotPassword()" style="color:var(--gold);font-size:13px;cursor:pointer;text-decoration:none;opacity:0.9;">Forgot Password?</a>
+                    <a onclick="showForgotPassword()" style="color:var(--gold);font-size:13px;cursor:pointer;text-decoration:none;opacity:0.85;">Forgot Password?</a>
                 </div>
             </div>
             <div id="register-form" class="hidden">
@@ -1581,7 +1729,7 @@
                     <div class="profile-phone" id="profile-phone"></div>
                 </div>
                 <div id="profile-edit-section" style="margin-bottom:16px;display:none;">
-                    <div style="background:var(--bg-card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);">
+                    <div class="premium-card">
                         <div class="form-group">
                             <label>Username</label>
                             <input type="text" id="edit-username" placeholder="Username">
@@ -1677,20 +1825,20 @@
                     </div>
                 </div>
                 <div style="display:flex;gap:12px;margin-bottom:20px;">
-                    <div style="flex:1;background:var(--bg-card);border-radius:var(--radius);padding:16px;text-align:center;border:1px solid var(--border);">
-                        <div style="font-size:24px;font-weight:800;color:var(--gold);" id="referral-count">0</div>
+                    <div class="premium-card" style="flex:1;text-align:center;">
+                        <div style="font-size:24px;font-weight:800;color:var(--gold);font-family:'Sora',sans-serif;" id="referral-count">0</div>
                         <div style="font-size:12px;color:var(--text-secondary);">Referrals</div>
                     </div>
-                    <div style="flex:1;background:var(--bg-card);border-radius:var(--radius);padding:16px;text-align:center;border:1px solid var(--border);">
-                        <div style="font-size:24px;font-weight:800;color:var(--success);" id="referral-earnings">₹0</div>
+                    <div class="premium-card" style="flex:1;text-align:center;">
+                        <div style="font-size:24px;font-weight:800;color:var(--success);font-family:'Sora',sans-serif;" id="referral-earnings">₹0</div>
                         <div style="font-size:12px;color:var(--text-secondary);">Earnings</div>
                     </div>
                 </div>
                 <button class="auth-btn" onclick="shareReferral()" style="background:var(--gold);color:#000;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <span class="material-icons" style="font-size:20px;">share</span> Share & Earn Lifetime
                 </button>
-                <div style="margin-top:20px;background:var(--bg-card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);">
-                    <h4 style="margin-bottom:12px;">How does it work?</h4>
+                <div class="premium-card" style="margin-top:20px;">
+                    <h4 style="margin-bottom:12px;font-family:'Sora',sans-serif;">How does it work?</h4>
                     <div style="display:flex;flex-direction:column;gap:10px;">
                         <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:var(--gold);color:#000;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">1</span><span style="font-size:13px;color:var(--text-secondary);">Share your referral code with friends</span></div>
                         <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:var(--gold);color:#000;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">2</span><span style="font-size:13px;color:var(--text-secondary);">They register using your code and start playing</span></div>
@@ -1867,6 +2015,45 @@
                 <input type="password" id="cp-confirm" placeholder="Re-enter new password">
             </div>
             <button class="auth-btn" onclick="changePassword()">Update Password</button>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgot-password-modal">
+        <div class="modal-content" style="position:relative;">
+            <button class="modal-close" onclick="closeForgotPassword()"><span class="material-icons">close</span></button>
+            <div class="modal-title" style="display:flex;align-items:center;gap:8px;"><span class="material-icons" style="color:var(--gold);">lock_reset</span> Reset Password</div>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Enter your registered mobile number. We'll send an OTP to verify your identity.</p>
+            <div id="forgot-step-phone">
+                <div class="form-group">
+                    <label>Registered Mobile Number</label>
+                    <input type="text" id="forgot-mobile" placeholder="Enter 10-digit mobile number">
+                </div>
+                <button class="auth-btn" id="forgot-send-btn" onclick="handleForgotSendOtp()">Send OTP</button>
+            </div>
+            <div id="forgot-step-otp" class="hidden">
+                <div class="otp-section">
+                    <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;">Enter OTP</label>
+                    <div class="otp-row" style="margin-top:8px;">
+                        <input class="forgot-otp-input" type="text" maxlength="1" data-idx="0">
+                        <input class="forgot-otp-input" type="text" maxlength="1" data-idx="1">
+                        <input class="forgot-otp-input" type="text" maxlength="1" data-idx="2">
+                        <input class="forgot-otp-input" type="text" maxlength="1" data-idx="3">
+                        <input class="forgot-otp-input" type="text" maxlength="1" data-idx="4">
+                        <input class="forgot-otp-input" type="text" maxlength="1" data-idx="5">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top:14px;">
+                    <label>New Password</label>
+                    <input type="password" id="forgot-new-password" placeholder="Min 6 characters">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="forgot-confirm-password" placeholder="Re-enter new password">
+                </div>
+                <button class="auth-btn" id="forgot-reset-btn" onclick="handleForgotResetPassword()">Reset Password</button>
+            </div>
+            <div id="forgot-error" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--danger);padding:10px 14px;border-radius:8px;font-size:12px;margin-top:12px;"></div>
         </div>
     </div>
 
@@ -2852,7 +3039,71 @@
     });
 
     // Password
-    function showForgotPassword() { showToast('Contact support to reset your password', 'info'); }
+    function showForgotPassword() {
+        document.getElementById('forgot-password-modal').classList.add('show');
+        document.getElementById('forgot-step-phone').classList.remove('hidden');
+        document.getElementById('forgot-step-otp').classList.add('hidden');
+        document.getElementById('forgot-error').style.display = 'none';
+        document.getElementById('forgot-mobile').value = '';
+    }
+    function closeForgotPassword() {
+        document.getElementById('forgot-password-modal').classList.remove('show');
+    }
+    function showForgotError(msg) {
+        const el = document.getElementById('forgot-error');
+        el.textContent = msg; el.style.display = 'block';
+    }
+    async function handleForgotSendOtp() {
+        const mobile = document.getElementById('forgot-mobile').value.trim();
+        if (!/^\d{10}$/.test(mobile)) { showForgotError('Enter a valid 10-digit mobile number'); return; }
+        document.getElementById('forgot-send-btn').disabled = true;
+        document.getElementById('forgot-send-btn').textContent = 'Sending...';
+        try {
+            const res = await fetch(`${API}/user/getotp/`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mobile})
+            });
+            if (res.ok) {
+                document.getElementById('forgot-step-phone').classList.add('hidden');
+                document.getElementById('forgot-step-otp').classList.remove('hidden');
+                document.getElementById('forgot-error').style.display = 'none';
+                showToast('OTP sent to your mobile', 'success');
+                setupOtpInputs(document.querySelectorAll('.forgot-otp-input'));
+            } else {
+                const data = await res.json();
+                showForgotError(extractErrorMessage(data));
+            }
+        } catch(e) { showForgotError('Network error. Please try again.'); }
+        document.getElementById('forgot-send-btn').disabled = false;
+        document.getElementById('forgot-send-btn').textContent = 'Send OTP';
+    }
+    async function handleForgotResetPassword() {
+        const mobile = document.getElementById('forgot-mobile').value.trim();
+        const otpInputs = document.querySelectorAll('.forgot-otp-input');
+        const otp = Array.from(otpInputs).map(i => i.value).join('');
+        const newPass = document.getElementById('forgot-new-password').value;
+        const confirmPass = document.getElementById('forgot-confirm-password').value;
+        if (otp.length !== 6) { showForgotError('Enter the 6-digit OTP'); return; }
+        if (newPass.length < 6) { showForgotError('Password must be at least 6 characters'); return; }
+        if (newPass !== confirmPass) { showForgotError('Passwords do not match'); return; }
+        document.getElementById('forgot-reset-btn').disabled = true;
+        document.getElementById('forgot-reset-btn').textContent = 'Resetting...';
+        try {
+            const res = await fetch(`${API}/user/reset-password/`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mobile, otp, new_password: newPass, confirm_password: confirmPass})
+            });
+            if (res.ok) {
+                closeForgotPassword();
+                showToast('Password reset successful! Please login.', 'success');
+            } else {
+                const data = await res.json();
+                showForgotError(extractErrorMessage(data));
+            }
+        } catch(e) { showForgotError('Network error. Please try again.'); }
+        document.getElementById('forgot-reset-btn').disabled = false;
+        document.getElementById('forgot-reset-btn').textContent = 'Reset Password';
+    }
     function showPasswordModal() { document.getElementById('password-modal').classList.add('show'); }
     function closePasswordModal() { document.getElementById('password-modal').classList.remove('show'); }
     async function changePassword() {
