@@ -49,7 +49,7 @@ function VideoPlayBox({
       const actionValue = parseFloat(settings?.L?.actionValue || '0');
       const balance = parseFloat(wallet?.balance || '0');
 
-      if ((balance < actionValue) & !bettingHistory) {
+      if ((balance < actionValue) && !bettingHistory) {
         setIsLiveEnableToSee(false);
       }
     }, 15000);
