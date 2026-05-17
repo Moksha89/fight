@@ -1,46 +1,30 @@
-
-from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from apiManager.cockfightManager.serializers import ZoneWithMatchesSerializer
 from cockfightManager.models import AutoMatchPollingState, CockfightMatch, MatchPremiumHighlights, Zone
 from asgiref.sync import sync_to_async
 from django.db.models import Prefetch
-
 from rest_framework.renderers import JSONRenderer
+from kokoroko.ws_protection import ProtectedConsumer
 
 
-class MatchResultConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        user = self.scope["user"]
-        if user.is_anonymous:
-            await self.close()
-            return
-
+class MatchResultConsumer(ProtectedConsumer):
+    async def on_connect(self):
         await self.channel_layer.group_add("match_result", self.channel_name)
-        await self.accept()
 
-    async def disconnect(self, close_code):
+    async def on_disconnect(self, close_code):
         await self.channel_layer.group_discard("match_result", self.channel_name)
 
     async def send_match_result(self, event):
-        # Handles both auto and manual match result updates
         await self.send(text_data=json.dumps({
-            # "auto_match_result" or "manual_match_result"
             "type": event["result_type"],
             "data": event["data"]
         }))
 
 
-class MatchConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        user = self.scope["user"]
-        if user.is_anonymous:
-            await self.close()
-            return
-
+class MatchConsumer(ProtectedConsumer):
+    async def on_connect(self):
         self.group_name = "match_updates"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
 
         # 1. Send initial auto match state
         auto_match_data = await self.get_initial_match_data()
@@ -57,8 +41,9 @@ class MatchConsumer(AsyncWebsocketConsumer):
             "data": manual_match_data,
         }).decode("utf-8"))
 
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+    async def on_disconnect(self, close_code):
+        if hasattr(self, 'group_name'):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def send_accepting_auto_bet_update(self, event):
         await self.send(text_data=json.dumps({

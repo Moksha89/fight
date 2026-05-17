@@ -37,6 +37,15 @@ class Wallet(models.Model):
         """Balance minus exposure and bonus debt."""
         return self.balance - self.bonusDebt - self.exposure
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.balance < 0:
+            raise ValidationError({"balance": "Wallet balance cannot be negative."})
+        if self.fundsIn < 0:
+            raise ValidationError({"fundsIn": "Funds-in cannot be negative."})
+        if self.fundsOut < 0:
+            raise ValidationError({"fundsOut": "Funds-out cannot be negative."})
+
     def __str__(self):
         return f"Wallet of {self.user}"
 
@@ -44,6 +53,20 @@ class Wallet(models.Model):
         verbose_name = "Wallet"
         verbose_name_plural = "5. Wallets"
         ordering = ['-balance']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(balance__gte=0),
+                name="wallet_balance_non_negative",
+            ),
+            models.CheckConstraint(
+                check=models.Q(fundsIn__gte=0),
+                name="wallet_funds_in_non_negative",
+            ),
+            models.CheckConstraint(
+                check=models.Q(fundsOut__gte=0),
+                name="wallet_funds_out_non_negative",
+            ),
+        ]
 
 
 # ========================= Customer Wallet History ======================
@@ -150,6 +173,9 @@ class WalletHistory(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['wallet']),
+            models.Index(fields=['wallet', '-created_at']),
+            models.Index(fields=['transaction_type', 'isSuccess', '-created_at']),
+            models.Index(fields=['-created_at']),
         ]
         verbose_name = "Wallet History"
         verbose_name_plural = "7. Wallet History"
@@ -303,6 +329,10 @@ class DepositRequest(models.Model):
     class Meta:
         verbose_name = "Deposit Request"
         verbose_name_plural = "3. Deposit Requests"
+        indexes = [
+            models.Index(fields=['utr_id']),
+            models.Index(fields=['status', '-created_at']),
+        ]
 
     def delete(self, *args, **kwargs):
         if self.screenShort:
@@ -371,6 +401,9 @@ class WithdrawalRequest(models.Model):
     class Meta:
         verbose_name = "Withdrawal Request"
         verbose_name_plural = "4. Withdrawal Requests"
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+        ]
 
 
 class BonusRange(models.Model):

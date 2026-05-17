@@ -7,28 +7,22 @@ WebSocket consumers for real-time platform features.
 
 import json
 import datetime
-from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.utils import timezone
+from kokoroko.ws_protection import ProtectedConsumer
 
 
-class NotificationConsumer(AsyncWebsocketConsumer):
+class NotificationConsumer(ProtectedConsumer):
     """
     Real-time notification delivery.
     User subscribes to their personal notification channel.
     Server pushes notifications as they're created.
     """
 
-    async def connect(self):
-        user = self.scope["user"]
-        if user.is_anonymous:
-            await self.close()
-            return
-
-        self.user = user
+    async def on_connect(self):
+        self.user = self.scope["user"]
         self.group_name = f"notifications_{self.user.id}"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
 
         # Send unread count on connect
         count = await self.get_unread_count()
@@ -37,11 +31,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             "unread_count": count,
         }))
 
-    async def disconnect(self, close_code):
+    async def on_disconnect(self, close_code):
         if hasattr(self, "group_name"):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
-    async def receive(self, text_data=None, bytes_data=None):
+    async def on_receive(self, text_data=None, bytes_data=None):
         """Handle client messages (e.g., mark as read)."""
         if not text_data:
             return
@@ -99,22 +93,16 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         mark_all_read(self.user)
 
 
-class DiceTimerConsumer(AsyncWebsocketConsumer):
+class DiceTimerConsumer(ProtectedConsumer):
     """
     Server-authoritative timer for dice game rounds.
     Broadcasts server_time + phase timing so frontend syncs correctly.
     Eliminates client-side timer drift.
     """
 
-    async def connect(self):
-        user = self.scope["user"]
-        if user.is_anonymous:
-            await self.close()
-            return
-
+    async def on_connect(self):
         self.group_name = "dice_timer"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
 
         # Send initial timer state
         timer_data = await self.get_timer_state()
@@ -123,7 +111,7 @@ class DiceTimerConsumer(AsyncWebsocketConsumer):
             "data": timer_data,
         }))
 
-    async def disconnect(self, close_code):
+    async def on_disconnect(self, close_code):
         if hasattr(self, "group_name"):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 

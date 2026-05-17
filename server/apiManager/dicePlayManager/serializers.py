@@ -7,6 +7,8 @@ from dicePlayManager.models import Board, DicePlayMatch, DicePlayMatchBet
 
 class DicePlayMatchSerializer(serializers.ModelSerializer):
     """Compact for match result WS."""
+    server_seed = serializers.SerializerMethodField()
+
     class Meta:
         model = DicePlayMatch
         fields = [
@@ -16,11 +18,20 @@ class DicePlayMatchSerializer(serializers.ModelSerializer):
             "dice_result_json", "isWinnerDeclared", "updated_at",
             "game_hash", "daily_match_number", "match_date", "virtual_phase",
             "commitment_hash", "client_seed", "nonce", "server_seed_revealed",
+            "server_seed",
         ]
+
+    def get_server_seed(self, obj):
+        """Only expose server_seed after round is completed and seed is revealed."""
+        if obj.server_seed_revealed:
+            return obj.server_seed
+        return None
 
 
 class DicePlayMatchDeepListSerializer(serializers.ModelSerializer):
     """Full match for board listing (WS / API)."""
+    server_seed = serializers.SerializerMethodField()
+
     class Meta:
         model = DicePlayMatch
         fields = [
@@ -31,7 +42,14 @@ class DicePlayMatchDeepListSerializer(serializers.ModelSerializer):
             "dice_result_json", "isWinnerDeclared", "created_at", "updated_at",
             "game_hash", "daily_match_number", "match_date", "virtual_phase", "phase_started_at",
             "commitment_hash", "client_seed", "nonce", "server_seed_revealed",
+            "server_seed",
         ]
+
+    def get_server_seed(self, obj):
+        """Only expose server_seed after round is completed and seed is revealed."""
+        if obj.server_seed_revealed:
+            return obj.server_seed
+        return None
 
 
 class BoardWithMatchesSerializer(serializers.ModelSerializer):

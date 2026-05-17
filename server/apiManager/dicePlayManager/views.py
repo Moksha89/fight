@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from django.db import transaction
 from django.db.models import F
 
+from kokoroko.throttles import DiceBetThrottle, HistoryThrottle
+from kokoroko.cache_helpers import get_cached_or_set, KEYS, TTL
 from dicePlayManager.models import Board, DicePlayMatch, DicePlayMatchBet
 from dicePlayManager.tasks import auto_roll_virtual_match, create_next_virtual_round
 from wallet.models import WalletHistory
@@ -71,14 +73,23 @@ class BoardViewSet(viewsets.ReadOnlyModelViewSet):
         """Get recent completed virtual dice match results, newest first."""
         board_id = request.query_params.get("board_id")
         limit = min(int(request.query_params.get("limit", 50)), 100)
-        qs = DicePlayMatch.objects.filter(
-            match_type="V",
-            isWinnerDeclared=True,
-        ).order_by("-updated_at")
-        if board_id:
-            qs = qs.filter(board_id=board_id)
-        qs = qs[:limit]
-        return Response(DicePlayMatchSerializer(qs, many=True).data)
+
+        cache_key = KEYS["dice_results"].format(
+            board_id=board_id or "all"
+        )
+
+        def _fetch():
+            qs = DicePlayMatch.objects.filter(
+                match_type="V",
+                isWinnerDeclared=True,
+            ).order_by("-updated_at")
+            if board_id:
+                qs = qs.filter(board_id=board_id)
+            qs = qs[:limit]
+            return list(DicePlayMatchSerializer(qs, many=True).data)
+
+        data = get_cached_or_set(cache_key, _fetch, TTL["dice_results"])
+        return Response(data)
 
 
 class DicePlayMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
@@ -92,7 +103,8 @@ class DicePlayMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
             .order_by("-createdDate")
         )
 
-    @action(detail=False, methods=["post"], url_path="place-bet")
+    @action(detail=False, methods=["post"], url_path="place-bet",
+            throttle_classes=[DiceBetThrottle])
     def place_bet(self, request):
         serializer = PlaceDiceBetSerializer(
             data=request.data, context={"request": request}
@@ -108,7 +120,8 @@ class DicePlayMatchBetViewSet(viewsets.ReadOnlyModelViewSet):
         dice_number = data["diceNumber"]
 
         with transaction.atomic():
-            wallet.refresh_from_db()
+            from wallet.models import Wallet
+            wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
             if wallet.balance < amount:
                 raise KokorokoError(
                     ErrorCode.BET_INSUFFICIENT_BALANCE,

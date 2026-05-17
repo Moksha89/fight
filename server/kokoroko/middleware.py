@@ -1,8 +1,9 @@
 """
 Kokoroko Middleware Stack
 =========================
+- RequestIDMiddleware: Assigns unique request ID and X-Request-ID header (S6.2)
 - ErrorHandlingMiddleware: Catches unhandled exceptions
-- RequestLoggingMiddleware: Logs API requests
+- RequestLoggingMiddleware: Structured request logging with timing + slow request alerts (S6.2, S6.3)
 - SecurityHeadersMiddleware: Adds security response headers
 - AdminSessionSecurityMiddleware: Admin session timeout & IP logging
 """
@@ -19,6 +20,33 @@ from django.utils import timezone
 logger = logging.getLogger("kokoroko.errors")
 request_logger = logging.getLogger("kokoroko.requests")
 security_logger = logging.getLogger("kokoroko.security")
+
+# Paths to skip for detailed request logging (high-frequency, low-value)
+_SKIP_LOG_PREFIXES = ("/static/", "/favicon.ico")
+
+# Slow request thresholds (seconds)
+SLOW_WARN_THRESHOLD = 1.0
+SLOW_ERROR_THRESHOLD = 3.0
+
+
+class RequestIDMiddleware:
+    """
+    Assigns a unique request ID to every request (S6.2).
+    - Uses incoming X-Request-ID header if present (from reverse proxy)
+    - Otherwise generates a UUID4
+    - Stores on request.request_id for downstream use
+    - Sets X-Request-ID response header
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request_id = request.META.get("HTTP_X_REQUEST_ID") or str(uuid.uuid4())
+        request.request_id = request_id
+        response = self.get_response(request)
+        response["X-Request-ID"] = request_id
+        return response
 
 
 class ErrorHandlingMiddleware:
@@ -41,9 +69,11 @@ class ErrorHandlingMiddleware:
 
     def _handle_api_error(self, request, exc):
         error_id = str(uuid.uuid4())[:8]
+        request_id = getattr(request, "request_id", "?")
         logger.error(
-            "Unhandled middleware exception [%s]: %s | user=%s path=%s method=%s\n%s",
+            "Unhandled middleware exception [%s] req=%s: %s | user=%s path=%s method=%s\n%s",
             error_id,
+            request_id,
             str(exc),
             getattr(request, "user", "anonymous"),
             request.path,
@@ -68,37 +98,81 @@ class ErrorHandlingMiddleware:
 
 class RequestLoggingMiddleware:
     """
-    Logs all API requests with timing, status code, and user context.
-    Useful for debugging and monitoring.
+    Structured request logging with timing, request ID, user context,
+    and slow request detection (S6.2 + S6.3).
+
+    Logs warning for requests >1s, error for >3s.
+    Includes request ID for correlation across services.
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if not (request.path.startswith("/api/") or request.path.startswith("/ws/")):
+        # Skip static files and favicon
+        if any(request.path.startswith(p) for p in _SKIP_LOG_PREFIXES):
             return self.get_response(request)
 
         start_time = time.time()
         response = self.get_response(request)
-        duration_ms = (time.time() - start_time) * 1000
+        duration = time.time() - start_time
+        duration_ms = duration * 1000
 
+        request_id = getattr(request, "request_id", "-")
         user = getattr(request, "user", None)
         user_str = str(user) if user and user.is_authenticated else "anonymous"
+        user_id = getattr(user, "id", None) if user and user.is_authenticated else None
+        client_ip = self._get_ip(request)
+        status_code = response.status_code
 
-        log_level = logging.WARNING if response.status_code >= 400 else logging.INFO
-        request_logger.log(
-            log_level,
-            "%s %s %d %.0fms user=%s",
-            request.method,
-            request.path,
-            response.status_code,
-            duration_ms,
-            user_str,
-        )
+        # Structured log data
+        log_data = {
+            "req_id": request_id,
+            "method": request.method,
+            "path": request.path[:200],
+            "status": status_code,
+            "duration_ms": round(duration_ms, 1),
+            "user": user_str,
+            "user_id": user_id,
+            "ip": client_ip,
+        }
+
+        # Determine log level
+        if duration >= SLOW_ERROR_THRESHOLD:
+            request_logger.error(
+                "SLOW REQUEST (%.1fs) %s %s %d req=%s user=%s ip=%s",
+                duration, request.method, request.path, status_code,
+                request_id, user_str, client_ip,
+            )
+        elif duration >= SLOW_WARN_THRESHOLD:
+            request_logger.warning(
+                "Slow request (%.1fs) %s %s %d req=%s user=%s ip=%s",
+                duration, request.method, request.path, status_code,
+                request_id, user_str, client_ip,
+            )
+        elif status_code >= 500:
+            request_logger.error(
+                "%s %s %d %.0fms req=%s user=%s ip=%s",
+                request.method, request.path, status_code, duration_ms,
+                request_id, user_str, client_ip,
+            )
+        elif status_code >= 400:
+            request_logger.warning(
+                "%s %s %d %.0fms req=%s user=%s ip=%s",
+                request.method, request.path, status_code, duration_ms,
+                request_id, user_str, client_ip,
+            )
+        else:
+            # Only log API and admin requests at INFO (not every static/page request)
+            if request.path.startswith(("/api/", "/ws/", "/admin", "/health")):
+                request_logger.info(
+                    "%s %s %d %.0fms req=%s user=%s ip=%s",
+                    request.method, request.path, status_code, duration_ms,
+                    request_id, user_str, client_ip,
+                )
 
         # Add error tracking header
-        if response.status_code >= 400 and hasattr(response, "content"):
+        if status_code >= 400 and hasattr(response, "content"):
             try:
                 data = json.loads(response.content)
                 error_id = data.get("error", {}).get("id")
@@ -111,16 +185,35 @@ class RequestLoggingMiddleware:
         try:
             from kokoroko.monitoring import track_metric
             track_metric("api_requests")
-            if response.status_code >= 400:
-                track_metric("api_errors", tags={"status": str(response.status_code)})
-            if response.status_code >= 500:
+            if status_code >= 400:
+                track_metric("api_errors", tags={"status": str(status_code)})
+            if status_code >= 500:
                 track_metric("api_5xx_errors")
-            if duration_ms > 2000:
+            if duration >= SLOW_WARN_THRESHOLD:
                 track_metric("slow_requests", tags={"path": request.path[:50]})
         except Exception:
             pass
 
+        # Track security events for alerts
+        if status_code == 429:
+            try:
+                from kokoroko.alerts import track_security_event
+                track_security_event(
+                    "rate_limit_spike",
+                    details={"path": request.path[:100]},
+                    ip=client_ip,
+                )
+            except Exception:
+                pass
+
         return response
+
+    @staticmethod
+    def _get_ip(request):
+        forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        return request.META.get("REMOTE_ADDR", "unknown")
 
 
 class SecurityHeadersMiddleware:
@@ -203,6 +296,18 @@ class AdminSessionSecurityMiddleware:
                     user, self._get_ip(request), request.path,
                 )
                 request.session["admin_ip_logged"] = True
+
+                # Track admin login as security event
+                try:
+                    from kokoroko.alerts import track_security_event
+                    track_security_event(
+                        "admin_login",
+                        details={"path": request.path},
+                        user_id=user.id,
+                        ip=self._get_ip(request),
+                    )
+                except Exception:
+                    pass
 
         return self.get_response(request)
 

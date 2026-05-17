@@ -1,24 +1,19 @@
 import json
 from asgiref.sync import sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db.models import Prefetch
+from kokoroko.ws_protection import ProtectedConsumer
 
 from apiManager.dicePlayManager.serializers import BoardWithMatchesSerializer
 from .models import Board, DicePlayMatch
 
 
-class DiceMatchResultConsumer(AsyncWebsocketConsumer):
+class DiceMatchResultConsumer(ProtectedConsumer):
     """WebSocket for dice match result (winner declared) updates."""
 
-    async def connect(self):
-        user = self.scope["user"]
-        if user.is_anonymous:
-            await self.close()
-            return
+    async def on_connect(self):
         await self.channel_layer.group_add("dice_match_result", self.channel_name)
-        await self.accept()
 
-    async def disconnect(self, close_code):
+    async def on_disconnect(self, close_code):
         await self.channel_layer.group_discard("dice_match_result", self.channel_name)
 
     async def send_dice_match_result(self, event):
@@ -28,22 +23,18 @@ class DiceMatchResultConsumer(AsyncWebsocketConsumer):
         }))
 
 
-class DiceMatchConsumer(AsyncWebsocketConsumer):
+class DiceMatchConsumer(ProtectedConsumer):
     """WebSocket for dice match list updates (boards + matches, betting on/off)."""
 
-    async def connect(self):
-        user = self.scope["user"]
-        if user.is_anonymous:
-            await self.close()
-            return
+    async def on_connect(self):
         self.group_name = "dice_match_updates"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
         data = await self.get_initial_data()
         await self.send(text_data=json.dumps({"type": "dice_match_update", "data": data}))
 
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+    async def on_disconnect(self, close_code):
+        if hasattr(self, 'group_name'):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def send_dice_match_update(self, event):
         await self.send(text_data=json.dumps({

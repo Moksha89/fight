@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from django.urls import path
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from userManager.models import User
 
@@ -53,37 +53,39 @@ class WalletAdmin(admin.ModelAdmin):
     def manual_deposit(self, request, queryset):
         from decimal import Decimal
         count = 0
-        for wallet in queryset:
-            wallet.balance += Decimal('1000')
-            wallet.fundsIn += Decimal('1000')
-            wallet.save()
-            WalletHistory.objects.create(
-                wallet=wallet,
-                transaction_type='D',
-                change=Decimal('1000'),
-                isSuccess=True,
-                description='Manual deposit by admin'
-            )
-            count += 1
+        with transaction.atomic():
+            for wallet in Wallet.objects.select_for_update().filter(pk__in=queryset):
+                wallet.balance = F('balance') + Decimal('1000')
+                wallet.fundsIn = F('fundsIn') + Decimal('1000')
+                wallet.save()
+                WalletHistory.objects.create(
+                    wallet=wallet,
+                    transaction_type='D',
+                    change=Decimal('1000'),
+                    isSuccess=True,
+                    description='Manual deposit by admin'
+                )
+                count += 1
         self.message_user(request, f"₹1000 deposited to {count} wallet(s).", level='success')
 
     @admin.action(description="Manual Withdraw ₹1000")
     def manual_withdraw(self, request, queryset):
         from decimal import Decimal
         count = 0
-        for wallet in queryset:
-            if wallet.balance >= Decimal('1000'):
-                wallet.balance -= Decimal('1000')
-                wallet.fundsOut += Decimal('1000')
-                wallet.save()
-                WalletHistory.objects.create(
-                    wallet=wallet,
-                    transaction_type='W',
-                    change=Decimal('-1000'),
-                    isSuccess=True,
-                    description='Manual withdrawal by admin'
-                )
-                count += 1
+        with transaction.atomic():
+            for wallet in Wallet.objects.select_for_update().filter(pk__in=queryset):
+                if wallet.balance >= Decimal('1000'):
+                    wallet.balance = F('balance') - Decimal('1000')
+                    wallet.fundsOut = F('fundsOut') + Decimal('1000')
+                    wallet.save()
+                    WalletHistory.objects.create(
+                        wallet=wallet,
+                        transaction_type='W',
+                        change=Decimal('-1000'),
+                        isSuccess=True,
+                        description='Manual withdrawal by admin'
+                    )
+                    count += 1
         self.message_user(request, f"₹1000 withdrawn from {count} wallet(s).", level='success')
 
     def running_bonus(self, obj):
@@ -140,6 +142,22 @@ class WalletAdmin(admin.ModelAdmin):
 
     def toggle_user_active(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
+        if request.method != 'POST':
+            from django.middleware.csrf import get_token
+            csrf_token = get_token(request)
+            new_state = "inactive" if user.is_active else "active"
+            color = "#f44336" if user.is_active else "#4caf50"
+            html = f'''<!DOCTYPE html><html><head><title>Toggle User Status</title>
+            <style>body{{font-family:Arial,sans-serif;max-width:400px;margin:80px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
+            .card{{background:#1c2128;border-radius:12px;padding:30px;border:1px solid #30363d;text-align:center;}}
+            .btn{{background:{color};color:#fff;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;width:100%;margin-top:15px;}}
+            .back{{display:inline-block;margin-top:15px;color:#8b949e;text-decoration:none;}}</style></head><body>
+            <div class="card"><h2 style="color:{color};">Toggle User Status</h2>
+            <p>Set <b>{user.username}</b> to <b>{new_state}</b>?</p>
+            <form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+            <button type="submit" class="btn">Confirm</button></form>
+            <a href="/admin/" class="back">← Cancel</a></div></body></html>'''
+            return HttpResponse(html)
         user.is_active = not user.is_active
         user.save()
         messages.success(
@@ -488,7 +506,7 @@ class DepositRequestAdmin(admin.ModelAdmin):
                                 amount=amount
                             )
 
-                        wallet, isCreated = Wallet.objects.get_or_create(
+                        wallet, isCreated = Wallet.objects.select_for_update().get_or_create(
                             user=customer)
 
                         wallet.balance = F('balance') + amount
@@ -573,7 +591,7 @@ class DepositRequestAdmin(admin.ModelAdmin):
                             amount=amount
                         )
 
-                    wallet, _ = Wallet.objects.get_or_create(user=customer)
+                    wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
 
                     wallet.balance = F('balance') + amount
                     wallet.fundsIn = F('fundsIn') + amount
@@ -863,7 +881,7 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
                         amount=amount
                     )
 
-                    wallet = withdrawal.customer.wallet
+                    wallet = Wallet.objects.select_for_update().get(pk=withdrawal.customer.wallet.pk)
 
                     wallet.fundsOut = F('fundsOut') + amount
                     wallet.save()
@@ -907,7 +925,7 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
                     missing_info += 1
                     continue
 
-                wallet, _ = Wallet.objects.get_or_create(user=customer)
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
 
                 wallet.balance = F('balance') + amount
                 wallet.save()

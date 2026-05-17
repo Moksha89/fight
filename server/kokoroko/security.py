@@ -17,6 +17,11 @@ from functools import wraps
 from django.core.cache import cache
 from django.utils import timezone
 
+try:
+    from kokoroko.alerts import track_security_event as _track_alert
+except ImportError:
+    def _track_alert(*args, **kwargs): pass
+
 logger = logging.getLogger("kokoroko.security")
 
 
@@ -72,6 +77,7 @@ def check_otp_rate_limit(identifier, ip_address=None):
             f"otp_ip:{ip_address}", max_attempts=10, window_seconds=600
         )
         if not ip_allowed:
+            _track_alert("failed_otp", details={"reason": "ip_limit"}, ip=ip_address)
             return False, f"Too many OTP requests from this IP. Try again in {ip_retry}s.", ip_retry
 
     return True, None, None

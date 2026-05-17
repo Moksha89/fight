@@ -141,6 +141,14 @@ class UserAdmin(BaseUserAdmin):
         except Exception:
             bet_url = "#"
 
+        # Get balance for modal display
+        try:
+            balance = obj.wallet.balance
+        except Exception:
+            balance = 0
+
+        phone = obj.phoneNumber or obj.email or ''
+
         # BL/WL logic: only show the relevant action
         if obj.is_active:
             toggle_url = reverse("admin:user_block", args=[obj.pk])
@@ -150,8 +158,8 @@ class UserAdmin(BaseUserAdmin):
             toggle_btn = f'<a href="{toggle_url}" onclick="return confirm(\'Activate this user?\')" title="Whitelist" style="background:#4caf50;color:#fff;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:bold;margin:1px;">WL</a>'
 
         html = f'''
-        <a href="{deposit_url}" title="Deposit" style="background:#1976d2;color:#fff;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:bold;margin:1px;">D</a>
-        <a href="{withdraw_url}" title="Withdraw" style="background:#e65100;color:#fff;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:bold;margin:1px;">W</a>
+        <a href="#" onclick="openWalletModal('deposit','{deposit_url}','{phone}','{balance}');return false;" title="Deposit" style="background:#1976d2;color:#fff;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:bold;margin:1px;cursor:pointer;">D</a>
+        <a href="#" onclick="openWalletModal('withdraw','{withdraw_url}','{phone}','{balance}');return false;" title="Withdraw" style="background:#e65100;color:#fff;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:bold;margin:1px;cursor:pointer;">W</a>
         <a href="{statement_url}" title="Statement" style="background:#6a1b9a;color:#fff;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:bold;margin:1px;">S</a>
         <a href="{bet_url}" title="Bet History" style="background:#ff6f00;color:#fff;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:bold;margin:1px;">BH</a>
         {toggle_btn}
@@ -179,10 +187,13 @@ class UserAdmin(BaseUserAdmin):
 
     def deposit_view(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         if request.method == 'POST':
             amount = request.POST.get('amount', '0')
             reason = request.POST.get('reason', '').strip()
             if not reason:
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': 'Reason is required for manual wallet operations.'})
                 messages.error(request, "Reason is required for manual wallet operations.")
                 return HttpResponseRedirect(request.get_full_path())
             try:
@@ -190,25 +201,34 @@ class UserAdmin(BaseUserAdmin):
                 if amount <= 0:
                     raise ValueError("Amount must be positive")
                 from wallet.models import Wallet, WalletHistory
-                wallet = Wallet.objects.get(user=user)
-                wallet.balance += amount
-                wallet.fundsIn += amount
-                wallet.save()
-                WalletHistory.objects.create(
-                    wallet=wallet,
-                    transaction_type='D',
-                    change=amount,
-                    isSuccess=True,
-                    description=f'Manual deposit by admin ({request.user}): ₹{amount} — {reason}'
-                )
+                from django.db import transaction as db_tx
+                with db_tx.atomic():
+                    wallet = Wallet.objects.select_for_update().get(user=user)
+                    wallet.balance = F('balance') + amount
+                    wallet.fundsIn = F('fundsIn') + amount
+                    wallet.save()
+                    wallet.refresh_from_db()
+                    WalletHistory.objects.create(
+                        wallet=wallet,
+                        transaction_type='D',
+                        change=amount,
+                        isSuccess=True,
+                        description=f'Manual deposit by admin ({request.user}): ₹{amount} — {reason}'
+                    )
                 log_admin_action(
                     request.user, 'manual_deposit', 'user', user_id,
                     {'amount': str(amount), 'reason': reason}, request
                 )
+                if is_ajax:
+                    return JsonResponse({'success': True, 'message': f'₹{amount} deposited to {user.phoneNumber or user.email}', 'new_balance': str(wallet.balance)})
                 messages.success(request, f"₹{amount} deposited to {user.phoneNumber or user.email}")
             except Wallet.DoesNotExist:
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': 'User has no wallet'})
                 messages.error(request, "User has no wallet")
             except (ValueError, Exception) as e:
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': str(e)})
                 messages.error(request, f"Error: {e}")
             return HttpResponseRedirect(reverse("admin:userManager_user_changelist"))
 
@@ -254,10 +274,13 @@ class UserAdmin(BaseUserAdmin):
 
     def withdraw_view(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         if request.method == 'POST':
             amount = request.POST.get('amount', '0')
             reason = request.POST.get('reason', '').strip()
             if not reason:
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': 'Reason is required for manual wallet operations.'})
                 messages.error(request, "Reason is required for manual wallet operations.")
                 return HttpResponseRedirect(request.get_full_path())
             try:
@@ -265,27 +288,36 @@ class UserAdmin(BaseUserAdmin):
                 if amount <= 0:
                     raise ValueError("Amount must be positive")
                 from wallet.models import Wallet, WalletHistory
-                wallet = Wallet.objects.get(user=user)
-                if wallet.balance < amount:
-                    raise ValueError(f"Insufficient balance (₹{wallet.balance})")
-                wallet.balance -= amount
-                wallet.fundsOut += amount
-                wallet.save()
-                WalletHistory.objects.create(
-                    wallet=wallet,
-                    transaction_type='W',
-                    change=-amount,
-                    isSuccess=True,
-                    description=f'Manual withdrawal by admin ({request.user}): ₹{amount} — {reason}'
-                )
+                from django.db import transaction as db_tx
+                with db_tx.atomic():
+                    wallet = Wallet.objects.select_for_update().get(user=user)
+                    if wallet.balance < amount:
+                        raise ValueError(f"Insufficient balance (₹{wallet.balance})")
+                    wallet.balance = F('balance') - amount
+                    wallet.fundsOut = F('fundsOut') + amount
+                    wallet.save()
+                    wallet.refresh_from_db()
+                    WalletHistory.objects.create(
+                        wallet=wallet,
+                        transaction_type='W',
+                        change=-amount,
+                        isSuccess=True,
+                        description=f'Manual withdrawal by admin ({request.user}): ₹{amount} — {reason}'
+                    )
                 log_admin_action(
                     request.user, 'manual_withdrawal', 'user', user_id,
                     {'amount': str(amount), 'reason': reason}, request
                 )
+                if is_ajax:
+                    return JsonResponse({'success': True, 'message': f'₹{amount} withdrawn from {user.phoneNumber or user.email}', 'new_balance': str(wallet.balance)})
                 messages.success(request, f"₹{amount} withdrawn from {user.phoneNumber or user.email}")
             except Wallet.DoesNotExist:
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': 'User has no wallet'})
                 messages.error(request, "User has no wallet")
             except (ValueError, Exception) as e:
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': str(e)})
                 messages.error(request, f"Error: {e}")
             return HttpResponseRedirect(reverse("admin:userManager_user_changelist"))
         
@@ -332,6 +364,21 @@ class UserAdmin(BaseUserAdmin):
 
     def block_view(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
+        if request.method != 'POST':
+            from django.middleware.csrf import get_token
+            csrf_token = get_token(request)
+            back = reverse("admin:userManager_user_changelist")
+            html = f'''<!DOCTYPE html><html><head><title>Block User</title>
+            <style>body{{font-family:Arial,sans-serif;max-width:400px;margin:80px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
+            .card{{background:#1c2128;border-radius:12px;padding:30px;border:1px solid #30363d;text-align:center;}}
+            .btn{{background:#f44336;color:#fff;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;width:100%;margin-top:15px;}}
+            .back{{display:inline-block;margin-top:15px;color:#8b949e;text-decoration:none;}}</style></head><body>
+            <div class="card"><h2 style="color:#f44336;">Block User</h2>
+            <p>Are you sure you want to block <b>{user.phoneNumber or user.email}</b>?</p>
+            <form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+            <button type="submit" class="btn">Confirm Block</button></form>
+            <a href="{back}" class="back">← Cancel</a></div></body></html>'''
+            return HttpResponse(html)
         user.is_active = False
         user.save()
         log_admin_action(
@@ -339,10 +386,25 @@ class UserAdmin(BaseUserAdmin):
             {'target_phone': user.phoneNumber}, request
         )
         messages.success(request, f"User {user.phoneNumber or user.email} has been BLOCKED.")
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse("admin:userManager_user_changelist")))
+        return HttpResponseRedirect(reverse("admin:userManager_user_changelist"))
 
     def activate_view(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
+        if request.method != 'POST':
+            from django.middleware.csrf import get_token
+            csrf_token = get_token(request)
+            back = reverse("admin:userManager_user_changelist")
+            html = f'''<!DOCTYPE html><html><head><title>Activate User</title>
+            <style>body{{font-family:Arial,sans-serif;max-width:400px;margin:80px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
+            .card{{background:#1c2128;border-radius:12px;padding:30px;border:1px solid #30363d;text-align:center;}}
+            .btn{{background:#4caf50;color:#fff;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;width:100%;margin-top:15px;}}
+            .back{{display:inline-block;margin-top:15px;color:#8b949e;text-decoration:none;}}</style></head><body>
+            <div class="card"><h2 style="color:#4caf50;">Activate User</h2>
+            <p>Are you sure you want to activate <b>{user.phoneNumber or user.email}</b>?</p>
+            <form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+            <button type="submit" class="btn">Confirm Activate</button></form>
+            <a href="{back}" class="back">← Cancel</a></div></body></html>'''
+            return HttpResponse(html)
         user.is_active = True
         user.save()
         log_admin_action(
@@ -350,10 +412,26 @@ class UserAdmin(BaseUserAdmin):
             {'target_phone': user.phoneNumber}, request
         )
         messages.success(request, f"User {user.phoneNumber or user.email} has been ACTIVATED.")
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse("admin:userManager_user_changelist")))
+        return HttpResponseRedirect(reverse("admin:userManager_user_changelist"))
 
     def reset_password_view(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
+        if request.method != 'POST':
+            from django.middleware.csrf import get_token
+            csrf_token = get_token(request)
+            back = reverse("admin:userManager_user_changelist")
+            html = f'''<!DOCTYPE html><html><head><title>Reset Password</title>
+            <style>body{{font-family:Arial,sans-serif;max-width:400px;margin:80px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
+            .card{{background:#1c2128;border-radius:12px;padding:30px;border:1px solid #30363d;text-align:center;}}
+            .btn{{background:#607d8b;color:#fff;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;width:100%;margin-top:15px;}}
+            .back{{display:inline-block;margin-top:15px;color:#8b949e;text-decoration:none;}}</style></head><body>
+            <div class="card"><h2 style="color:#607d8b;">Reset Password</h2>
+            <p>Reset password for <b>{user.phoneNumber or user.email}</b>?</p>
+            <p style="color:#f59e0b;font-size:13px;">A new random password will be generated. Note it down immediately.</p>
+            <form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+            <button type="submit" class="btn">Confirm Reset</button></form>
+            <a href="{back}" class="back">← Cancel</a></div></body></html>'''
+            return HttpResponse(html)
         import string, random
         new_pass = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
         user.set_password(new_pass)
@@ -362,9 +440,8 @@ class UserAdmin(BaseUserAdmin):
             request.user, 'reset_password', 'user', user_id,
             {'target_phone': user.phoneNumber}, request
         )
-        # Show password briefly - admin must note it down
         messages.success(request, f"Password reset for {user.phoneNumber or user.username}. New password: {new_pass} (note it now, it won't be shown again)")
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse("admin:userManager_user_changelist")))
+        return HttpResponseRedirect(reverse("admin:userManager_user_changelist"))
 
     def export_users_csv(self, request):
         if not request.user.is_superuser:

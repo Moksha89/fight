@@ -92,6 +92,7 @@ class DicePlayMatch(models.Model):
             models.Index(fields=['processed']),
             models.Index(fields=['match_type']),
             models.Index(fields=['match_date', 'daily_match_number']),
+            models.Index(fields=['match_type', 'isWinnerDeclared', '-updated_at']),
         ]
 
     def __str__(self):
