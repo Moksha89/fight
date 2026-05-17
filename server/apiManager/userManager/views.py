@@ -38,8 +38,17 @@ logger = logging.getLogger("kokoroko.security")
 
 
 def _generate_otp():
-    """Generate OTP. Uses static 123456 as demo OTP."""
-    return "123456"
+    """Generate a 6-digit OTP.
+
+    Default: cryptographically random 6-digit code.
+    Override: set OTP_ALLOW_FIXED=true + OTP_FIXED_CODE=123456 in env
+    for staging/dev only.
+    """
+    if os.environ.get("OTP_ALLOW_FIXED", "").lower() == "true":
+        fixed = os.environ.get("OTP_FIXED_CODE", "")
+        if fixed:
+            return fixed
+    return str(random.randint(100000, 999999))
 
 
 class SubscriptionViewSet(viewsets.ViewSet):
