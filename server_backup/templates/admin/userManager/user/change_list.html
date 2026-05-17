@@ -1,0 +1,167 @@
+{% extends "admin/change_list.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div class="user-tabs">
+    <a href="?is_staff__exact=0" class="tab-btn {% if 'is_staff__exact=0' in request.get_full_path or 'is_staff' not in request.get_full_path %}tab-active{% else %}tab-inactive{% endif %}">
+        Users ({{ users_count }})
+    </a>
+    <a href="?is_staff__exact=1" class="tab-btn {% if 'is_staff__exact=1' in request.get_full_path %}tab-active{% else %}tab-inactive{% endif %}">
+        Admins ({{ admin_count }})
+    </a>
+    <a href="{{ export_url }}" class="export-btn">
+        Export CSV
+    </a>
+</div>
+{{ block.super }}
+
+<!-- Wallet Modal Overlay -->
+<div id="walletModalOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:10000;justify-content:center;align-items:center;">
+  <div id="walletModalCard" style="background:#1c2128;border-radius:12px;padding:30px;box-shadow:0 8px 32px rgba(0,0,0,0.6);border:1px solid #30363d;width:420px;max-width:90vw;position:relative;font-family:'Inter',Arial,sans-serif;color:#e6edf3;">
+    <button id="walletModalClose" onclick="closeWalletModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:#8b949e;font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;">&times;</button>
+    <h2 id="walletModalTitle" style="margin:0 0 5px;font-size:20px;"></h2>
+    <p style="color:#8b949e;margin-bottom:8px;">User: <b id="walletModalUser"></b></p>
+    <p id="walletModalBalance" style="font-size:22px;font-weight:bold;color:#58a6ff;margin:10px 0 18px;"></p>
+    <form id="walletModalForm" onsubmit="submitWalletModal(event)">
+      <label style="display:block;margin-bottom:4px;color:#8b949e;font-size:14px;">Amount (₹)</label>
+      <input id="walletModalAmount" name="amount" type="number" min="1" step="1" required autofocus placeholder="Enter amount..."
+             style="width:100%;padding:12px;font-size:18px;border:2px solid #30363d;border-radius:8px;box-sizing:border-box;background:#161b22;color:#e6edf3;margin-bottom:12px;outline:none;">
+      <label style="display:block;margin-bottom:4px;color:#8b949e;font-size:14px;">Reason <span style="color:#f44336;">*</span></label>
+      <input id="walletModalReason" name="reason" type="text" required placeholder="Why is this being done?" maxlength="200"
+             style="width:100%;padding:12px;font-size:14px;border:2px solid #30363d;border-radius:8px;box-sizing:border-box;background:#161b22;color:#e6edf3;margin-bottom:16px;outline:none;">
+      <button id="walletModalSubmit" type="submit"
+              style="width:100%;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;color:#fff;font-weight:600;"></button>
+    </form>
+    <div id="walletModalMsg" style="display:none;margin-top:14px;padding:10px 14px;border-radius:8px;font-size:14px;"></div>
+  </div>
+</div>
+
+<script>
+var _wmUrl = '';
+var _wmType = '';
+
+function openWalletModal(type, url, phone, balance) {
+    _wmUrl = url;
+    _wmType = type;
+    var overlay = document.getElementById('walletModalOverlay');
+    var title = document.getElementById('walletModalTitle');
+    var userEl = document.getElementById('walletModalUser');
+    var balEl = document.getElementById('walletModalBalance');
+    var btn = document.getElementById('walletModalSubmit');
+    var amtInput = document.getElementById('walletModalAmount');
+    var reasonInput = document.getElementById('walletModalReason');
+    var msgDiv = document.getElementById('walletModalMsg');
+
+    msgDiv.style.display = 'none';
+    amtInput.value = '';
+    reasonInput.value = '';
+
+    if (type === 'deposit') {
+        title.textContent = 'Deposit Funds';
+        title.style.color = '#2ea043';
+        btn.textContent = 'Confirm Deposit';
+        btn.style.background = '#1976d2';
+        amtInput.style.borderColor = '#30363d';
+    } else {
+        title.textContent = 'Withdraw Funds';
+        title.style.color = '#f0883e';
+        btn.textContent = 'Confirm Withdrawal';
+        btn.style.background = '#e65100';
+        amtInput.style.borderColor = '#30363d';
+    }
+
+    userEl.textContent = phone;
+    balEl.textContent = 'Current Balance: ₹' + balance;
+    overlay.style.display = 'flex';
+    setTimeout(function() { amtInput.focus(); }, 100);
+}
+
+function closeWalletModal() {
+    document.getElementById('walletModalOverlay').style.display = 'none';
+}
+
+document.getElementById('walletModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeWalletModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeWalletModal();
+});
+
+function submitWalletModal(e) {
+    e.preventDefault();
+    var amt = document.getElementById('walletModalAmount').value;
+    var reason = document.getElementById('walletModalReason').value;
+    var btn = document.getElementById('walletModalSubmit');
+    var msgDiv = document.getElementById('walletModalMsg');
+
+    if (!amt || !reason) return;
+
+    var confirmMsg = _wmType === 'deposit'
+        ? 'Confirm deposit of ₹' + amt + '?'
+        : 'Confirm withdrawal of ₹' + amt + '?';
+    if (!confirm(confirmMsg)) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    msgDiv.style.display = 'none';
+
+    var csrfToken = '';
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) {
+            csrfToken = c.substring('csrftoken='.length);
+            break;
+        }
+    }
+
+    var formData = new FormData();
+    formData.append('amount', amt);
+    formData.append('reason', reason);
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+    fetch(_wmUrl, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
+        },
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(data) {
+        if (data.success) {
+            msgDiv.style.background = 'rgba(46,160,67,0.15)';
+            msgDiv.style.color = '#2ea043';
+            msgDiv.style.border = '1px solid rgba(46,160,67,0.3)';
+            msgDiv.textContent = data.message;
+            msgDiv.style.display = 'block';
+            btn.textContent = 'Done!';
+            setTimeout(function() {
+                closeWalletModal();
+                location.reload();
+            }, 1200);
+        } else {
+            msgDiv.style.background = 'rgba(248,81,73,0.15)';
+            msgDiv.style.color = '#f85149';
+            msgDiv.style.border = '1px solid rgba(248,81,73,0.3)';
+            msgDiv.textContent = data.error || 'Unknown error';
+            msgDiv.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = _wmType === 'deposit' ? 'Confirm Deposit' : 'Confirm Withdrawal';
+        }
+    })
+    .catch(function(err) {
+        msgDiv.style.background = 'rgba(248,81,73,0.15)';
+        msgDiv.style.color = '#f85149';
+        msgDiv.style.border = '1px solid rgba(248,81,73,0.3)';
+        msgDiv.textContent = 'Network error: ' + err.message;
+        msgDiv.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = _wmType === 'deposit' ? 'Confirm Deposit' : 'Confirm Withdrawal';
+    });
+}
+</script>
+{% endblock %}
