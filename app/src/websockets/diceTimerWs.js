@@ -1,5 +1,5 @@
 import {baseWSEndpoint as BASE_URL} from '../Config/baseEndpoint';
-import storage from '../utils/storage';
+import {loadTokens} from '../utils/tokenStorage';
 
 let timerSocket = null;
 let timerReconnectTimeout = null;
@@ -22,7 +22,7 @@ export const getServerNow = () => Date.now() + serverTimeOffset;
 export const connectDiceTimerWebSocket = async (onTimerSync, onPhaseChange) => {
   timerShouldReconnect = true;
 
-  const accessToken = await storage.getItem('accessToken');
+  const {accessToken} = await loadTokens();
   if (!accessToken) {
     console.warn('[WS:Timer] No access token');
     return;

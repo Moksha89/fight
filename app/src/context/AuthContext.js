@@ -98,6 +98,7 @@ export const AuthProvider = ({children}) => {
 
   // Persist non-sensitive flags to AsyncStorage
   useEffect(() => {
+    if (isPinSet === undefined) return;
     const persistFlags = async () => {
       await storage.setItem('isPinSet', String(isPinSet));
       await storage.setItem('isProfileUpdated', String(isProfileUpdated));
