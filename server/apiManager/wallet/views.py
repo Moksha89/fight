@@ -336,6 +336,12 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
         )
 
         with transaction.atomic():
+            wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
+            if wallet.balance < withdrawal_amount:
+                return Response(
+                    {"detail": "Insufficient balance."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             wallet.balance = F('balance') - withdrawal_amount
             wallet.save()
 
@@ -361,7 +367,7 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
                         raise PermissionDenied(
                             "You cannot delete a withdrawal request being handled by staff.")
                 with transaction.atomic():
-                    wallet = obj.customer.wallet
+                    wallet = Wallet.objects.select_for_update().get(pk=obj.customer.wallet.pk)
                     wallet.balance = F('balance') + obj.withdrawal_amount
                     wallet.save()
 
