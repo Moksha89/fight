@@ -1,4 +1,3 @@
-// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import {
   View,
   StyleSheet,
@@ -212,7 +211,7 @@ function VideoPlayBox({
         <View style={styles.virtualArena}>
           {countdownSeconds > 0 ? (
             <View style={styles.virtualCountdown}>
-              <Text style={[styles.virtualCountdownText, isUrgent && {color: '#DC2626'}]}>
+              <Text style={[styles.virtualCountdownText, isUrgent && {color: '#f44336'}]}>
                 {countdownSeconds}s
               </Text>
               <Text style={styles.virtualSubtext}>until dice roll</Text>
@@ -332,7 +331,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: wp(5),
     right: wp(5),
-    backgroundColor: '#DC2626',
+    backgroundColor: '#FF4000',
     color: '#fff',
     paddingHorizontal: 6,
     borderRadius: 4,

@@ -1,4 +1,3 @@
-// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import React, {useState, useEffect} from 'react';
 import {
   Modal,
@@ -18,7 +17,6 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {getDicePlayUserBets} from '../../../../apis/dicePlayApi';
 import ProvablyFairModal from './ProvablyFairModal';
-import {useTheme} from '../../../../context/ThemeContext';
 import COLORS from '../../../../context/designTokens';
 
 const getColor = (matchWinStatus) => {

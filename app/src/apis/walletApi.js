@@ -3,7 +3,6 @@
  */
 import {apiRequest} from '../utils/apiClient';
 import {baseApiEndpoint as BASE_URL} from '../Config/baseEndpoint';
-import storage from '../utils/storage';
 import {handleError} from '../utils/errorHandler';
 
 export const getDepositPaymentOptions = async amount => {
@@ -36,7 +35,6 @@ export const createDepositRequest = async ({
   depositAmount,
   screenShortUri,
 }) => {
-  const token = await storage.getItem('accessToken');
   const formData = new FormData();
   formData.append('deposit_type', depositType);
   formData.append('utr_id', utrId);

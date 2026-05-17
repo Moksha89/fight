@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
 
 import {createWithdrawal} from '../../../apis/walletApi';
 
@@ -29,7 +28,6 @@ import {
 
 const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
   const {wallet} = useAuth();
-  const {colors} = useTheme();
 
   const [activeTab, setActiveTab] = useState('upi');
   const [speedType, setSpeedType] = useState('N');
@@ -114,7 +112,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
         onBackPress={() => navigation.goBack()}
         onIconPress={() => navigation.navigate('HistoryScreen')}
         RightIconComponent={
-          <MaterialIcons name="history" size={25} color={colors.text_primary} />
+          <MaterialIcons name="history" size={25} color="#ffffff" />
         }
         rightIconWrapperStyle={{
           backgroundColor: '#d4a843',
@@ -223,7 +221,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
                 value={withdrawalAmount}
                 onChangeText={e => setWithdrawalAmount(e)}
                 keyboardType="numeric"
-                placeholderTextColor={colors.text_muted}
+                placeholderTextColor="#999"
                 style={styles.input}
               />
               <AppText style={styles.label}>Enter UPI ID & Confirm</AppText>
@@ -232,7 +230,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
                   value={upiId}
                   onChangeText={setUpiId}
                   placeholder="Ex: 8512374652@ybl"
-                  placeholderTextColor={colors.text_muted}
+                  placeholderTextColor="#999"
                   style={styles.input}
                 />
               </View>
@@ -242,7 +240,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
                 onPress={handleCreateWithdrawal}
                 buttonStyle={[styles.loginButton, {bottom: hp(4)}]}
                 iconName="arrow-right-alt"
-                iconColor={colors.text_primary}
+                iconColor="#ffffff"
                 iconSize={35}>
                 Confirm Withdrawal
               </AppButton>
@@ -255,7 +253,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
                 onChangeText={e => setWithdrawalAmount(e)}
                 value={withdrawalAmount}
                 keyboardType="numeric"
-                placeholderTextColor={colors.text_muted}
+                placeholderTextColor="#999"
                 style={styles.input}
               />
               <AppText style={styles.label}>Account Number</AppText>
@@ -264,13 +262,13 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
                 keyboardType="numeric"
                 value={accountNumber}
                 onChangeText={setAccountNumber}
-                placeholderTextColor={colors.text_muted}
+                placeholderTextColor="#999"
                 style={styles.input}
               />
               <AppText style={styles.label}>IFSC Code</AppText>
               <TextInput
                 placeholder="Ex: SBIN00001234"
-                placeholderTextColor={colors.text_muted}
+                placeholderTextColor="#999"
                 value={ifscCode}
                 onChangeText={setIfscCode}
                 style={styles.input}
@@ -278,7 +276,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
               <AppText style={styles.label}>Account Holder Name</AppText>
               <TextInput
                 placeholder="Ex: Mahesh Gowtham"
-                placeholderTextColor={colors.text_muted}
+                placeholderTextColor="#999"
                 value={accountHolderName}
                 onChangeText={setAccountHolderName}
                 style={styles.input}
@@ -290,7 +288,7 @@ const WithdrawlUpiAndBankAccount = ({navigation, route}) => {
                 showArrow={true}
                 buttonStyle={[styles.loginButton, {bottom: hp(4)}]}
                 iconName="arrow-right-alt"
-                iconColor={colors.text_primary}
+                iconColor="#ffffff"
                 iconSize={35}>
                 Confirm Withdrawal
               </AppButton>

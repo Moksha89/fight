@@ -1,4 +1,3 @@
-// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import {
   StyleSheet,
   ImageBackground,
@@ -244,7 +243,7 @@ export default function BettingControls({
         manualMatchData,
         isBetAllowedAtCurrentChannel,
       );
-      if (ratios & !isNaN(ratios[0])) {
+      if (ratios && !isNaN(ratios[0])) {
         callback(ratios.map(val => parseFloat(val.toFixed(2))));
       } else {
         callback(ratios);

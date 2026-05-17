@@ -1,5 +1,5 @@
 import {baseWSEndpoint as BASE_URL} from '../Config/baseEndpoint';
-import storage from '../utils/storage';
+import {loadTokens} from '../utils/tokenStorage';
 import {getDicePlayUserBets} from '../apis/dicePlayApi';
 
 let DiceMatchSocket = null;
@@ -14,7 +14,7 @@ export const connectDiceMatchWebSocket = async (
   console.log('[WS] connectDiceMatchWebSocket called');
   DiceMatchShouldReconnect = true;
 
-  const accessToken = await storage.getItem('accessToken');
+  const {accessToken} = await loadTokens();
   if (!accessToken || typeof setBoardsData !== 'function') {
     console.warn('[WS] Invalid parameters');
     return;
@@ -124,7 +124,7 @@ export const connectDiceMatchResultWebSocket = async (
   console.log('[WS] connectDiceMatchResultWebSocket called');
   DiceResultShouldReconnect = true;
 
-  const accessToken = await storage.getItem('accessToken');
+  const {accessToken} = await loadTokens();
   if (
     !accessToken ||
     typeof setBoardsData !== 'function' ||

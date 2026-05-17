@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b"/>
+      <stop offset="100%" style="stop-color:#c0392b"/>
+    </linearGradient>
+  </defs>
+  <!-- Body -->
+  <ellipse cx="100" cy="130" rx="55" ry="45" fill="url(#redGrad)" filter="url(#glow)"/>
+  <!-- Neck -->
+  <ellipse cx="80" cy="90" rx="22" ry="35" fill="#e74c3c" transform="rotate(-10 80 90)"/>
+  <!-- Head -->
+  <circle cx="72" cy="60" r="18" fill="#e74c3c"/>
+  <!-- Comb -->
+  <path d="M62 44 Q58 28 66 32 Q64 20 72 28 Q74 16 80 28 Q86 22 82 34 Q88 30 82 42" fill="#ff0000" filter="url(#glow)"/>
+  <!-- Beak -->
+  <path d="M55 58 L42 62 L55 66" fill="#f39c12" stroke="#e67e22" stroke-width="1"/>
+  <!-- Eye -->
+  <circle cx="66" cy="56" r="4" fill="#fff"/>
+  <circle cx="66" cy="56" r="2" fill="#000"/>
+  <!-- Wattle -->
+  <path d="M60 68 Q56 80 64 76 Q58 84 66 72" fill="#ff0000"/>
+  <!-- Wing -->
+  <ellipse cx="115" cy="125" rx="35" ry="25" fill="#c0392b" transform="rotate(-5 115 125)"/>
+  <path d="M130 115 Q150 125 145 140 Q155 130 150 145" fill="#a93226"/>
+  <!-- Tail feathers -->
+  <path d="M155 110 Q175 80 165 60 Q185 85 170 55 Q190 78 175 50" fill="url(#redGrad)" filter="url(#glow)" stroke="#8b0000" stroke-width="1"/>
+  <path d="M150 115 Q168 88 160 70" fill="none" stroke="#ff6b6b" stroke-width="2" opacity="0.6"/>
+  <!-- Legs -->
+  <line x1="85" y1="170" x2="78" y2="195" stroke="#f39c12" stroke-width="3"/>
+  <line x1="110" y1="170" x2="115" y2="195" stroke="#f39c12" stroke-width="3"/>
+  <!-- Feet -->
+  <path d="M68 195 L78 195 L88 195" stroke="#f39c12" stroke-width="2" fill="none"/>
+  <path d="M75 195 L70 200" stroke="#f39c12" stroke-width="2"/>
+  <path d="M105 195 L115 195 L125 195" stroke="#f39c12" stroke-width="2" fill="none"/>
+  <path d="M112 195 L107 200" stroke="#f39c12" stroke-width="2"/>
+  <!-- Chest feather detail -->
+  <path d="M70 105 Q75 115 80 105 Q85 115 90 105" fill="none" stroke="#ff6b6b" stroke-width="1" opacity="0.5"/>
+</svg>

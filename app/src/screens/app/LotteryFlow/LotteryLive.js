@@ -27,7 +27,6 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
 
 const ticketNumbers = Array.from({length: 15}, (_, i) => i + 1);
 const ticketsData = [
@@ -588,7 +587,7 @@ const styles = StyleSheet.create({
   countBox: {
     marginHorizontal: wp(4),
     borderRadius: wp(1),
-    backgroundColor: '#D4A843',
+    backgroundColor: '#ff7c0A',
     justifyContent: 'center',
     alignItems: 'center',
     width: wp(6),
@@ -622,7 +621,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: wp(5),
     right: wp(5),
-    backgroundColor: '#DC2626',
+    backgroundColor: '#FF4000',
     color: '#fff',
     paddingHorizontal: 6,
     borderRadius: 4,

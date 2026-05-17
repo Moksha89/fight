@@ -14,7 +14,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import AppText from '../../../../components/AppText';
 import {apiRequest} from '../../../../utils/apiClient';
-import {useTheme} from '../../../../context/ThemeContext';
 import COLORS from '../../../../context/designTokens';
 
 import {

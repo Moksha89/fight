@@ -1,41 +1,13 @@
-import React from 'react';
-import {Text, StyleSheet, View, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {Text, StyleSheet, View, TouchableOpacity} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
   responsiveHeight as hp,
   responsiveWidth as wp,
   responsiveFontSize as fp,
 } from 'react-native-responsive-dimensions';
-import {useTheme} from '../context/ThemeContext';
 
-/**
- * AppButton — Kokoroko Design System
- *
- * Props:
- *   variant:  'primary' | 'secondary' | 'danger' | 'ghost' | 'outline'  (default: 'primary')
- *   size:     'sm' | 'md' | 'lg'  (default: 'md')
- *   fullWidth: boolean (default: false)
- *   disabled:  boolean
- *   loading:   boolean
- *   leftIcon:  string (MaterialIcons name)
- *   rightIcon: string (MaterialIcons name)
- *
- * Legacy props (backward compat):
- *   buttonLight: boolean → maps to variant='outline'
- *   showArrow:   boolean → maps to rightIcon
- *   iconName, iconColor, iconSize
- *   buttonStyle, textStyle, contentContainerStyle
- */
 export default function AppButton({
   children,
-  // New API
-  variant = 'primary',
-  size = 'md',
-  fullWidth = false,
-  loading = false,
-  leftIcon,
-  rightIcon,
-  // Legacy API (backward compat)
   buttonStyle,
   textStyle,
   onPress,
@@ -43,142 +15,92 @@ export default function AppButton({
   disabled,
   showArrow,
   contentContainerStyle,
-  iconName = 'arrow-right-alt',
+  iconName = 'arrow-right-alt', // default icon
   iconColor,
   iconSize = 40,
 }) {
-  const {colors, radius} = useTheme();
-
-  // Legacy: buttonLight maps to outline variant
-  const resolvedVariant = buttonLight ? 'outline' : variant;
-
-  // Variant styles
-  const variantStyles = {
-    primary: {
-      bg: colors.gold,
-      text: colors.text_on_gold,
-      border: 'transparent',
-      iconFallback: colors.text_on_gold,
-    },
-    secondary: {
-      bg: colors.bg_elevated,
-      text: colors.text_primary,
-      border: colors.border,
-      iconFallback: colors.text_primary,
-    },
-    danger: {
-      bg: colors.danger,
-      text: '#ffffff',
-      border: 'transparent',
-      iconFallback: '#ffffff',
-    },
-    ghost: {
-      bg: 'transparent',
-      text: colors.gold,
-      border: 'transparent',
-      iconFallback: colors.gold,
-    },
-    outline: {
-      bg: 'transparent',
-      text: colors.gold,
-      border: colors.gold,
-      iconFallback: colors.gold,
-    },
-  };
-
-  // Size styles
-  const sizeStyles = {
-    sm: {height: hp(4.5), paddingH: wp(4), fontSize: fp(1.6), iconSz: 18},
-    md: {height: hp(6), paddingH: wp(6), fontSize: fp(2), iconSz: 22},
-    lg: {height: hp(7), paddingH: wp(8), fontSize: fp(2.2), iconSz: 26},
-  };
-
-  const v = variantStyles[resolvedVariant] || variantStyles.primary;
-  const s = sizeStyles[size] || sizeStyles.md;
-
-  const isDisabled = disabled || loading;
-  const finalBg = isDisabled ? colors.disabled : v.bg;
-  const finalText = isDisabled ? colors.disabled_text : v.text;
-  const finalBorder = isDisabled ? colors.disabled : v.border;
-
-  const containerStyle = [
-    {
-      height: s.height,
-      backgroundColor: finalBg,
-      borderRadius: resolvedVariant === 'primary' ? 50 : radius.md,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: resolvedVariant === 'outline' || resolvedVariant === 'secondary' ? 1 : 0,
-      borderColor: finalBorder,
-    },
-    fullWidth
-      ? {width: '100%'}
-      : showArrow || contentContainerStyle
-      ? {width: wp(84)} // Legacy compat: keep old width when using old API
-      : {paddingHorizontal: s.paddingH},
-    buttonStyle,
-  ];
-
-  // Determine icons
-  const showLeftIcon = leftIcon && !loading;
-  const showRightIcon = rightIcon || (showArrow && !loading);
-  const rightIconName = rightIcon || iconName;
-  const rightIconColor = iconColor || v.iconFallback;
-  const rightIconSize = rightIcon ? s.iconSz : iconSize;
-
   const ButtonContent = () => (
-    <View
-      style={[
-        styles.contentContainer,
-        showArrow && {width: wp(50)},
-        contentContainerStyle,
-      ]}>
-      {loading ? (
-        <ActivityIndicator size="small" color={finalText} />
-      ) : (
-        <>
-          {showLeftIcon && (
-            <MaterialIcons
-              name={leftIcon}
-              size={s.iconSz}
-              color={finalText}
-              style={{marginRight: 6}}
-            />
-          )}
-          <Text style={[{fontSize: s.fontSize, color: finalText, fontWeight: '600'}, textStyle]}>
-            {children}
-          </Text>
-          {showRightIcon && (
-            <MaterialIcons
-              name={rightIconName}
-              size={rightIconSize}
-              color={rightIconColor}
-            />
-          )}
-        </>
+    <View style={[styles.contentContainer, contentContainerStyle]}>
+      <Text
+        style={
+          buttonLight
+            ? [styles.buttonText, {color: '#D4A843'}, textStyle]
+            : [styles.buttonText, textStyle]
+        }>
+        {children}
+      </Text>
+      {showArrow && (
+        <MaterialIcons
+          name={iconName}
+          size={iconSize}
+          color={iconColor || (buttonLight ? '#D4A843' : '#fff')}
+        />
       )}
     </View>
   );
 
-  return isDisabled && !loading ? (
-    <View style={containerStyle}>
+  return disabled ? (
+    <View
+      style={
+        buttonLight
+          ? [styles.button, styles.buttonLight, buttonStyle]
+          : [styles.button, buttonStyle]
+      }>
       <ButtonContent />
     </View>
   ) : (
     <TouchableOpacity
-      style={containerStyle}
-      onPress={onPress}
-      disabled={isDisabled}
-      activeOpacity={0.7}>
+      style={
+        buttonLight
+          ? [styles.button, styles.buttonLight, buttonStyle]
+          : [styles.button, buttonStyle]
+      }
+      onPress={onPress}>
       <ButtonContent />
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
+  button: {
+    width: wp(84),
+    height: hp(6),
+    backgroundColor: '#D4A843',
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: fp(2),
+    color: '#fff',
+    fontWeight: '500',
+  },
+  buttonLight: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#D4A843',
+  },
   contentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    width: wp(50),
   },
 });
+
+{
+  /* <AppButton
+  onPress={() => console.log('Clicked')}
+  showArrow={true}
+  buttonLight={false}
+  iconName="close"
+  iconColor="#ffffff"
+  iconSize={30}
+  contentContainerStyle={{
+    justifyContent: 'space-between',
+    width: '90%',
+  }}
+  buttonStyle={{marginBottom: 20}}>
+  Cancel Withdrawal
+</AppButton>; */
+}

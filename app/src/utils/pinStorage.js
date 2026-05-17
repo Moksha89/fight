@@ -97,6 +97,10 @@ export async function migratePinFromAsyncStorage() {
 
       console.log('[PinStorage] Migrating plain-text PIN to hashed secure storage');
       const hashed = await savePin(oldPin);
+      if (!hashed) {
+        console.error('[PinStorage] PIN migration aborted — secure save failed');
+        return null;
+      }
       await AsyncStorage.removeItem('checkPin');
       console.log('[PinStorage] PIN migration complete');
       return hashed;

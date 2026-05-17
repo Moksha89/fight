@@ -5,16 +5,10 @@ import {baseApiEndpoint} from '../Config/baseEndpoint';
 const THEME_STORAGE_KEY = 'kokoroko_theme';
 
 /**
- * KOKOROKO DESIGN SYSTEM — Unified Token Set
- *
- * Single source of truth for colors, typography, spacing, radius, and shadows.
- * Admin can override brand color tokens via Theme Settings API.
- *
- * Usage:
- *   const {colors, typography, spacing, radius, shadows} = useTheme();
+ * KOKOROKO DESIGN SYSTEM — Mobile Color Tokens
+ * Mirrors the web CSS :root variables. Admin can override brand tokens via Theme Settings API.
+ * Use `const {colors} = useTheme()` then reference `colors.gold`, `colors.meron_light`, etc.
  */
-
-// ── Color Tokens ──
 const DEFAULT_COLORS = {
   // Brand
   gold: '#D4A843',
@@ -38,14 +32,6 @@ const DEFAULT_COLORS = {
   black: '#0B0B0B',
   black_light: '#171717',
 
-  // Semantic background aliases
-  background: '#0B0B0B',
-  surface: '#121212',
-  surfaceElevated: '#1F1A12',
-  card: '#171717',
-  cardAlt: '#1F1F1F',
-  overlay: 'rgba(0,0,0,0.6)',
-
   // Text
   text_primary: '#F5F1E8',
   text_secondary: '#A8A29E',
@@ -54,17 +40,11 @@ const DEFAULT_COLORS = {
   text_on_dark: '#cccccc',
   text_label: '#9ca3af',
 
-  // Semantic text aliases
-  textPrimary: '#F5F1E8',
-  textSecondary: '#A8A29E',
-  textMuted: '#6B6560',
-
   // Borders
   border: 'rgba(212,168,67,0.18)',
   border_light: 'rgba(212,168,67,0.10)',
   border_subtle: 'rgba(255,255,255,0.06)',
   border_chip: '#555555',
-  borderGold: 'rgba(212,168,67,0.18)',
 
   // Game Colors
   meron: '#DC2626',
@@ -94,10 +74,6 @@ const DEFAULT_COLORS = {
   warning_bg: 'rgba(251,191,36,0.15)',
   info: '#3B82F6',
 
-  // Disabled
-  disabled: '#3a3a3a',
-  disabled_text: '#6B6560',
-
   // Social
   whatsapp: '#25d366',
   telegram: '#229ED9',
@@ -105,71 +81,17 @@ const DEFAULT_COLORS = {
   // Dice
   brass: '#B8860B',
   brass_dark: '#8B6914',
-};
 
-// ── Typography Scale ──
-const TYPOGRAPHY = {
-  display: {fontSize: 28, fontWeight: '800', lineHeight: 34},
-  h1: {fontSize: 22, fontWeight: '700', lineHeight: 28},
-  h2: {fontSize: 18, fontWeight: '600', lineHeight: 24},
-  h3: {fontSize: 16, fontWeight: '600', lineHeight: 22},
-  body: {fontSize: 14, fontWeight: '400', lineHeight: 20},
-  bodySmall: {fontSize: 13, fontWeight: '400', lineHeight: 18},
-  caption: {fontSize: 12, fontWeight: '400', lineHeight: 16},
-  label: {fontSize: 11, fontWeight: '600', lineHeight: 14},
-  button: {fontSize: 14, fontWeight: '600', lineHeight: 20},
-};
-
-// ── Spacing Scale ──
-const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
-  xxl: 32,
-};
-
-// ── Border Radius Scale ──
-const RADIUS = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  pill: 999,
-};
-
-// ── Shadow / Elevation Tokens ──
-const SHADOWS = {
-  card: {
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  modal: {
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 12,
-  },
-  button: {
-    shadowColor: '#D4A843',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
-  },
+  // Spacing
+  radius: 12,
+  radius_sm: 8,
+  radius_lg: 16,
+  radius_xl: 20,
 };
 
 const ThemeContext = createContext();
 
 export const useTheme = () => useContext(ThemeContext);
-
-// Export defaults for static usage (designTokens.js re-exports these)
-export {DEFAULT_COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS};
 
 export const ThemeProvider = ({children}) => {
   const [colors, setColors] = useState(DEFAULT_COLORS);
@@ -209,16 +131,7 @@ export const ThemeProvider = ({children}) => {
   };
 
   return (
-    <ThemeContext.Provider
-      value={{
-        colors,
-        typography: TYPOGRAPHY,
-        spacing: SPACING,
-        radius: RADIUS,
-        shadows: SHADOWS,
-        themeName,
-        refreshTheme: fetchTheme,
-      }}>
+    <ThemeContext.Provider value={{colors, themeName, refreshTheme: fetchTheme}}>
       {children}
     </ThemeContext.Provider>
   );
