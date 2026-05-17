@@ -5,6 +5,7 @@ import AppScreen from '../../components/AppScreen';
 import AppText from '../../components/AppText';
 import AppButton from '../../components/AppButton';
 import storage from '../../utils/storage';
+import {savePin} from '../../utils/pinStorage';
 import CustomMessage from '../../components/ToestMessege';
 import {
   responsiveHeight as hp,
@@ -70,8 +71,8 @@ const SetLockScreen = ({navigation}) => {
       }
 
       setIsPinSet(true);
-      setCheckPin(pinValue);
-      await storage.setItem('checkPin', pinValue);
+      const hashed = await savePin(pinValue);
+      setCheckPin(hashed);
 
       navigation.reset({
         index: 0,

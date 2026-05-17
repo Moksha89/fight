@@ -17,7 +17,7 @@ import {
 
 import {useAuth} from '../../../context/AuthContext';
 
-import storage from '../../../utils/storage';
+import {savePin} from '../../../utils/pinStorage';
 
 const SetLockScreen = ({navigation}) => {
   const {setIsPinSet, setCheckPin} = useAuth();
@@ -30,9 +30,8 @@ const SetLockScreen = ({navigation}) => {
         return;
       }
       setIsPinSet(true);
-      setCheckPin(pinValue);
-
-      await storage.setItem('checkPin', pinValue);
+      const hashed = await savePin(pinValue);
+      setCheckPin(hashed);
 
       navigation.goBack();
     } catch (error) {
