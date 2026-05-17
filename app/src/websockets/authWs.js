@@ -2,6 +2,8 @@
 import {baseWSEndpoint as BASE_URL} from '../Config/baseEndpoint';
 
 let userSocket = null;
+let reconnectTimeout = null;
+let shouldReconnect = false;
 
 export const connectUserWebSocket = (accessToken, setWallet) => {
   if (!accessToken || typeof setWallet !== 'function') {
@@ -14,6 +16,8 @@ export const connectUserWebSocket = (accessToken, setWallet) => {
     console.warn('[WS] Socket already connected or connecting.');
     return;
   }
+
+  shouldReconnect = true;
 
   const socketUrl = `${BASE_URL}/ws/user/?token=${accessToken}`;
   userSocket = new WebSocket(socketUrl);
@@ -52,14 +56,21 @@ export const connectUserWebSocket = (accessToken, setWallet) => {
     console.log('[WS] User WebSocket closed:', event.reason || 'No reason');
     userSocket = null;
 
-    // Retry after 5 seconds
-    reconnectTimeout = setTimeout(() => {
-      connectUserWebSocket(accessToken, setWallet);
-    }, 3000);
+    // Retry after 3 seconds if not intentionally closed
+    if (shouldReconnect) {
+      reconnectTimeout = setTimeout(() => {
+        connectUserWebSocket(accessToken, setWallet);
+      }, 3000);
+    }
   };
 };
 
 export const closeUserWebSocket = () => {
+  shouldReconnect = false;
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
   if (userSocket) {
     console.log('[WS] Closing User WebSocket...');
     userSocket.close();

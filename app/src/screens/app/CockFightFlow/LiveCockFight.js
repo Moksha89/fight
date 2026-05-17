@@ -195,7 +195,7 @@ const LiveCockFight = ({navigation, route}) => {
 
     const result = await placeCockfightBet(data, activeChannel);
 
-    if (result) {
+    if (result && result.bet) {
       setUserBetHistory(prev => [result.bet, ...prev]);
       setBetHistoryModalVisible(true);
 
@@ -216,9 +216,9 @@ const LiveCockFight = ({navigation, route}) => {
 
     setIsBettingButtonStatus(true);
 
-    // Reset placed amounts for new round, if you want — else comment this block
-    betAmount(0);
-    selectedBetTeam(null);
+    // Reset placed amounts for new round
+    setBetAmount(0);
+    setSelectedBetTeam(null);
   };
 
   return (
