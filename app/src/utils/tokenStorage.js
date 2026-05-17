@@ -17,8 +17,10 @@ export async function saveTokens(accessToken, refreshToken) {
   try {
     const payload = JSON.stringify({accessToken, refreshToken});
     await Keychain.setGenericPassword('auth', payload, {service: TOKEN_SERVICE});
+    return true;
   } catch (error) {
     console.error('[TokenStorage] Failed to save tokens:', error);
+    return false;
   }
 }
 
@@ -73,7 +75,11 @@ export async function migrateTokensFromAsyncStorage() {
 
     if (oldAccess || oldRefresh) {
       console.log('[TokenStorage] Migrating tokens from AsyncStorage to secure storage');
-      await saveTokens(oldAccess, oldRefresh);
+      const saved = await saveTokens(oldAccess, oldRefresh);
+      if (!saved) {
+        console.error('[TokenStorage] Migration aborted — secure save failed');
+        return;
+      }
       await AsyncStorage.removeItem('accessToken');
       await AsyncStorage.removeItem('refreshToken');
       console.log('[TokenStorage] Migration complete, old keys removed');

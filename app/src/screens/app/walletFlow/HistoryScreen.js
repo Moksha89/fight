@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, FlatList, StyleSheet, RefreshControl} from 'react-native';
+import {View, FlatList, StyleSheet} from 'react-native';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -7,12 +7,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AppText from '../../../components/AppText';
 import AppScreen from '../../../components/AppScreen';
 import HeaderComponent from '../../../components/HeaderComponent';
-import AppLoader from '../../../components/AppLoader';
-import EmptyState from '../../../components/EmptyState';
 
 import {getWalletInfo} from '../../../apis/appApi';
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
 
 import {
   responsiveHeight as hp,
@@ -22,11 +19,8 @@ import {
 
 const HistoryScreen = ({navigation}) => {
   const {wallet} = useAuth();
-  const {colors} = useTheme();
   const [walletData, setWalletData] = useState([]);
   const [nextPageLink, setNextPageLink] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchWalletInfo();
@@ -42,19 +36,6 @@ const HistoryScreen = ({navigation}) => {
         console.warn('Failed to load wallet data');
       }
     }
-    setLoading(false);
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    setWalletData([]);
-    setNextPageLink(0);
-    const result = await getWalletInfo(0);
-    if (result.success) {
-      setWalletData(result.data.results.history);
-      setNextPageLink(result.data.next);
-    }
-    setRefreshing(false);
   };
 
   const getIconByType = type => {
@@ -80,124 +61,95 @@ const HistoryScreen = ({navigation}) => {
     }
   };
 
-  if (loading) {
-    return (
-      <AppScreen lightStatusBar isTranslucent style={{paddingTop: hp(4.5)}}>
-        <HeaderComponent
-          title="Wallet History"
-          onBackPress={() => navigation.canGoBack() && navigation.goBack()}
-        />
-        <AppLoader fullScreen text="Loading history..." />
-      </AppScreen>
-    );
-  }
-
   return (
     <AppScreen lightStatusBar isTranslucent style={{paddingTop: hp(4.5)}}>
       <HeaderComponent
         title="Wallet History"
-        onBackPress={() => navigation.canGoBack() && navigation.goBack()}
+        onBackPress={() => navigation.goBack()}
         RightIconComponent={
           <>
-            <Ionicons name="wallet-outline" size={20} color={colors.text_primary} />
-            <AppText style={{color: colors.text_primary}}>
+            <Ionicons name="wallet-outline" size={20} color="#fff" />
+            <AppText style={{color: '#fff'}}>
               ₹{String(wallet.balanceWithBonus).split('.')[0]}
             </AppText>
           </>
         }
         containerStyle={styles.headerSection}
-        rightIconWrapperStyle={[styles.headerIcon, {backgroundColor: colors.gold, borderColor: colors.border_gold}]}
+        rightIconWrapperStyle={styles.headerIcon}
       />
-      {walletData.length === 0 ? (
-        <EmptyState
-          icon="receipt-long"
-          title="No transactions yet"
-          message="Your wallet history will appear here"
-        />
-      ) : (
-        <FlatList
-          data={walletData}
-          onEndReached={fetchWalletInfo}
-          onEndReachedThreshold={0.4}
-          keyExtractor={item => item.id.toString()}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={colors.gold}
-              colors={[colors.gold]}
-            />
-          }
-          renderItem={({item}) => (
-            <View style={[styles.historyRow, {borderColor: colors.border}]}>
-              <View style={styles.historySection}>
-                <View style={[styles.transactionTypeIcon, {backgroundColor: colors.surface_elevated}]}>
-                  <MaterialCommunityIcons
-                    name={getIconByType(item.transaction_type)}
-                    size={23}
-                    color={colors.gold}
-                  />
-                </View>
-                <View style={{width: wp(50), marginRight: wp(5)}}>
-                  <AppText style={{color: colors.text_secondary}}>
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </AppText>
-                  <AppText
-                    style={{
-                      fontSize: fp(1.6),
-                      lineHeight: wp(4.5),
-                      marginTop: hp(0.5),
-                      color: colors.text_primary,
-                    }}>
-                    {item.description}
-                  </AppText>
-                </View>
-                <View style={{width: wp(20), alignItems: 'flex-end'}}>
-                  <AppText
-                    style={[
-                      styles.amountText,
-                      {
-                        color:
-                          item.transaction_type === 'D'
-                            ? item.isSuccess
-                              ? colors.success
-                              : colors.text_muted
-                            : item.transaction_type === 'W'
-                            ? item.isSuccess
-                              ? colors.danger
-                              : colors.text_muted
-                            : item.isSuccess
-                            ? colors.success
-                            : colors.danger,
-                      },
-                    ]}>
-                    {item.transaction_type === 'D'
-                      ? item.isSuccess
-                        ? '+ '
-                        : ''
-                      : item.transaction_type === 'W'
-                      ? item.isSuccess
-                        ? '- '
-                        : ''
-                      : item.isSuccess
+      <FlatList
+        data={walletData}
+        onEndReached={fetchWalletInfo}
+        onEndReachedThreshold={0.4}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({item}) => (
+          <View style={styles.historyRow}>
+            <View style={styles.historySection}>
+              <View style={styles.transactionTypeIcon}>
+                <MaterialCommunityIcons
+                  name={getIconByType(item.transaction_type)}
+                  size={23}
+                  color="#D4A843"
+                />
+              </View>
+              <View style={{width: wp(50), marginRight: wp(5)}}>
+                <AppText>
+                  {new Date(item.created_at).toLocaleDateString()}
+                </AppText>
+                <AppText
+                  style={{
+                    fontSize: fp(1.6),
+                    lineHeight: wp(4.5),
+                    marginTop: hp(0.5),
+                  }}>
+                  {item.description}
+                </AppText>
+              </View>
+              <View style={{width: wp(20), alignItems: 'flex-end'}}>
+                <AppText
+                  style={[
+                    styles.amountText,
+                    {
+                      color:
+                        item.transaction_type === 'D'
+                          ? item.isSuccess
+                            ? 'green'
+                            : '#000'
+                          : item.transaction_type === 'W'
+                          ? item.isSuccess
+                            ? 'red'
+                            : '#000'
+                          : item.isSuccess
+                          ? 'green'
+                          : 'red',
+                    },
+                  ]}>
+                  {item.transaction_type === 'D'
+                    ? item.isSuccess
                       ? '+ '
-                      : '- '}
-                    ₹{item.change.toLocaleString()}
-                  </AppText>
-                  {!item.isSuccess &&
-                    ['W', 'D'].includes(item.transaction_type) && (
-                      <View style={styles.paymentStatusRow}>
-                        <AppText style={[styles.ststusText, {color: colors.danger}]}>
-                          Failed
-                        </AppText>
-                      </View>
-                    )}
-                </View>
+                      : ''
+                    : item.transaction_type === 'W'
+                    ? item.isSuccess
+                      ? '- '
+                      : ''
+                    : item.isSuccess
+                    ? '+ '
+                    : '- '}
+                  ₹{item.change.toLocaleString()}
+                </AppText>
+                {!item.isSuccess &&
+                  ['W', 'D'].includes(item.transaction_type) && (
+                    <View style={styles.paymentStatusRow}>
+                      <AppText style={[styles.ststusText, {color: 'red'}]}>
+                        Failed
+                      </AppText>
+                    </View>
+                  )}
               </View>
             </View>
-          )}
-        />
-      )}
+          </View>
+        )}
+      />
     </AppScreen>
   );
 };
@@ -213,6 +165,7 @@ const styles = StyleSheet.create({
     paddingBottom: wp(3),
   },
   headerIcon: {
+    backgroundColor: '#d4a843',
     borderColor: 'rgba(212,168,67,0.18)',
     width: wp(27),
     flexDirection: 'row',
@@ -225,6 +178,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: wp(0.5),
     paddingBottom: hp(1.5),
     paddingTop: hp(1.5),
+    borderColor: '#f3f3f3',
   },
   historySection: {
     flexDirection: 'row',
@@ -236,8 +190,10 @@ const styles = StyleSheet.create({
     borderRadius: wp(4),
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#2a2a2a',
     marginRight: wp(5),
   },
+
   paymentStatusRow: {
     flexDirection: 'row',
     alignItems: 'center',

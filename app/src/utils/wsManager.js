@@ -10,7 +10,7 @@
  */
 
 import {baseWSEndpoint as BASE_URL} from '../Config/baseEndpoint';
-import storage from './storage';
+import {loadTokens} from './tokenStorage';
 
 const MIN_RECONNECT_DELAY = 500;
 const MAX_RECONNECT_DELAY = 30000;
@@ -112,7 +112,7 @@ class SmartWebSocket {
     try {
       let url = `${BASE_URL}${this.path}`;
       if (this.options.requireAuth) {
-        const token = await storage.getItem('accessToken');
+        const {accessToken: token} = await loadTokens();
         if (!token) {
           console.warn(`[WS:${this.name}] No auth token — aborting`);
           this._setState(WS_STATE.DISCONNECTED);

@@ -1,5 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import BottomTabNavigator from './BottomTabNavigator';
+import HomeScreen from '../screens/app/HomeScreen';
 import LiveCockFight from '../screens/app/CockFightFlow/LiveCockFight';
 import PastMatches from '../screens/app/CockFightFlow/PastMatches';
 import LotteryGift from '../screens/app/LotteryFlow/LotteryGift';
@@ -12,9 +12,12 @@ import LearningScreen from '../screens/app/settingsFlow/LearningScreen';
 import ProfileUpdateScreen from '../screens/app/settingsFlow/ProfileUpdateScreen';
 import ReferralScreen from '../screens/app/settingsFlow/ReferralScreen';
 import SetLockScreen from '../screens/app/settingsFlow/SetLockScreen';
+import SettingsScreen from '../screens/app/settingsFlow/SettingsScreen';
 import ChangePasswordScreen from '../screens/app/settingsFlow/ChangePasswordScreen';
 import DepositUpiAndBankAccount from '../screens/app/walletFlow/DepositUpiAndBankAccount';
+import DepositWithdrawl from '../screens/app/walletFlow/DepositWithdrawl';
 import WithdrawlUpiAndBankAccount from '../screens/app/walletFlow/WithdrawlUpiAndBankAccount';
+import HistoryScreen from '../screens/app/walletFlow/HistoryScreen';
 import StatementScreen from '../screens/app/walletFlow/StatementScreen';
 import GundataLive from '../screens/app/Gundata/GundataLive';
 import NotificationsScreen from '../screens/app/NotificationsScreen';
@@ -27,12 +30,11 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName="MainTabs">
-      {/* Bottom tab navigator is the root screen */}
-      <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
-
-      {/* Detail/deep screens accessible from any tab via navigation.navigate() */}
+      initialRouteName="HomeScreen">
+      <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="PromotionsScreen" component={PromotionsScreen} />
+      <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
+      <Stack.Screen name="DepositWithdrawl" component={DepositWithdrawl} />
 
       <Stack.Screen name="LotteryGift" component={LotteryGift} />
       <Stack.Screen name="LotteryGiftLive" component={LotteryGiftLive} />
@@ -69,6 +71,7 @@ export default function AppNavigator() {
         name="WithdrawlUpiAndBankAccount"
         component={WithdrawlUpiAndBankAccount}
       />
+      <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
       <Stack.Screen name="StatementScreen" component={StatementScreen} />
       <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
     </Stack.Navigator>

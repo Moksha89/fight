@@ -22,7 +22,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
 
 import Video from 'react-native-video';
 
@@ -496,7 +495,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: wp(5),
     right: wp(5),
-    backgroundColor: '#DC2626',
+    backgroundColor: '#FF4000',
     color: '#fff',
     paddingHorizontal: 6,
     borderRadius: 4,

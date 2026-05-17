@@ -1,4 +1,3 @@
-// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import {
   StyleSheet,
   ImageBackground,
@@ -18,7 +17,7 @@ import AppText from '../../../../components/AppText';
 import LottieView from 'lottie-react-native';
 
 import {useAuth} from '../../../../context/AuthContext';
-import {useTheme} from '../../../../context/ThemeContext';
+import COLORS from '../../../../context/designTokens';
 
 import {useNavigation} from '@react-navigation/native';
 
@@ -278,7 +277,7 @@ export default function BettingControls({
         manualMatchData,
         isBetAllowedAtCurrentChannel,
       );
-      if (ratios & !isNaN(ratios[0])) {
+      if (ratios && !isNaN(ratios[0])) {
         callback(ratios.map(val => parseFloat(val.toFixed(2))));
       } else {
         callback(ratios);
@@ -709,7 +708,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   betPlaceButton: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     width: wp(35),
     paddingVertical: hp(1.2),
     borderRadius: wp(2),
@@ -741,7 +740,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
   },
   autoBetToggleActive: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
   },
   autoBetTeamRow: {
     flexDirection: 'row',

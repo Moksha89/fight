@@ -1,9 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {View, Text, TouchableOpacity, Animated, StyleSheet} from 'react-native';
-import {useTheme} from '../context/ThemeContext';
 
 export default function DinoGame() {
-  const {colors, radius} = useTheme();
   const jumpValue = useRef(new Animated.Value(0)).current;
   const [isJumping, setIsJumping] = useState(false);
   const [score, setScore] = useState(0);
@@ -56,39 +54,21 @@ export default function DinoGame() {
 
   return (
     <View style={styles.gameContainer}>
-      <Text style={[styles.score, {color: colors.text_primary}]}>Score: {score}</Text>
-      <View
-        style={[
-          styles.gameArea,
-          {backgroundColor: colors.bg_input, borderColor: colors.border, borderRadius: radius.sm},
-        ]}>
+      <Text style={styles.score}>Score: {score}</Text>
+      <View style={styles.gameArea}>
         <Animated.View
-          style={[
-            styles.dino,
-            {backgroundColor: colors.gold, transform: [{translateY: jumpValue}]},
-          ]}
+          style={[styles.dino, {transform: [{translateY: jumpValue}]}]}
         />
-        <View
-          style={[styles.obstacle, {left: obstacleLeft, backgroundColor: colors.gold}]}
-        />
+        <View style={[styles.obstacle, {left: obstacleLeft}]} />
       </View>
 
       <TouchableOpacity
-        style={[
-          styles.actionButton,
-          {backgroundColor: gameOver ? colors.gold : colors.gold_dark, borderRadius: radius.pill},
-        ]}
+        style={[styles.actionButton, gameOver ? {backgroundColor: '#d4a843'} : {}]}
         onPress={gameOver ? resetGame : jump}>
-        <Text style={[styles.buttonText, {color: colors.text_on_gold}]}>
-          {gameOver ? 'Restart' : 'Jump'}
-        </Text>
+        <Text style={[styles.buttonText]}>{gameOver ? 'Restart' : 'Jump'}</Text>
       </TouchableOpacity>
 
-      <Text
-        style={[
-          styles.gameOverText,
-          {opacity: gameOver ? 1 : 0, color: colors.danger},
-        ]}>
+      <Text style={[styles.gameOverText, {opacity: gameOver ? 1 : 0}]}>
         💥 Game Over! Final Score: {score}
       </Text>
     </View>
@@ -104,42 +84,53 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#F5F1E8',
   },
   gameArea: {
     width: 300,
     height: 150,
+    backgroundColor: '#1a1a1a',
     overflow: 'hidden',
     position: 'relative',
+    borderRadius: 10,
     borderWidth: 1,
+    borderColor: 'rgba(212,168,67,0.18)',
   },
   dino: {
     width: 30,
     height: 30,
+    backgroundColor: '#d4a843',
     position: 'absolute',
     bottom: 0,
     left: 20,
+    borderRadius: 4,
     borderRadius: 1000,
   },
   obstacle: {
     width: 10,
     height: 40,
+    backgroundColor: '#D4A843',
     position: 'absolute',
     bottom: 0,
     borderRadius: 10,
   },
   actionButton: {
+    backgroundColor: '#ff6b00',
     paddingVertical: 12,
     paddingHorizontal: 30,
+    borderRadius: 30,
     marginTop: 30,
     elevation: 2,
   },
   buttonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
   gameOverText: {
     fontSize: 16,
     marginTop: 15,
+    color: '#e74c3c',
     fontWeight: 'bold',
   },
 });

@@ -27,13 +27,12 @@ import AppText from '../../../components/AppText';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import {GameVideoBox, GameBetHistoryModal} from '../../../components/game';
+import VideoPlayBox from './components/VideoPlayBox';
 import BoardBar from './components/BoardBar';
-import ProvablyFairModal from './components/ProvablyFairModal';
+import BetHistoryModal from './components/BetHistoryModal';
 import FeatureUnderMaintenanceScreen from '../../FeatureUnderMaintenanceScreen';
 
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
 import COLORS from '../../../context/designTokens';
 import {
   placeDicePlayBet,
@@ -104,7 +103,6 @@ const DICE_NUMBERS = [1, 2, 3, 4, 5, 6];
 
 const GundataLive = ({navigation}) => {
   const {wallet, settings} = useAuth();
-  const {colors} = useTheme();
   const translateX = useRef(new Animated.Value(0)).current;
   const [contentWidth, setContentWidth] = useState(0);
 
@@ -465,14 +463,11 @@ const GundataLive = ({navigation}) => {
       isTranslucent
       lightStatusBar>
         
-      <GameBetHistoryModal
-        gameType="dice"
+      <BetHistoryModal
         visible={isBetHistoryModalVisible}
         onClose={() => setBetHistoryModalVisible(false)}
         bets={userBetHistory}
         setBets={setUserBetHistory}
-        fetchBetsApi={getDicePlayUserBets}
-        ProvablyFairModal={ProvablyFairModal}
       />
 
       {/* Dice Roll Animation Overlay */}
@@ -546,7 +541,7 @@ const GundataLive = ({navigation}) => {
         onIconPress={() => navigation.navigate('DepositWithdrawl')}
         RightIconComponent={
           <>
-            <MaterialCommunityIcons name="wallet" size={16} color={colors.text_primary} />
+            <MaterialCommunityIcons name="wallet" size={16} color="#ffffff" />
             <AppText style={styles.walletText}>
               ₹{String(wallet?.balanceWithBonus || 0).split('.')[0]}
             </AppText>
@@ -566,8 +561,7 @@ const GundataLive = ({navigation}) => {
         </Animated.View>
       </View>
 
-      <GameVideoBox
-        gameType="dice"
+      <VideoPlayBox
         activeChannel={activeBoardId ?? '0'}
         manualMatchData={manualMatchData}
         soundEnabled={soundEnabled}
@@ -697,7 +691,7 @@ const GundataLive = ({navigation}) => {
               <Text style={styles.pleaseWaitText}>Please wait...</Text>
             ) : isBettingButtonEnable ? (
               <View style={styles.placeBetContent}>
-                <Icon name="check" size={fp(2.5)} color={colors.text_primary} />
+                <Icon name="check" size={fp(2.5)} color="#fff" />
                 <AppText style={styles.placeBetText}>Place Bet...</AppText>
               </View>
             ) : (
@@ -765,7 +759,7 @@ const styles = StyleSheet.create({
     height: hp(7),
   },
   walletButton: {
-    backgroundColor: colors.gold,
+    backgroundColor: COLORS.gold,
     borderRadius: wp(2),
     flexDirection: 'row',
     width: wp(25),
@@ -821,15 +815,15 @@ const styles = StyleSheet.create({
     width: wp(2),
     height: wp(2),
     borderRadius: wp(1),
-    backgroundColor: colors.gold,
+    backgroundColor: COLORS.gold,
   },
   diceSelected: {
     borderWidth: 2,
-    borderColor: colors.gold,
+    borderColor: COLORS.gold,
   },
   diceNumber: {
     fontWeight: '400',
-    color: colors.text_muted,
+    color: COLORS.text_muted,
     fontSize: fp(1.8),
   },
   diceImage: {
@@ -965,7 +959,7 @@ const styles = StyleSheet.create({
   diceAnimationTitle: {
     fontSize: fp(2.8),
     fontWeight: '800',
-    color: colors.gold,
+    color: COLORS.gold,
     letterSpacing: 3,
     textTransform: 'uppercase',
   },
@@ -1037,7 +1031,7 @@ const styles = StyleSheet.create({
   winBannerText: {
     fontSize: fp(4),
     fontWeight: '900',
-    color: colors.gold,
+    color: COLORS.gold,
     textShadowColor: 'rgba(0,0,0,0.5)',
     textShadowOffset: {width: 0, height: 2},
     textShadowRadius: 8,

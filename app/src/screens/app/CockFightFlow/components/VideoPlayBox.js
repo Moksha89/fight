@@ -1,4 +1,3 @@
-// @deprecated — Use shared component from app/src/components/game/ instead. This file is kept for reference only.
 import {
   View,
   StyleSheet,
@@ -50,7 +49,7 @@ function VideoPlayBox({
       const actionValue = parseFloat(settings?.L?.actionValue || '0');
       const balance = parseFloat(wallet?.balance || '0');
 
-      if ((balance < actionValue) & !bettingHistory) {
+      if ((balance < actionValue) && !bettingHistory) {
         setIsLiveEnableToSee(false);
       }
     }, 15000);
@@ -258,7 +257,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: wp(5),
     right: wp(5),
-    backgroundColor: '#DC2626',
+    backgroundColor: '#FF4000',
     color: '#fff',
     paddingHorizontal: 6,
     borderRadius: 4,

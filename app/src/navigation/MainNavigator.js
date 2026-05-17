@@ -4,7 +4,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import AuthNavigator from './AuthNavigator';
 import AppNavigator from './AppNavigator';
 import {getNewAccess} from '../apis/authApi';
-import storage from '../utils/storage';
+import {loadTokens} from '../utils/tokenStorage';
 import {useAuth} from '../context/AuthContext';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
@@ -24,7 +24,7 @@ const MainNavigator = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const refreshToken = await storage.getItem('refreshToken');
+        const {refreshToken} = await loadTokens();
         if (refreshToken) {
           const result = await getNewAccess(refreshToken);
           if (result?.ok && result.data.access) {

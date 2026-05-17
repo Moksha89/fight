@@ -76,6 +76,7 @@ import {ThemeProvider} from './context/ThemeContext';
 import NoInternet from './components/NoInternet';
 import ErrorBoundary from './components/ErrorBoundary';
 import SmartToast, {showToast} from './components/SmartToast';
+import AppUpdateChecker from './components/AppUpdateChecker';
 import {registerErrorCallbacks} from './utils/errorHandler';
 
 function AppInner() {
@@ -109,6 +110,7 @@ function AppInner() {
     <>
       {isConnected ? <MainNavigator /> : <NoInternet />}
       <SmartToast />
+      <AppUpdateChecker />
     </>
   );
 }

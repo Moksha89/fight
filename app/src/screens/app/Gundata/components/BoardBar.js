@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#DC2626',
+    backgroundColor: '#f44336',
   },
   virtualTriangle: {
     borderBottomColor: '#4caf50',

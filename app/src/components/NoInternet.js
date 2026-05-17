@@ -1,24 +1,23 @@
 import React from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   Dimensions,
+  TouchableOpacity,
   StatusBar,
 } from 'react-native';
 import AppScreen from './AppScreen';
-import AppText from './AppText';
 import LottieView from 'lottie-react-native';
 import OfflineGame from './OfflineGame';
-import {useTheme} from '../context/ThemeContext';
+import {BlurView} from '@react-native-community/blur'; // Optional, for iOS polish
 
 const {width} = Dimensions.get('window');
 
 export default function NoInternetScreen() {
-  const {colors, radius, shadows} = useTheme();
-
   return (
     <AppScreen style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="light-content" backgroundColor="#0B0B0B" />
 
       <LottieView
         source={require('../assets/lottie/no-internet.json')}
@@ -27,22 +26,12 @@ export default function NoInternetScreen() {
         style={styles.lottie}
       />
 
-      <AppText variant="h1" align="center">
-        No Internet Connection !
-      </AppText>
-      <AppText variant="body" color="muted" align="center" style={styles.subtitle}>
+      <Text style={styles.title}>No Internet Connection !</Text>
+      <Text style={styles.subtitle}>
         Looks like you're offline. While we reconnect you, enjoy a quick game!
-      </AppText>
+      </Text>
 
-      <View
-        style={[
-          styles.gameWrapper,
-          {
-            backgroundColor: colors.card,
-            borderRadius: radius.lg,
-            ...shadows.card,
-          },
-        ]}>
+      <View style={styles.gameWrapper}>
         <OfflineGame />
       </View>
     </AppScreen>
@@ -52,6 +41,7 @@ export default function NoInternetScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#0B0B0B',
     alignItems: 'center',
     paddingHorizontal: 24,
     justifyContent: 'space-evenly',
@@ -60,7 +50,15 @@ const styles = StyleSheet.create({
     width: width * 0.65,
     height: width * 0.65,
   },
+  title: {
+    fontSize: 28,
+    color: '#F5F1E8',
+    textAlign: 'center',
+  },
   subtitle: {
+    fontSize: 16,
+    color: '#6B6560',
+    textAlign: 'center',
     paddingHorizontal: 10,
     marginBottom: 20,
   },
@@ -68,6 +66,13 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     padding: 10,
+    backgroundColor: '#171717',
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: {width: 0, height: 3},
     marginBottom: 30,
   },
 });
