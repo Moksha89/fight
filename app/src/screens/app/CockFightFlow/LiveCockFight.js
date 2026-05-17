@@ -11,8 +11,13 @@ import {
   Vibration,
 } from 'react-native';
 
-import {GameBetHistoryModal, GameVideoBox, GameChannelBar, GameBettingControls, GameHistoryContainer} from '../../../components/game';
-import {getCockfightUserBets, placeCockfightBet} from '../../../apis/cockfightApi';
+import BetHistoryModal from './BetHistoryModal';
+
+import VideoPlayBox from './components/VideoPlayBox';
+import ChannelBar from './components/ChannelBar';
+import BettingControls from './components/BettingControls';
+
+import {placeCockfightBet} from '../../../apis/cockfightApi';
 
 import {
   connectMatchWebSocket,
@@ -37,14 +42,13 @@ import AppText from '../../../components/AppText';
 import AppScreen from '../../../components/AppScreen';
 
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
 import COLORS from '../../../context/designTokens';
 
 import FeatureUnderMaintenanceScreen from '../../FeatureUnderMaintenanceScreen';
+import HistoryContainer from './components/HistoryContainer';
 
 const LiveCockFight = ({navigation, route}) => {
   const {wallet, settings} = useAuth();
-  const {colors} = useTheme();
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [isBetHistoryModalVisible, setBetHistoryModalVisible] = useState(false);
@@ -223,13 +227,12 @@ const LiveCockFight = ({navigation, route}) => {
 
   return (
     <AppScreen lightStatusBar isTranslucent style={{paddingTop: hp(3.5)}}>
-      <GameBetHistoryModal
-        gameType="cockfight"
+      <BetHistoryModal
+        style={{flex: 1}}
         visible={isBetHistoryModalVisible}
         onClose={() => setBetHistoryModalVisible(false)}
         bets={userBetHistory}
         setBets={setUserBetHistory}
-        fetchBetsApi={getCockfightUserBets}
       />
       {/* Header */}
       <HeaderComponent
@@ -261,8 +264,7 @@ const LiveCockFight = ({navigation, route}) => {
         </Animated.View>
       </View>
 
-      <GameVideoBox
-        gameType="cockfight"
+      <VideoPlayBox
         activeChannel={activeChannel}
         autoMatchData={autoMatchData}
         manualMatchData={manualMatchData}
@@ -273,7 +275,7 @@ const LiveCockFight = ({navigation, route}) => {
       />
 
       <ScrollView style={styles.mainContainer}>
-        <GameChannelBar
+        <ChannelBar
           availableChannels={availableChannels}
           activeChannel={activeChannel}
           setActiveChannel={setActiveChannel}
@@ -282,8 +284,7 @@ const LiveCockFight = ({navigation, route}) => {
           musicEnabled={musicEnabled}
           setMusicEnabled={setMusicEnabled}
         />
-        <GameBettingControls
-          gameType="cockfight"
+        <BettingControls
           soundEnabled={soundEnabled}
           activeChannel={activeChannel}
           autoMatchData={autoMatchData}
@@ -299,13 +300,11 @@ const LiveCockFight = ({navigation, route}) => {
           isBetAllowedAtCurrentChannel={isBetAllowedAtCurrentChannel}
           setIsBetAllowedAtCurrentChannel={setIsBetAllowedAtCurrentChannel}
           isBettingButtonEnable={isBettingButtonEnable}
-          showAutoBet={true}
         />
-        <GameHistoryContainer
+        <HistoryContainer
           activeChannel={activeChannel}
           autoMatchHistory={autoMatchHistory}
           manualMatchHistory={manualMatchHistory}
-          showBeadRoad={true}
         />
       </ScrollView>
     </AppScreen>
@@ -319,7 +318,7 @@ const styles = StyleSheet.create({
   header: {flexDirection: 'row', alignItems: 'center', padding: 12},
   headerTitle: {flex: 1, textAlign: 'center', fontWeight: 'bold', fontSize: 18},
   walletButton: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     borderRadius: wp(2),
     flexDirection: 'row',
     width: wp(25),

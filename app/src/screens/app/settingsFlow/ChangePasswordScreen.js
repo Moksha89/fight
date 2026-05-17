@@ -15,7 +15,7 @@ import AppScreen from '../../../components/AppScreen';
 import HeaderComponent from '../../../components/HeaderComponent';
 
 import {apiRequest} from '../../../utils/apiClient';
-import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../../context/designTokens';
 
 import {
   responsiveHeight as hp,
@@ -24,7 +24,6 @@ import {
 } from 'react-native-responsive-dimensions';
 
 const ChangePasswordScreen = ({navigation}) => {
-  const {colors} = useTheme();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -209,7 +208,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   submitBtn: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
@@ -219,7 +218,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitText: {
-    color: '#F5F1E8',
+    color: COLORS.white,
     fontSize: fp(1.8),
     fontWeight: '700',
   },

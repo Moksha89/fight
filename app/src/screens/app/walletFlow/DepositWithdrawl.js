@@ -19,7 +19,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import {useAuth} from '../../../context/AuthContext';
-import {useTheme} from '../../../context/ThemeContext';
+import COLORS from '../../../context/designTokens';
 
 import {
   getCurrentDeposit,
@@ -41,7 +41,6 @@ const audioFileURL =
   'https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3';
 import SoundPlayer from 'react-native-sound-player';
 const DepositWithdrawl = ({navigation}) => {
-  const {colors} = useTheme();
   const [activeTab, setActiveTab] = useState('deposit');
   const [selectedMode, setSelectedMode] = useState('upi');
   const amounts = ['500', '1000', '2000', '5000', '10000'];
@@ -106,7 +105,7 @@ const DepositWithdrawl = ({navigation}) => {
     if (success) {
       setCurrentDeposit(null);
     } else {
-      Alert.alert('Error', 'Failed to cancel deposit request');
+      Alert('Failed to cancel deposit request');
     }
   };
 
@@ -115,7 +114,7 @@ const DepositWithdrawl = ({navigation}) => {
     if (success) {
       setCurrentWithdrawal(null);
     } else {
-      Alert.alert('Error', 'Failed to cancel withdrawal request');
+      Alert('Failed to cancel deposit request');
     }
   };
 
@@ -131,13 +130,13 @@ const DepositWithdrawl = ({navigation}) => {
     <AppScreen isTranslucent lightStatusBar style={styles.mainContainer}>
       <HeaderComponent
         title="Wallet"
-        onBackPress={() => navigation.canGoBack() && navigation.goBack()}
+        onBackPress={() => navigation.goBack()}
         onIconPress={() => navigation.navigate('StatementScreen')}
         RightIconComponent={
-          <MaterialIcons name="history" size={25} color={colors.text_primary} />
+          <MaterialIcons name="history" size={25} color="#ffffff" />
         }
         rightIconWrapperStyle={{
-          backgroundColor: colors.gold,
+          backgroundColor: COLORS.gold,
         }}
       />
       <AppText style={styles.walletAmount}>
@@ -233,7 +232,7 @@ const DepositWithdrawl = ({navigation}) => {
               height: '77%',
             }}>
             <View style={styles.info}>
-              <Foundation name="info" size={24} color={colors.background} />
+              <Foundation name="info" size={24} color="#000000" />
               <AppText style={{fontSize: fp(1.7)}}>
                 {'Minimum amount of ' +
                   settings['J'].actionValue +
@@ -410,7 +409,7 @@ const DepositWithdrawl = ({navigation}) => {
               <TouchableOpacity
                 style={styles.gameList}
                 onPress={handleOpenModal}>
-                <FontAwesome name="youtube-play" size={18} color={colors.danger} />
+                <FontAwesome name="youtube-play" size={18} color="#ff0000" />
                 <AppText style={{marginLeft: wp(2)}}>Watch Tutorial</AppText>
               </TouchableOpacity>
             </View>
@@ -430,7 +429,7 @@ const DepositWithdrawl = ({navigation}) => {
             <TouchableOpacity
               style={styles.watchTutorialsButton}
               onPress={handleOpenModal}>
-              <Feather name="youtube" size={20} color={colors.danger} />
+              <Feather name="youtube" size={20} color="#FF0A0A" />
               <AppText style={styles.tutorialText}>Watch Tutorials</AppText>
             </TouchableOpacity>
             <TouchableOpacity onPress={togglePlayPauseMute}>
@@ -542,7 +541,7 @@ const DepositWithdrawl = ({navigation}) => {
             height: '77%',
           }}>
           <View style={styles.info}>
-            <Foundation name="info" size={24} color={colors.background} />
+            <Foundation name="info" size={24} color="#000000" />
             <AppText style={{fontSize: fp(1.7)}}>
               {parseFloat(wallet.bonusDebt) != 0
                 ? `Current Bonus ${wallet.bonusDebt} will be 0 on withdrawal.`
@@ -645,7 +644,7 @@ const DepositWithdrawl = ({navigation}) => {
           <View style={styles.gameSelectionHeader}>
             <AppText style={styles.sectionTitle}>How to withdrawal :</AppText>
             <TouchableOpacity style={styles.gameList} onPress={handleOpenModal}>
-              <FontAwesome name="youtube-play" size={18} color={colors.danger} />
+              <FontAwesome name="youtube-play" size={18} color="#ff0000" />
               <AppText style={{marginLeft: wp(2)}}>Watch Tutorial</AppText>
             </TouchableOpacity>
           </View>
@@ -662,7 +661,7 @@ const DepositWithdrawl = ({navigation}) => {
             <TouchableOpacity
               style={styles.watchTutorialsButton}
               onPress={handleOpenModal}>
-              <Feather name="youtube" size={20} color={colors.danger} />
+              <Feather name="youtube" size={20} color="#FF0A0A" />
               <AppText style={styles.tutorialText}>Watch Tutorials</AppText>
             </TouchableOpacity>
             <TouchableOpacity onPress={togglePlayPauseMute}>
@@ -778,7 +777,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(2),
   },
   selectedButton: {
-    backgroundColor: '#D4A843',
+    backgroundColor: COLORS.gold,
   },
   iconImage: {
     tintColor: '#A8A29E',
@@ -795,7 +794,7 @@ const styles = StyleSheet.create({
   },
   commissionText: {
     fontSize: 12,
-    color: '#6B6560',
+    color: COLORS.text_muted,
   },
   selectedText: {
     color: '#fff',
