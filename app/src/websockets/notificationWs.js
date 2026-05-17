@@ -1,5 +1,5 @@
 import {baseWSEndpoint as BASE_URL} from '../Config/baseEndpoint';
-import storage from '../utils/storage';
+import {loadTokens} from '../utils/tokenStorage';
 
 let notifSocket = null;
 let notifReconnectTimeout = null;
@@ -17,7 +17,7 @@ const MAX_RECONNECT_DELAY = 30000;
 export const connectNotificationWebSocket = async (onNotification, setUnreadCount) => {
   notifShouldReconnect = true;
 
-  const accessToken = await storage.getItem('accessToken');
+  const {accessToken} = await loadTokens();
   if (!accessToken) {
     console.warn('[WS:Notif] No access token');
     return;
