@@ -117,9 +117,11 @@ INSTALLED_APPS = [
     "cockfightManager",
     "dicePlayManager",
     "lotteryManager",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
+    "kokoroko.middleware.RequestIDMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "kokoroko.middleware.SecurityHeadersMiddleware",
@@ -195,10 +197,10 @@ AUTH_PASSWORD_VALIDATORS = [
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer", "JWT",),
     "JWT_SECRET_KEY": SECRET_KEY,
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
 }
 
