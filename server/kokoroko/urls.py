@@ -1322,6 +1322,21 @@ loadForm();
 </body></html>''')
 
 
+# ─── App Version Check API ───────────────────────────────────────────────────
+from django.views.decorators.http import require_GET
+
+@require_GET
+def app_version_check(request):
+    """Public endpoint for Android app to check for updates."""
+    return JsonResponse({
+        "latest_version_code": int(settings.APP_VERSION_CODE),
+        "latest_version_name": settings.APP_VERSION_NAME,
+        "download_url": settings.APP_DOWNLOAD_URL,
+        "force_update": getattr(settings, 'APP_FORCE_UPDATE', False),
+        "release_notes": getattr(settings, 'APP_RELEASE_NOTES', ''),
+    })
+
+
 # ─── Health / Monitoring API ─────────────────────────────────────────────────
 def health_check_view(request):
     """Public health check endpoint."""
@@ -1367,6 +1382,7 @@ urlpatterns = [
     path('admin-api/get-feature-controls/', get_feature_controls_api, name='get_feature_controls_api'),
     path('admin-api/set-feature-controls/', set_feature_controls_api, name='set_feature_controls_api'),
     path('health/', health_check_view, name='health_check'),
+    path('api/app-version/', app_version_check, name='app_version_check'),
     path('', admin.site.urls),
 ]
 

@@ -395,3 +395,12 @@ DEBUG = os.environ.get("DJANGO_ENV") != "prod"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 100
+
+# =============================================================================
+# APP VERSION (for in-app update checks)
+# =============================================================================
+APP_VERSION_CODE = os.environ.get("APP_VERSION_CODE", "2")
+APP_VERSION_NAME = os.environ.get("APP_VERSION_NAME", "2.0.0")
+APP_DOWNLOAD_URL = os.environ.get("APP_DOWNLOAD_URL", "https://roosterrun.io/roosterrun.apk")
+APP_FORCE_UPDATE = os.environ.get("APP_FORCE_UPDATE", "false").lower() == "true"
+APP_RELEASE_NOTES = os.environ.get("APP_RELEASE_NOTES", "New Kokoroko premium design, security improvements, and bug fixes.")
