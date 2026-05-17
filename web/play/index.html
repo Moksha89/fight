@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kokoroko - Play</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -16,6 +16,7 @@
             --gold-bg: rgba(212,168,67,0.08);
             --gold-bg-hover: rgba(212,168,67,0.14);
             --gold-border: rgba(212,168,67,0.18);
+            --gold-glow: 0 0 15px rgba(212,168,67,0.6), 0 0 30px rgba(212,168,67,0.4), 0 0 45px rgba(212,168,67,0.2);
 
             /* ── Backgrounds ── */
             --black: #0B0B0B;
@@ -60,8 +61,8 @@
             --meron-light: #ef4444;
             --wala: #2563EB;
             --wala-light: #3b82f6;
-            --draw: #A855F7;
-            --draw-light: #c084fc;
+            --draw: #16A34A;
+            --draw-light: #22c55e;
         }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -74,6 +75,74 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         .hidden { display: none !important; }
+
+        /* ===== REUSABLE DESIGN TOKENS (Kokoroko Premium) ===== */
+        .premium-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .glass-card {
+            background: rgba(20,20,20,0.85); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212,168,67,0.12);
+            border-radius: var(--radius); padding: 20px;
+        }
+        .gold-btn {
+            background: linear-gradient(180deg, #D4A843 0%, #B8922E 100%);
+            color: #000; font-weight: 700; border: none; border-radius: var(--radius);
+            padding: 12px 24px; cursor: pointer; font-size: 15px;
+            box-shadow: 0 2px 8px rgba(212,168,67,0.3);
+            transition: all .2s;
+        }
+        .gold-btn:hover { box-shadow: var(--gold-glow); transform: translateY(-1px); }
+        .outline-btn {
+            background: transparent; color: var(--gold); font-weight: 600;
+            border: 1px solid var(--gold-border); border-radius: var(--radius);
+            padding: 10px 20px; cursor: pointer; transition: all .2s;
+        }
+        .outline-btn:hover { background: var(--gold-bg); border-color: var(--gold); }
+        .section-header {
+            font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+            color: var(--text-primary);
+        }
+        .section-header .material-icons { font-size: 20px; color: var(--gold); }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+        }
+        .live-badge {
+            background: rgba(239,68,68,0.15); color: #ef4444;
+            padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700;
+        }
+        .wallet-chip {
+            background: var(--gold-bg); border: 1px solid var(--gold-border);
+            border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600;
+            color: var(--gold);
+        }
+        .game-banner {
+            border-radius: var(--radius-lg); overflow: hidden; position: relative;
+            cursor: pointer; transition: transform .2s;
+        }
+        .game-banner:hover { transform: translateY(-2px); }
+        .betting-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 14px;
+        }
+        .amount-chip {
+            padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+            cursor: pointer; border: 1px solid var(--border); background: var(--bg-surface);
+            color: var(--text-secondary); transition: all .15s;
+        }
+        .amount-chip.active, .amount-chip:hover {
+            background: var(--gold-bg); border-color: var(--gold); color: var(--gold);
+        }
+        .sticky-action-bar {
+            position: sticky; bottom: 0; background: var(--bg-card);
+            border-top: 1px solid var(--border); padding: 12px 16px;
+            z-index: 50;
+        }
 
         /* ===== AUTH ===== */
         .auth-container {
@@ -189,6 +258,9 @@
             width: 36px; height: 36px; border-radius: 50%;
             cursor: pointer; transition: all 0.2s; border: none; background: none;
         }
+        .header-action-btn.notification-btn { background: rgba(212,168,67,0.1); }
+        .header-action-btn.notification-btn .material-icons { color: var(--gold); font-size: 20px; }
+        .header-action-btn.notification-btn:hover { background: rgba(212,168,67,0.25); }
         .header-action-btn.deposit-btn { background: rgba(16,185,129,0.15); }
         .header-action-btn.deposit-btn .material-icons { color: #10b981; font-size: 20px; }
         .header-action-btn.deposit-btn:hover { background: rgba(16,185,129,0.3); }
@@ -466,11 +538,12 @@
         .social-link.instagram svg { fill: #e4405f; }
 
         .section-label {
+            font-family: 'Sora', sans-serif;
             font-size: 15px; font-weight: 700; margin-bottom: 14px;
             display: flex; align-items: center; gap: 8px;
             color: var(--text-primary);
         }
-        .section-label .material-icons { font-size: 20px; color: var(--gold-dark); }
+        .section-label .material-icons { font-size: 20px; color: var(--gold); }
 
         /* ===== MATCH CARDS ===== */
         .match-card {
@@ -532,14 +605,14 @@
         }
         .odds-value.meron { color: #ef4444; }
         .odds-value.wala { color: #3b82f6; }
-        .odds-value.draw { color: #a855f7; }
+        .odds-value.draw { color: var(--draw-light); }
         .odds-team {
             font-size: 13px; font-weight: 700; display: flex;
             align-items: center; justify-content: center; gap: 4px;
         }
         .odds-team.meron { color: #ef4444; }
         .odds-team.wala { color: #3b82f6; }
-        .odds-team.draw { color: #a855f7; }
+        .odds-team.draw { color: var(--draw-light); }
 
         /* Rooster Mascots */
         .mascot-row {
@@ -741,12 +814,13 @@
         .bet-item .bet-team { font-weight: 600; font-size: 13px; min-width: 60px; }
         .bet-item .bet-team.meron { color: #dc2626; }
         .bet-item .bet-team.wala { color: #2563eb; }
-        .bet-item .bet-team.draw { color: #7c3aed; }
+        .bet-item .bet-team.draw { color: var(--draw-light); }
         .bet-item .bet-info { flex: 1; font-size: 12px; color: var(--text-secondary); }
         .bet-item .bet-result { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
         .bet-item .bet-result.won { background: rgba(34,197,94,0.15); color: #22c55e; }
         .bet-item .bet-result.lost { background: rgba(239,68,68,0.15); color: #ef4444; }
         .bet-item .bet-result.pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .bet-item .bet-result.cancelled { background: rgba(156,163,175,0.15); color: #9ca3af; }
         /* Cockfight Two-Column Layout */
         .cockfight-layout { display: flex; gap: 16px; align-items: flex-start; }
         .cockfight-layout .cockfight-left { flex: 1; min-width: 0; }
@@ -768,7 +842,7 @@
         .mh-winner { font-weight: 600; font-size: 13px; }
         .mh-winner.meron { color: #ef4444; }
         .mh-winner.wala { color: #3b82f6; }
-        .mh-winner.draw { color: #a855f7; }
+        .mh-winner.draw { color: var(--draw-light); }
         .mh-date { font-size: 11px; color: var(--text-muted); }
         .mh-proof { display: flex; gap: 4px; justify-content: flex-end; }
         .proof-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; font-size: 14px; text-decoration: none; transition: all 0.2s; }
@@ -796,7 +870,7 @@
         .match-result-banner .mrb-winner { font-size: 20px; font-weight: 700; }
         .match-result-banner .mrb-winner.meron { color: #ef4444; }
         .match-result-banner .mrb-winner.wala { color: #3b82f6; }
-        .match-result-banner .mrb-winner.draw { color: #a78bfa; }
+        .match-result-banner .mrb-winner.draw { color: var(--draw-light); }
         .match-result-banner .mrb-user-result { margin-top: 8px; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 16px; display: inline-block; }
         .match-result-banner .mrb-user-result.won { background: #16a34a; }
         .match-result-banner .mrb-user-result.lost { background: #dc2626; }
@@ -821,7 +895,7 @@
         @keyframes koPulse { from { transform: scale(1); } to { transform: scale(1.08); } }
         .wo-ko-text.meron { color: #ef4444; }
         .wo-ko-text.wala { color: #3b82f6; }
-        .wo-ko-text.draw { color: #a855f7; }
+        .wo-ko-text.draw { color: var(--draw-light); }
         .wo-winner-name {
             font-size: 28px; font-weight: 700; color: #fff; margin-top: 8px;
             text-transform: uppercase; letter-spacing: 3px;
@@ -871,21 +945,181 @@
         /* Match Timer */
         .match-timer { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
         .match-timer .material-icons { font-size: 14px; }
-        /* Dice Game */
-        .dice-board { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; }
-        .dice-board-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
-        .dice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-        .dice-face {
-            border: 2px solid var(--border); border-radius: var(--radius);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 28px; font-weight: 700; transition: all .2s;
-            background: var(--bg-card); padding: 16px 0;
+        /* ===== DICE GAME — Premium Gundata UI ===== */
+        .dice-game-wrap { max-width: 1100px; margin: 0 auto; }
+        .dice-desktop-layout { display: flex; gap: 14px; }
+        .dice-left-col { flex: 1; min-width: 0; }
+        .dice-right-col { width: 320px; flex-shrink: 0; }
+        .dice-right-col .dice-sidebar-panel { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px; margin-bottom: 10px; }
+        .dice-right-col .dice-sidebar-title { font-size: 13px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+        .dice-right-col .dice-sidebar-title .view-all { font-size: 11px; color: var(--text-muted); cursor: pointer; font-weight: 600; text-transform: none; }
+        .dice-right-col .dice-sidebar-title .view-all:hover { color: var(--gold); }
+        .dice-sidebar-status { text-align: center; color: var(--text-muted); font-size: 12px; padding: 12px 0; }
+        .dice-sidebar-status .material-icons { font-size: 14px; vertical-align: middle; margin-right: 3px; }
+        .dice-sidebar-balance { text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+        .dice-mybets-compact { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .dice-mybets-compact th { text-align: left; padding: 5px 6px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 10px; text-transform: uppercase; }
+        .dice-mybets-compact td { padding: 5px 6px; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
+        /* Match history cards */
+        .dice-match-cards { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; }
+        .dice-match-card { min-width: 180px; flex-shrink: 0; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 10px 12px; transition: border-color 0.2s; }
+        .dice-match-card:hover { border-color: var(--gold-border); }
+        .dice-match-card-title { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+        .dice-match-card-dice { display: flex; gap: 3px; margin-bottom: 4px; flex-wrap: wrap; }
+        .dice-match-card-dice .mface { width: 22px; height: 22px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8B0000; background: linear-gradient(135deg, #F5F1E8, #E8E0D0); border: 1px solid #D4C9B8; }
+        .dice-match-card-dice .mface.mwin { border-color: var(--gold); box-shadow: 0 0 4px rgba(212,168,67,0.4); }
+        .dice-match-card-nums { font-size: 10px; color: var(--text-muted); }
+        .dice-match-card-win { font-size: 11px; color: var(--gold); font-weight: 700; }
+        .dice-match-card-nowinner { font-size: 11px; color: var(--danger); font-weight: 600; }
+        .dice-match-card-verify { display: inline-flex; align-items: center; gap: 2px; font-size: 9px; color: var(--text-muted); cursor: pointer; margin-top: 4px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); background: transparent; transition: all 0.2s; }
+        .dice-match-card-verify:hover { border-color: var(--gold-border); color: var(--gold); }
+        .dice-match-card-verify .material-icons { font-size: 11px; }
+        .dice-round-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .dice-round-id { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+        .dice-round-id .rid { color: var(--gold); font-weight: 700; }
+        .dice-round-id .badge-v { background: var(--gold); color: #000; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px; margin-left: 4px; }
+        .dice-timer-box { display: flex; align-items: center; gap: 8px; }
+        .dice-timer-val { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 52px; text-align: center; }
+        .dice-timer-val.urgent { color: var(--danger); }
+        .dice-timer-val.warn { color: var(--warning); }
+        .dice-timer-val.ok { color: var(--success); }
+        .dice-status-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dice-status-badge.open { background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+        .dice-status-badge.closed { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+        .dice-status-badge.rolling { background: rgba(212,168,67,0.15); color: var(--gold); border: 1px solid rgba(212,168,67,0.3); animation: dicePulse 0.6s ease-in-out infinite alternate; }
+        @keyframes dicePulse { from { opacity: 0.7; } to { opacity: 1; } }
+        @keyframes diceShake { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-5px,2px) rotate(-4deg)} 40%{transform:translate(5px,-2px) rotate(4deg)} 60%{transform:translate(-3px,1px) rotate(-2deg)} 80%{transform:translate(3px,-1px) rotate(2deg)} }
+        @keyframes diceBounceIn { 0%{transform:scale(0) translateY(20px);opacity:0} 60%{transform:scale(1.12) translateY(-4px);opacity:1} 80%{transform:scale(0.95) translateY(2px)} 100%{transform:scale(1) translateY(0)} }
+        @keyframes diceWinGlow { 0%,100%{box-shadow:0 0 8px rgba(212,168,67,0.4),inset 0 0 2px rgba(212,168,67,0.1)} 50%{box-shadow:0 0 24px rgba(212,168,67,0.8),inset 0 0 6px rgba(212,168,67,0.2)} }
+        @keyframes confettiFall { 0%{transform:translateY(-10px) rotate(0);opacity:1} 100%{transform:translateY(60px) rotate(360deg);opacity:0} }
+        @keyframes diceRollingBounce { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-6px) rotate(8deg)} 50%{transform:translateY(0) rotate(-5deg)} 75%{transform:translateY(-3px) rotate(3deg)} }
+        @keyframes diceMugShake { 0%,100%{transform:translate(0,0) rotate(0)} 10%{transform:translate(-3px,1px) rotate(-2deg)} 20%{transform:translate(4px,-1px) rotate(3deg)} 30%{transform:translate(-4px,2px) rotate(-3deg)} 40%{transform:translate(3px,-2px) rotate(2deg)} 50%{transform:translate(-2px,1px) rotate(-1deg)} 60%{transform:translate(3px,0) rotate(2deg)} 70%{transform:translate(-2px,-1px) rotate(-2deg)} 80%{transform:translate(2px,1px) rotate(1deg)} 90%{transform:translate(-1px,0) rotate(-1deg)} }
+        @keyframes diceRevealLift { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(-100px) scale(0.8);opacity:0} }
+        @keyframes diceRollingShadow { 0%,100%{opacity:0.6;transform:translateX(-50%) scaleX(1)} 50%{opacity:0.3;transform:translateX(-50%) scaleX(0.85)} }
+        @keyframes diceResultLabel { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes diceConfettiPop { 0%{transform:scale(0) rotate(0);opacity:1} 50%{transform:scale(1.2) rotate(180deg);opacity:0.8} 100%{transform:scale(0) rotate(360deg);opacity:0} }
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .dice-mug-svg, .dice-result-face, .dice-pick-card, .dice-rolling-placeholder,
+            .dice-status-badge.rolling, .dice-match-card, .dice-confetti-particle { animation: none !important; transition-duration: 0.01ms !important; }
+            .dice-mug-svg.shaking { animation: none !important; }
+            .dice-mug-svg.lifted { transform: translateY(-80px); opacity: 0; transition-duration: 0.01ms !important; }
         }
-        .dice-face:hover { border-color: var(--gold); background: rgba(212,168,67,0.15); }
-        .dice-face.selected { border-color: var(--gold); background: rgba(212,168,67,0.2); box-shadow: 0 0 0 3px rgba(212,168,67,0.2); }
-        .dice-face small { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-top: 4px; }
-        .dice-emoji { font-size: 36px; filter: drop-shadow(0 0 1px rgba(255,255,255,0.5)); }
-        .dice-number { width: 44px; height: 44px; border-radius: 10px; background: var(--gold); color: #000; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; box-shadow: 0 2px 8px rgba(212,168,67,0.3); }
+
+        /* Mug + Dice visual area */
+        .dice-visual-area { position: relative; background: linear-gradient(180deg, #2D1F1A 0%, #1a1209 100%); border-radius: var(--radius); padding: 24px 20px 20px; margin-bottom: 10px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(212,168,67,0.2); box-shadow: inset 0 2px 20px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2); }
+        .dice-velvet-mat { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 340px; height: 55px; background: radial-gradient(ellipse at center, #6B1A1A 0%, #4A1212 60%, transparent 100%); border-radius: 50%; opacity: 0.6; }
+        .dice-velvet-mat.rolling-shadow { animation: diceRollingShadow 0.8s ease-in-out infinite; }
+        .dice-mug-svg { position: relative; z-index: 2; transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+        .dice-mug-svg.shaking { animation: diceMugShake 0.25s linear infinite; filter: drop-shadow(0 4px 12px rgba(212,168,67,0.2)); }
+        .dice-mug-svg.lifted { animation: diceRevealLift 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        .dice-result-grid { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 3; }
+        .dice-result-face { width: 56px; height: 56px; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; background: linear-gradient(145deg, #FAFAF5, #E8E0D0); border: 1.5px solid #C8BCA8; box-shadow: 0 3px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6); }
+        .dice-result-face.bouncing { animation: diceBounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
+        .dice-result-face.winner { animation: diceWinGlow 1.2s ease-in-out infinite; border-color: var(--gold); background: linear-gradient(145deg, #FFF8E8, #F0E0C0); }
+        .dice-result-label { font-size: 11px; color: var(--text-muted); margin-top: 10px; text-align: center; z-index: 3; position: relative; animation: diceResultLabel 0.3s ease-out; }
+        /* CSS dice pip faces */
+        .dice-pip-grid { display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); width: 100%; height: 100%; padding: 7px; gap: 1px; }
+        .dice-pip { width: 9px; height: 9px; border-radius: 50%; background: #8B0000; display: flex; align-items: center; justify-content: center; margin: auto; }
+        .dice-pip.hide { visibility: hidden; }
+        /* Small pips for match history / recent */
+        .dice-pip-sm { display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); width: 100%; height: 100%; padding: 3px; gap: 0px; }
+        .dice-pip-sm .pip { width: 4px; height: 4px; border-radius: 50%; background: #8B0000; margin: auto; }
+        .dice-pip-sm .pip.hide { visibility: hidden; }
+        /* Rolling placeholder dice */
+        .dice-rolling-wrap { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 3; }
+        .dice-rolling-placeholder { width: 56px; height: 56px; border-radius: 10px; background: linear-gradient(145deg, #FAFAF5, #E8E0D0); border: 1.5px solid #C8BCA8; box-shadow: 0 3px 8px rgba(0,0,0,0.35); animation: diceRollingBounce 0.4s ease-in-out infinite; display: flex; align-items: center; justify-content: center; font-size: 20px; color: rgba(139,0,0,0.3); }
+        .dice-rolling-text { font-size: 12px; color: var(--gold); margin-top: 10px; text-align: center; z-index: 3; position: relative; animation: dicePulse 0.8s ease-in-out infinite alternate; letter-spacing: 1px; font-weight: 600; }
+        /* Phase indicator */
+        .dice-phase-label { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px; z-index: 3; position: relative; }
+
+        /* Number picker */
+        .dice-picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .dice-pick-card { position: relative; border: 2px solid var(--border); border-radius: var(--radius); background: var(--bg-card); padding: 14px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s ease; user-select: none; }
+        .dice-pick-card:hover { border-color: var(--gold); background: rgba(212,168,67,0.08); transform: translateY(-1px); }
+        .dice-pick-card.selected { border-color: var(--gold); background: rgba(212,168,67,0.15); box-shadow: 0 0 0 3px rgba(212,168,67,0.2), 0 4px 12px rgba(212,168,67,0.15); }
+        .dice-pick-card.selected::after { content: '✓'; position: absolute; top: 4px; right: 6px; font-size: 12px; color: var(--gold); font-weight: 700; }
+        .dice-pick-card.win-highlight { border-color: var(--success); background: rgba(34,197,94,0.12); box-shadow: 0 0 16px rgba(34,197,94,0.3); animation: diceWinGlow 1s ease-in-out infinite; }
+        .dice-pick-card.disabled { opacity: 0.5; pointer-events: none; }
+        .dice-pick-num { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(145deg, #F0D78C, #D4A843); color: #000; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 2px 8px rgba(212,168,67,0.3), inset 0 1px 0 rgba(255,255,255,0.3); }
+        .dice-pick-num .dice-pip-grid { padding: 6px; }
+        .dice-pick-num .dice-pip { width: 7px; height: 7px; background: #4A3000; }
+        .dice-pick-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; }
+
+        /* Bet controls */
+        .dice-bet-panel { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px; margin-bottom: 10px; }
+        .dice-selected-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .dice-sel-chip { background: var(--gold); color: #000; padding: 2px 10px; border-radius: 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .dice-sel-chip .remove { cursor: pointer; font-size: 14px; opacity: 0.7; }
+        .dice-sel-chip .remove:hover { opacity: 1; }
+        .dice-chips-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+        .dice-chip { padding: 6px 14px; border-radius: 8px; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-primary); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        .dice-chip:hover { border-color: var(--gold); background: rgba(212,168,67,0.1); }
+        .dice-chip.active { border-color: var(--gold); background: var(--gold); color: #000; }
+        .dice-bet-row { display: flex; gap: 8px; align-items: center; }
+        .dice-bet-input { flex: 1; padding: 10px 12px; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-primary); font-size: 14px; font-weight: 600; color-scheme: dark; -webkit-text-fill-color: var(--text-primary); }
+        .dice-bet-input::placeholder { color: var(--text-muted); -webkit-text-fill-color: var(--text-muted); }
+        .dice-bet-input:focus { border-color: var(--gold); outline: none; }
+        .dice-place-btn { padding: 12px 24px; border-radius: 8px; background: linear-gradient(135deg, #D4A843, #B8922E); color: #000; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 2px 8px rgba(212,168,67,0.3); letter-spacing: 0.3px; }
+        .dice-place-btn:hover { background: linear-gradient(135deg, #F0D78C, #D4A843); box-shadow: 0 4px 16px rgba(212,168,67,0.4); transform: translateY(-1px); }
+        .dice-place-btn:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; transform: none; }
+        .dice-total-row { margin-top: 8px; font-size: 12px; color: var(--text-secondary); text-align: right; }
+        .dice-total-row b { color: var(--gold); font-size: 14px; }
+
+        /* Recent results strip */
+        .dice-recent-strip { display: flex; gap: 4px; overflow-x: auto; padding: 8px 0; margin-bottom: 10px; scrollbar-width: thin; scrollbar-color: rgba(212,168,67,0.2) transparent; }
+        .dice-recent-strip::-webkit-scrollbar { height: 3px; }
+        .dice-recent-strip::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.3); border-radius: 3px; }
+        .dice-recent-item { min-width: 40px; padding: 4px 6px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--text-muted); flex-shrink: 0; transition: border-color 0.2s; }
+        .dice-recent-item:hover { border-color: var(--gold-border); }
+        .dice-recent-item .rnum { font-size: 11px; font-weight: 700; color: var(--text-primary); }
+        .dice-recent-item .rwin { color: var(--gold); font-weight: 700; }
+
+        /* Latest result display */
+        .dice-latest-result { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 12px; margin-bottom: 10px; }
+        .dice-latest-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+        .dice-latest-dice { display: flex; gap: 6px; flex-wrap: wrap; }
+        .dice-latest-face { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: #8B0000; background: linear-gradient(135deg, #F5F1E8, #E8E0D0); border: 1px solid #D4C9B8; }
+        .dice-latest-face.win { border-color: var(--gold); box-shadow: 0 0 8px rgba(212,168,67,0.5); }
+
+        /* Match history table */
+        .dice-history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .dice-history-table th { text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; }
+        .dice-history-table td { padding: 6px 8px; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
+        .dice-history-table .hface { display: inline-flex; width: 24px; height: 24px; border-radius: 5px; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #8B0000; background: linear-gradient(135deg, #F5F1E8, #E8E0D0); border: 1px solid #D4C9B8; margin-right: 2px; }
+        .dice-history-table .hface.win { border-color: var(--gold); box-shadow: 0 0 4px rgba(212,168,67,0.4); }
+
+        /* My bets table */
+        .dice-mybets-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .dice-mybets-table th { text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; }
+        .dice-mybets-table td { padding: 6px 8px; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
+        .dice-bet-won { color: var(--success); font-weight: 700; }
+        .dice-bet-lost { color: var(--danger); font-weight: 700; }
+        .dice-bet-pending { color: var(--warning); font-weight: 600; }
+
+        /* Result overlay */
+        .dice-result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0,0,0,0.3); animation: confirmFadeIn 0.2s ease; }
+        .dice-result-card { padding: 28px 44px; border-radius: 20px; text-align: center; animation: diceBounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; pointer-events: auto; position: relative; overflow: hidden; }
+        .dice-result-card.win { background: linear-gradient(135deg, #1a1209, #2D1F1A); border: 2px solid var(--gold); box-shadow: 0 0 60px rgba(212,168,67,0.3), 0 0 120px rgba(212,168,67,0.1); }
+        .dice-result-card.win::before { content: ''; position: absolute; inset: -2px; border-radius: 20px; background: linear-gradient(45deg, transparent 30%, rgba(212,168,67,0.1) 50%, transparent 70%); background-size: 200% 200%; animation: diceShimmer 2s linear infinite; z-index: 0; }
+        @keyframes diceShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .dice-result-card.loss { background: linear-gradient(135deg, #1a0909, #2D1A1A); border: 1px solid rgba(239,68,68,0.3); box-shadow: 0 0 20px rgba(239,68,68,0.1); }
+        .dice-result-emoji { font-size: 52px; margin-bottom: 10px; position: relative; z-index: 1; }
+        .dice-result-text { font-size: 26px; font-weight: 800; margin-bottom: 6px; position: relative; z-index: 1; }
+        .dice-result-amount { font-size: 20px; font-weight: 700; position: relative; z-index: 1; }
+        /* Confetti container */
+        .dice-confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; overflow: hidden; }
+        .dice-confetti-particle { position: absolute; width: 8px; height: 8px; border-radius: 2px; opacity: 0; }
+
+        /* Section tabs for history */
+        .dice-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+        .dice-tab { padding: 6px 14px; border-radius: 8px; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        .dice-tab.active { background: var(--gold); color: #000; border-color: var(--gold); }
+        .dice-tab:hover:not(.active) { border-color: var(--gold); color: var(--text-primary); }
+
+        /* Fair button */
+        .dice-fair-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; transition: all 0.15s; }
+        .dice-fair-btn:hover { background: rgba(212,168,67,0.1); }
         .wallet-action-btn.deposit {
             background: var(--gold); color: white;
         }
@@ -907,7 +1141,7 @@
             font-size: 12px; font-weight: 600;
             color: var(--text-secondary); transition: all 0.2s;
         }
-        .stmt-tab.active { background: var(--bg-white); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+        .stmt-tab.active { background: linear-gradient(180deg, #D4A843 0%, #B8922E 100%); color: #000; font-weight: 700; box-shadow: var(--gold-glow); }
 
         .txn-item {
             display: flex; align-items: center; gap: 12px;
@@ -1039,9 +1273,26 @@
             .header-wallet span:last-child { font-size: 11px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             .header-brand h2 { font-size: 16px; }
             .header-brand img { width: 30px; height: 30px; }
-            .dice-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-            .dice-face { max-height: 80px; }
-            .dice-number { width: 36px; height: 36px; font-size: 18px; }
+            .dice-desktop-layout { flex-direction: column; }
+            .dice-right-col { width: 100%; }
+            .dice-picker-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .dice-result-face { width: 44px; height: 44px; }
+            .dice-result-face .dice-pip-grid { padding: 5px; }
+            .dice-result-face .dice-pip { width: 7px; height: 7px; }
+            .dice-rolling-placeholder { width: 44px; height: 44px; font-size: 16px; }
+            .dice-visual-area { min-height: 160px; padding: 14px; }
+            .dice-pick-num { width: 38px; height: 38px; }
+            .dice-pick-num .dice-pip-grid { padding: 4px; }
+            .dice-pick-num .dice-pip { width: 6px; height: 6px; }
+            .dice-pick-card { padding: 10px 0; }
+            .dice-phase-label { font-size: 9px; }
+            .dice-rolling-text { font-size: 10px; }
+            .dice-result-card { padding: 20px 28px; }
+            .dice-result-emoji { font-size: 40px; }
+            .dice-result-text { font-size: 20px; }
+            .dice-result-amount { font-size: 16px; }
+            .dice-match-card { min-width: 150px; padding: 8px 10px; }
+            .dice-round-bar { padding: 8px 10px; }
             .game-cards { grid-template-columns: 1fr; }
             .stats-bar { grid-template-columns: repeat(3, 1fr); gap: 8px; }
             .match-teams { padding: 14px; }
@@ -1050,6 +1301,23 @@
 
         @media (min-width: 769px) {
             .bottom-nav { display: none !important; }
+        }
+
+        /* Desktop polish: larger screens */
+        @media (min-width: 1440px) {
+            .dice-visual-area { min-height: 240px; padding: 28px; }
+            .dice-result-face { width: 62px; height: 62px; }
+            .dice-result-face .dice-pip { width: 10px; height: 10px; }
+            .dice-rolling-placeholder { width: 62px; height: 62px; }
+            .dice-pick-num { width: 48px; height: 48px; }
+            .dice-match-cards { gap: 12px; }
+        }
+        @media (min-width: 2560px) {
+            .dice-game-wrap { max-width: 1400px; }
+            .dice-visual-area { min-height: 280px; padding: 32px; }
+            .dice-result-face { width: 68px; height: 68px; }
+            .dice-result-face .dice-pip { width: 11px; height: 11px; }
+            .dice-rolling-placeholder { width: 68px; height: 68px; }
         }
 
         /* Info card */
@@ -1116,8 +1384,8 @@
             <div id="auth-error" class="auth-error"></div>
             <div id="login-form">
                 <div class="form-group">
-                    <label>Mobile Number</label>
-                    <input type="text" id="login-identifier" placeholder="Enter mobile number">
+                    <label>Mobile Number / Username</label>
+                    <input type="text" id="login-identifier" placeholder="Enter mobile number or username">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
@@ -1135,6 +1403,9 @@
                     </div>
                 </div>
                 <button class="auth-btn" id="login-btn" onclick="handleLogin()">Send OTP & Login</button>
+                <div style="text-align:center;margin-top:12px;">
+                    <a onclick="showForgotPassword()" style="color:var(--gold);font-size:13px;cursor:pointer;text-decoration:none;">Forgot Password?</a>
+                </div>
             </div>
             <div id="register-form" class="hidden">
                 <div class="form-group">
@@ -1167,6 +1438,48 @@
                 <button class="auth-btn" id="reg-btn" onclick="handleRegister()">Send OTP & Register</button>
             </div>
         </div>
+        <footer style="text-align:center;margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <div style="display:flex;gap:16px;align-items:center;">
+                <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);"><span class="material-icons" style="font-size:14px;">18_up_rating</span> 18+ Only</span>
+                <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);"><span class="material-icons" style="font-size:14px;">verified_user</span> Secure Play</span>
+            </div>
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted);"><span class="material-icons" style="font-size:13px;">shield</span> Account recovery protected by SMS OTP</span>
+        </footer>
+    </div>
+
+    <!-- FORGOT PASSWORD MODAL -->
+    <div id="forgot-password-modal" class="hidden" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);padding:20px;">
+        <div class="glass-card" style="max-width:380px;width:100%;position:relative;">
+            <button onclick="closeForgotPassword()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;"><span class="material-icons">close</span></button>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span class="material-icons" style="color:var(--gold);font-size:24px;">lock_reset</span>
+                <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:700;color:var(--text-primary);">Reset Password</h3>
+            </div>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Enter your registered mobile number. We'll send an OTP to verify your identity.</p>
+            <div id="forgot-error" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--danger);padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:12px;"></div>
+            <div id="forgot-step-phone">
+                <div class="form-group">
+                    <label>Registered Mobile Number</label>
+                    <input type="text" id="forgot-phone" placeholder="Enter 10-digit mobile number">
+                </div>
+                <button class="auth-btn" onclick="handleForgotSendOtp()">Send OTP</button>
+            </div>
+            <div id="forgot-step-otp" class="hidden">
+                <div class="form-group">
+                    <label>OTP Code</label>
+                    <input type="text" id="forgot-otp" placeholder="Enter 6-digit OTP" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="forgot-new-password" placeholder="Min 6 characters">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="forgot-confirm-password" placeholder="Re-enter new password">
+                </div>
+                <button class="auth-btn" onclick="handleForgotResetPassword()">Reset Password</button>
+            </div>
+        </div>
     </div>
 
     <!-- APP -->
@@ -1183,7 +1496,7 @@
                 </div>
             </div>
             <div class="header-right">
-                <button class="header-action-btn" onclick="navigate('sec-notifications')" title="Notifications" style="position:relative;">
+                <button class="header-action-btn notification-btn" onclick="navigate('sec-notifications')" title="Notifications" style="position:relative;">
                     <span class="material-icons">notifications</span>
                     <span id="header-notif-badge" style="display:none;position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;">0</span>
                 </button>
@@ -1435,9 +1748,9 @@
             <div id="sec-dice" class="section">
                 <div class="page-title">
                     <span class="material-icons">casino</span>
-                    Dice Games
+                    Dice Games — Gundata
                 </div>
-                <div id="dice-container">
+                <div id="dice-container" class="dice-game-wrap">
                     <div class="empty-state"><span class="material-icons">casino</span><p>Loading dice games...</p></div>
                 </div>
             </div>
@@ -1808,22 +2121,35 @@
         <div class="modal-content" style="position:relative;max-width:500px;">
             <button class="modal-close" onclick="closeProvablyFairModal()"><span class="material-icons">close</span></button>
             <div class="modal-title" style="display:flex;align-items:center;gap:8px;"><span class="material-icons" style="color:var(--gold);">verified</span> Provably Fair</div>
-            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Every dice result is cryptographically verifiable. The hash was committed before betting opened.</p>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Every dice result is cryptographically verifiable. The commitment hash is published before betting opens. After the round ends, the server seed is revealed so you can verify the result.</p>
             <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Game Hash (SHA-256)</div>
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Round</div>
+                <div style="font-size:14px;font-weight:700;color:var(--gold);" id="pf-round">—</div>
+            </div>
+            <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Commitment Hash (SHA-256)</div>
                 <div style="font-size:12px;font-family:monospace;word-break:break-all;color:var(--text-primary);" id="pf-hash">—</div>
             </div>
             <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Seed</div>
-                <div style="font-size:12px;font-family:monospace;word-break:break-all;color:var(--text-primary);" id="pf-seed">Revealed after game ends</div>
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Server Seed</div>
+                <div style="font-size:12px;font-family:monospace;word-break:break-all;color:var(--text-primary);" id="pf-seed">Will be revealed after round completes</div>
             </div>
             <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Result</div>
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Client Seed</div>
+                <div style="font-size:12px;font-family:monospace;word-break:break-all;color:var(--text-primary);" id="pf-client-seed">—</div>
+            </div>
+            <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:8px;">
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Nonce</div>
+                <div style="font-size:14px;font-weight:700;color:var(--text-primary);" id="pf-nonce">—</div>
+            </div>
+            <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Dice Result</div>
                 <div style="font-size:18px;font-weight:800;color:var(--gold);" id="pf-result">—</div>
             </div>
             <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:10px;font-size:12px;color:var(--success);display:none;" id="pf-verified">
-                <span class="material-icons" style="font-size:16px;vertical-align:middle;">check_circle</span> Verified: SHA256(seed) matches committed hash
+                <span class="material-icons" style="font-size:16px;vertical-align:middle;">check_circle</span> Verified: Server seed revealed. You can verify that SHA256(server_seed) = commitment hash.
             </div>
+            <p style="font-size:11px;color:var(--text-muted);margin-top:12px;">How it works: Before betting opens, the server generates a seed and publishes SHA-256(server_seed) as the commitment hash. The dice result is derived from HMAC-SHA256(server_seed, client_seed + nonce). After the round, the server seed is revealed so anyone can verify the result was predetermined.</p>
         </div>
     </div>
 
@@ -1836,6 +2162,20 @@
     </a>
 
     <script>
+    // ===== CURRENCY FORMATTING HELPERS =====
+    function formatCurrencyShort(amount) {
+        var num = parseFloat(amount) || 0;
+        if (num < 0) return '-' + formatCurrencyShort(-num);
+        if (num >= 10000000) return (num / 10000000).toFixed(2) + ' Cr';
+        if (num >= 100000) return (num / 100000).toFixed(2) + ' L';
+        if (num >= 1000) return num.toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        return num.toFixed(2);
+    }
+    function formatCurrencyFull(amount) {
+        var num = parseFloat(amount) || 0;
+        return num.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
     // Custom confirm modal (replaces browser confirm())
     function customConfirm(message, {title = 'Confirm', icon = '⚡', okText = 'Confirm', cancelText = 'Cancel', danger = false} = {}) {
         return new Promise((resolve) => {
@@ -1879,6 +2219,70 @@
         document.getElementById('reg-otp-section').classList.add('hidden');
         document.getElementById('login-btn').textContent = 'Send OTP & Login';
         document.getElementById('reg-btn').textContent = 'Send OTP & Register';
+    }
+
+    // ── Forgot Password ──
+    function showForgotPassword() {
+        var modal = document.getElementById('forgot-password-modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.getElementById('forgot-step-phone').classList.remove('hidden');
+        document.getElementById('forgot-step-otp').classList.add('hidden');
+        document.getElementById('forgot-error').style.display = 'none';
+        document.getElementById('forgot-phone').value = '';
+    }
+    function closeForgotPassword() {
+        var modal = document.getElementById('forgot-password-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+    function showForgotError(msg) {
+        var el = document.getElementById('forgot-error');
+        el.textContent = msg; el.style.display = 'block';
+    }
+    async function handleForgotSendOtp() {
+        var phone = document.getElementById('forgot-phone').value.trim();
+        if (!phone || phone.length < 10) { showForgotError('Enter a valid 10-digit mobile number'); return; }
+        document.getElementById('forgot-error').style.display = 'none';
+        try {
+            var res = await fetch(API + '/user/getotp/', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({phone_number: phone})
+            });
+            var data = await res.json();
+            if (res.ok && data.success !== false) {
+                document.getElementById('forgot-step-phone').classList.add('hidden');
+                document.getElementById('forgot-step-otp').classList.remove('hidden');
+            } else {
+                showForgotError(data.message || data.error || 'Failed to send OTP');
+            }
+        } catch(e) { showForgotError('Network error. Please try again.'); }
+    }
+    async function handleForgotResetPassword() {
+        var phone = document.getElementById('forgot-phone').value.trim();
+        var otp = document.getElementById('forgot-otp').value.trim();
+        var newPw = document.getElementById('forgot-new-password').value;
+        var confirmPw = document.getElementById('forgot-confirm-password').value;
+        if (!otp || otp.length < 4) { showForgotError('Enter the OTP sent to your phone'); return; }
+        if (!newPw || newPw.length < 6) { showForgotError('Password must be at least 6 characters'); return; }
+        if (newPw !== confirmPw) { showForgotError('Passwords do not match'); return; }
+        document.getElementById('forgot-error').style.display = 'none';
+        try {
+            var res = await fetch(API + '/user/reset-password/', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({phone_number: phone, otp: otp, new_password: newPw})
+            });
+            var data = await res.json();
+            if (res.ok && data.success !== false) {
+                closeForgotPassword();
+                showError('Password reset successful! Please login.');
+                document.getElementById('auth-error').style.background = 'rgba(34,197,94,0.1)';
+                document.getElementById('auth-error').style.borderColor = 'rgba(34,197,94,0.3)';
+                document.getElementById('auth-error').style.color = 'var(--success)';
+            } else {
+                showForgotError(data.message || data.error || 'Reset failed. Check OTP and try again.');
+            }
+        } catch(e) { showForgotError('Network error. Please try again.'); }
     }
 
     async function handleLogin() {
@@ -2143,7 +2547,7 @@
             ? ['#ef4444','#dc2626','#f87171','#fca5a5','#d4a843','#fff']
             : winTeam === 2
             ? ['#3b82f6','#2563eb','#60a5fa','#93c5fd','#d4a843','#fff']
-            : ['#a855f7','#7c3aed','#c084fc','#d4a843','#fff','#fbbf24'];
+            : ['#22c55e','#16a34a','#4ade80','#d4a843','#fff','#fbbf24'];
         for (let i = 0; i < 60; i++) {
             const piece = document.createElement('div');
             piece.className = 'confetti-piece';
@@ -2161,7 +2565,7 @@
     }
 
     function spawnSparks(winTeam) {
-        const color = winTeam === 1 ? '#ef4444' : winTeam === 2 ? '#3b82f6' : '#a855f7';
+        const color = winTeam === 1 ? '#ef4444' : winTeam === 2 ? '#3b82f6' : '#22c55e';
         const burst = document.createElement('div');
         burst.className = 'spark-burst';
         for (let i = 0; i < 24; i++) {
@@ -2496,15 +2900,15 @@
                 const data = await res.json();
                 userInfo = data;
                 localStorage.setItem('userInfo', JSON.stringify(data));
-                document.getElementById('wallet-balance').textContent = parseFloat(data.wallet_balance || 0).toFixed(2);
-                document.getElementById('wallet-balance-large').textContent = parseFloat(data.wallet_balance || 0).toFixed(2);
+                document.getElementById('wallet-balance').textContent = formatCurrencyShort(data.wallet_balance || 0);
+                document.getElementById('wallet-balance-large').textContent = formatCurrencyFull(data.wallet_balance || 0);
                 // Exposure & bonus
                 const exposure = parseFloat(data.exposure || 0);
                 const bonus = parseFloat(data.wallet_balance || 0) - parseFloat(data.available_balance || 0) - exposure;
                 const expEl = document.getElementById('wallet-exposure');
                 const bonEl = document.getElementById('wallet-bonus');
-                if (expEl) expEl.textContent = '₹' + exposure.toFixed(2);
-                if (bonEl) bonEl.textContent = '₹' + Math.max(0, bonus).toFixed(2);
+                if (expEl) expEl.textContent = '₹' + formatCurrencyShort(exposure);
+                if (bonEl) bonEl.textContent = '₹' + formatCurrencyShort(Math.max(0, bonus));
                 document.getElementById('profile-name').textContent = data.username || 'User';
                 document.getElementById('profile-phone').textContent = data.phoneNumber || '';
                 document.getElementById('pd-name').textContent = data.username || 'User';
@@ -2747,7 +3151,7 @@
 
         if (sectionId === 'sec-statement') loadStatement();
         if (sectionId === 'sec-home' || sectionId === 'sec-cockfight') { loadMatches(); loadUserBets(); }
-        if (sectionId === 'sec-dice') loadDiceGames();
+        if (sectionId === 'sec-dice') { loadDiceGames(); loadDiceMyBets(); }
         if (sectionId === 'sec-wallet') { loadStatement(); }
         if (sectionId === 'sec-promotions') loadPromotions();
         if (sectionId === 'sec-lottery') loadLottery();
@@ -3125,9 +3529,77 @@
         container.innerHTML = html;
     }
 
-    // ===== DICE GAMES =====
+    // ===== DICE GAMES — Premium Gundata =====
     let diceBoards = [];
-    let selectedDice = {};
+    let diceSelectedNums = [];  // multi-select: array of selected numbers
+    let diceBetAmount = 0;
+    let diceActiveChip = null;
+    let diceMyBets = [];
+    let diceAnimState = 'idle'; // idle|betting_open|betting_locked|rolling|reveal|highlight|result
+    let diceCurrentMatch = null;
+    let diceTimerEnd = null;
+    let diceTimerInterval = null;
+    let diceLastResult = null;
+    let diceActiveTab = 'history'; // history|mybets
+    let diceBetSubmitting = false; // Fix #4: prevent double-click
+    let diceCompletedCache = []; // Fix #2: persistent match history cache
+    let diceRevealTimer = null; // D2: track reveal animation timer
+
+    // D2: Render CSS pip pattern for a dice face value (1-6)
+    function dicePipHTML(val, size) {
+        // size: 'lg' for main result, 'sm' for match history/recent, 'pick' for number picker
+        var cls = size === 'sm' ? 'dice-pip-sm' : 'dice-pip-grid';
+        var pipCls = size === 'sm' ? 'pip' : 'dice-pip';
+        // Pip positions: 3x3 grid (TL,TC,TR,ML,MC,MR,BL,BC,BR)
+        // 1=MC, 2=TR+BL, 3=TR+MC+BL, 4=TL+TR+BL+BR, 5=TL+TR+MC+BL+BR, 6=TL+TR+ML+MR+BL+BR
+        var layouts = {
+            1: [0,0,0, 0,1,0, 0,0,0],
+            2: [0,0,1, 0,0,0, 1,0,0],
+            3: [0,0,1, 0,1,0, 1,0,0],
+            4: [1,0,1, 0,0,0, 1,0,1],
+            5: [1,0,1, 0,1,0, 1,0,1],
+            6: [1,0,1, 1,0,1, 1,0,1]
+        };
+        var l = layouts[val] || layouts[1];
+        var h = '<div class="' + cls + '">';
+        for (var i = 0; i < 9; i++) {
+            h += '<div class="' + pipCls + (l[i] ? '' : ' hide') + '"></div>';
+        }
+        h += '</div>';
+        return h;
+    }
+
+    // D2: Spawn confetti particles for win celebration
+    function diceSpawnConfetti() {
+        var container = document.createElement('div');
+        container.className = 'dice-confetti-container';
+        var colors = ['#D4A843','#F0D78C','#22C55E','#F59E0B','#EF4444','#3B82F6','#EC4899'];
+        for (var i = 0; i < 40; i++) {
+            var p = document.createElement('div');
+            p.className = 'dice-confetti-particle';
+            p.style.left = (Math.random() * 100) + '%';
+            p.style.top = '-10px';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            p.style.width = (4 + Math.random() * 8) + 'px';
+            p.style.height = (4 + Math.random() * 8) + 'px';
+            p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            var dur = 1.5 + Math.random() * 2;
+            var delay = Math.random() * 0.8;
+            var drift = -60 + Math.random() * 120;
+            p.style.animation = 'none';
+            p.style.opacity = '1';
+            p.style.transition = 'none';
+            // Use inline keyframe via JS
+            p.animate([
+                { transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: 1 },
+                { transform: 'translateY(' + (window.innerHeight + 20) + 'px) translateX(' + drift + 'px) rotate(' + (360 + Math.random()*360) + 'deg)', opacity: 0 }
+            ], { duration: dur * 1000, delay: delay * 1000, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', fill: 'forwards' });
+            container.appendChild(p);
+        }
+        document.body.appendChild(container);
+        setTimeout(function() { if (container.parentNode) container.remove(); }, 4500);
+    }
+
     async function loadDiceGames() {
         try {
             const res = await fetch(`${API}/dice-play/history/`, {headers:{'Authorization':`Bearer ${token}`}});
@@ -3138,67 +3610,539 @@
             }
         } catch(e) {}
     }
+
+    async function loadDiceMyBets() {
+        try {
+            const res = await fetch(`${API}/dice-play/bets/`, {headers:{'Authorization':`Bearer ${token}`}});
+            if (res.ok) {
+                const data = await res.json();
+                diceMyBets = data.results || data || [];
+                renderDiceMyBets();
+            }
+        } catch(e) {}
+    }
+
+    function getDiceRolls(match) {
+        if (!match) return [];
+        if (match.dice_result_json) return match.dice_result_json.split(',').map(Number);
+        var faces = [];
+        for (var f = 1; f <= 6; f++) { var c = match['total'+f+'Rolled'] || 0; for (var i = 0; i < c; i++) faces.push(f); }
+        return faces.length === 6 ? faces : [];
+    }
+
+    function getDiceWinners(faces) {
+        var counts = {};
+        faces.forEach(function(f) { counts[f] = (counts[f]||0) + 1; });
+        return Object.keys(counts).filter(function(k) { return counts[k] >= 2; }).map(Number);
+    }
+
+    function formatDiceTimer(secs) {
+        if (secs <= 0) return '0:00';
+        var m = Math.floor(secs / 60), s = secs % 60;
+        return m + ':' + String(s).padStart(2, '0');
+    }
+
+    function diceTimerTick() {
+        if (!diceTimerEnd) return;
+        var remaining = Math.max(0, Math.ceil((diceTimerEnd - Date.now()) / 1000));
+        var el = document.getElementById('dice-timer-value');
+        if (el) {
+            el.textContent = formatDiceTimer(remaining);
+            el.className = 'dice-timer-val ' + (remaining <= 5 ? 'urgent' : remaining <= 15 ? 'warn' : 'ok');
+        }
+        if (remaining <= 0 && diceTimerInterval) { clearInterval(diceTimerInterval); diceTimerInterval = null; }
+    }
+
     function renderDiceGames() {
-        const container = document.getElementById('dice-container');
+        var container = document.getElementById('dice-container');
         if (!diceBoards || diceBoards.length === 0) {
             container.innerHTML = '<div class="empty-state"><span class="material-icons">casino</span><p>No dice games available right now</p></div>';
             return;
         }
-        const diceEmojis = ['', '🎲', '🎲', '🎲', '🎲', '🎲', '🎲'];
-        const diceDots = ['', '&#9856;', '&#9857;', '&#9858;', '&#9859;', '&#9860;', '&#9861;'];
-        let html = '';
-        diceBoards.forEach(board => {
-            const matches = board.matches || [];
-            const liveMatch = matches.find(m => !m.isWinnerDeclared);
-            if (!liveMatch) return;
-            html += `<div class="dice-board">
-                <div class="dice-board-title" style="display:flex;justify-content:space-between;align-items:center;">
-                    <span>${board.name} — Match #${liveMatch.id}</span>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span class="dice-timer-display" style="font-size:13px;font-weight:700;color:var(--gold);"></span>
-                        <button onclick="openProvablyFairModal({commitment_hash:'${liveMatch.commitment_hash||liveMatch.hash||''}',seed:'${liveMatch.seed||''}',result:'${liveMatch.result||''}'})" style="background:none;border:1px solid var(--gold);color:var(--gold);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px;"><span class="material-icons" style="font-size:14px;">verified</span>Fair</button>
-                    </div>
-                </div>
-                <div class="dice-grid">`;
-            for (let i = 1; i <= 6; i++) {
-                html += `<div class="dice-face ${selectedDice[liveMatch.id]===i?'selected':''}" onclick="selectDiceFace(${liveMatch.id}, ${i})">
-                    <div class="dice-number">${i}</div>
-                </div>`;
+        var board = diceBoards.find(function(b) { return b.is_virtual; }) || diceBoards[0];
+        var matches = board.matches || [];
+        var liveMatch = matches.find(function(m) { return !m.isWinnerDeclared && m.isLive; });
+        var freshCompleted = matches.filter(function(m) { return m.isWinnerDeclared; });
+        // Fix #2: Merge fresh completed into persistent cache (deduplicate by id, keep latest 20)
+        var cacheMap = {};
+        diceCompletedCache.forEach(function(m) { cacheMap[m.id] = m; });
+        freshCompleted.forEach(function(m) { cacheMap[m.id] = m; });
+        diceCompletedCache = Object.values(cacheMap).sort(function(a,b) { return b.id - a.id; }).slice(0, 20);
+        var completedMatches = diceCompletedCache;
+        diceCurrentMatch = liveMatch;
+
+        if (!liveMatch && completedMatches.length === 0) {
+            container.innerHTML = '<div class="empty-state"><span class="material-icons">casino</span><p>No active dice games right now</p></div>';
+            return;
+        }
+
+        var phase = liveMatch ? (liveMatch.virtual_phase || 'betting') : 'done';
+        var isBettingOpen = liveMatch ? liveMatch.isBettingEnabled : false;
+        var roundId = liveMatch ? (liveMatch.daily_match_number || liveMatch.id) : '';
+        var isVirtual = board.is_virtual;
+        var commitHash = liveMatch ? (liveMatch.commitment_hash || liveMatch.game_hash || '') : '';
+
+        // Determine animation state from phase
+        if (phase === 'betting' && isBettingOpen) diceAnimState = 'betting_open';
+        else if (phase === 'betting_closed' || (phase === 'betting' && !isBettingOpen)) diceAnimState = 'betting_locked';
+        else if (phase === 'shuffling') diceAnimState = 'rolling';
+        else if (phase === 'result') diceAnimState = 'reveal';
+        else if (phase === 'done') diceAnimState = 'idle';
+
+        // Latest completed result
+        var lastDone = completedMatches[0];
+        var lastFaces = lastDone ? getDiceRolls(lastDone) : [];
+        var lastWinners = getDiceWinners(lastFaces);
+
+        var html = '';
+
+        // === Round info bar (full width above both columns) ===
+        html += '<div class="dice-round-bar">';
+        html += '<div class="dice-round-id"><span class="material-icons" style="font-size:16px;">tag</span> Round <span class="rid">' + (roundId || '...') + '</span>';
+        if (isVirtual) html += '<span class="badge-v">VIRTUAL</span>';
+        html += '</div>';
+        html += '<div class="dice-timer-box">';
+        if (diceAnimState === 'rolling') {
+            html += '<span class="dice-status-badge rolling"><span class="material-icons" style="font-size:12px;vertical-align:middle;">autorenew</span> Rolling...</span>';
+        } else if (isBettingOpen) {
+            html += '<span class="dice-status-badge open">Betting Open</span>';
+            html += '<span id="dice-timer-value" class="dice-timer-val ok">--:--</span>';
+        } else if (liveMatch) {
+            html += '<span class="dice-status-badge closed">Betting Closed</span>';
+        }
+        // Fix #3: Store provably fair data globally for modal
+        window._dicePfData = {};
+        if (liveMatch) {
+            window._dicePfData = {
+                commitment_hash: liveMatch.commitment_hash || '',
+                client_seed: liveMatch.client_seed || '',
+                nonce: liveMatch.nonce || 0,
+                server_seed_revealed: liveMatch.server_seed_revealed || false,
+                server_seed: liveMatch.server_seed || '',
+                dice_result_json: liveMatch.dice_result_json || '',
+                round: liveMatch.daily_match_number || liveMatch.id,
+                isWinnerDeclared: liveMatch.isWinnerDeclared || false
+            };
+        } else if (completedMatches.length > 0) {
+            var lm = completedMatches[0];
+            window._dicePfData = {
+                commitment_hash: lm.commitment_hash || '',
+                client_seed: lm.client_seed || '',
+                nonce: lm.nonce || 0,
+                server_seed_revealed: lm.server_seed_revealed || false,
+                server_seed: lm.server_seed || '',
+                dice_result_json: lm.dice_result_json || '',
+                round: lm.daily_match_number || lm.id,
+                isWinnerDeclared: true
+            };
+        }
+        html += '<button class="dice-fair-btn" onclick="openProvablyFairModal(window._dicePfData)">';
+        html += '<span class="material-icons" style="font-size:13px;">verified</span>Fair</button>';
+        html += '</div></div>';
+
+        // Fix #5: Recent results strip (always visible)
+        if (completedMatches.length > 0) {
+            html += '<div class="dice-recent-strip">';
+            completedMatches.slice(0, 15).forEach(function(m) {
+                var faces = getDiceRolls(m);
+                var wins = getDiceWinners(faces);
+                html += '<div class="dice-recent-item">';
+                html += '<span class="rnum">#' + (m.daily_match_number || m.id) + '</span>';
+                if (wins.length > 0) {
+                    html += '<span class="rwin">' + wins.join(',') + '</span>';
+                } else {
+                    html += '<span style="color:var(--text-muted);font-size:9px;">—</span>';
+                }
+                html += '</div>';
+            });
+            html += '</div>';
+        }
+
+        // === Two-column desktop layout ===
+        html += '<div class="dice-desktop-layout">';
+
+        // ======= LEFT COLUMN: Visual + Picker + History =======
+        html += '<div class="dice-left-col">';
+
+        // Mug + Dice visual area
+        html += '<div class="dice-visual-area">';
+        var matClass = 'dice-velvet-mat';
+        if (diceAnimState === 'rolling') matClass += ' rolling-shadow';
+        html += '<div class="' + matClass + '"></div>';
+
+        // D2: Phase-aware visual states
+        if (diceAnimState === 'rolling') {
+            // ROLLING: Show mug shaking with placeholder dice underneath (hidden by mug)
+            html += '<div class="dice-phase-label">Shaking Dice...</div>';
+            html += '<svg class="dice-mug-svg shaking" width="90" height="80" viewBox="0 0 100 90">';
+            html += '<defs><linearGradient id="brassG" x1="0" y1="0" x2="1" y2="0.6">';
+            html += '<stop offset="0" stop-color="#8B6914"/><stop offset=".3" stop-color="#D4A843"/><stop offset=".5" stop-color="#F0D78C"/><stop offset=".7" stop-color="#B8860B"/><stop offset="1" stop-color="#8B6914"/>';
+            html += '</linearGradient></defs>';
+            html += '<path d="M20,85 Q20,20 30,10 L70,10 Q80,20 80,85 Z" fill="url(#brassG)" stroke="#8B6914" stroke-width="1.5"/>';
+            html += '<ellipse cx="50" cy="10" rx="25" ry="6" fill="#F0D78C" stroke="#8B6914" stroke-width=".5"/>';
+            html += '<ellipse cx="50" cy="85" rx="30" ry="5" fill="#8B6914" stroke="#B8860B" stroke-width=".5"/>';
+            html += '<rect x="25" y="40" width="50" height="3" fill="#F0D78C" opacity=".4"/>';
+            html += '</svg>';
+            html += '<div class="dice-rolling-wrap">';
+            for (var rp = 0; rp < 6; rp++) {
+                html += '<div class="dice-rolling-placeholder" style="animation-delay:' + (rp * 0.07) + 's;">?</div>';
             }
-            html += `</div>
-                <div class="quick-chips" style="margin-bottom:8px;">
-                    <div class="chip" onclick="setAmount('dice-'+${liveMatch.id}, 100)">₹100</div>
-                    <div class="chip" onclick="setAmount('dice-'+${liveMatch.id}, 500)">₹500</div>
-                    <div class="chip" onclick="setAmount('dice-'+${liveMatch.id}, 1000)">₹1K</div>
-                    <div class="chip" onclick="setAmount('dice-'+${liveMatch.id}, 5000)">₹5K</div>
-                </div>
-                <div class="bet-amount-row">
-                    <input type="number" class="bet-amount-input" placeholder="Enter amount" id="bet-amt-dice-${liveMatch.id}" min="10">
-                    <button class="bet-submit" onclick="placeDiceBet(${liveMatch.id})">Place Bet</button>
-                </div>
-            </div>`;
+            html += '</div>';
+            html += '<div class="dice-rolling-text">Revealing soon...</div>';
+        } else if (diceAnimState === 'reveal' || diceAnimState === 'highlight') {
+            // REVEAL/HIGHLIGHT: Mug lifts, dice appear
+            html += '<svg class="dice-mug-svg lifted" width="90" height="80" viewBox="0 0 100 90">';
+            html += '<defs><linearGradient id="brassG" x1="0" y1="0" x2="1" y2="0.6">';
+            html += '<stop offset="0" stop-color="#8B6914"/><stop offset=".3" stop-color="#D4A843"/><stop offset=".5" stop-color="#F0D78C"/><stop offset=".7" stop-color="#B8860B"/><stop offset="1" stop-color="#8B6914"/>';
+            html += '</linearGradient></defs>';
+            html += '<path d="M20,85 Q20,20 30,10 L70,10 Q80,20 80,85 Z" fill="url(#brassG)" stroke="#8B6914" stroke-width="1.5"/>';
+            html += '<ellipse cx="50" cy="10" rx="25" ry="6" fill="#F0D78C" stroke="#8B6914" stroke-width=".5"/>';
+            html += '<ellipse cx="50" cy="85" rx="30" ry="5" fill="#8B6914" stroke="#B8860B" stroke-width=".5"/>';
+            html += '<rect x="25" y="40" width="50" height="3" fill="#F0D78C" opacity=".4"/>';
+            html += '</svg>';
+            var revFaces = liveMatch ? getDiceRolls(liveMatch) : [];
+            var revWinners = getDiceWinners(revFaces);
+            if (revFaces.length === 6) {
+                html += '<div class="dice-result-grid">';
+                revFaces.forEach(function(f, idx) {
+                    var isW = revWinners.indexOf(f) >= 0;
+                    var cls = 'dice-result-face';
+                    if (diceAnimState === 'reveal') cls += ' bouncing';
+                    if (isW && diceAnimState === 'highlight') cls += ' winner';
+                    var delay = diceAnimState === 'reveal' ? (idx * 0.1) + 's' : '0s';
+                    html += '<div class="' + cls + '" style="animation-delay:' + delay + ';">' + dicePipHTML(f, 'lg') + '</div>';
+                });
+                html += '</div>';
+                if (revWinners.length > 0) {
+                    html += '<div class="dice-result-label">Winners: ' + revWinners.join(', ') + ' (appeared 2+ times)</div>';
+                } else {
+                    html += '<div class="dice-result-label" style="color:var(--text-muted);">No number appeared 2+ times</div>';
+                }
+            }
+        } else {
+            // IDLE / BETTING: Show mug resting + last result (or waiting state)
+            html += '<svg class="dice-mug-svg" width="90" height="80" viewBox="0 0 100 90">';
+            html += '<defs><linearGradient id="brassG" x1="0" y1="0" x2="1" y2="0.6">';
+            html += '<stop offset="0" stop-color="#8B6914"/><stop offset=".3" stop-color="#D4A843"/><stop offset=".5" stop-color="#F0D78C"/><stop offset=".7" stop-color="#B8860B"/><stop offset="1" stop-color="#8B6914"/>';
+            html += '</linearGradient></defs>';
+            html += '<path d="M20,85 Q20,20 30,10 L70,10 Q80,20 80,85 Z" fill="url(#brassG)" stroke="#8B6914" stroke-width="1.5"/>';
+            html += '<ellipse cx="50" cy="10" rx="25" ry="6" fill="#F0D78C" stroke="#8B6914" stroke-width=".5"/>';
+            html += '<ellipse cx="50" cy="85" rx="30" ry="5" fill="#8B6914" stroke="#B8860B" stroke-width=".5"/>';
+            html += '<rect x="25" y="40" width="50" height="3" fill="#F0D78C" opacity=".4"/>';
+            html += '</svg>';
+            if (lastFaces.length === 6) {
+                html += '<div class="dice-result-grid">';
+                lastFaces.forEach(function(f) {
+                    var isW = lastWinners.indexOf(f) >= 0;
+                    var cls = 'dice-result-face' + (isW ? ' winner' : '');
+                    html += '<div class="' + cls + '">' + dicePipHTML(f, 'lg') + '</div>';
+                });
+                html += '</div>';
+                if (lastWinners.length > 0) {
+                    html += '<div class="dice-result-label">Last result — Winners: ' + lastWinners.join(', ') + '</div>';
+                } else {
+                    html += '<div class="dice-result-label">Last result — No winners</div>';
+                }
+            } else if (isBettingOpen) {
+                html += '<div class="dice-phase-label" style="margin-top:8px;">Place your bets!</div>';
+            }
+        }
+        html += '</div>';
+
+        // Number picker (multi-select)
+        html += '<div class="dice-picker-grid">';
+        for (var i = 1; i <= 6; i++) {
+            var sel = diceSelectedNums.indexOf(i) >= 0;
+            var disabled = !isBettingOpen;
+            var winH = lastWinners.indexOf(i) >= 0 && diceAnimState === 'highlight';
+            var cls = 'dice-pick-card';
+            if (sel) cls += ' selected';
+            if (winH) cls += ' win-highlight';
+            if (disabled) cls += ' disabled';
+            html += '<div class="' + cls + '" onclick="diceToggleNumber(' + i + ')">';
+            html += '<div class="dice-pick-num">' + dicePipHTML(i, 'pick') + '</div>';
+            html += '<div class="dice-pick-label">' + ['One','Two','Three','Four','Five','Six'][i-1] + '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+
+        // Match History section (horizontal scrollable cards) — Fix #2: always show from cache
+        if (completedMatches.length > 0) {
+            html += '<div style="margin-top:4px;">';
+            html += '<div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;letter-spacing:0.5px;">Match History</div>';
+            html += '<div class="dice-match-cards">';
+            completedMatches.slice(0, 15).forEach(function(m) {
+                var faces = getDiceRolls(m);
+                var wins = getDiceWinners(faces);
+                var winSet = new Set(wins);
+                html += '<div class="dice-match-card">';
+                html += '<div class="dice-match-card-title">Round #' + (m.daily_match_number || m.id) + '</div>';
+                html += '<div class="dice-match-card-dice">';
+                faces.forEach(function(f) {
+                    html += '<span class="mface' + (winSet.has(f) ? ' mwin' : '') + '">' + dicePipHTML(f, 'sm') + '</span>';
+                });
+                html += '</div>';
+                if (wins.length > 0) {
+                    html += '<div class="dice-match-card-win">Win: ' + wins.join(', ') + '</div>';
+                } else {
+                    html += '<div class="dice-match-card-nowinner">No winners</div>';
+                }
+                // D2.1: Provably Fair verify button per completed round
+                var mIdx = diceCompletedCache.findIndex(function(cm) { return cm.id === m.id; });
+                html += '<button class="dice-match-card-verify" onclick="diceVerifyRound(' + mIdx + ')">';
+                html += '<span class="material-icons">verified</span>Verify</button>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+        }
+
+        html += '</div>'; // end dice-left-col
+
+        // ======= RIGHT COLUMN: Bet Panel + My Bets =======
+        html += '<div class="dice-right-col">';
+
+        // PLACE YOUR BET panel
+        html += '<div class="dice-sidebar-panel">';
+        html += '<div class="dice-sidebar-title">Place Your Bet</div>';
+        // Fix #6: Amount input with "per number" clarity
+        html += '<label style="font-size:11px;color:var(--text-muted);margin-bottom:4px;display:block;">Amount per number</label>';
+        // D2.1: Helper text for max 5 numbers
+        html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;opacity:0.7;">Select up to 5 numbers. Amount applies to each.</div>';
+        html += '<input type="number" class="dice-bet-input" id="dice-bet-amount" placeholder="Enter amount per number" min="10" value="' + (diceBetAmount || '') + '" oninput="diceAmountChanged(this.value)" style="width:100%;margin-bottom:10px;box-sizing:border-box;color:#F5F1E8;-webkit-text-fill-color:#F5F1E8;">';
+        // Quick chips
+        html += '<div class="dice-chips-row">';
+        var chips = [50, 100, 200, 500, 1000, 2500];
+        chips.forEach(function(c) {
+            var label = c >= 1000 ? (c/1000) + 'K' : '' + c;
+            var active = diceActiveChip === c ? ' active' : '';
+            html += '<div class="dice-chip' + active + '" onclick="diceSetChip(' + c + ')">' + label + '</div>';
         });
-        if (!html) html = '<div class="empty-state"><span class="material-icons">casino</span><p>No active dice games right now</p></div>';
+        html += '</div>';
+        // Selected numbers summary
+        if (diceSelectedNums.length > 0) {
+            html += '<div class="dice-selected-row" style="margin-top:8px;">';
+            html += '<span style="font-size:11px;color:var(--text-muted);">Selected:</span>';
+            diceSelectedNums.forEach(function(n) {
+                html += '<span class="dice-sel-chip">' + n + ' <span class="remove" onclick="diceRemoveNumber(' + n + ')">×</span></span>';
+            });
+            html += '</div>';
+        }
+        // Fix #6: Total bet display (always visible when numbers selected)
+        if (diceSelectedNums.length > 0) {
+            var total = diceBetAmount > 0 ? diceBetAmount * diceSelectedNums.length : 0;
+            html += '<div class="dice-total-row" style="margin-top:8px;margin-bottom:6px;">₹' + (diceBetAmount || 0) + ' × ' + diceSelectedNums.length + ' number' + (diceSelectedNums.length > 1 ? 's' : '') + ' = <b>₹' + total.toLocaleString('en-IN') + ' total</b></div>';
+        }
+        // Status + Place bet (Fix #4: disable during submission)
+        if (!isBettingOpen) {
+            html += '<div class="dice-sidebar-status"><span class="material-icons">hourglass_empty</span> Waiting for next round...</div>';
+        } else {
+            var btnDisabled = (diceSelectedNums.length === 0 || diceBetAmount <= 0 || diceBetSubmitting) ? ' disabled' : '';
+            var btnText = diceBetSubmitting ? 'Placing...' : 'Place Bet';
+            html += '<button class="dice-place-btn" id="dice-place-btn" style="width:100%;margin-top:10px;"' + btnDisabled + ' onclick="dicePlaceBet()">' + btnText + '</button>';
+        }
+        // Balance
+        var bal = userInfo && userInfo.wallet_balance ? parseFloat(userInfo.wallet_balance) : 0;
+        html += '<div class="dice-sidebar-balance">Available balance: ₹' + bal.toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + '</div>';
+        html += '</div>'; // end PLACE YOUR BET
+
+        // MY BETS panel
+        html += '<div class="dice-sidebar-panel">';
+        html += '<div class="dice-sidebar-title">My Bets <span class="view-all" onclick="diceSetTab(\'mybets\')">View All</span></div>';
+        html += '<div id="dice-mybets-sidebar"></div>';
+        html += '</div>';
+
+        html += '</div>'; // end dice-right-col
+        html += '</div>'; // end dice-desktop-layout
+
+        // === Full My Bets panel (hidden, for View All) ===
+        html += '<div id="dice-mybets-panel" style="display:none;">';
+        html += '</div>';
+
         container.innerHTML = html;
+
+        // Always render my bets (sidebar shows compact view)
+        renderDiceMyBets();
+
+        // Start timer tick
+        diceTimerTick();
     }
-    function selectDiceFace(matchId, face) {
-        selectedDice[matchId] = face;
+
+    function renderDiceMyBets() {
+        // Full panel (for View All)
+        var panel = document.getElementById('dice-mybets-panel');
+        // Sidebar compact view
+        var sidebar = document.getElementById('dice-mybets-sidebar');
+
+        if (!diceMyBets || diceMyBets.length === 0) {
+            if (panel) panel.innerHTML = '<div class="empty-state" style="padding:20px;"><p>No bets yet</p></div>';
+            if (sidebar) sidebar.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:10px;">No bets yet</div>';
+            return;
+        }
+
+        // Helper to build bet status
+        function betStatus(b) {
+            if (b.matchWinStatus === 0) return '<span class="dice-bet-pending">Pending</span>';
+            if (b.matchWinStatus === 1) return '<span class="dice-bet-won">Won</span>';
+            if (b.matchWinStatus === 2) return '<span class="dice-bet-lost">Lost</span>';
+            if (b.matchWinStatus === 4) return '<span style="color:var(--text-muted);">Cancelled</span>';
+            return '<span class="dice-bet-lost">Lost</span>';
+        }
+
+        // Sidebar compact (last 5 bets)
+        if (sidebar) {
+            var sh = '<table class="dice-mybets-compact"><thead><tr><th>Dice</th><th>Amount</th><th>Status</th><th>Return</th></tr></thead><tbody>';
+            diceMyBets.slice(0, 5).forEach(function(b) {
+                var payout = b.payout_amount || 0;
+                if (payout === 0 && b.matchWinStatus === 1 && b.rolled_count > 0) payout = (b.amount || 0) + ((b.rolled_count || 0) * (b.amount || 0));
+                sh += '<tr>';
+                sh += '<td><span class="dice-pick-num" style="width:26px;height:26px;font-size:13px;display:inline-flex;">' + b.diceNumber + '</span></td>';
+                sh += '<td>₹' + (b.amount || 0).toLocaleString('en-IN') + '</td>';
+                sh += '<td>' + betStatus(b) + '</td>';
+                sh += '<td>' + (payout > 0 ? '<span class="dice-bet-won">+₹' + payout.toLocaleString('en-IN') + '</span>' : (b.matchWinStatus === 2 ? '₹0' : '—')) + '</td>';
+                sh += '</tr>';
+            });
+            sh += '</tbody></table>';
+            sidebar.innerHTML = sh;
+        }
+
+        // Full panel
+        if (panel) {
+            var html = '<table class="dice-mybets-table"><thead><tr><th>Round</th><th>Face</th><th>Amount</th><th>Status</th><th>Return</th></tr></thead><tbody>';
+            diceMyBets.slice(0, 30).forEach(function(b) {
+                var roundNum = b.match_info ? (b.match_info.daily_match_number || b.match_info.id || b.match) : b.match;
+                var payout = b.payout_amount || 0;
+                if (payout === 0 && b.matchWinStatus === 1 && b.rolled_count > 0) payout = (b.amount || 0) + ((b.rolled_count || 0) * (b.amount || 0));
+                html += '<tr>';
+                html += '<td>#' + roundNum + '</td>';
+                html += '<td><span class="dice-pick-num" style="width:28px;height:28px;font-size:14px;display:inline-flex;">' + b.diceNumber + '</span></td>';
+                html += '<td>₹' + (b.amount || 0).toLocaleString('en-IN') + '</td>';
+                html += '<td>' + betStatus(b) + '</td>';
+                html += '<td>' + (payout > 0 ? '<span class="dice-bet-won">+₹' + payout.toLocaleString('en-IN') + '</span>' : (b.matchWinStatus === 2 ? '₹0' : '—')) + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            panel.innerHTML = html;
+        }
+    }
+
+    // D2.1: Open Provably Fair modal for a completed round from cache
+    function diceVerifyRound(cacheIdx) {
+        if (cacheIdx < 0 || cacheIdx >= diceCompletedCache.length) {
+            showToast('Verification data not available for this round.', 'error');
+            return;
+        }
+        var m = diceCompletedCache[cacheIdx];
+        openProvablyFairModal({
+            commitment_hash: m.commitment_hash || '',
+            client_seed: m.client_seed || '',
+            nonce: m.nonce || 0,
+            server_seed_revealed: m.server_seed_revealed || false,
+            server_seed: m.server_seed || '',
+            dice_result_json: m.dice_result_json || '',
+            round: m.daily_match_number || m.id,
+            isWinnerDeclared: m.isWinnerDeclared || true
+        });
+    }
+
+    function diceToggleNumber(num) {
+        var idx = diceSelectedNums.indexOf(num);
+        if (idx >= 0) { diceSelectedNums.splice(idx, 1); }
+        else if (diceSelectedNums.length < 5) { diceSelectedNums.push(num); }
+        else { showToast('Max 5 numbers', 'error'); return; }
         renderDiceGames();
     }
-    async function placeDiceBet(matchId) {
-        if (!selectedDice[matchId]) { showToast('Select a dice face', 'error'); return; }
-        const amount = document.getElementById('bet-amt-dice-'+matchId).value;
-        if (!amount || amount < 10) { showToast('Minimum bet ₹10', 'error'); return; }
-        if (!await customConfirm(`Place <b>₹${amount}</b> on dice face <b>${selectedDice[matchId]}</b>?`, {title: 'Place Dice Bet', icon: '🎲', okText: 'Place Bet'})) return;
-        try {
-            const res = await fetch(`${API}/dice-play/bets/place-bet/`, {
-                method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-                body:JSON.stringify({matchId, diceNumber: selectedDice[matchId], amount: parseFloat(amount)})
-            });
-            const data = await res.json();
-            if (res.ok || res.status === 201) { showToast('Dice bet placed!', 'success'); loadUserInfo(); }
-            else { showToast(data.detail || data.error || 'Bet failed', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+
+    function diceRemoveNumber(num) {
+        diceSelectedNums = diceSelectedNums.filter(function(n) { return n !== num; });
+        renderDiceGames();
+    }
+
+    function diceSetChip(val) {
+        diceActiveChip = val;
+        diceBetAmount = val;
+        renderDiceGames();
+        var inp = document.getElementById('dice-bet-amount');
+        if (inp) inp.value = val;
+    }
+
+    function diceAmountChanged(val) {
+        diceBetAmount = parseInt(val) || 0;
+        diceActiveChip = null;
+    }
+
+    function diceSetTab(tab) {
+        diceActiveTab = tab;
+        if (tab === 'mybets') loadDiceMyBets();
+        renderDiceGames();
+    }
+
+    async function dicePlaceBet() {
+        if (diceBetSubmitting) return; // Fix #4: prevent double-click
+        if (diceSelectedNums.length === 0) { showToast('Select at least one number', 'error'); return; }
+        if (diceBetAmount <= 0 || diceBetAmount < 10) { showToast('Minimum bet ₹10', 'error'); return; }
+        if (!diceCurrentMatch) { showToast('No active match', 'error'); return; }
+        var matchId = diceCurrentMatch.id;
+        var total = diceBetAmount * diceSelectedNums.length;
+        var numStr = diceSelectedNums.join(', ');
+        var msg = 'Place <b>₹' + diceBetAmount.toLocaleString('en-IN') + '</b> per number on face' + (diceSelectedNums.length > 1 ? 's' : '') + ' <b>' + numStr + '</b>';
+        if (diceSelectedNums.length > 1) msg += '<br>Total: <b>₹' + total.toLocaleString('en-IN') + '</b> (' + diceSelectedNums.length + ' bets)';
+        if (!await customConfirm(msg + '?', {title: 'Place Dice Bet', icon: '🎲', okText: 'Place Bet'})) return;
+
+        // Fix #4: Lock submission
+        diceBetSubmitting = true;
+        renderDiceGames();
+
+        var success = 0, failed = 0, failedNums = [];
+        for (var i = 0; i < diceSelectedNums.length; i++) {
+            try {
+                var res = await fetch(API + '/dice-play/bets/place-bet/', {
+                    method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+                    body: JSON.stringify({matchId: matchId, diceNumber: diceSelectedNums[i], amount: diceBetAmount})
+                });
+                if (res.ok || res.status === 201) {
+                    success++;
+                } else {
+                    failed++;
+                    var errMsg = 'unknown error';
+                    try { var errData = await res.json(); errMsg = errData.detail || errData.amount || errData.non_field_errors || 'server error'; } catch(ex) {}
+                    failedNums.push({num: diceSelectedNums[i], reason: errMsg});
+                }
+            } catch(e) { failed++; failedNums.push({num: diceSelectedNums[i], reason: 'network error'}); }
+        }
+        // Fix #4: Unlock submission
+        diceBetSubmitting = false;
+        if (success > 0) {
+            showToast(success + ' bet' + (success>1?'s':'') + ' placed!', 'success');
+            diceSelectedNums = [];
+            diceBetAmount = 0;
+            diceActiveChip = null;
+            loadUserInfo();
+            loadDiceMyBets();
+        }
+        // Fix #7: Clear partial failure message with specific numbers
+        if (failed > 0) {
+            var failDetail = failedNums.map(function(f) { return 'face ' + f.num + ' (' + f.reason + ')'; }).join(', ');
+            showToast(failed + ' bet' + (failed>1?'s':'') + ' failed: ' + failDetail, 'error');
+        }
+        renderDiceGames();
+    }
+
+    function diceShowResultOverlay(isWin, amount) {
+        var existing = document.querySelector('.dice-result-overlay');
+        if (existing) existing.remove();
+        var overlay = document.createElement('div');
+        overlay.className = 'dice-result-overlay';
+        if (isWin) {
+            diceSpawnConfetti();
+            overlay.innerHTML = '<div class="dice-result-card win"><div class="dice-result-emoji">🎉</div><div class="dice-result-text" style="color:var(--gold);">YOU WON!</div>' + (amount > 0 ? '<div class="dice-result-amount" style="color:var(--success);">+₹' + amount.toLocaleString('en-IN') + '</div>' : '') + '</div>';
+        } else {
+            overlay.innerHTML = '<div class="dice-result-card loss"><div class="dice-result-emoji">😔</div><div class="dice-result-text" style="color:var(--danger);">Better Luck Next Time</div></div>';
+        }
+        document.body.appendChild(overlay);
+        // Click to dismiss
+        overlay.addEventListener('click', function() { if (overlay.parentNode) overlay.remove(); });
+        var autoTime = isWin ? 6000 : 3000;
+        setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, autoTime);
     }
 
     // ===== BET HISTORY ON COCKFIGHT PAGE =====
@@ -3222,9 +4166,11 @@
         recentBets.forEach(b => {
             const team = teamNames[b.betTeam] || 'Unknown';
             const cls = teamClasses[b.betTeam] || '';
-            let result = 'pending', resultCls = 'pending';
-            if (b.matchWinStatus === 1) { result = 'Won'; resultCls = 'won'; }
-            else if (b.matchWinStatus === 2) { result = 'Lost'; resultCls = 'lost'; }
+            let result = 'Pending', resultCls = 'pending';
+            if (b.matchWinStatus === 0) { result = 'Pending'; resultCls = 'pending'; }
+            else if (b.matchWinStatus === 4) { result = 'Cancelled'; resultCls = 'cancelled'; }
+            else if (b.matchWinStatus === b.betTeam) { result = 'Won'; resultCls = 'won'; }
+            else { result = 'Lost'; resultCls = 'lost'; }
             const fightNum = b.matchNumber || b.match_number || b.matchId || '';
             html += `<div class="bet-item">
                 <div class="bet-team ${cls}">${team}</div>
@@ -3414,7 +4360,7 @@
         var items = history.slice(-40);
         items.forEach(function(m) {
             var w = m.winTeam || m.winner;
-            var color = w === 1 ? 'var(--meron)' : w === 2 ? 'var(--wala)' : w === 3 ? 'var(--draw,#7C3AED)' : '#666';
+            var color = w === 1 ? 'var(--meron)' : w === 2 ? 'var(--wala)' : w === 3 ? 'var(--draw)' : '#666';
             var label = w === 1 ? 'M' : w === 2 ? 'W' : w === 3 ? 'D' : '?';
             html += '<div style="width:22px;height:22px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-size:9px;font-weight:700;">'+label+'</span></div>';
         });
@@ -3555,54 +4501,150 @@
             try {
                 var data = JSON.parse(e.data);
                 if (data.balance !== undefined) {
-                    document.getElementById('wallet-balance').textContent = parseFloat(data.balance).toFixed(2);
-                    document.getElementById('wallet-balance-large').textContent = parseFloat(data.balance).toFixed(2);
+                    document.getElementById('wallet-balance').textContent = formatCurrencyShort(data.balance);
+                    document.getElementById('wallet-balance-large').textContent = formatCurrencyFull(data.balance);
+                    // Fix #1: Sync sidebar balance by updating userInfo
+                    if (userInfo) {
+                        userInfo.wallet_balance = data.balance;
+                        if (data.available_balance !== undefined) userInfo.available_balance = data.available_balance;
+                    }
+                    // Re-render dice sidebar if on dice page to update "Available balance"
+                    var diceContainer = document.getElementById('dice-container');
+                    if (diceContainer && diceContainer.innerHTML.indexOf('dice-sidebar-balance') >= 0) {
+                        renderDiceGames();
+                    }
                 }
                 if (data.exposure !== undefined) {
                     var expEl = document.getElementById('wallet-exposure');
-                    if (expEl) expEl.textContent = '₹' + parseFloat(data.exposure).toFixed(2);
+                    if (expEl) expEl.textContent = '₹' + formatCurrencyShort(data.exposure);
+                    if (userInfo) userInfo.exposure = data.exposure;
                 }
             } catch(err) {}
         };
         walletWsConn.onclose = function() { setTimeout(function() { if (token) connectWalletWebSocket(); }, 5000); };
     }
 
-    // ===== DICE WEBSOCKET =====
-    var diceWsConn = null;
-    var diceTimerWsConn = null;
+    // ===== DICE WEBSOCKET — 3 connections =====
+    var diceMatchWs = null;
+    var diceResultWs = null;
+    var diceTimerWs = null;
+
     function connectDiceWebSocket() {
-        // Dice match updates
-        if (diceWsConn) { try { diceWsConn.close(); } catch(e) {} }
         var wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        var wsUrl = wsProto + '//' + location.host + '/ws/dice-match/?token=' + token;
-        diceWsConn = new WebSocket(wsUrl);
-        diceWsConn.onmessage = function(e) {
+
+        // 1) Match updates
+        if (diceMatchWs) { try { diceMatchWs.close(); } catch(e) {} }
+        diceMatchWs = new WebSocket(wsProto + '//' + location.host + '/ws/dice-match-updates/?token=' + token);
+        diceMatchWs.onmessage = function(e) {
             try {
-                var data = JSON.parse(e.data);
-                if (data.type === 'match_update' || data.match) {
-                    loadDiceGames();
+                var msg = JSON.parse(e.data);
+                if (msg.type === 'dice_match_update' && msg.data) {
+                    diceBoards = msg.data;
+                    // D2: Don't re-render during reveal animation sequence (would disrupt animation)
+                    if (diceAnimState !== 'rolling' && diceAnimState !== 'reveal' && diceAnimState !== 'highlight') {
+                        renderDiceGames();
+                    }
                 }
             } catch(err) {}
         };
-        diceWsConn.onclose = function() { setTimeout(function() { if (token) connectDiceWebSocket(); }, 5000); };
-        // Dice timer
-        if (diceTimerWsConn) { try { diceTimerWsConn.close(); } catch(e) {} }
-        var timerUrl = wsProto + '//' + location.host + '/ws/dice-timer/?token=' + token;
-        diceTimerWsConn = new WebSocket(timerUrl);
-        diceTimerWsConn.onmessage = function(e) {
+        diceMatchWs.onclose = function() { setTimeout(function() { if (token) connectDiceWebSocket(); }, 5000); };
+
+        // 2) Match result
+        if (diceResultWs) { try { diceResultWs.close(); } catch(e) {} }
+        diceResultWs = new WebSocket(wsProto + '//' + location.host + '/ws/dice-match-result/?token=' + token);
+        diceResultWs.onmessage = function(e) {
             try {
-                var data = JSON.parse(e.data);
-                if (data.seconds_remaining !== undefined) {
-                    var timerEls = document.querySelectorAll('.dice-timer-display');
-                    timerEls.forEach(function(el) {
-                        var m = Math.floor(data.seconds_remaining / 60);
-                        var s = data.seconds_remaining % 60;
-                        el.textContent = m + ':' + s.toString().padStart(2, '0');
-                    });
+                var msg = JSON.parse(e.data);
+                if (msg.type === 'dice_result' || msg.result_type === 'dice_result') {
+                    var match = msg.data;
+                    if (!match) return;
+                    diceLastResult = match;
+                    // D2: Clear any pending reveal timers
+                    if (diceRevealTimer) { clearTimeout(diceRevealTimer); diceRevealTimer = null; }
+                    // D2: Improved reveal sequence with better timing
+                    // Step 1: Rolling (mug shaking, placeholder dice) — 1.8s
+                    diceAnimState = 'rolling';
+                    renderDiceGames();
+                    diceRevealTimer = setTimeout(function() {
+                        // Step 2: Reveal (mug lifts, dice bounce in) — 1s
+                        diceAnimState = 'reveal';
+                        renderDiceGames();
+                        diceRevealTimer = setTimeout(function() {
+                            // Step 3: Highlight (winners glow) — 2s
+                            diceAnimState = 'highlight';
+                            renderDiceGames();
+                            // Check if user had bets on this match
+                            var faces = getDiceRolls(match);
+                            var winners = getDiceWinners(faces);
+                            var winSet = new Set(winners);
+                            var userBetsOnMatch = diceMyBets.filter(function(b) {
+                                return String(b.match) === String(match.id) || (b.match_info && String(b.match_info.id) === String(match.id));
+                            });
+                            var winBets = userBetsOnMatch.filter(function(b) { return winSet.has(b.diceNumber); });
+                            diceRevealTimer = setTimeout(function() {
+                                // Step 4: Win/loss feedback
+                                if (winBets.length > 0) {
+                                    var totalWin = winBets.reduce(function(s,b) { return s + (b.payout_amount || b.amount * 2 || 0); }, 0);
+                                    diceShowResultOverlay(true, totalWin);
+                                } else if (userBetsOnMatch.length > 0) {
+                                    diceShowResultOverlay(false, 0);
+                                }
+                                // Step 5: Update data, stay on highlight briefly
+                                loadDiceMyBets();
+                                diceRevealTimer = setTimeout(function() {
+                                    // Step 6: Transition to idle, refresh
+                                    diceAnimState = 'idle';
+                                    diceRevealTimer = null;
+                                    loadDiceGames();
+                                }, 2000);
+                            }, 1500);
+                        }, 1000);
+                    }, 1800);
                 }
             } catch(err) {}
         };
-        diceTimerWsConn.onclose = function() { setTimeout(function() { if (token) { diceTimerWsConn = null; connectDiceWebSocket(); } }, 5000); };
+        diceResultWs.onclose = function() { setTimeout(function() { if (token) { diceResultWs = null; connectDiceWebSocket(); } }, 8000); };
+
+        // 3) Timer sync
+        if (diceTimerWs) { try { diceTimerWs.close(); } catch(e) {} }
+        diceTimerWs = new WebSocket(wsProto + '//' + location.host + '/ws/dice-timer/?token=' + token);
+        diceTimerWs.onmessage = function(e) {
+            try {
+                var msg = JSON.parse(e.data);
+                if (msg.type === 'timer_sync' && msg.data && msg.data.timers) {
+                    var timers = msg.data.timers;
+                    // Find timer for current match
+                    if (diceCurrentMatch) {
+                        var t = timers.find(function(x) { return String(x.match_id) === String(diceCurrentMatch.id); });
+                        if (t && t.phase_ends_at) {
+                            diceTimerEnd = new Date(t.phase_ends_at).getTime();
+                            if (!diceTimerInterval) {
+                                diceTimerInterval = setInterval(diceTimerTick, 1000);
+                            }
+                            diceTimerTick();
+                        }
+                    }
+                } else if (msg.type === 'phase_change' && msg.data) {
+                    if (msg.data.phase_ends_at) {
+                        diceTimerEnd = new Date(msg.data.phase_ends_at).getTime();
+                        if (!diceTimerInterval) {
+                            diceTimerInterval = setInterval(diceTimerTick, 1000);
+                        }
+                        diceTimerTick();
+                    }
+                    // D2: Set rolling animation when phase changes to shuffling
+                    var newPhase = msg.data.phase || msg.data.virtual_phase || '';
+                    if (newPhase === 'shuffling' && diceAnimState !== 'rolling' && diceAnimState !== 'reveal' && diceAnimState !== 'highlight') {
+                        diceAnimState = 'rolling';
+                        renderDiceGames();
+                    } else if (diceAnimState !== 'rolling' && diceAnimState !== 'reveal' && diceAnimState !== 'highlight') {
+                        // Phase change triggers fresh data only if not in animation
+                        loadDiceGames();
+                    }
+                }
+            } catch(err) {}
+        };
+        diceTimerWs.onclose = function() { setTimeout(function() { if (token) { diceTimerWs = null; connectDiceWebSocket(); } }, 5000); };
     }
 
     // ===== PROMOTIONS =====
@@ -3767,10 +4809,31 @@
 
     // ===== PROVABLY FAIR =====
     function openProvablyFairModal(matchData) {
-        document.getElementById('pf-hash').textContent = matchData.commitment_hash || matchData.hash || '—';
-        document.getElementById('pf-seed').textContent = matchData.seed || 'Revealed after game ends';
-        document.getElementById('pf-result').textContent = matchData.result || '—';
-        document.getElementById('pf-verified').style.display = matchData.seed ? 'block' : 'none';
+        // Fix #3: Show full provably fair data for completed matches
+        document.getElementById('pf-hash').textContent = matchData.commitment_hash || '—';
+        // Server seed: show only if revealed (completed match)
+        if (matchData.server_seed_revealed && matchData.server_seed) {
+            document.getElementById('pf-seed').textContent = matchData.server_seed;
+        } else {
+            document.getElementById('pf-seed').textContent = 'Will be revealed after round completes';
+        }
+        // Client seed + nonce
+        var csEl = document.getElementById('pf-client-seed');
+        if (csEl) csEl.textContent = matchData.client_seed || '—';
+        var nonceEl = document.getElementById('pf-nonce');
+        if (nonceEl) nonceEl.textContent = matchData.nonce !== undefined ? matchData.nonce : '—';
+        // Result
+        if (matchData.dice_result_json && matchData.isWinnerDeclared) {
+            var faces = matchData.dice_result_json.split(',').map(Number);
+            document.getElementById('pf-result').textContent = '[' + faces.join(', ') + ']';
+        } else {
+            document.getElementById('pf-result').textContent = 'Pending...';
+        }
+        // Round info
+        var roundEl = document.getElementById('pf-round');
+        if (roundEl) roundEl.textContent = matchData.round ? '#' + matchData.round : '—';
+        // Verified badge
+        document.getElementById('pf-verified').style.display = (matchData.server_seed_revealed && matchData.server_seed) ? 'block' : 'none';
         document.getElementById('provably-fair-modal').classList.add('show');
     }
     function closeProvablyFairModal() { document.getElementById('provably-fair-modal').classList.remove('show'); }
