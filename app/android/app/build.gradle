@@ -83,8 +83,8 @@ android {
         applicationId "com.cockfight"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "3.0.0"
     }
     signingConfigs {
         debug {
