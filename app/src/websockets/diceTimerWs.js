@@ -50,6 +50,13 @@ export const connectDiceTimerWebSocket = async (onTimerSync, onPhaseChange) => {
     try {
       const message = JSON.parse(event.data);
 
+      if (message.type === 'ping') {
+        if (timerSocket && timerSocket.readyState === WebSocket.OPEN) {
+          timerSocket.send(JSON.stringify({type: 'pong'}));
+        }
+        return;
+      }
+
       if (message.type === 'timer_sync' && message.data) {
         // Sync server time
         const serverTime = new Date(message.data.server_time).getTime();
