@@ -1,0 +1,6 @@
+from .common import *
+
+DEBUG = False
+
+RATELIMIT_IP_META_KEY = "HTTP_X_FORWARDED_FOR"
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
