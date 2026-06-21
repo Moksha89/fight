@@ -1,0 +1,1989 @@
+import json
+import logging
+
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.http import JsonResponse, HttpResponse
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Sum, Count, Q
+from django.utils import timezone
+from datetime import timedelta
+from kokoroko.security import log_admin_action
+
+security_logger = logging.getLogger("kokoroko.security")
+
+# ─── Shared Sidebar HTML for standalone admin pages ──────────────────────────
+def _admin_sidebar_css():
+    return '''
+@font-face { font-family:'Material Icons'; font-style:normal; font-weight:400; src:url(https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2'); font-display:block; }
+i, .material-icons { font-family:'Material Icons' !important; font-weight:normal; font-style:normal; font-size:20px; line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap; word-wrap:normal; direction:ltr; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+#kk-sidebar { position:fixed; top:0; left:0; width:220px; height:100vh; background:#0A0A0A; border-right:1px solid rgba(255,255,255,0.06); z-index:9000; overflow-y:auto; display:flex; flex-direction:column; }
+#kk-sidebar::-webkit-scrollbar { width:3px; }
+#kk-sidebar::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
+.sb-brand { padding:16px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.06); }
+.sb-brand img { width:34px; height:34px; border-radius:8px; }
+.sb-brand span { color:#D4A843; font-size:17px; font-weight:700; }
+.sb-section { padding:6px 8px; }
+.sb-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#6B6560; padding:10px 12px 6px; }
+.sb-divider { height:1px; background:rgba(255,255,255,0.04); margin:4px 12px; }
+.sb-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; color:#A8A29E; font-size:13px; font-weight:500; text-decoration:none; transition:all 0.15s; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sb-item:hover { background:rgba(212,168,67,0.08); color:#F5F1E8; }
+.sb-item.active { background:rgba(212,168,67,0.12); color:#D4A843; font-weight:600; }
+.sb-item i { font-size:18px; width:22px; text-align:center; opacity:0.5; }
+.sb-item:hover i { opacity:0.9; color:#F0D78C; }
+.sb-item.active i { opacity:1; color:#D4A843; }
+#kk-main { margin-left:220px; min-height:100vh; }
+'''
+
+def _admin_sidebar_html(active_path=""):
+    def _cls(path):
+        return ' class="sb-item active"' if active_path == path else ' class="sb-item"'
+    return f'''<div id="kk-sidebar">
+    <div class="sb-brand"><img src="/static/admin/img/logo.png"><span>Kokoroko</span></div>
+    <div class="sb-section"><a href="/"{_cls("/")}><i>dashboard</i>Dashboard</a></div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+        <div class="sb-title">Management</div>
+        <a href="/userManager/user/?is_staff__exact=0"{_cls("/userManager/user/")}><i>people</i>Users</a>
+        <a href="/cockfightManager/cockfightmatch/"{_cls("/cockfightManager/cockfightmatch/")}><i>live_tv</i>Cockfight Matches</a>
+        <a href="/cockfightManager/cockfightautomatch/"{_cls("/cockfightManager/cockfightautomatch/")}><i>public</i>China Market</a>
+        <a href="/cockfightManager/livesession/"{_cls("/cockfightManager/livesession/")}><i>videocam</i>Live Sessions</a>
+        <a href="/cockfightManager/oddsconfig/"{_cls("/cockfightManager/oddsconfig/")}><i>trending_up</i>Odds Config</a>
+        <a href="/dicePlayManager/board/"{_cls("/dicePlayManager/")}><i>casino</i>Dice Matches</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+        <div class="sb-title">Finance</div>
+        <a href="/wallet/wallet/"{_cls("/wallet/wallet/")}><i>account_balance_wallet</i>Wallets</a>
+        <a href="/wallet/depositrequest/"{_cls("/wallet/depositrequest/")}><i>savings</i>Deposit Requests</a>
+        <a href="/wallet/withdrawalrequest/"{_cls("/wallet/withdrawalrequest/")}><i>payments</i>Withdrawal Requests</a>
+        <a href="/wallet/wallethistory/"{_cls("/wallet/wallethistory/")}><i>history</i>Transactions</a>
+        <a href="/wallet/paymentqr/"{_cls("/wallet/paymentqr/")}><i>qr_code</i>QR Manager</a>
+        <a href="/wallet/paymentbankaccount/"{_cls("/wallet/paymentbankaccount/")}><i>account_balance</i>Bank Accounts</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+        <div class="sb-title">Content</div>
+        <a href="/base/banner/"{_cls("/base/banner/")}><i>image</i>Banners</a>
+        <a href="/base/highlight/"{_cls("/base/highlight/")}><i>stars</i>Highlights</a>
+        <a href="/base/learningvideo/"{_cls("/base/learningvideo/")}><i>play_circle</i>Videos</a>
+        <a href="/base/setting/"{_cls("/base/setting/")}><i>settings</i>App Settings</a>
+        <a href="/admin-api/theme-settings/"{_cls("/admin-api/theme-settings/")}><i>palette</i>Theme Settings</a>
+        <a href="/admin-api/feature-controls/"{_cls("/admin-api/feature-controls/")}><i>tune</i>Feature Controls</a>
+        <a href="/admin-api/sms-settings/"{_cls("/admin-api/sms-settings/")}><i>sms</i>SMS Settings</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+        <div class="sb-title">Reports</div>
+        <a href="/cockfightManager/cockfightmatchbet/"{_cls("/cockfightManager/cockfightmatchbet/")}><i>analytics</i>Bet History</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section" style="margin-top:auto;padding-bottom:12px;">
+        <a href="/logout/" class="sb-item"><i>logout</i>Logout</a>
+    </div>
+</div>'''
+
+
+admin.site.site_header = "Kokoroko"
+admin.site.site_title = "Administration • Kokoroko"
+admin.site.enable_nav_sidebar = True
+admin.site.index_title = "Welcome"
+admin.site.site_url = "http://155.117.46.249:8080"
+admin.site.name = "kokoroko"
+
+
+
+@staff_member_required
+def deposit_action_view(request, pk, action):
+    from django.shortcuts import redirect
+    from django.contrib import messages as msg
+    from wallet.models import DepositRequest, Wallet, WalletHistory
+    from django.db.models import F
+    from django.db import transaction as db_transaction
+    from django.middleware.csrf import get_token
+
+    if action not in ('accept', 'reject'):
+        msg.error(request, "Invalid action.")
+        return redirect('/wallet/depositrequest/')
+
+    # GET → show confirmation page; POST → perform action
+    if request.method != 'POST':
+        try:
+            deposit = DepositRequest.objects.get(pk=pk)
+        except DepositRequest.DoesNotExist:
+            msg.error(request, f"Deposit #{pk} not found.")
+            return redirect('/wallet/depositrequest/')
+
+        customer_name = deposit.customer.username if deposit.customer else 'Unknown'
+        amount = deposit.confirm_amount or deposit.deposit_amount
+        csrf_token = get_token(request)
+        color = "#10b981" if action == 'accept' else "#ef4444"
+        label = "Accept" if action == 'accept' else "Reject"
+        html = f'''<!DOCTYPE html><html><head><title>{label} Deposit #{pk}</title>
+        <style>body{{font-family:Arial,sans-serif;max-width:450px;margin:80px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
+        .card{{background:#1c2128;border-radius:12px;padding:30px;border:1px solid #30363d;text-align:center;}}
+        .btn{{background:{color};color:#fff;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;width:100%;margin-top:15px;}}
+        .back{{display:inline-block;margin-top:15px;color:#8b949e;text-decoration:none;}}
+        .info{{color:#8b949e;font-size:14px;margin:8px 0;}}</style></head><body>
+        <div class="card"><h2 style="color:{color};">{label} Deposit</h2>
+        <p class="info">Customer: <b>{customer_name}</b></p>
+        <p class="info">Amount: <b>₹{amount}</b></p>
+        <p class="info">UTR: <b>{deposit.utr_id or '-'}</b></p>
+        <form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+        <button type="submit" class="btn">Confirm {label}</button></form>
+        <a href="/wallet/depositrequest/" class="back">← Cancel</a></div></body></html>'''
+        return HttpResponse(html)
+
+    try:
+        if action == 'accept':
+            with db_transaction.atomic():
+                deposit = DepositRequest.objects.select_for_update().get(pk=pk)
+                if deposit.status != 'P':
+                    msg.warning(request, f"Deposit #{pk} already processed.")
+                    return redirect('/wallet/depositrequest/')
+                customer = deposit.customer
+                if not customer:
+                    msg.warning(request, f"Deposit #{pk} has no customer.")
+                    return redirect('/wallet/depositrequest/')
+                amount = deposit.confirm_amount if deposit.confirm_amount else deposit.deposit_amount
+                if not deposit.confirm_amount:
+                    deposit.confirm_amount = deposit.deposit_amount
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
+                wallet.balance = F('balance') + amount
+                wallet.fundsIn = F('fundsIn') + amount
+                wallet.save()
+                WalletHistory.objects.create(
+                    wallet=wallet, transaction_type='D', change=amount,
+                    isSuccess=True, description=f"Deposit via {deposit.get_deposit_type_display()} UTR {deposit.utr_id}"
+                )
+                deposit.status = 'A'
+                deposit.save()
+            log_admin_action(
+                request.user, 'accept_deposit', 'deposit', pk,
+                {'amount': str(amount), 'customer': customer.username, 'utr': deposit.utr_id}, request
+            )
+            msg.success(request, f"Deposit #{pk} accepted. {amount} credited to {customer.username}.")
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(customer, "deposit_approved", {"amount": str(amount)})
+            except Exception:
+                pass
+
+        elif action == 'reject':
+            with db_transaction.atomic():
+                deposit = DepositRequest.objects.select_for_update().get(pk=pk)
+                if deposit.status != 'P':
+                    msg.warning(request, f"Deposit #{pk} already processed.")
+                    return redirect('/wallet/depositrequest/')
+                customer = deposit.customer
+                if not customer:
+                    msg.warning(request, f"Deposit #{pk} has no customer.")
+                    return redirect('/wallet/depositrequest/')
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
+                WalletHistory.objects.create(
+                    wallet=wallet, transaction_type='D', change=deposit.deposit_amount,
+                    isSuccess=False, description=f"Rejected: {deposit.infoNote or 'No remarks'}"
+                )
+                deposit.status = 'R'
+                deposit.save()
+            log_admin_action(
+                request.user, 'reject_deposit', 'deposit', pk,
+                {'customer': customer.username, 'amount': str(deposit.deposit_amount)}, request
+            )
+            msg.warning(request, f"Deposit #{pk} rejected.")
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(customer, "deposit_rejected", {"amount": str(deposit.deposit_amount)})
+            except Exception:
+                pass
+    except DepositRequest.DoesNotExist:
+        msg.error(request, f"Deposit #{pk} not found.")
+    except Exception as e:
+        msg.error(request, f"Error: {str(e)}")
+    return redirect('/wallet/depositrequest/')
+
+
+@staff_member_required
+def withdrawal_action_view(request, pk, action):
+    from django.shortcuts import redirect
+    from django.contrib import messages as msg
+    from wallet.models import WithdrawalRequest, Wallet, WalletHistory
+    from django.db.models import F
+    from django.db import transaction as db_transaction
+    from django.middleware.csrf import get_token
+
+    if action not in ('approve', 'reject', 'handle'):
+        msg.error(request, "Invalid action.")
+        return redirect('/wallet/withdrawalrequest/')
+
+    # GET → show confirmation page; POST → perform action
+    if request.method != 'POST':
+        try:
+            wd = WithdrawalRequest.objects.get(pk=pk)
+        except WithdrawalRequest.DoesNotExist:
+            msg.error(request, f"Withdrawal #{pk} not found.")
+            return redirect('/wallet/withdrawalrequest/')
+
+        customer_name = wd.customer.username if wd.customer else 'Unknown'
+        amount = wd.withdrawal_amount
+        csrf_token = get_token(request)
+        labels = {'approve': ('Approve', '#10b981'), 'reject': ('Reject', '#ef4444'), 'handle': ('Handle', '#3b82f6')}
+        label, color = labels[action]
+        html = f'''<!DOCTYPE html><html><head><title>{label} Withdrawal #{pk}</title>
+        <style>body{{font-family:Arial,sans-serif;max-width:450px;margin:80px auto;padding:20px;background:#0d1117;color:#e6edf3;}}
+        .card{{background:#1c2128;border-radius:12px;padding:30px;border:1px solid #30363d;text-align:center;}}
+        .btn{{background:{color};color:#fff;padding:12px 30px;border:none;border-radius:8px;font-size:16px;cursor:pointer;width:100%;margin-top:15px;}}
+        .back{{display:inline-block;margin-top:15px;color:#8b949e;text-decoration:none;}}
+        .info{{color:#8b949e;font-size:14px;margin:8px 0;}}</style></head><body>
+        <div class="card"><h2 style="color:{color};">{label} Withdrawal</h2>
+        <p class="info">Customer: <b>{customer_name}</b></p>
+        <p class="info">Amount: <b>₹{amount}</b></p>
+        <p class="info">Status: <b>{wd.get_status_display()}</b></p>
+        <form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+        <button type="submit" class="btn">Confirm {label}</button></form>
+        <a href="/wallet/withdrawalrequest/" class="back">← Cancel</a></div></body></html>'''
+        return HttpResponse(html)
+
+    try:
+        if action == 'approve':
+            with db_transaction.atomic():
+                wd = WithdrawalRequest.objects.select_for_update().get(pk=pk)
+                if wd.status not in ('P', 'H'):
+                    msg.warning(request, f"Withdrawal #{pk} already processed.")
+                    return redirect('/wallet/withdrawalrequest/')
+                wd.status = 'A'
+                wd.save()
+            log_admin_action(
+                request.user, 'approve_withdrawal', 'withdrawal', pk,
+                {'amount': str(wd.withdrawal_amount), 'customer': wd.customer.username}, request
+            )
+            msg.success(request, f"Withdrawal #{pk} approved.")
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(wd.customer, "withdrawal_approved", {"amount": str(wd.withdrawal_amount)})
+            except Exception:
+                pass
+
+        elif action == 'reject':
+            with db_transaction.atomic():
+                wd = WithdrawalRequest.objects.select_for_update().get(pk=pk)
+                if wd.status not in ('P', 'H'):
+                    msg.warning(request, f"Withdrawal #{pk} already processed.")
+                    return redirect('/wallet/withdrawalrequest/')
+                customer = wd.customer
+                amount = wd.withdrawal_amount
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=customer)
+                wallet.balance = F('balance') + amount
+                wallet.save()
+                WalletHistory.objects.create(
+                    wallet=wallet, transaction_type='W', change=amount,
+                    isSuccess=False, description=f"Rejected withdrawal: {wd.infoNote or 'No remarks'}"
+                )
+                wd.status = 'R'
+                wd.save()
+            log_admin_action(
+                request.user, 'reject_withdrawal', 'withdrawal', pk,
+                {'amount': str(amount), 'customer': customer.username}, request
+            )
+            msg.warning(request, f"Withdrawal #{pk} rejected. Amount returned to {customer.username}.")
+            try:
+                from kokoroko.notifications import create_notification
+                create_notification(customer, "withdrawal_rejected", {"amount": str(amount)})
+            except Exception:
+                pass
+
+        elif action == 'handle':
+            with db_transaction.atomic():
+                wd = WithdrawalRequest.objects.select_for_update().get(pk=pk)
+                if wd.status != 'P':
+                    msg.warning(request, f"Withdrawal #{pk} already processed.")
+                    return redirect('/wallet/withdrawalrequest/')
+                wd.status = 'H'
+                wd.handling_by = request.user
+                wd.save()
+            msg.info(request, f"Withdrawal #{pk} now handled by you.")
+    except WithdrawalRequest.DoesNotExist:
+        msg.error(request, f"Withdrawal #{pk} not found.")
+    except Exception as e:
+        msg.error(request, f"Error: {str(e)}")
+    return redirect('/wallet/withdrawalrequest/')
+
+
+@staff_member_required
+def admin_sidebar_counts(request):
+    """Lightweight endpoint for sidebar badge counts — cached."""
+    from kokoroko.cache_helpers import get_cached_or_set, KEYS, TTL
+
+    def _fetch():
+        counts = {}
+        try:
+            from wallet.models import DepositRequest, WithdrawalRequest
+            counts["pending_deposits"] = DepositRequest.objects.filter(status='P').count()
+            counts["pending_withdrawals"] = WithdrawalRequest.objects.filter(status='P').count()
+        except:
+            counts["pending_deposits"] = 0
+            counts["pending_withdrawals"] = 0
+        try:
+            from cockfightManager.models import CockfightMatch
+            counts["live_matches"] = CockfightMatch.objects.filter(isLive=True).count()
+        except:
+            counts["live_matches"] = 0
+        try:
+            from cockfightManager.models import CockfightMatchBet
+            counts["pending_bets"] = CockfightMatchBet.objects.filter(matchWinStatus=0).count()
+        except:
+            counts["pending_bets"] = 0
+        return counts
+
+    counts = get_cached_or_set(KEYS["admin_sidebar"], _fetch, TTL["admin_sidebar"])
+    return JsonResponse(counts)
+
+
+@staff_member_required
+def admin_dashboard_stats(request):
+    """API endpoint for admin dashboard stats — cached."""
+    from kokoroko.cache_helpers import get_cached_or_set, KEYS, TTL
+
+    days = int(request.GET.get('days', 0))
+    cache_key = KEYS["admin_dashboard"].format(days=days)
+
+    def _fetch():
+        return _admin_dashboard_stats_fetch(days)
+
+    data = get_cached_or_set(cache_key, _fetch, TTL["admin_dashboard"])
+    return JsonResponse(data)
+
+
+def _admin_dashboard_stats_fetch(days):
+    from userManager.models import User
+    from wallet.models import Wallet, WalletHistory
+    date_filter = {}
+    if days > 0:
+        start_date = timezone.now() - timedelta(days=days)
+        date_filter = {'created_at__gte': start_date}
+
+    # User stats
+    total_users = User.objects.filter(is_staff=False).count()
+    active_users = User.objects.filter(is_staff=False, is_active=True).count()
+    blocked_users = User.objects.filter(is_staff=False, is_active=False).count()
+
+    # Wallet stats - use 'change' field and 'transaction_type' field
+    total_balance = Wallet.objects.aggregate(total=Sum('balance'))['total'] or 0
+    total_deposits = WalletHistory.objects.filter(
+        transaction_type='D', **date_filter
+    ).aggregate(total=Sum('change'))['total'] or 0
+    total_withdrawals = WalletHistory.objects.filter(
+        transaction_type='W', **date_filter
+    ).aggregate(total=Sum('change'))['total'] or 0
+
+    # Pending requests (no status field - just count all)
+    try:
+        from wallet.models import DepositRequest
+        pending_deposits = DepositRequest.objects.filter(status='P').count()
+    except:
+        pending_deposits = 0
+    try:
+        from wallet.models import WithdrawalRequest
+        pending_withdrawals = WithdrawalRequest.objects.filter(status='P').count()
+    except:
+        pending_withdrawals = 0
+
+    # Match stats
+    try:
+        from cockfightManager.models import CockfightMatch, CockfightMatchBet
+        live_cockfight = CockfightMatch.objects.filter(isLive=True).count()
+        total_cockfight_bets = CockfightMatchBet.objects.count()
+    except:
+        live_cockfight = 0
+        total_cockfight_bets = 0
+
+    try:
+        from dicePlayManager.models import DicePlayMatch
+        live_dice = DicePlayMatch.objects.filter(isLive=True).count()
+    except:
+        live_dice = 0
+
+    # Recent transactions
+    try:
+        recent_transactions = list(
+            WalletHistory.objects.select_related('wallet__user').order_by('-created_at')[:10].values(
+                'transactionHash', 'transaction_type', 'change', 'created_at',
+                'wallet__user__username', 'wallet__user__phoneNumber'
+            )
+        )
+    except:
+        recent_transactions = []
+
+    return {
+        'users': {
+            'total': total_users,
+            'active': active_users,
+            'blocked': blocked_users,
+        },
+        'wallet': {
+            'total_balance': float(total_balance),
+            'total_deposits': float(total_deposits),
+            'total_withdrawals': float(abs(total_withdrawals)) if total_withdrawals else 0,
+            'pending_deposits': pending_deposits,
+            'pending_withdrawals': pending_withdrawals,
+        },
+        'matches': {
+            'live_cockfight': live_cockfight,
+            'total_cockfight_bets': total_cockfight_bets,
+            'live_dice': live_dice,
+        },
+        'recent_transactions': [
+            {
+                'hash': t['transactionHash'] or '-',
+                'type': t['transaction_type'],
+                'amount': float(abs(t['change'])) if t['change'] else 0,
+                'date': t['created_at'].strftime('%Y-%m-%d %H:%M') if t['created_at'] else '-',
+                'user': t['wallet__user__username'] or t['wallet__user__phoneNumber'] or '-',
+            } for t in recent_transactions
+        ]
+    }
+
+
+# ─── Theme System ─────────────────────────────────────────────────────────────
+
+import json
+from django.views.decorators.csrf import csrf_exempt
+
+PRESET_THEMES = {
+    "gold-black": {
+        "name": "Gold & Black (Original)",
+        "preview": ["#0B0B0B", "#D4A843", "#171717"],
+        "colors": {
+            "gold": "#D4A843", "gold_dark": "#B8922E", "gold_light": "#f0d78c",
+            "bg": "#0B0B0B", "bg_card": "#171717", "bg_elevated": "#1F1A12",
+            "bg_surface": "#121212", "bg_white": "#171717",
+            "text_primary": "#F5F1E8", "text_secondary": "#A8A29E", "text_muted": "#6B6560",
+            "border": "rgba(212,168,67,0.18)", "border_light": "rgba(212,168,67,0.10)",
+            "success": "#22C55E", "danger": "#EF4444", "warning": "#F59E0B",
+            "meron": "#DC2626", "wala": "#2563EB", "draw": "#A855F7",
+        }
+    },
+    "blue-dark": {
+        "name": "Royal Blue",
+        "preview": ["#0A0E1A", "#3B82F6", "#111827"],
+        "colors": {
+            "gold": "#3B82F6", "gold_dark": "#2563EB", "gold_light": "#93C5FD",
+            "bg": "#0A0E1A", "bg_card": "#111827", "bg_elevated": "#1E293B",
+            "bg_surface": "#0F172A", "bg_white": "#111827",
+            "text_primary": "#F1F5F9", "text_secondary": "#94A3B8", "text_muted": "#64748B",
+            "border": "rgba(59,130,246,0.20)", "border_light": "rgba(59,130,246,0.10)",
+            "success": "#22C55E", "danger": "#EF4444", "warning": "#F59E0B",
+            "meron": "#DC2626", "wala": "#2563EB", "draw": "#A855F7",
+        }
+    },
+    "emerald-dark": {
+        "name": "Emerald Night",
+        "preview": ["#0A1A0F", "#10B981", "#11251A"],
+        "colors": {
+            "gold": "#10B981", "gold_dark": "#059669", "gold_light": "#6EE7B7",
+            "bg": "#0A1A0F", "bg_card": "#11251A", "bg_elevated": "#1A3A28",
+            "bg_surface": "#0D1F14", "bg_white": "#11251A",
+            "text_primary": "#ECFDF5", "text_secondary": "#A7F3D0", "text_muted": "#6EE7B7",
+            "border": "rgba(16,185,129,0.20)", "border_light": "rgba(16,185,129,0.10)",
+            "success": "#22C55E", "danger": "#EF4444", "warning": "#F59E0B",
+            "meron": "#DC2626", "wala": "#2563EB", "draw": "#A855F7",
+        }
+    },
+    "purple-dark": {
+        "name": "Neon Purple",
+        "preview": ["#0F0A1A", "#A855F7", "#1A1127"],
+        "colors": {
+            "gold": "#A855F7", "gold_dark": "#9333EA", "gold_light": "#D8B4FE",
+            "bg": "#0F0A1A", "bg_card": "#1A1127", "bg_elevated": "#2D1F4E",
+            "bg_surface": "#130E20", "bg_white": "#1A1127",
+            "text_primary": "#F5F3FF", "text_secondary": "#C4B5FD", "text_muted": "#8B5CF6",
+            "border": "rgba(168,85,247,0.20)", "border_light": "rgba(168,85,247,0.10)",
+            "success": "#22C55E", "danger": "#EF4444", "warning": "#F59E0B",
+            "meron": "#DC2626", "wala": "#2563EB", "draw": "#A855F7",
+        }
+    },
+    "red-dark": {
+        "name": "Crimson Fire",
+        "preview": ["#1A0A0A", "#EF4444", "#271111"],
+        "colors": {
+            "gold": "#EF4444", "gold_dark": "#DC2626", "gold_light": "#FCA5A5",
+            "bg": "#1A0A0A", "bg_card": "#271111", "bg_elevated": "#3B1515",
+            "bg_surface": "#1F0E0E", "bg_white": "#271111",
+            "text_primary": "#FEF2F2", "text_secondary": "#FCA5A5", "text_muted": "#F87171",
+            "border": "rgba(239,68,68,0.20)", "border_light": "rgba(239,68,68,0.10)",
+            "success": "#22C55E", "danger": "#F97316", "warning": "#F59E0B",
+            "meron": "#DC2626", "wala": "#2563EB", "draw": "#A855F7",
+        }
+    },
+    "orange-dark": {
+        "name": "Sunset Orange",
+        "preview": ["#1A120A", "#F97316", "#271A11"],
+        "colors": {
+            "gold": "#F97316", "gold_dark": "#EA580C", "gold_light": "#FDBA74",
+            "bg": "#1A120A", "bg_card": "#271A11", "bg_elevated": "#3B2515",
+            "bg_surface": "#1F150E", "bg_white": "#271A11",
+            "text_primary": "#FFF7ED", "text_secondary": "#FED7AA", "text_muted": "#FB923C",
+            "border": "rgba(249,115,22,0.20)", "border_light": "rgba(249,115,22,0.10)",
+            "success": "#22C55E", "danger": "#EF4444", "warning": "#FBBF24",
+            "meron": "#DC2626", "wala": "#2563EB", "draw": "#A855F7",
+        }
+    },
+    "cyan-dark": {
+        "name": "Ocean Cyan",
+        "preview": ["#0A1A1A", "#06B6D4", "#112727"],
+        "colors": {
+            "gold": "#06B6D4", "gold_dark": "#0891B2", "gold_light": "#67E8F9",
+            "bg": "#0A1A1A", "bg_card": "#112727", "bg_elevated": "#1A3A3A",
+            "bg_surface": "#0D1F1F", "bg_white": "#112727",
+            "text_primary": "#ECFEFF", "text_secondary": "#A5F3FC", "text_muted": "#22D3EE",
+            "border": "rgba(6,182,212,0.20)", "border_light": "rgba(6,182,212,0.10)",
+            "success": "#22C55E", "danger": "#EF4444", "warning": "#F59E0B",
+            "meron": "#DC2626", "wala": "#2563EB", "draw": "#A855F7",
+        }
+    },
+    "white-gold": {
+        "name": "Light Gold (White)",
+        "preview": ["#FAFAFA", "#B8922E", "#FFFFFF"],
+        "colors": {
+            "gold": "#B8922E", "gold_dark": "#9A7A24", "gold_light": "#D4A843",
+            "bg": "#F5F5F5", "bg_card": "#FFFFFF", "bg_elevated": "#FFF9EB",
+            "bg_surface": "#FAFAFA", "bg_white": "#FFFFFF",
+            "text_primary": "#1A1A1A", "text_secondary": "#6B7280", "text_muted": "#9CA3AF",
+            "border": "rgba(184,146,46,0.25)", "border_light": "rgba(184,146,46,0.12)",
+            "success": "#16A34A", "danger": "#DC2626", "warning": "#D97706",
+            "meron": "#DC2626", "wala": "#2563EB", "draw": "#7C3AED",
+        }
+    },
+}
+
+def _get_active_theme():
+    """Get the active theme from cache or DB."""
+    from django.core.cache import cache
+    theme = cache.get("active_theme")
+    if theme:
+        return theme
+    # Default
+    theme = {"preset": "gold-black", "custom": None}
+    try:
+        from base.models import Setting
+        s = Setting.objects.filter(action='Z').first()
+        if s:
+            theme = json.loads(s.actionValue)
+    except Exception:
+        pass
+    cache.set("active_theme", theme, timeout=60)
+    return theme
+
+
+def get_theme_api(request):
+    """Public API: returns the active theme colors for web/app."""
+    theme_data = _get_active_theme()
+    preset_key = theme_data.get("preset", "gold-black")
+    custom = theme_data.get("custom")
+
+    if custom:
+        colors = custom
+        name = "Custom Theme"
+    else:
+        preset = PRESET_THEMES.get(preset_key, PRESET_THEMES["gold-black"])
+        colors = preset["colors"]
+        name = preset["name"]
+
+    return JsonResponse({
+        "preset": preset_key,
+        "name": name,
+        "is_custom": bool(custom),
+        "colors": colors,
+    })
+
+
+@csrf_exempt
+@staff_member_required
+def set_theme_api(request):
+    """Admin API: set the active theme."""
+    if request.method != 'POST':
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    preset = body.get("preset", "gold-black")
+    custom = body.get("custom")  # dict of colors or None
+
+    if not custom and preset not in PRESET_THEMES:
+        return JsonResponse({"error": f"Unknown preset: {preset}"}, status=400)
+
+    theme_data = {"preset": preset, "custom": custom}
+
+    from base.models import Setting as SettingModel
+    obj, created = SettingModel.objects.update_or_create(
+        action='Z',
+        defaults={"actionValue": json.dumps(theme_data)}
+    )
+
+    from django.core.cache import cache
+    cache.set("active_theme", theme_data, timeout=86400)
+
+    log_admin_action(
+        request.user, 'change_theme', 'system', preset,
+        {'custom': bool(custom)}, request
+    )
+
+    return JsonResponse({"success": True, "theme": theme_data})
+
+
+def get_theme_presets_api(request):
+    """Public API: list all available preset themes."""
+    presets = []
+    for key, theme in PRESET_THEMES.items():
+        presets.append({
+            "key": key,
+            "name": theme["name"],
+            "preview": theme["preview"],
+            "colors": theme["colors"],
+        })
+    return JsonResponse({"presets": presets})
+
+
+@staff_member_required
+def admin_theme_page(request):
+    """Admin page for theme management."""
+    theme_data = _get_active_theme()
+    active_preset = theme_data.get("preset", "gold-black")
+    custom_colors = theme_data.get("custom")
+    is_custom = bool(custom_colors)
+
+    presets_json = json.dumps([
+        {"key": k, "name": v["name"], "preview": v["preview"], "colors": v["colors"]}
+        for k, v in PRESET_THEMES.items()
+    ])
+
+    active_colors = custom_colors if is_custom else PRESET_THEMES.get(active_preset, PRESET_THEMES["gold-black"])["colors"]
+
+    return HttpResponse(_theme_page_html(presets_json, active_preset, is_custom, json.dumps(active_colors)))
+
+
+def _theme_page_html(presets_json, active_preset, is_custom, active_colors_json):
+    from django.middleware.csrf import get_token
+    sidebar_css = _admin_sidebar_css()
+    sidebar_html = _admin_sidebar_html("/admin-api/theme-settings/")
+    return f'''<!DOCTYPE html>
+<html><head>
+<title>Theme Settings — Kokoroko Admin</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+* {{ box-sizing: border-box; margin: 0; padding: 0; }}
+{sidebar_css}
+body {{ font-family: 'Inter', -apple-system, sans-serif; background: #0B0B0B; color: #F5F1E8; min-height: 100vh; }}
+.theme-container {{ max-width: 1100px; margin: 0 auto; padding: 30px 24px; }}
+.page-header {{ display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }}
+.page-header .material-icons {{ font-size: 28px; color: #D4A843; }}
+.page-header h1 {{ font-size: 24px; font-weight: 700; }}
+.page-header .back {{ color: #A8A29E; text-decoration: none; margin-left: auto; font-size: 14px; display: flex; align-items: center; gap: 4px; }}
+.page-header .back:hover {{ color: #D4A843; }}
+
+.section {{ margin-bottom: 32px; }}
+.section-title {{ font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #D4A843; display: flex; align-items: center; gap: 8px; }}
+
+.presets-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }}
+.preset-card {{
+    background: #171717; border: 2px solid rgba(255,255,255,0.08); border-radius: 14px;
+    padding: 16px; cursor: pointer; transition: all 0.2s;
+}}
+.preset-card:hover {{ border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }}
+.preset-card.active {{ border-color: #D4A843; box-shadow: 0 0 20px rgba(212,168,67,0.15); }}
+.preset-preview {{ display: flex; gap: 6px; margin-bottom: 12px; height: 48px; border-radius: 8px; overflow: hidden; }}
+.preset-preview span {{ flex: 1; }}
+.preset-name {{ font-size: 14px; font-weight: 600; }}
+.preset-check {{ float: right; color: #D4A843; display: none; }}
+.preset-card.active .preset-check {{ display: inline; }}
+
+.custom-section {{ background: #171717; border-radius: 14px; padding: 24px; border: 1px solid rgba(255,255,255,0.08); }}
+.color-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }}
+.color-item {{ display: flex; align-items: center; gap: 10px; }}
+.color-item label {{ font-size: 13px; color: #A8A29E; min-width: 100px; }}
+.color-item input[type=color] {{
+    width: 40px; height: 34px; border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 8px; cursor: pointer; background: transparent; padding: 2px;
+}}
+.color-item input[type=text] {{
+    background: #0B0B0B; border: 1px solid rgba(255,255,255,0.15); color: #F5F1E8;
+    padding: 6px 10px; border-radius: 6px; font-size: 13px; width: 110px; font-family: monospace;
+}}
+
+.preview-section {{ background: #171717; border-radius: 14px; padding: 24px; border: 1px solid rgba(255,255,255,0.08); }}
+.preview-phone {{
+    width: 280px; height: 500px; margin: 0 auto; border-radius: 24px;
+    overflow: hidden; border: 3px solid #333; position: relative;
+}}
+.preview-header {{ height: 50px; display: flex; align-items: center; padding: 0 14px; justify-content: space-between; }}
+.preview-header h3 {{ font-size: 15px; font-weight: 700; }}
+.preview-body {{ padding: 12px; }}
+.preview-card {{ border-radius: 10px; padding: 14px; margin-bottom: 10px; }}
+.preview-btn {{ padding: 10px 0; border-radius: 8px; text-align: center; font-weight: 700; font-size: 13px; margin-top: 8px; }}
+.preview-nav {{ position: absolute; bottom: 0; left: 0; right: 0; height: 52px; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid; }}
+.preview-nav span {{ font-size: 22px; }}
+
+.btn-row {{ display: flex; gap: 12px; margin-top: 20px; }}
+.btn {{ padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }}
+.btn-primary {{ background: #D4A843; color: #000; }}
+.btn-primary:hover {{ background: #B8922E; }}
+.btn-secondary {{ background: transparent; color: #D4A843; border: 1px solid #D4A843; }}
+.btn-secondary:hover {{ background: rgba(212,168,67,0.1); }}
+.btn:disabled {{ opacity: 0.5; cursor: not-allowed; }}
+
+.toast {{ position: fixed; top: 20px; right: 20px; padding: 14px 24px; border-radius: 10px; font-weight: 600; z-index: 9999; display: none; font-size: 14px; }}
+.toast.success {{ background: #22C55E; color: #fff; }}
+.toast.error {{ background: #EF4444; color: #fff; }}
+
+.tab-row {{ display: flex; gap: 0; margin-bottom: 24px; }}
+.tab-btn {{ padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; background: #171717; color: #A8A29E; border-bottom: 2px solid transparent; transition: all 0.2s; }}
+.tab-btn.active {{ color: #D4A843; border-bottom-color: #D4A843; background: #1F1A12; }}
+.tab-content {{ display: none; }}
+.tab-content.active {{ display: block; }}
+</style>
+</head><body>
+{sidebar_html}
+<div id="kk-main">
+<div class="theme-container">
+    <div class="page-header">
+        <span class="material-icons">palette</span>
+        <h1>Theme Settings</h1>
+    </div>
+
+    <div class="tab-row">
+        <button class="tab-btn active" onclick="switchTab('presets')">Preset Themes</button>
+        <button class="tab-btn" onclick="switchTab('custom')">Custom Colors</button>
+    </div>
+
+    <!-- PRESETS TAB -->
+    <div id="tab-presets" class="tab-content active">
+        <div class="section">
+            <div class="presets-grid" id="presetsGrid"></div>
+        </div>
+    </div>
+
+    <!-- CUSTOM TAB -->
+    <div id="tab-custom" class="tab-content">
+        <div class="custom-section">
+            <div class="section-title"><span class="material-icons">colorize</span> Pick Your Colors</div>
+            <div class="color-grid" id="colorGrid"></div>
+        </div>
+    </div>
+
+    <!-- LIVE PREVIEW -->
+    <div class="section" style="margin-top:24px;">
+        <div class="section-title"><span class="material-icons">phone_iphone</span> Live Preview</div>
+        <div class="preview-section">
+            <div class="preview-phone" id="previewPhone">
+                <div class="preview-header" id="pvHeader">
+                    <h3 id="pvBrand">KOKOROKO</h3>
+                    <span style="font-size:13px;font-weight:700" id="pvWallet">₹5,000</span>
+                </div>
+                <div class="preview-body" id="pvBody">
+                    <div class="preview-card" id="pvCard1">
+                        <div style="font-size:12px;opacity:0.7;">Live Match</div>
+                        <div style="font-size:16px;font-weight:700;margin:6px 0;">Meron vs Wala</div>
+                        <div style="font-size:11px;opacity:0.6;">Game #124 &bull; Betting Open</div>
+                    </div>
+                    <div class="preview-card" id="pvCard2">
+                        <div style="font-size:12px;opacity:0.7;">Dice Game</div>
+                        <div style="display:flex;gap:6px;margin:8px 0;" id="pvDice"></div>
+                        <div style="font-size:11px;opacity:0.6;">Next round in 45s</div>
+                    </div>
+                    <div class="preview-btn" id="pvBtn">Place Bet</div>
+                </div>
+                <div class="preview-nav" id="pvNav">
+                    <span class="material-icons">home</span>
+                    <span class="material-icons">sports_mma</span>
+                    <span class="material-icons">casino</span>
+                    <span class="material-icons">account_balance_wallet</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn btn-primary" id="saveBtn" onclick="saveTheme()">
+            <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">save</span>
+            Apply Theme
+        </button>
+        <button class="btn btn-secondary" onclick="resetToOriginal()">
+            <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">restore</span>
+            Reset to Original
+        </button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PRESETS = {presets_json};
+const ACTIVE_PRESET = "{active_preset}";
+const IS_CUSTOM = {"true" if is_custom else "false"};
+const ACTIVE_COLORS = {active_colors_json};
+
+const COLOR_LABELS = {{
+    gold: "Accent / Brand", gold_dark: "Accent Dark", gold_light: "Accent Light",
+    bg: "Background", bg_card: "Card Background", bg_elevated: "Elevated BG",
+    bg_surface: "Surface BG", bg_white: "White / Card",
+    text_primary: "Primary Text", text_secondary: "Secondary Text", text_muted: "Muted Text",
+    border: "Border Color", border_light: "Light Border",
+    success: "Success", danger: "Danger", warning: "Warning",
+    meron: "Meron (Red)", wala: "Wala (Blue)", draw: "Draw (Purple)",
+}};
+
+let currentMode = IS_CUSTOM ? 'custom' : 'preset';
+let selectedPreset = ACTIVE_PRESET;
+let customColors = JSON.parse(JSON.stringify(ACTIVE_COLORS));
+
+function switchTab(tab) {{
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+    currentMode = tab === 'custom' ? 'custom' : 'preset';
+    updatePreview();
+}}
+
+function renderPresets() {{
+    const grid = document.getElementById('presetsGrid');
+    grid.innerHTML = '';
+    PRESETS.forEach(p => {{
+        const active = (!IS_CUSTOM && selectedPreset === p.key) ? 'active' : '';
+        grid.innerHTML += `
+            <div class="preset-card ${{active}}" data-key="${{p.key}}" onclick="selectPreset('${{p.key}}')">
+                <div class="preset-preview">
+                    ${{p.preview.map(c => `<span style="background:${{c}}"></span>`).join('')}}
+                </div>
+                <div class="preset-name">
+                    ${{p.name}}
+                    <span class="preset-check material-icons">check_circle</span>
+                </div>
+            </div>
+        `;
+    }});
+}}
+
+function selectPreset(key) {{
+    selectedPreset = key;
+    currentMode = 'preset';
+    document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+    document.querySelector(`[data-key="${{key}}"]`).classList.add('active');
+    const preset = PRESETS.find(p => p.key === key);
+    customColors = JSON.parse(JSON.stringify(preset.colors));
+    renderColorGrid();
+    updatePreview();
+}}
+
+function renderColorGrid() {{
+    const grid = document.getElementById('colorGrid');
+    grid.innerHTML = '';
+    Object.entries(COLOR_LABELS).forEach(([key, label]) => {{
+        const val = customColors[key] || '#000000';
+        const isRgba = val.startsWith('rgba');
+        const hexVal = isRgba ? rgbaToHex(val) : val;
+        grid.innerHTML += `
+            <div class="color-item">
+                <label>${{label}}</label>
+                <input type="color" value="${{hexVal}}" onchange="updateColor('${{key}}', this.value)" id="cp-${{key}}">
+                <input type="text" value="${{val}}" onchange="updateColorText('${{key}}', this.value)" id="ct-${{key}}">
+            </div>
+        `;
+    }});
+}}
+
+function rgbaToHex(rgba) {{
+    const m = rgba.match(/[\\d.]+/g);
+    if (!m) return '#000000';
+    const r = Math.round(parseFloat(m[0]));
+    const g = Math.round(parseFloat(m[1]));
+    const b = Math.round(parseFloat(m[2]));
+    return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
+}}
+
+function updateColor(key, value) {{
+    customColors[key] = value;
+    document.getElementById('ct-' + key).value = value;
+    currentMode = 'custom';
+    updatePreview();
+}}
+
+function updateColorText(key, value) {{
+    customColors[key] = value;
+    if (!value.startsWith('rgba')) {{
+        document.getElementById('cp-' + key).value = value;
+    }}
+    currentMode = 'custom';
+    updatePreview();
+}}
+
+function updatePreview() {{
+    let c;
+    if (currentMode === 'preset') {{
+        const preset = PRESETS.find(p => p.key === selectedPreset);
+        c = preset ? preset.colors : ACTIVE_COLORS;
+    }} else {{
+        c = customColors;
+    }}
+
+    const phone = document.getElementById('previewPhone');
+    phone.style.background = c.bg;
+    phone.style.color = c.text_primary;
+
+    const header = document.getElementById('pvHeader');
+    header.style.background = c.bg_card;
+    header.style.borderBottom = '1px solid ' + c.border;
+
+    document.getElementById('pvBrand').style.color = c.gold;
+    document.getElementById('pvWallet').style.color = c.gold;
+
+    document.getElementById('pvBody').style.background = c.bg;
+
+    ['pvCard1','pvCard2'].forEach(id => {{
+        const el = document.getElementById(id);
+        el.style.background = c.bg_card;
+        el.style.border = '1px solid ' + c.border;
+    }});
+
+    const btn = document.getElementById('pvBtn');
+    btn.style.background = `linear-gradient(135deg, ${{c.gold}}, ${{c.gold_dark}})`;
+    btn.style.color = isLightColor(c.gold) ? '#000' : '#fff';
+
+    const nav = document.getElementById('pvNav');
+    nav.style.background = c.bg_card;
+    nav.style.borderColor = c.border;
+    nav.querySelectorAll('span').forEach((s, i) => {{
+        s.style.color = i === 0 ? c.gold : c.text_muted;
+    }});
+
+    // Dice dots
+    const diceDiv = document.getElementById('pvDice');
+    diceDiv.innerHTML = '';
+    for (let i = 1; i <= 6; i++) {{
+        const d = document.createElement('div');
+        d.style.cssText = `width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:${{c.bg_elevated}};border:1px solid ${{c.border}};color:${{c.text_primary}}`;
+        d.textContent = i;
+        diceDiv.appendChild(d);
+    }}
+}}
+
+function isLightColor(hex) {{
+    if (!hex || hex.startsWith('rgba')) return false;
+    const c = hex.replace('#','');
+    const r = parseInt(c.substr(0,2),16);
+    const g = parseInt(c.substr(2,2),16);
+    const b = parseInt(c.substr(4,2),16);
+    return (r*299 + g*587 + b*114) / 1000 > 155;
+}}
+
+function saveTheme() {{
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const body = currentMode === 'preset'
+        ? {{ preset: selectedPreset, custom: null }}
+        : {{ preset: 'custom', custom: customColors }};
+
+    fetch('/admin-api/set-theme/', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json'}},
+        body: JSON.stringify(body),
+    }})
+    .then(r => r.json())
+    .then(data => {{
+        if (data.success) {{
+            showToast('Theme applied! Web & App will update on next refresh.', 'success');
+        }} else {{
+            showToast('Error: ' + (data.error || 'Unknown'), 'error');
+        }}
+    }})
+    .catch(e => showToast('Network error: ' + e.message, 'error'))
+    .finally(() => {{
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">save</span> Apply Theme';
+    }});
+}}
+
+function resetToOriginal() {{
+    if (!confirm('Reset to original Gold & Black theme?')) return;
+    selectedPreset = 'gold-black';
+    currentMode = 'preset';
+    const preset = PRESETS.find(p => p.key === 'gold-black');
+    customColors = JSON.parse(JSON.stringify(preset.colors));
+    renderPresets();
+    renderColorGrid();
+    updatePreview();
+    saveTheme();
+}}
+
+function showToast(msg, type) {{
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+}}
+
+// Init
+renderPresets();
+renderColorGrid();
+updatePreview();
+</script>
+</div>
+</body></html>'''
+
+
+from django.views.static import serve
+from django.urls import re_path
+
+# ─── Risk Detection API ──────────────────────────────────────────────────────
+@staff_member_required
+def admin_user_risk(request, user_id):
+    """Get risk assessment for a specific user."""
+    from kokoroko.risk_detection import get_user_risk_summary
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+    summary = get_user_risk_summary(user)
+    return JsonResponse(summary)
+
+# ─── Feature Controls ────────────────────────────────────────────────────────
+
+FEATURE_DEFAULTS = {
+    "referral": {"enabled": True, "commission_percent": 2.0, "bonus_amount": 0, "min_withdrawal_to_earn": 100},
+    "subscription": {"enabled": True, "monthly_cost": 299, "duration_days": 30, "auto_renew": False},
+    "promotions": {"enabled": True, "show_on_home": True},
+    "lottery": {"enabled": True, "show_on_home": True},
+    "notifications": {"enabled": True, "deposit_alerts": True, "withdrawal_alerts": True, "bet_alerts": True, "system_alerts": True},
+    "backup": {"enabled": True, "auto_daily": True, "retention_days": 30},
+    "risk_detection": {"enabled": True, "auto_flag_threshold": 3, "block_on_critical": False, "duplicate_upi_check": True, "win_pattern_check": True, "rapid_transaction_check": True},
+    "express_withdrawal": {"enabled": True, "fee_percent": 2.5, "processing_minutes": 30},
+    "normal_withdrawal": {"enabled": True, "processing_hours": 6},
+    "dice_play": {"enabled": True, "max_bet": 0, "auto_match": True},
+    "cockfight": {"enabled": True, "auto_match": True},
+    "cricket": {"enabled": False, "coming_soon": True},
+}
+
+def _get_feature_config():
+    from django.core.cache import cache
+    from base.models import Setting
+    config = cache.get("feature_controls")
+    if config:
+        return config
+    try:
+        s = Setting.objects.get(action='Z')
+        stored = json.loads(s.actionValue) if s.actionValue.startswith('{') else {}
+        feature_config = stored.get("feature_controls", {})
+    except Exception:
+        feature_config = {}
+    merged = {}
+    for key, defaults in FEATURE_DEFAULTS.items():
+        merged[key] = {**defaults, **(feature_config.get(key, {}))}
+    cache.set("feature_controls", merged, timeout=60)
+    return merged
+
+def _save_feature_config(config):
+    from django.core.cache import cache
+    from base.models import Setting
+    cache.set("feature_controls", config, timeout=60)
+    try:
+        s = Setting.objects.get(action='Z')
+        try:
+            existing = json.loads(s.actionValue)
+        except Exception:
+            existing = {}
+        existing["feature_controls"] = config
+        s.actionValue = json.dumps(existing)
+        s.save()
+    except Setting.DoesNotExist:
+        pass
+
+@staff_member_required
+def get_feature_controls_api(request):
+    return JsonResponse(_get_feature_config())
+
+@staff_member_required
+def set_feature_controls_api(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    current = _get_feature_config()
+    for key, vals in data.items():
+        if key in current and isinstance(vals, dict):
+            current[key].update(vals)
+    _save_feature_config(current)
+    log_admin_action(request.user, "feature_controls_updated", "system", "feature_controls", {"changes": data}, request)
+    return JsonResponse({"status": "ok", "config": current})
+
+@staff_member_required
+def admin_feature_controls_page(request):
+    config = _get_feature_config()
+    sidebar_css = _admin_sidebar_css()
+    sidebar_html = _admin_sidebar_html("/admin-api/feature-controls/")
+    return HttpResponse(f'''<!DOCTYPE html>
+<html><head>
+<title>Feature Controls | Kokoroko Admin</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+* {{ margin:0; padding:0; box-sizing:border-box; }}
+{sidebar_css}
+body {{ font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#0B0B0B; color:#F5F1E8; min-height:100vh; }}
+.topbar {{ background:#141414; padding:16px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2a2a2a; }}
+.topbar a {{ color:#D4A843; text-decoration:none; font-size:14px; }}
+.topbar h1 {{ font-size:20px; color:#D4A843; }}
+.container {{ max-width:1200px; margin:0 auto; padding:24px; }}
+.grid {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:20px; }}
+.card {{ background:#141414; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden; }}
+.card-header {{ padding:16px 20px; background:#1a1a1a; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2a2a2a; }}
+.card-header h3 {{ display:flex; align-items:center; gap:8px; font-size:15px; }}
+.card-header .material-icons {{ color:#D4A843; font-size:20px; }}
+.card-body {{ padding:16px 20px; }}
+.toggle-row {{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #1f1f1f; }}
+.toggle-row:last-child {{ border:none; }}
+.toggle-label {{ font-size:13px; color:#ccc; }}
+.toggle-label small {{ display:block; font-size:11px; color:#777; margin-top:2px; }}
+.switch {{ position:relative; width:44px; height:24px; flex-shrink:0; }}
+.switch input {{ opacity:0; width:0; height:0; }}
+.slider {{ position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#333; border-radius:24px; transition:.3s; }}
+.slider:before {{ content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#888; border-radius:50%; transition:.3s; }}
+input:checked + .slider {{ background:#D4A843; }}
+input:checked + .slider:before {{ transform:translateX(20px); background:#fff; }}
+.input-row {{ display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #1f1f1f; }}
+.input-row:last-child {{ border:none; }}
+.input-row label {{ font-size:13px; color:#ccc; }}
+.input-row input[type=number], .input-row input[type=text] {{ background:#1a1a1a; border:1px solid #333; color:#F5F1E8; padding:6px 10px; border-radius:6px; width:100px; font-size:13px; text-align:right; }}
+.save-bar {{ position:fixed; bottom:0; left:0; right:0; background:#141414; border-top:1px solid #2a2a2a; padding:12px 24px; display:flex; justify-content:flex-end; gap:12px; z-index:100; }}
+.btn {{ padding:10px 24px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }}
+.btn-primary {{ background:#D4A843; color:#000; }}
+.btn-primary:hover {{ background:#e0b654; }}
+.btn-secondary {{ background:#333; color:#ccc; }}
+.btn-secondary:hover {{ background:#444; }}
+.status {{ display:inline-block; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:600; }}
+.status-on {{ background:rgba(34,197,94,0.15); color:#22c55e; }}
+.status-off {{ background:rgba(239,68,68,0.15); color:#ef4444; }}
+.toast {{ position:fixed; top:20px; right:20px; padding:12px 20px; border-radius:8px; color:#fff; font-size:14px; z-index:9999; display:none; }}
+.toast-success {{ background:#22c55e; }}
+.toast-error {{ background:#ef4444; }}
+.save-bar {{ left:220px; }}
+</style>
+</head>
+<body>
+{sidebar_html}
+<div id="kk-main">
+<div class="topbar">
+    <h1><span class="material-icons">tune</span> Feature Controls</h1>
+</div>
+<div class="container">
+<div class="grid">
+
+    <!-- Referral -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">people</span> Referral System</h3><span class="status" id="st-referral"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Referral<small>Allow users to share referral codes</small></div><label class="switch"><input type="checkbox" id="referral-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Commission %<br><small style="color:#777">% of referred friend's winning bets</small></label><input type="number" id="referral-commission_percent" step="0.1" min="0" max="20" onchange="markDirty()"></div>
+            <div class="input-row"><label>Sign-up Bonus ₹</label><input type="number" id="referral-bonus_amount" min="0" onchange="markDirty()"></div>
+            <div class="input-row"><label>Min Withdrawal to Earn ₹</label><input type="number" id="referral-min_withdrawal_to_earn" min="0" onchange="markDirty()"></div>
+        </div>
+    </div>
+
+    <!-- Subscription -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">card_membership</span> Subscription</h3><span class="status" id="st-subscription"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Subscription<small>Monthly premium subscription for users</small></div><label class="switch"><input type="checkbox" id="subscription-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Monthly Cost ₹</label><input type="number" id="subscription-monthly_cost" min="0" onchange="markDirty()"></div>
+            <div class="input-row"><label>Duration (days)</label><input type="number" id="subscription-duration_days" min="1" max="365" onchange="markDirty()"></div>
+            <div class="toggle-row"><div class="toggle-label">Auto-Renew<small>Auto deduct from wallet on expiry</small></div><label class="switch"><input type="checkbox" id="subscription-auto_renew" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Promotions -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">local_offer</span> Promotions</h3><span class="status" id="st-promotions"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Promotions<small>Show promotions section to users</small></div><label class="switch"><input type="checkbox" id="promotions-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Show on Home Page<small>Display promotions on home page</small></div><label class="switch"><input type="checkbox" id="promotions-show_on_home" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Lottery -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">emoji_events</span> Lottery</h3><span class="status" id="st-lottery"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Lottery<small>Gift pools and price pools</small></div><label class="switch"><input type="checkbox" id="lottery-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Show on Home Page</div><label class="switch"><input type="checkbox" id="lottery-show_on_home" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">notifications</span> Notifications</h3><span class="status" id="st-notifications"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Notifications<small>Master switch for all notifications</small></div><label class="switch"><input type="checkbox" id="notifications-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Deposit Alerts</div><label class="switch"><input type="checkbox" id="notifications-deposit_alerts" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Withdrawal Alerts</div><label class="switch"><input type="checkbox" id="notifications-withdrawal_alerts" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Bet Alerts</div><label class="switch"><input type="checkbox" id="notifications-bet_alerts" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">System Alerts</div><label class="switch"><input type="checkbox" id="notifications-system_alerts" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Backup -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">backup</span> Backup & Recovery</h3><span class="status" id="st-backup"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Backups<small>Database + wallet ledger backups</small></div><label class="switch"><input type="checkbox" id="backup-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Auto Daily Backup<small>Run at 2:00 AM IST automatically</small></div><label class="switch"><input type="checkbox" id="backup-auto_daily" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Retention Days</label><input type="number" id="backup-retention_days" min="1" max="365" onchange="markDirty()"></div>
+        </div>
+    </div>
+
+    <!-- Risk Detection -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">security</span> Risk & Fraud Detection</h3><span class="status" id="st-risk_detection"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Risk Detection<small>Scan for suspicious activity</small></div><label class="switch"><input type="checkbox" id="risk_detection-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Auto-Flag Threshold<br><small style="color:#777">Number of flags to auto-mark HIGH</small></label><input type="number" id="risk_detection-auto_flag_threshold" min="1" max="20" onchange="markDirty()"></div>
+            <div class="toggle-row"><div class="toggle-label">Block on Critical<small>Auto-block users with CRITICAL risk</small></div><label class="switch"><input type="checkbox" id="risk_detection-block_on_critical" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Duplicate UPI Check</div><label class="switch"><input type="checkbox" id="risk_detection-duplicate_upi_check" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Win Pattern Check</div><label class="switch"><input type="checkbox" id="risk_detection-win_pattern_check" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Rapid Transaction Check</div><label class="switch"><input type="checkbox" id="risk_detection-rapid_transaction_check" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Express Withdrawal -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">bolt</span> Express Withdrawal</h3><span class="status" id="st-express_withdrawal"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Express Withdrawal<small>Fast withdrawal option with fee</small></div><label class="switch"><input type="checkbox" id="express_withdrawal-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Fee %</label><input type="number" id="express_withdrawal-fee_percent" step="0.1" min="0" max="20" onchange="markDirty()"></div>
+            <div class="input-row"><label>Processing Time (min)</label><input type="number" id="express_withdrawal-processing_minutes" min="5" max="120" onchange="markDirty()"></div>
+        </div>
+    </div>
+
+    <!-- Dice Play -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">casino</span> Dice Play</h3><span class="status" id="st-dice_play"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Dice Play<small>Virtual dice game</small></div><label class="switch"><input type="checkbox" id="dice_play-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="input-row"><label>Max Bet ₹ <small>(0=no limit)</small></label><input type="number" id="dice_play-max_bet" min="0" onchange="markDirty()"></div>
+            <div class="toggle-row"><div class="toggle-label">Auto Match<small>Auto-create new matches 24/7</small></div><label class="switch"><input type="checkbox" id="dice_play-auto_match" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Cockfight -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">sports_mma</span> Cockfight</h3><span class="status" id="st-cockfight"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Cockfight<small>Live cockfight betting</small></div><label class="switch"><input type="checkbox" id="cockfight-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Auto Match</div><label class="switch"><input type="checkbox" id="cockfight-auto_match" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+    <!-- Cricket -->
+    <div class="card">
+        <div class="card-header"><h3><span class="material-icons">sports_cricket</span> Cricket</h3><span class="status" id="st-cricket"></span></div>
+        <div class="card-body">
+            <div class="toggle-row"><div class="toggle-label">Enable Cricket<small>Cricket prediction game</small></div><label class="switch"><input type="checkbox" id="cricket-enabled" onchange="markDirty()"><span class="slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label">Coming Soon Mode<small>Show "Coming Soon" instead of game</small></div><label class="switch"><input type="checkbox" id="cricket-coming_soon" onchange="markDirty()"><span class="slider"></span></label></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div class="save-bar" id="save-bar" style="display:none;">
+    <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
+    <button class="btn btn-primary" onclick="saveConfig()">💾 Save Changes</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var config = {json.dumps(config)};
+var dirty = false;
+
+function loadForm() {{
+    for (var section in config) {{
+        var st = document.getElementById('st-' + section);
+        if (st) {{
+            var on = config[section].enabled;
+            st.textContent = on ? 'ACTIVE' : 'OFF';
+            st.className = 'status ' + (on ? 'status-on' : 'status-off');
+        }}
+        for (var key in config[section]) {{
+            var el = document.getElementById(section + '-' + key);
+            if (!el) continue;
+            if (el.type === 'checkbox') el.checked = !!config[section][key];
+            else el.value = config[section][key];
+        }}
+    }}
+}}
+
+function getFormData() {{
+    var result = {{}};
+    for (var section in config) {{
+        result[section] = {{}};
+        for (var key in config[section]) {{
+            var el = document.getElementById(section + '-' + key);
+            if (!el) {{ result[section][key] = config[section][key]; continue; }}
+            if (el.type === 'checkbox') result[section][key] = el.checked;
+            else if (el.type === 'number') result[section][key] = parseFloat(el.value) || 0;
+            else result[section][key] = el.value;
+        }}
+    }}
+    return result;
+}}
+
+function markDirty() {{
+    dirty = true;
+    document.getElementById('save-bar').style.display = 'flex';
+    // Update status badges live
+    for (var section in config) {{
+        var el = document.getElementById(section + '-enabled');
+        var st = document.getElementById('st-' + section);
+        if (el && st) {{
+            st.textContent = el.checked ? 'ACTIVE' : 'OFF';
+            st.className = 'status ' + (el.checked ? 'status-on' : 'status-off');
+        }}
+    }}
+}}
+
+function resetForm() {{
+    loadForm();
+    dirty = false;
+    document.getElementById('save-bar').style.display = 'none';
+}}
+
+function saveConfig() {{
+    var data = getFormData();
+    fetch('/admin-api/set-feature-controls/', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}},
+        body: JSON.stringify(data)
+    }}).then(r => r.json()).then(d => {{
+        if (d.status === 'ok') {{
+            config = d.config;
+            loadForm();
+            dirty = false;
+            document.getElementById('save-bar').style.display = 'none';
+            showToast('Settings saved successfully!', 'success');
+        }} else {{
+            showToast('Error: ' + (d.error || 'Unknown'), 'error');
+        }}
+    }}).catch(e => showToast('Network error', 'error'));
+}}
+
+function getCookie(name) {{
+    var v = document.cookie.match('(^|;)\\\\s*' + name + '\\\\s*=\\\\s*([^;]+)');
+    return v ? v.pop() : '';
+}}
+
+function showToast(msg, type) {{
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast toast-' + type;
+    t.style.display = 'block';
+    setTimeout(function() {{ t.style.display = 'none'; }}, 3000);
+}}
+
+loadForm();
+</script>
+</div>
+</body></html>''')
+
+
+# ─── Health / Monitoring API ─────────────────────────────────────────────────
+def health_check_view(request):
+    """Public health check endpoint."""
+    from kokoroko.monitoring import full_health_check
+    data = full_health_check()
+    status_code = 200 if data.get("overall") == "ok" else 503
+    return JsonResponse(data, status=status_code)
+
+@staff_member_required
+def admin_monitoring_dashboard(request):
+    """Admin monitoring dashboard data."""
+    from kokoroko.monitoring import get_dashboard_data
+    return JsonResponse(get_dashboard_data())
+
+# ─── Backup API ──────────────────────────────────────────────────────────────
+@staff_member_required
+def admin_run_backup(request):
+    """Manually trigger a backup run."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+    from kokoroko.backup import run_all_backups
+    results = run_all_backups()
+    log_admin_action(request.user, "manual_backup", "system", "backup", {"results": {k: v for k, v in results.items()}}, request)
+    return JsonResponse({"status": "ok", "results": results})
+
+
+# ─── SMS Settings Admin Views ─────────────────────────────────────────────────
+
+def _require_superuser(request):
+    """Returns an error response if the user is not a superuser, else None."""
+    if not request.user.is_superuser:
+        return JsonResponse({"error": "Superuser access required."}, status=403)
+    return None
+
+
+@staff_member_required
+def admin_sms_settings_get(request):
+    """Return current SMS settings as JSON (secrets masked)."""
+    perm_err = _require_superuser(request)
+    if perm_err:
+        return perm_err
+
+    from base.models import SmsProviderSetting
+    cfg = SmsProviderSetting.get_config()
+
+    def _mask(val, show=4):
+        if not val:
+            return ""
+        if len(val) <= show:
+            return "*" * len(val)
+        return val[:show] + "*" * (len(val) - show)
+
+    return JsonResponse({
+        "provider": cfg.provider,
+        "is_enabled": cfg.is_enabled,
+        "default_country_code": cfg.default_country_code,
+        "msg91_auth_key_set": bool(cfg.msg91_auth_key_enc),
+        "msg91_auth_key_masked": _mask(cfg.get_msg91_auth_key()),
+        "msg91_template_id": cfg.msg91_template_id,
+        "msg91_sender_id": cfg.msg91_sender_id,
+        "msg91_route": cfg.msg91_route,
+        "msg91_entity_id": cfg.msg91_entity_id,
+        "msg91_base_url": cfg.msg91_base_url,
+        "twilio_account_sid_set": bool(cfg.twilio_account_sid_enc),
+        "twilio_account_sid_masked": _mask(cfg.get_twilio_account_sid()),
+        "twilio_auth_token_set": bool(cfg.twilio_auth_token_enc),
+        "twilio_auth_token_masked": _mask(cfg.get_twilio_auth_token()),
+        "twilio_from_number": cfg.twilio_from_number,
+        "twilio_messaging_service_sid": cfg.twilio_messaging_service_sid,
+        "otp_message_template": cfg.otp_message_template,
+        "last_test_status": cfg.last_test_status,
+        "last_test_error": cfg.last_test_error,
+        "last_test_at": cfg.last_test_at.isoformat() if cfg.last_test_at else None,
+        "last_test_mobile": cfg.last_test_mobile,
+        "updated_at": cfg.updated_at.isoformat() if cfg.updated_at else None,
+    })
+
+
+@staff_member_required
+def admin_sms_settings_save(request):
+    """Save SMS settings via POST. Secrets are only updated if non-empty."""
+    perm_err = _require_superuser(request)
+    if perm_err:
+        return perm_err
+
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    from base.models import SmsProviderSetting
+    cfg = SmsProviderSetting.get_config()
+
+    changes = {}
+
+    for field in ["provider", "default_country_code", "msg91_template_id",
+                  "msg91_sender_id", "msg91_route", "msg91_entity_id",
+                  "msg91_base_url", "twilio_from_number",
+                  "twilio_messaging_service_sid", "otp_message_template"]:
+        if field in data:
+            old_val = getattr(cfg, field, "")
+            new_val = str(data[field]).strip()
+            if old_val != new_val:
+                changes[field] = {"from": old_val, "to": new_val}
+            setattr(cfg, field, new_val)
+
+    if "is_enabled" in data:
+        new_enabled = bool(data["is_enabled"])
+        if cfg.is_enabled != new_enabled:
+            changes["is_enabled"] = {"from": cfg.is_enabled, "to": new_enabled}
+        cfg.is_enabled = new_enabled
+
+    if data.get("msg91_auth_key"):
+        cfg.set_msg91_auth_key(data["msg91_auth_key"])
+        changes["msg91_auth_key"] = "updated"
+
+    if data.get("twilio_account_sid"):
+        cfg.set_twilio_account_sid(data["twilio_account_sid"])
+        changes["twilio_account_sid"] = "updated"
+
+    if data.get("twilio_auth_token"):
+        cfg.set_twilio_auth_token(data["twilio_auth_token"])
+        changes["twilio_auth_token"] = "updated"
+
+    cfg.updated_by = request.user
+    cfg.save()
+
+    if changes:
+        safe_changes = {k: v for k, v in changes.items()
+                        if k not in ("msg91_auth_key", "twilio_account_sid", "twilio_auth_token")}
+        log_admin_action(request.user, "sms_settings_updated", "sms_settings", "1", {"changes": safe_changes}, request)
+
+    return JsonResponse({"status": "ok"})
+
+
+@staff_member_required
+def admin_sms_test(request):
+    """Send a test OTP to a mobile number."""
+    perm_err = _require_superuser(request)
+    if perm_err:
+        return perm_err
+
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    mobile = data.get("mobile", "").strip()
+    if not mobile or len(mobile) < 10:
+        return JsonResponse({"error": "Valid mobile number required."}, status=400)
+
+    provider_override = data.get("provider", None)
+
+    from utility.sms import send_test_otp
+    success, test_otp, err = send_test_otp(mobile, provider_override)
+
+    log_admin_action(request.user, "sms_test_sent", "sms_settings", "test", {
+        "mobile_masked": mobile[:2] + "****" + mobile[-2:] if len(mobile) > 4 else "****",
+        "provider": provider_override or "active",
+        "success": success,
+    }, request)
+
+    result = {"success": success}
+    if err:
+        result["error"] = err
+    return JsonResponse(result)
+
+
+@staff_member_required
+def admin_sms_settings_page(request):
+    """Render the SMS Settings admin page."""
+    perm_err = _require_superuser(request)
+    if perm_err:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("Superuser access required.")
+
+    sidebar_css = _admin_sidebar_css()
+    sidebar_html = _admin_sidebar_html("/admin-api/sms-settings/")
+    return HttpResponse(f'''<!DOCTYPE html>
+<html><head>
+<title>SMS Settings | Kokoroko Admin</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+* {{ margin:0; padding:0; box-sizing:border-box; }}
+{sidebar_css}
+body {{ font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#0B0B0B; color:#F5F1E8; min-height:100vh; }}
+.topbar {{ background:#141414; padding:16px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2a2a2a; }}
+.topbar h1 {{ font-size:20px; color:#D4A843; }}
+.container {{ max-width:1200px; margin:0 auto; padding:24px; padding-bottom:80px; }}
+.grid {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:20px; }}
+.card {{ background:#141414; border:1px solid #2a2a2a; border-radius:12px; overflow:hidden; }}
+.card-header {{ padding:16px 20px; background:#1a1a1a; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2a2a2a; }}
+.card-header h3 {{ display:flex; align-items:center; gap:8px; font-size:15px; }}
+.card-header .material-icons {{ color:#D4A843; font-size:20px; }}
+.card-body {{ padding:16px 20px; }}
+.field {{ margin-bottom:14px; }}
+.field label {{ display:block; font-size:12px; color:#999; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }}
+.field input, .field select, .field textarea {{ width:100%; background:#1a1a1a; border:1px solid #333; color:#F5F1E8; padding:8px 12px; border-radius:6px; font-size:13px; }}
+.field textarea {{ min-height:60px; resize:vertical; }}
+.field select {{ appearance:auto; }}
+.field .hint {{ font-size:11px; color:#666; margin-top:3px; }}
+.field .secret-row {{ display:flex; gap:8px; align-items:center; }}
+.field .secret-row input {{ flex:1; }}
+.field .secret-status {{ font-size:11px; padding:2px 6px; border-radius:4px; }}
+.secret-set {{ background:rgba(34,197,94,0.15); color:#22c55e; }}
+.secret-unset {{ background:rgba(239,68,68,0.15); color:#ef4444; }}
+.toggle-row {{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; }}
+.switch {{ position:relative; width:44px; height:24px; flex-shrink:0; }}
+.switch input {{ opacity:0; width:0; height:0; }}
+.slider {{ position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#333; border-radius:24px; transition:.3s; }}
+.slider:before {{ content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#888; border-radius:50%; transition:.3s; }}
+input:checked + .slider {{ background:#D4A843; }}
+input:checked + .slider:before {{ transform:translateX(20px); background:#fff; }}
+.save-bar {{ position:fixed; bottom:0; left:220px; right:0; background:#141414; border-top:1px solid #2a2a2a; padding:12px 24px; display:flex; justify-content:flex-end; gap:12px; z-index:100; }}
+.btn {{ padding:10px 24px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.15s; }}
+.btn-primary {{ background:#D4A843; color:#000; }}
+.btn-primary:hover {{ background:#e0b654; }}
+.btn-secondary {{ background:#333; color:#ccc; }}
+.btn-secondary:hover {{ background:#444; }}
+.btn-danger {{ background:#ef4444; color:#fff; }}
+.btn-danger:hover {{ background:#dc2626; }}
+.btn:disabled {{ opacity:0.5; cursor:not-allowed; }}
+.status-badge {{ display:inline-block; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:600; }}
+.status-success {{ background:rgba(34,197,94,0.15); color:#22c55e; }}
+.status-failed {{ background:rgba(239,68,68,0.15); color:#ef4444; }}
+.status-none {{ background:rgba(156,163,175,0.15); color:#9ca3af; }}
+.test-result {{ margin-top:12px; padding:12px; border-radius:8px; font-size:13px; display:none; }}
+.test-success {{ background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:#22c55e; }}
+.test-failed {{ background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; }}
+.toast {{ position:fixed; top:20px; right:20px; padding:12px 20px; border-radius:8px; color:#fff; font-size:14px; z-index:9999; display:none; }}
+.toast-success {{ background:#22c55e; }}
+.toast-error {{ background:#ef4444; }}
+.provider-section {{ display:none; }}
+.provider-section.active {{ display:block; }}
+.preview-box {{ background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:12px; font-size:13px; color:#ccc; margin-top:8px; }}
+.warning-banner {{ background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.4); border-radius:10px; padding:14px 20px; margin-bottom:20px; display:flex; align-items:center; gap:10px; font-size:14px; color:#eab308; }}
+.warning-banner .material-icons {{ font-size:22px; }}
+.warning-banner.hidden {{ display:none; }}
+</style>
+</head>
+<body>
+{sidebar_html}
+<div id="kk-main">
+<div class="topbar"><h1><i class="material-icons" style="color:#D4A843;margin-right:4px;">sms</i> SMS Settings</h1></div>
+<div class="container">
+<div class="warning-banner" id="provider-warning">
+<i class="material-icons">warning</i>
+<span><strong>SMS provider is disabled.</strong> Users will not receive OTP SMS until MSG91 or Twilio is configured. Before public launch, configure either MSG91 (Auth Key, Template ID, Sender ID, Entity ID) or Twilio (Account SID, Auth Token, From Number).</span>
+</div>
+<div class="grid">
+
+<!-- General Settings Card -->
+<div class="card">
+<div class="card-header"><h3><i class="material-icons">settings</i> General Settings</h3></div>
+<div class="card-body">
+<div class="field">
+<label>Active SMS Provider</label>
+<select id="sms-provider">
+<option value="none">None / Disabled</option>
+<option value="msg91">MSG91</option>
+<option value="twilio">Twilio</option>
+</select>
+</div>
+<div class="toggle-row">
+<span style="font-size:13px;color:#ccc;">Enable SMS Sending</span>
+<label class="switch"><input type="checkbox" id="sms-enabled"><span class="slider"></span></label>
+</div>
+<div class="field">
+<label>Default Country Code</label>
+<input type="text" id="country-code" value="91" maxlength="5" style="width:80px;">
+</div>
+<div class="field">
+<label>OTP Message Template</label>
+<textarea id="otp-template"></textarea>
+<div class="hint">Use {{otp}} as the OTP placeholder.</div>
+</div>
+<div class="field">
+<label>Message Preview</label>
+<div class="preview-box" id="msg-preview"></div>
+</div>
+</div>
+</div>
+
+<!-- MSG91 Settings Card -->
+<div class="card provider-section" id="msg91-card">
+<div class="card-header"><h3><i class="material-icons">cloud</i> MSG91 Settings</h3></div>
+<div class="card-body">
+<div class="field">
+<label>Auth Key</label>
+<div class="secret-row">
+<input type="password" id="msg91-auth-key" placeholder="Enter new auth key to update">
+<span class="secret-status" id="msg91-key-status"></span>
+</div>
+<div class="hint">Leave blank to keep existing key.</div>
+</div>
+<div class="field">
+<label>Template ID</label>
+<input type="text" id="msg91-template-id">
+</div>
+<div class="field">
+<label>Sender ID / Header</label>
+<input type="text" id="msg91-sender-id" maxlength="20">
+</div>
+<div class="field">
+<label>Route</label>
+<input type="text" id="msg91-route" placeholder="e.g. 4" maxlength="10">
+</div>
+<div class="field">
+<label>DLT Entity ID</label>
+<input type="text" id="msg91-entity-id">
+</div>
+<div class="field">
+<label>API Base URL</label>
+<input type="text" id="msg91-base-url" value="https://control.msg91.com/api/v5/otp">
+</div>
+</div>
+</div>
+
+<!-- Twilio Settings Card -->
+<div class="card provider-section" id="twilio-card">
+<div class="card-header"><h3><i class="material-icons">phone_forwarded</i> Twilio Settings</h3></div>
+<div class="card-body">
+<div class="field">
+<label>Account SID</label>
+<div class="secret-row">
+<input type="password" id="twilio-sid" placeholder="Enter new Account SID to update">
+<span class="secret-status" id="twilio-sid-status"></span>
+</div>
+<div class="hint">Leave blank to keep existing value.</div>
+</div>
+<div class="field">
+<label>Auth Token</label>
+<div class="secret-row">
+<input type="password" id="twilio-token" placeholder="Enter new Auth Token to update">
+<span class="secret-status" id="twilio-token-status"></span>
+</div>
+<div class="hint">Leave blank to keep existing value.</div>
+</div>
+<div class="field">
+<label>From Number</label>
+<input type="text" id="twilio-from" placeholder="+1XXXXXXXXXX">
+</div>
+<div class="field">
+<label>Messaging Service SID</label>
+<input type="text" id="twilio-msid" placeholder="Optional — use instead of From Number">
+</div>
+</div>
+</div>
+
+<!-- Test OTP Card -->
+<div class="card">
+<div class="card-header"><h3><i class="material-icons">science</i> Send Test OTP</h3></div>
+<div class="card-body">
+<div class="field">
+<label>Test Mobile Number</label>
+<input type="text" id="test-mobile" placeholder="e.g. 9876543210">
+</div>
+<button class="btn btn-secondary" id="btn-test" onclick="sendTestOtp()" style="width:100%;">
+<i class="material-icons" style="font-size:16px;vertical-align:middle;">send</i> Send Test OTP
+</button>
+<div class="test-result" id="test-result"></div>
+<div style="margin-top:14px;font-size:12px;color:#666;">
+<div><strong>Last test:</strong> <span id="last-test-info">—</span></div>
+</div>
+</div>
+</div>
+
+</div><!-- /grid -->
+</div><!-- /container -->
+
+<div class="save-bar">
+<button class="btn btn-secondary" onclick="loadConfig()">Reset</button>
+<button class="btn btn-primary" id="btn-save" onclick="saveConfig()">
+<i class="material-icons" style="font-size:16px;vertical-align:middle;">save</i> Save Settings
+</button>
+</div>
+</div><!-- /kk-main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+function getCookie(name) {{
+    var v = document.cookie.match('(^|;)\\\\s*'+name+'=([^;]*)');
+    return v ? decodeURIComponent(v[2]) : '';
+}}
+function showToast(msg, type) {{
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast toast-' + type;
+    t.style.display = 'block';
+    setTimeout(function() {{ t.style.display = 'none'; }}, 3000);
+}}
+function updateProviderSections() {{
+    var p = document.getElementById('sms-provider').value;
+    document.getElementById('msg91-card').className = 'card provider-section' + (p === 'msg91' ? ' active' : '');
+    document.getElementById('twilio-card').className = 'card provider-section' + (p === 'twilio' ? ' active' : '');
+    var warn = document.getElementById('provider-warning');
+    if (warn) warn.className = 'warning-banner' + (p !== 'none' ? ' hidden' : '');
+}}
+function updatePreview() {{
+    var tpl = document.getElementById('otp-template').value || 'Your KOKOROKO OTP is {{otp}}.';
+    document.getElementById('msg-preview').textContent = tpl.replace('{{otp}}', '123456');
+}}
+
+function loadConfig() {{
+    fetch('/admin-api/sms-settings/get/', {{
+        headers: {{'X-CSRFToken': getCookie('csrftoken')}}
+    }})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(d) {{
+        document.getElementById('sms-provider').value = d.provider || 'none';
+        document.getElementById('sms-enabled').checked = d.is_enabled;
+        document.getElementById('country-code').value = d.default_country_code || '91';
+        document.getElementById('otp-template').value = d.otp_message_template || '';
+        document.getElementById('msg91-template-id').value = d.msg91_template_id || '';
+        document.getElementById('msg91-sender-id').value = d.msg91_sender_id || '';
+        document.getElementById('msg91-route').value = d.msg91_route || '';
+        document.getElementById('msg91-entity-id').value = d.msg91_entity_id || '';
+        document.getElementById('msg91-base-url').value = d.msg91_base_url || 'https://control.msg91.com/api/v5/otp';
+        document.getElementById('twilio-from').value = d.twilio_from_number || '';
+        document.getElementById('twilio-msid').value = d.twilio_messaging_service_sid || '';
+
+        // Clear secret inputs
+        document.getElementById('msg91-auth-key').value = '';
+        document.getElementById('twilio-sid').value = '';
+        document.getElementById('twilio-token').value = '';
+
+        // Secret status badges
+        var ks = document.getElementById('msg91-key-status');
+        ks.textContent = d.msg91_auth_key_set ? 'Set: ' + d.msg91_auth_key_masked : 'Not set';
+        ks.className = 'secret-status ' + (d.msg91_auth_key_set ? 'secret-set' : 'secret-unset');
+
+        var ss = document.getElementById('twilio-sid-status');
+        ss.textContent = d.twilio_account_sid_set ? 'Set: ' + d.twilio_account_sid_masked : 'Not set';
+        ss.className = 'secret-status ' + (d.twilio_account_sid_set ? 'secret-set' : 'secret-unset');
+
+        var ts = document.getElementById('twilio-token-status');
+        ts.textContent = d.twilio_auth_token_set ? 'Set: ' + d.twilio_auth_token_masked : 'Not set';
+        ts.className = 'secret-status ' + (d.twilio_auth_token_set ? 'secret-set' : 'secret-unset');
+
+        // Last test info
+        var lti = document.getElementById('last-test-info');
+        if (d.last_test_at) {{
+            var statusCls = d.last_test_status === 'success' ? 'status-success' : 'status-failed';
+            lti.innerHTML = '<span class="status-badge ' + statusCls + '">' + d.last_test_status + '</span> '
+                + d.last_test_mobile + ' at ' + new Date(d.last_test_at).toLocaleString()
+                + (d.last_test_error ? ' — ' + d.last_test_error : '');
+        }} else {{
+            lti.textContent = 'Never tested';
+        }}
+
+        updateProviderSections();
+        updatePreview();
+    }})
+    .catch(function(e) {{ showToast('Failed to load config: ' + e, 'error'); }});
+}}
+
+function saveConfig() {{
+    var data = {{
+        provider: document.getElementById('sms-provider').value,
+        is_enabled: document.getElementById('sms-enabled').checked,
+        default_country_code: document.getElementById('country-code').value,
+        otp_message_template: document.getElementById('otp-template').value,
+        msg91_template_id: document.getElementById('msg91-template-id').value,
+        msg91_sender_id: document.getElementById('msg91-sender-id').value,
+        msg91_route: document.getElementById('msg91-route').value,
+        msg91_entity_id: document.getElementById('msg91-entity-id').value,
+        msg91_base_url: document.getElementById('msg91-base-url').value,
+        twilio_from_number: document.getElementById('twilio-from').value,
+        twilio_messaging_service_sid: document.getElementById('twilio-msid').value
+    }};
+    // Only send secrets if the user typed something
+    var mk = document.getElementById('msg91-auth-key').value;
+    if (mk) data.msg91_auth_key = mk;
+    var ts = document.getElementById('twilio-sid').value;
+    if (ts) data.twilio_account_sid = ts;
+    var tt = document.getElementById('twilio-token').value;
+    if (tt) data.twilio_auth_token = tt;
+
+    document.getElementById('btn-save').disabled = true;
+    fetch('/admin-api/sms-settings/save/', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}},
+        body: JSON.stringify(data)
+    }})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(d) {{
+        if (d.status === 'ok') {{
+            showToast('Settings saved', 'success');
+            loadConfig();
+        }} else {{
+            showToast(d.error || 'Save failed', 'error');
+        }}
+    }})
+    .catch(function(e) {{ showToast('Error: ' + e, 'error'); }})
+    .finally(function() {{ document.getElementById('btn-save').disabled = false; }});
+}}
+
+function sendTestOtp() {{
+    var mobile = document.getElementById('test-mobile').value.trim();
+    if (!mobile || mobile.length < 10) {{
+        showToast('Enter a valid mobile number', 'error');
+        return;
+    }}
+    var btn = document.getElementById('btn-test');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    var result = document.getElementById('test-result');
+    result.style.display = 'none';
+
+    fetch('/admin-api/sms-settings/test/', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}},
+        body: JSON.stringify({{mobile: mobile}})
+    }})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(d) {{
+        result.style.display = 'block';
+        if (d.success) {{
+            result.className = 'test-result test-success';
+            result.textContent = 'Test OTP sent successfully!';
+        }} else {{
+            result.className = 'test-result test-failed';
+            result.textContent = 'Failed: ' + (d.error || 'Unknown error');
+        }}
+        loadConfig();
+    }})
+    .catch(function(e) {{
+        result.style.display = 'block';
+        result.className = 'test-result test-failed';
+        result.textContent = 'Error: ' + e;
+    }})
+    .finally(function() {{
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:16px;vertical-align:middle;">send</i> Send Test OTP';
+    }});
+}}
+
+document.getElementById('sms-provider').addEventListener('change', updateProviderSections);
+document.getElementById('otp-template').addEventListener('input', updatePreview);
+loadConfig();
+</script>
+</body></html>''')
+
+
+urlpatterns = [
+    # Media files (before admin catch-all, no auth required)
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    path('api/', include('apiManager.urls')),
+    path("auth/", include("djoser.urls.jwt")),
+    path('admin-api/deposit-action/<int:pk>/<str:action>/', deposit_action_view, name='deposit_action'),
+    path('admin-api/withdrawal-action/<int:pk>/<str:action>/', withdrawal_action_view, name='withdrawal_action'),
+    path('admin-api/sidebar-counts/', admin_sidebar_counts, name='admin_sidebar_counts'),
+    path('admin-api/dashboard-stats/', admin_dashboard_stats, name='admin_dashboard_stats'),
+    path('admin-api/get-theme/', get_theme_api, name='get_theme_api'),
+    path('admin-api/set-theme/', set_theme_api, name='set_theme_api'),
+    path('admin-api/theme-presets/', get_theme_presets_api, name='get_theme_presets_api'),
+    path('admin-api/theme-settings/', admin_theme_page, name='admin_theme_page'),
+    path('admin-api/user-risk/<int:user_id>/', admin_user_risk, name='admin_user_risk'),
+    path('admin-api/monitoring/', admin_monitoring_dashboard, name='admin_monitoring'),
+    path('admin-api/run-backup/', admin_run_backup, name='admin_run_backup'),
+    path('admin-api/feature-controls/', admin_feature_controls_page, name='admin_feature_controls'),
+    path('admin-api/get-feature-controls/', get_feature_controls_api, name='get_feature_controls_api'),
+    path('admin-api/set-feature-controls/', set_feature_controls_api, name='set_feature_controls_api'),
+    path('admin-api/sms-settings/', admin_sms_settings_page, name='admin_sms_settings'),
+    path('admin-api/sms-settings/get/', admin_sms_settings_get, name='admin_sms_settings_get'),
+    path('admin-api/sms-settings/save/', admin_sms_settings_save, name='admin_sms_settings_save'),
+    path('admin-api/sms-settings/test/', admin_sms_test, name='admin_sms_test'),
+    path('health/', health_check_view, name='health_check'),
+    path('', admin.site.urls),
+]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
