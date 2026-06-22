@@ -1,10 +1,10 @@
 {% extends "admin/base.html" %}
 {% load i18n static %}
 
-{% block title %}{{ title }} | Kokoroko Admin{% endblock %}
+{% block title %}{{ title }} | RoosterRun Admin{% endblock %}
 
 {% block branding %}
-<h1 id="header-branding" style="display:none;"><a href="/">Kokoroko</a></h1>
+<h1 id="header-branding" style="display:none;"><a href="/">RoosterRun</a></h1>
 {% endblock %}
 
 {% block extrastyle %}
@@ -19,7 +19,7 @@
   src: url('/fonts/materialicons.woff2') format('woff2'), url(https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
   font-display: block;
 }
-/* ============ CSS VARIABLES — KOKOROKO DESIGN SYSTEM (Admin Panel) ============ */
+/* ============ CSS VARIABLES — ROOSTERRUN DESIGN SYSTEM (Admin Panel) ============ */
 /* Synced with Android ThemeContext.js + Web play/index.html. All 3 platforms share these tokens. */
 :root {
     /* ====================================================================
@@ -561,7 +561,7 @@ a:hover { color: var(--accent); }
 #changelist-filter, .changelist-filter-wrapper, [id*="changelist-filter"],
 .card-content#changelist-filter {
     width: 100% !important;
-    max-width: calc(100vw - 220px - 48px) !important;
+    max-width: 100% !important;
     position: static !important;
     order: -1 !important;
     background: var(--bg-card) !important;
@@ -1264,10 +1264,11 @@ body.login .row, body.login .col, body.login .s12 {
 }
 body.login form::before {
     content: ''; display: block; width: 64px; height: 64px;
-    margin: 0 auto 24px; border-radius: 14px;
+    margin: 0 auto 8px; border-radius: 14px;
     background: url('/static/admin/img/logo.png') center/contain no-repeat;
     border: 1px solid var(--gold-border);
 }
+
 body.login form#login-form input[type="text"],
 body.login form#login-form input[type="password"] {
     width: 100% !important; padding: 12px 14px !important;
@@ -1681,6 +1682,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (indent) indent.style.cssText = 'position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;display:flex!important;justify-content:center!important;align-items:center!important;background:#0B0B0B!important;z-index:9999!important;';
         var sideBar = document.querySelector('.side-bar');
         if (sideBar) sideBar.style.display = 'none';
+        var loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            var titleEl = document.createElement('div');
+            titleEl.style.cssText = 'text-align:center;margin-bottom:20px;font-size:16px;font-weight:700;color:var(--accent);font-family:Inter,-apple-system,sans-serif;';
+            titleEl.textContent = 'RoosterRun Admin';
+            loginForm.insertBefore(titleEl, loginForm.firstChild);
+        }
         return;
     }
 
@@ -1688,7 +1696,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var sidebar = document.createElement('div');
     sidebar.id = 'kokoroko-sidebar';
     sidebar.innerHTML = '' +
-        '<div class="sb-brand"><img src="/static/admin/img/logo.png"><span>Kokoroko</span></div>' +
+        '<div class="sb-brand"><img src="/static/admin/img/logo.png"><span>RoosterRun</span></div>' +
 
         '<div class="sb-section">' +
         '<a href="/userManager/user/" class="sb-item" data-path="DASHBOARD"><i>dashboard</i>Dashboard</a>' +
@@ -1755,9 +1763,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (container) {
         var header = document.createElement('div');
         header.id = 'kokoroko-header';
-        var pageTitle = document.title.replace(' | Kokoroko Admin', '').replace('Kokoroko Admin', 'Dashboard');
-        header.innerHTML = '<div style="display:flex;align-items:center;gap:12px;">' +
+        var pageTitle = document.title.replace(' | RoosterRun Admin', '').replace('RoosterRun Admin', 'Dashboard');
+        var canGoBack = window.history.length > 1 && window.location.pathname !== '/userManager/user/' && window.location.pathname !== '/';
+        var backBtn = canGoBack
+            ? '<button onclick="window.history.back()" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;"><i style="font-size:20px;color:var(--text-secondary);">arrow_back</i></button>'
+            : '';
+        header.innerHTML = '<div style="display:flex;align-items:center;gap:8px;">' +
             '<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu"><i style="font-size:22px;color:#F5F1E8;line-height:36px;width:36px;height:36px;display:block;text-align:center;">menu</i></button>' +
+            backBtn +
             '<div class="header-title">' + pageTitle + '</div>' +
             '</div>' +
             '<div class="header-right">' +
@@ -1798,9 +1811,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (sideWrapper) sideWrapper.style.display = 'none';
     if (filterPanel) {
         var isMobile = window.innerWidth < 768;
-        var filterDir = isMobile ? 'flex-direction:column !important;align-items:stretch !important;' : 'align-items:center !important;';
-        var filterMaxW = isMobile ? 'max-width:100% !important;' : '';
-        filterPanel.style.cssText = 'display:flex !important;flex-wrap:wrap !important;' + filterDir + 'gap:12px !important;width:100% !important;' + filterMaxW + 'padding:12px 16px !important;background:var(--bg-card) !important;border:1px solid var(--border) !important;border-radius:12px !important;margin-bottom:12px !important;height:auto !important;min-height:0 !important;flex-grow:0 !important;flex-shrink:0 !important;flex-basis:auto !important;align-self:stretch !important;position:static !important;float:none !important;order:-1 !important;';
+        var filterDir = isMobile
+            ? 'flex-direction:column !important;align-items:stretch !important;'
+            : 'flex-direction:row !important;align-items:center !important;';
+        filterPanel.style.cssText = 'display:flex !important;flex-wrap:wrap !important;' + filterDir + 'gap:12px !important;width:100% !important;max-width:100% !important;padding:12px 16px !important;background:var(--bg-card) !important;border:1px solid var(--border) !important;border-radius:12px !important;margin-bottom:12px !important;height:auto !important;min-height:0 !important;flex-grow:0 !important;flex-shrink:0 !important;flex-basis:auto !important;align-self:stretch !important;position:static !important;float:none !important;order:-1 !important;';
         var innerRows = filterPanel.querySelectorAll('.row');
         innerRows.forEach(function(row) {
             row.style.cssText = 'display:contents !important;';
@@ -1808,15 +1822,18 @@ document.addEventListener('DOMContentLoaded', function() {
         filterPanel.querySelectorAll('.col, [class*="col "]').forEach(function(col) {
             col.style.cssText = isMobile
                 ? 'width:100% !important;display:flex !important;align-items:center !important;gap:6px !important;padding:0 !important;margin:0 !important;float:none !important;'
-                : 'width:auto !important;display:inline-flex !important;align-items:center !important;gap:6px !important;padding:0 !important;margin:0 !important;float:none !important;flex-grow:0 !important;flex-shrink:0 !important;';
+                : 'width:auto !important;flex:0 1 auto !important;display:inline-flex !important;align-items:center !important;gap:6px !important;padding:0 !important;margin:0 !important;float:none !important;';
         });
         filterPanel.querySelectorAll('.input-field').forEach(function(f) {
             f.style.cssText = 'margin:0 !important;padding:0 !important;';
         });
         filterPanel.querySelectorAll('select').forEach(function(sel) {
             sel.style.cssText = isMobile
-                ? 'width:100% !important;max-width:100% !important;'
-                : '';
+                ? 'width:100% !important;max-width:100% !important;padding:8px 12px !important;border:1px solid var(--border) !important;border-radius:8px !important;font-size:13px !important;background:var(--bg-input) !important;color:var(--text-primary) !important;'
+                : 'min-width:120px !important;padding:8px 12px !important;border:1px solid var(--border) !important;border-radius:8px !important;font-size:13px !important;background:var(--bg-input) !important;color:var(--text-primary) !important;';
+        });
+        filterPanel.querySelectorAll('label').forEach(function(lbl) {
+            lbl.style.cssText = 'font-size:12px !important;font-weight:600 !important;color:var(--text-secondary) !important;white-space:nowrap !important;';
         });
     }
     var actionForm = document.querySelector('.actions form, #changelist-form .actions');

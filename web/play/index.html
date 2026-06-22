@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kokoroko - Play</title>
+    <title>RoosterRun - Play</title>
     <style>
     /* Local Material Icons font - no CDN dependency */
     @font-face {
@@ -99,7 +99,7 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         .hidden { display: none !important; }
 
-        /* ===== REUSABLE DESIGN TOKENS (Kokoroko Premium) ===== */
+        /* ===== REUSABLE DESIGN TOKENS (RoosterRun Premium) ===== */
         .premium-card {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 16px;
@@ -1816,8 +1816,8 @@
     <div id="auth-screen" class="auth-container">
         <div class="auth-card">
             <div class="auth-logo">
-                <img src="/static/logo.png" alt="Kokoroko" onerror="this.style.display='none'">
-                <h1>Kokoroko</h1>
+                <img src="/static/logo.png" alt="RoosterRun" onerror="this.style.display='none'">
+                <h1>RoosterRun</h1>
                 <p id="auth-subtitle">Welcome back</p>
             </div>
             <div class="auth-tabs">
@@ -1880,14 +1880,14 @@
                 </div>
                 <button class="auth-btn" id="reg-btn" onclick="handleRegister()">Send OTP & Register</button>
             </div>
-        </div>
-        <footer style="text-align:center;margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:400px;">
-            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
-                <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);white-space:nowrap;"><span class="material-icons" style="font-size:14px;">18_up_rating</span> 18+ Only</span>
-                <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);white-space:nowrap;"><span class="material-icons" style="font-size:14px;">verified_user</span> Secure Play</span>
+            <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
+                    <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);white-space:nowrap;"><span class="material-icons" style="font-size:14px;">18_up_rating</span> 18+ Only</span>
+                    <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);white-space:nowrap;"><span class="material-icons" style="font-size:14px;">verified_user</span> Secure Play</span>
+                </div>
+                <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted);text-align:center;flex-wrap:wrap;justify-content:center;"><span class="material-icons" style="font-size:13px;">shield</span> Account recovery protected by SMS OTP</span>
             </div>
-            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted);text-align:center;flex-wrap:wrap;justify-content:center;"><span class="material-icons" style="font-size:13px;">shield</span> Account recovery protected by SMS OTP</span>
-        </footer>
+        </div>
     </div>
 
     <!-- FORGOT PASSWORD MODAL -->
@@ -1935,7 +1935,7 @@
                 </button>
                 <div class="header-brand">
                     <img src="/static/logo.png" alt="K" onerror="this.outerHTML='<div style=&quot;width:36px;height:36px;background:var(--black);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:16px&quot;>K</div>'">
-                    <h2>Kokoroko</h2>
+                    <h2>RoosterRun</h2>
                 </div>
             </div>
             <div class="header-right">
@@ -2160,7 +2160,7 @@
                 </div>
 
                 <div style="text-align:center;padding:8px 0 16px;color:var(--text-muted);font-size:11px;">
-                    © 2024 Kokoroko. All rights reserved.
+                    © 2024 RoosterRun. All rights reserved.
                 </div>
             </div>
 
@@ -4863,13 +4863,13 @@
     // ===== DYNAMIC THEME FROM ADMIN API =====
     async function loadThemeFromApi() {
         try {
-            var cached = localStorage.getItem('kokoroko_theme');
+            var cached = localStorage.getItem('roosterrun_theme');
             if (cached) applyThemeColors(JSON.parse(cached));
             var res = await fetch(`${API.replace('/api','')}/admin-api/get-theme/`);
             if (!res.ok) return;
             var data = await res.json();
             if (data && data.colors) {
-                localStorage.setItem('kokoroko_theme', JSON.stringify(data.colors));
+                localStorage.setItem('roosterrun_theme', JSON.stringify(data.colors));
                 applyThemeColors(data.colors);
             }
         } catch(e) {}
@@ -5228,8 +5228,8 @@
     }
     function shareReferral() {
         var code = document.getElementById('referral-code').textContent;
-        var text = 'Join Kokoroko and start earning! Use my referral code: ' + code;
-        if (navigator.share) { navigator.share({title:'Kokoroko Referral', text:text}).catch(function(){}); }
+        var text = 'Join RoosterRun and start earning! Use my referral code: ' + code;
+        if (navigator.share) { navigator.share({title:'RoosterRun Referral', text:text}).catch(function(){}); }
         else { copyReferralCode(); showToast('Link copied — share it with friends!','success'); }
     }
 
@@ -5289,7 +5289,7 @@
                 }
                 const bgImg = bannerUrl ? `url(${bannerUrl})` : 'linear-gradient(135deg,#1a1a1a,#2a1f0e)';
                 const catLabels = {S:'Cockfight',P:'Promotion',D:'Dice Play',W:'Wallet',V:'Videos'};
-                const label = catLabels[b.category] || 'Kokoroko';
+                const label = catLabels[b.category] || 'RoosterRun';
                 trackHtml += `<div class="banner-slide" style="background-image:${bgImg};background-size:cover;background-position:center;"><div class="banner-content"><h3>${label}</h3></div></div>`;
                 dotsHtml += `<div class="banner-dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
             });
