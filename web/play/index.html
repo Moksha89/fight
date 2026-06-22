@@ -227,12 +227,25 @@
             transition: border 0.2s; outline: none;
         }
         .form-group input:-webkit-autofill,
-        .form-group input:-webkit-autofill:focus {
-            -webkit-text-fill-color: var(--text-primary) !important;
-            -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
-            background-color: var(--bg-input) !important;
-            color: var(--text-primary) !important;
+        .form-group input:-webkit-autofill:focus,
+        .form-group input:-webkit-autofill:hover,
+        .form-group input:-webkit-autofill:active {
+            -webkit-text-fill-color: #F5F1E8 !important;
+            -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+            background-color: #1a1a1a !important;
+            color: #F5F1E8 !important;
+            caret-color: #F5F1E8;
         }
+
+        .form-group { position: relative; }
+        .password-toggle {
+            position: absolute; right: 12px; bottom: 13px;
+            background: none; border: none; color: #6B6560; cursor: pointer;
+            font-size: 20px; padding: 4px; line-height: 1;
+            font-family: 'Material Icons'; -webkit-text-fill-color: #6B6560 !important;
+        }
+        .password-toggle:hover { color: #F5F1E8; -webkit-text-fill-color: #F5F1E8 !important; }
+        .form-group.has-toggle input { padding-right: 40px; }
         .form-group input:focus {
             border-color: var(--gold);
             box-shadow: 0 0 0 3px rgba(212,168,67,0.15);
@@ -1849,6 +1862,7 @@
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" id="login-password" placeholder="Enter password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('login-password', this)">visibility_off</button>
                 </div>
                 <div id="login-otp-section" class="otp-section hidden">
                     <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;">Enter OTP</label>
@@ -1878,10 +1892,12 @@
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" id="reg-password" placeholder="Min 6 characters">
+                    <button type="button" class="password-toggle" onclick="togglePassword('reg-password', this)">visibility_off</button>
                 </div>
                 <div class="form-group">
                     <label>Confirm Password</label>
                     <input type="password" id="reg-confirm" placeholder="Re-enter password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('reg-confirm', this)">visibility_off</button>
                 </div>
                 <div id="reg-otp-section" class="otp-section hidden">
                     <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;">Enter OTP</label>
@@ -2761,6 +2777,17 @@
         } catch(e) { showForgotError('Network error. Please try again.'); }
     }
 
+
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'visibility';
+        } else {
+            input.type = 'password';
+            btn.textContent = 'visibility_off';
+        }
+    }
     async function handleLogin() {
         const identifier = document.getElementById('login-identifier').value.trim();
         const password = document.getElementById('login-password').value;
