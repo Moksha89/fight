@@ -16,47 +16,50 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+  src: url('/fonts/materialicons.woff2') format('woff2'), url(https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
   font-display: block;
 }
 /* ============ CSS VARIABLES — KOKOROKO DESIGN SYSTEM (Admin Panel) ============ */
 /* Synced with Android ThemeContext.js + Web play/index.html. All 3 platforms share these tokens. */
 :root {
-    /* Brand */
-    --gold: #D4A843;
-    --gold-dark: #B8922E;
-    --gold-light: #F0D78C;
-    --gold-bg: rgba(212,168,67,0.08);
-    --gold-bg-hover: rgba(212,168,67,0.14);
-    --gold-border: rgba(212,168,67,0.18);
-    --gold-border-strong: rgba(212,168,67,0.30);
-    --gold-glow: rgba(212,168,67,0.3);
+    /* ====================================================================
+       GLOBAL THEME VARIABLES — Change these to restyle the entire admin.
+       To switch themes, just update these values. Every element uses them.
+       ==================================================================== */
 
-    /* Backgrounds */
-    --bg-main: #0B0B0B;
-    --bg: #0B0B0B;
-    --bg-card: #171717;
-    --bg-elevated: #1F1A12;
-    --bg-card-hover: #1F1F1F;
-    --bg-hover: #1F1A12;
-    --bg-sidebar: #0A0A0A;
-    --bg-surface: #121212;
-    --bg-input: #1a1a1a;
-    --bg-white: #171717;
+    /* === ACCENT COLOR (buttons, links, active states) === */
+    --accent: #F97316;              /* Primary accent — orange */
+    --accent-dark: #EA580C;         /* Accent hover/pressed */
+    --accent-light: #FB923C;        /* Accent lighter variant */
+    --accent-bg: rgba(249,115,22,0.08);   /* Accent tinted background */
+    --accent-bg-hover: rgba(249,115,22,0.14);
+    --accent-border: var(--accent-border);
+    --accent-text: #FFFFFF;         /* Text on accent-colored buttons */
 
-    /* Text */
-    --text-primary: #F5F1E8;
-    --text-secondary: #A8A29E;
-    --text-muted: #6B6560;
-    --text-on-gold: #000000;
-    --text-label: #9ca3af;
+    /* === BACKGROUNDS === */
+    --bg-main: #F5F5F5;             /* Page background */
+    --bg-card: #FFFFFF;             /* Cards, fieldsets, tables */
+    --bg-elevated: #F0F0F0;         /* Table headers, section headers */
+    --bg-card-hover: #FAFAFA;       /* Row hover */
+    --bg-hover: #F8F8F8;            /* General hover */
+    --bg-sidebar: #1A1A1A;          /* Sidebar stays dark */
+    --bg-header: #FFFFFF;           /* Top header bar */
+    --bg-input: #FFFFFF;            /* Input fields */
 
-    /* Borders */
-    --border: rgba(212,168,67,0.18);
-    --border-light: rgba(212,168,67,0.10);
-    --border-subtle: rgba(255,255,255,0.06);
+    /* === TEXT === */
+    --text-primary: #111111;        /* Main text */
+    --text-secondary: #555555;      /* Secondary/labels */
+    --text-muted: #999999;          /* Muted/placeholder */
+    --text-on-accent: #FFFFFF;      /* Text on accent buttons */
+    --text-sidebar: #CCCCCC;        /* Sidebar text */
+    --text-sidebar-active: #FFFFFF; /* Sidebar active text */
 
-    /* Status */
+    /* === BORDERS === */
+    --border: #E0E0E0;              /* Default border */
+    --border-light: #EEEEEE;        /* Lighter border */
+    --border-subtle: #F0F0F0;       /* Very subtle border */
+
+    /* === STATUS COLORS === */
     --success: #22C55E;
     --success-dark: #16a34a;
     --danger: #EF4444;
@@ -65,7 +68,7 @@
     --warning-dark: #d97706;
     --info: #3B82F6;
 
-    /* Game Colors */
+    /* === GAME COLORS === */
     --meron: #DC2626;
     --meron-light: #ef4444;
     --wala: #2563EB;
@@ -73,13 +76,28 @@
     --draw: #A855F7;
     --draw-light: #c084fc;
 
-    /* Layout */
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-    --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+    /* === LAYOUT === */
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
     --radius: 12px;
     --radius-sm: 8px;
     --radius-lg: 16px;
+
+    /* === LEGACY ALIASES (mapped to new vars for compatibility) === */
+    --gold: var(--accent);
+    --gold-dark: var(--accent-dark);
+    --gold-light: var(--accent-light);
+    --gold-bg: var(--accent-bg);
+    --gold-bg-hover: var(--accent-bg-hover);
+    --gold-border: var(--border);
+    --gold-border-strong: var(--accent-border);
+    --gold-glow: var(--accent-bg);
+    --bg: var(--bg-main);
+    --bg-surface: var(--bg-main);
+    --bg-white: var(--bg-card);
+    --text-on-gold: var(--text-on-accent);
+    --text-label: var(--text-muted);
 }
 
 /* ============ RESET & BASE ============ */
@@ -107,13 +125,12 @@ i, .material-icons {
 /* Global table background fix - prevent white bg from base CSS */
 table, thead, tbody, tr, td, th {
     background-color: transparent !important;
-    color: inherit;
+    color: var(--text-primary);
 }
 /* Hide ALL default admin chrome */
 #header, .breadcrumbs, #user-tools, .header,
 nav.navbar, .ma-tools-icons, [class*="ma-tools"],
-#branding, .login-form, #container > div:first-child > div:first-child,
-.messagelist { display: none !important; }
+#branding, .login-form { display: none !important; }
 
 /* ============ LAYOUT ============ */
 #kokoroko-sidebar {
@@ -122,7 +139,7 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     width: 220px;
     height: 100vh;
     background: var(--bg-sidebar);
-    border-right: 1px solid var(--border);
+    border-right: 1px solid rgba(255,255,255,0.08);
     z-index: 9000;
     overflow-y: auto;
     overflow-x: hidden;
@@ -130,7 +147,7 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     flex-direction: column;
 }
 #kokoroko-sidebar::-webkit-scrollbar { width: 3px; }
-#kokoroko-sidebar::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+#kokoroko-sidebar::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
 
 #kokoroko-main {
     margin-left: 220px;
@@ -146,7 +163,7 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     height: 100vh;
 }
 #kokoroko-header {
-    background: var(--bg-card);
+    background: var(--bg-header);
     border-bottom: 1px solid var(--border);
     padding: 12px 24px;
     display: flex;
@@ -169,14 +186,14 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(255,255,255,0.10);
 }
 .sb-brand img { width: 34px; height: 34px; border-radius: 8px; }
-.sb-brand span { color: var(--gold); font-size: 17px; font-weight: 700; letter-spacing: 0.3px; }
+.sb-brand span { color: var(--text-sidebar-active); font-size: 17px; font-weight: 700; letter-spacing: 0.3px; }
 
 .sb-section { padding: 8px 6px 2px; }
 .sb-title {
-    color: var(--text-muted); font-size: 10px; font-weight: 600;
+    color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 1.4px;
     padding: 6px 14px; margin-bottom: 2px;
 }
@@ -184,21 +201,21 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     display: flex; align-items: center; gap: 10px;
     padding: 8px 14px; margin: 2px 6px;
     border-radius: 8px; text-decoration: none;
-    color: var(--text-secondary); font-size: 13px; font-weight: 400;
+    color: var(--text-sidebar); font-size: 13px; font-weight: 400;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
 }
-.sb-item:hover { background: var(--gold-bg); color: var(--text-primary); }
+.sb-item:hover { background: rgba(255,255,255,0.08); color: var(--text-sidebar-active); }
 .sb-item.active {
-    background: var(--gold-bg-hover);
-    color: var(--gold);
+    background: var(--accent-bg-hover);
+    color: var(--accent);
     font-weight: 500;
-    border-left-color: var(--gold);
+    border-left-color: var(--accent);
 }
-.sb-item i { font-size: 18px; width: 22px; text-align: center; opacity: 0.5; }
-.sb-item:hover i { opacity: 0.9; color: var(--gold-light); }
-.sb-item.active i { opacity: 1; color: var(--gold); }
-.sb-divider { height: 1px; background: var(--border); margin: 8px 18px; }
+.sb-item i { font-size: 18px; width: 22px; text-align: center; opacity: 0.7; color: var(--accent-light); }
+.sb-item:hover i { opacity: 1; color: var(--accent); }
+.sb-item.active i { opacity: 1; color: var(--accent); }
+.sb-divider { height: 1px; background: rgba(255,255,255,0.10); margin: 8px 18px; }
 .sb-badge { display: none; margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 10px; font-weight: 700; line-height: 20px; text-align: center; color: #FFF; background: var(--danger); }
 .sb-badge.sb-badge-green { background: var(--success); }
 .sb-badge.has-count { display: inline-block; }
@@ -207,22 +224,22 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
 .header-title { color: var(--text-primary); font-size: 20px; font-weight: 600; }
 .header-breadcrumb { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
 .header-breadcrumb a { color: var(--text-secondary); text-decoration: none; }
-.header-breadcrumb a:hover { color: var(--gold); }
+.header-breadcrumb a:hover { color: var(--accent); }
 .header-right { display: flex; align-items: center; gap: 14px; }
 .header-btn {
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-    border: none; color: #000;
+    background: var(--accent);
+    border: none; color: var(--accent-text);
     padding: 8px 18px; border-radius: 8px; cursor: pointer;
     font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s;
 }
-.header-btn:hover { background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #000; transform: translateY(-1px); }
+.header-btn:hover { background: var(--accent-dark); color: var(--accent-text); transform: translateY(-1px); }
 .header-user {
     display: flex; align-items: center; gap: 8px;
     color: var(--text-secondary); font-size: 13px;
 }
 .header-user .avatar {
     width: 36px; height: 36px; border-radius: 50%;
-    background: var(--gold-bg-hover); color: var(--gold); font-weight: 600; font-size: 14px;
+    background: var(--accent-bg); color: var(--accent); font-weight: 600; font-size: 14px;
     display: flex; align-items: center; justify-content: center;
     border: 1px solid var(--gold-border);
 }
@@ -240,7 +257,7 @@ html body #container, body > #container, #container#container { margin-left: 220
 #result_list, .results { width: 100% !important; overflow: hidden !important; min-width: 0 !important; max-width: 100% !important; }
 #result_list table, .results table {
     background: var(--bg-card) !important; border-radius: 12px !important;
-    border: 1px solid var(--gold-border) !important; overflow: hidden;
+    border: 1px solid var(--border) !important; overflow: hidden;
     width: 100% !important; min-width: max-content !important; border-collapse: collapse !important;
 }
 
@@ -251,7 +268,7 @@ html body #container, body > #container, #container#container { margin-left: 220
     max-width: calc(100vw - 220px - 48px);
     overflow-x: auto;
     overflow-y: hidden;
-    border: 1px solid var(--gold-border);
+    border: 1px solid var(--border);
     border-radius: 12px;
     background: var(--bg-card);
 }
@@ -263,8 +280,8 @@ html body #container, body > #container, #container#container { margin-left: 220
     border-radius: 0 !important;
 }
 .table-scroll-wrapper::-webkit-scrollbar { height: 8px; }
-.table-scroll-wrapper::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 8px; }
-.table-scroll-wrapper::-webkit-scrollbar-track { background: var(--bg-elevated); }
+.table-scroll-wrapper::-webkit-scrollbar-thumb { background: var(--accent-dark); border-radius: 8px; }
+.table-scroll-wrapper::-webkit-scrollbar-track { background: var(--bg-card); }
 
 /* ============ STICKY TABLE HEADER ============ */
 .table-scroll-wrapper thead th {
@@ -280,14 +297,14 @@ html body #container, body > #container, #container#container { margin-left: 220
     display: inline-flex; align-items: center; justify-content: center;
     width: 30px; height: 30px; border-radius: 8px;
     font-size: 18px; font-weight: 700; text-decoration: none;
-    cursor: pointer; background: var(--bg-elevated); color: var(--text-secondary);
+    cursor: pointer; background: var(--bg-card); color: var(--text-primary);
     border: 1px solid var(--border); transition: all 0.2s;
     line-height: 1;
 }
-.action-more-btn:hover { background: var(--gold-bg); color: var(--gold); border-color: var(--gold-border); }
+.action-more-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-border); }
 .action-more-dropdown {
     display: none; position: absolute; right: 0; top: 34px;
-    background: var(--bg-card); border: 1px solid var(--gold-border);
+    background: var(--bg-card); border: 1px solid var(--border);
     border-radius: 10px; box-shadow: var(--shadow); z-index: 500;
     min-width: 160px; padding: 6px 0;
 }
@@ -301,18 +318,18 @@ html body #container, body > #container, #container#container { margin-left: 220
     margin: 0 !important; white-space: nowrap;
 }
 .action-more-dropdown a:hover {
-    background: var(--gold-bg-hover) !important; color: var(--gold) !important;
+    background: var(--accent-bg) !important; color: var(--accent) !important;
 }
 .action-more-dropdown a .more-icon {
     width: 22px; height: 22px; border-radius: 6px;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 700;
 }
-.action-more-dropdown a[title="Statement"] .more-icon { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
-.action-more-dropdown a[title="Bet History"] .more-icon { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
+.action-more-dropdown a[title="Statement"] .more-icon { background: rgba(59,130,246,0.15); color: var(--info); }
+.action-more-dropdown a[title="Bet History"] .more-icon { background: rgba(168,85,247,0.15); color: var(--draw); }
 .action-more-dropdown a[title="Blacklist"] .more-icon { background: rgba(239,68,68,0.12); color: var(--danger); }
 .action-more-dropdown a[title="Whitelist"] .more-icon { background: rgba(34,197,94,0.12); color: var(--success); }
-.action-more-dropdown a[title="Reset Password"] .more-icon { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
+.action-more-dropdown a[title="Reset Password"] .more-icon { background: rgba(0,0,0,0.10); color: #333333; }
 
 /* ============ RESPONSIVE COLUMN HIDING ============ */
 @media (max-width: 1500px) {
@@ -325,14 +342,14 @@ html body #container, body > #container, #container#container { margin-left: 220
     .col-hide-768 { display: none !important; }
 }
 #result_list th, .results th {
-    background: var(--bg-elevated) !important; color: var(--text-muted) !important;
+    background: var(--bg-elevated) !important; color: var(--text-secondary) !important;
     font-size: 11px !important; text-transform: uppercase !important;
     font-weight: 600 !important; letter-spacing: 0.6px !important;
     border-bottom: 1px solid var(--gold-border) !important; padding: 10px 10px !important;
     white-space: nowrap !important;
 }
 #result_list th a, .results th a { color: var(--text-muted) !important; text-decoration: none !important; }
-#result_list th a:hover, .results th a:hover { color: var(--gold) !important; }
+#result_list th a:hover, .results th a:hover { color: var(--accent) !important; }
 #result_list td, .results td {
     color: var(--text-primary) !important; font-size: 13px !important; padding: 10px 10px !important;
     border-bottom: 1px solid var(--border) !important;
@@ -341,6 +358,7 @@ html body #container, body > #container, #container#container { margin-left: 220
 #result_list tbody tr, .results tbody tr {
     background: var(--bg-card) !important;
 }
+#result_list tbody tr:nth-child(even), .results tbody tr:nth-child(even) { background: var(--bg-hover) !important; }
 #result_list tbody tr:hover, .results tbody tr:hover { background: var(--bg-hover) !important; }
 
 /* ============ ACTION BUTTONS (D/W/S/BH/BL/PR) ============ */
@@ -352,43 +370,91 @@ a[title="Reset Password"] {
     font-size: 11px; font-weight: 700; text-decoration: none;
     margin-right: 3px; transition: all 0.2s;
 }
-a[title="Deposit"] { background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important; border: none !important; }
-a[title="Withdraw"] { background: transparent !important; color: var(--gold) !important; border: 1px solid var(--gold-border-strong) !important; }
-a[title="Statement"] { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; border: 1px solid var(--border) !important; }
-a[title="Bet History"] { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; border: 1px solid var(--border) !important; }
+a[title="Deposit"] { background: var(--success) !important; color: #FFFFFF !important; border: none !important; }
+a[title="Withdraw"] { background: var(--warning) !important; color: #000 !important; border: none !important; }
+a[title="Statement"] { background: var(--info) !important; color: #FFFFFF !important; border: none !important; }
+a[title="Bet History"] { background: var(--draw) !important; color: #FFFFFF !important; border: none !important; }
 a[title="Blacklist"] { background: rgba(239,68,68,0.12) !important; color: var(--danger) !important; border: 1px solid rgba(239,68,68,0.25) !important; }
 a[title="Whitelist"] { background: rgba(34,197,94,0.12) !important; color: var(--success) !important; border: 1px solid rgba(34,197,94,0.25) !important; }
-a[title="Reset Password"] { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; border: 1px solid var(--border) !important; }
+a[title="Reset Password"] { background: #333333 !important; color: #FFFFFF !important; border: none !important; }
 a[title="Deposit"]:hover, a[title="Withdraw"]:hover, a[title="Statement"]:hover,
 a[title="Bet History"]:hover, a[title="Blacklist"]:hover, a[title="Whitelist"]:hover,
 a[title="Reset Password"]:hover { transform: translateY(-1px); opacity: 0.9; }
 
+/* General link accent color */
+#content a:not([class]):not([title]),
+#content-main a:not([class]):not([title]),
+.form-row a, .help a, .inline-related a,
+fieldset a:not(.related-widget-wrapper a):not([title]) {
+    color: var(--accent) !important;
+}
+#content a:not([class]):not([title]):hover,
+fieldset a:not(.related-widget-wrapper a):not([title]):hover {
+    color: var(--accent-dark) !important;
+    text-decoration: underline !important;
+}
+
+/* Search button accent */
+#searchbar button, button[type="submit"] i.material-icons,
+.search-btn, #changelist-search button {
+    color: var(--accent) !important;
+}
+
 /* ============ FORMS & INPUTS ============ */
 input, select, textarea {
-    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    background: var(--bg-input) !important; border: 1px solid var(--border) !important;
     color: var(--text-primary) !important; border-radius: 8px !important;
     padding: 8px 12px !important; font-size: 13px !important;
     height: auto !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+}
+/* Force dark text on all input types across the admin */
+body input, body select, body textarea,
+body input[type="text"], body input[type="number"],
+body input[type="email"], body input[type="password"],
+body input[type="url"], body input[type="search"],
+body input[type="tel"], body input[type="date"],
+body .input-field input, body .input-field textarea,
+fieldset input, fieldset select, fieldset textarea,
+#content input, #content select, #content textarea,
+#changelist input, #changelist select, #changelist textarea,
+.form-row input, .form-row select, .form-row textarea {
+    color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+}
+/* Select2 rendered text */
+.select2-container .select2-selection__rendered,
+.select2-container--default .select2-selection--single .select2-selection__rendered,
+.select2-container .select2-selection,
+.select2-results__option {
+    color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+}
+/* Placeholder text should be muted */
+input::placeholder, textarea::placeholder {
+    color: var(--text-muted) !important;
+    -webkit-text-fill-color: var(--text-muted) !important;
+    opacity: 1 !important;
 }
 #result_list textarea { width: 100px !important; height: 32px !important; min-height: 32px !important; max-height: 60px !important; resize: vertical !important; font-size: 11px !important; padding: 3px 5px !important; }
 #result_list input[type="text"], #result_list input[type="number"] { width: 100px !important; font-size: 12px !important; padding: 4px 6px !important; }
 #result_list td { font-size: 12px !important; padding: 8px 6px !important; white-space: nowrap; }
 #result_list th { font-size: 11px !important; padding: 8px 6px !important; white-space: nowrap; }
 input:focus, select:focus, textarea:focus {
-    border-color: var(--gold) !important; outline: none !important;
-    box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
+    border-color: var(--accent) !important; outline: none !important;
+    box-shadow: 0 0 0 3px var(--accent-bg) !important;
 }
 
 /* ============ BUTTONS ============ */
 input[type="submit"], .submit-row input, button[type="submit"] {
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
+    background: var(--accent) !important; color: var(--accent-text) !important;
     font-weight: 600 !important; border: none !important;
     border-radius: 8px !important; padding: 10px 24px !important;
     cursor: pointer !important; font-size: 14px !important;
     transition: all 0.2s !important;
 }
 input[type="submit"]:hover, .submit-row input:hover, button[type="submit"]:hover {
-    background: linear-gradient(135deg, var(--gold-light), var(--gold)) !important;
+    background: var(--accent-dark) !important;
     transform: translateY(-1px) !important;
 }
 .deletelink, a.deletelink {
@@ -401,19 +467,19 @@ input[type="submit"]:hover, .submit-row input:hover, button[type="submit"]:hover
 
 /* ============ LINKS ============ */
 a { color: var(--text-primary); text-decoration: none; }
-a:hover { color: var(--gold); }
-#result_list td a, .results td a, #result_list th a { color: var(--text-primary) !important; }
-#result_list td a:hover, .results td a:hover { color: var(--gold) !important; }
+a:hover { color: var(--accent); }
+#result_list td a, .results td a, #result_list th a { color: var(--accent) !important; font-weight: 500 !important; }
+#result_list td a:hover, .results td a:hover { color: var(--accent) !important; }
 
 /* ============ PAGINATION ============ */
 .paginator, #changelist .paginator {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     border-radius: 12px !important; padding: 14px 18px !important;
     color: var(--text-muted) !important; font-size: 13px !important;
     margin-top: 16px !important;
 }
-.paginator a { color: var(--gold) !important; text-decoration: none !important; padding: 4px 10px !important; }
-.paginator .this-page { color: var(--text-primary) !important; font-weight: 700 !important; }
+.paginator a { color: var(--accent) !important; text-decoration: none !important; padding: 4px 10px !important; }
+.paginator .this-page { color: var(--accent) !important; font-weight: 700 !important; background: var(--accent-bg) !important; border: 1px solid var(--accent-border) !important; padding: 4px 10px !important; border-radius: 6px !important; }
 .paginator ul, p.paginator ul, .pagination {
     list-style: none !important; padding: 0 !important; margin: 0 !important;
     display: flex !important; gap: 4px !important; flex-wrap: wrap !important;
@@ -426,9 +492,9 @@ a:hover { color: var(--gold); }
     border: 1px solid var(--border) !important;
 }
 .paginator ul li a:hover, .pagination li a:hover {
-    background: var(--gold) !important; color: #000 !important; border-color: var(--gold) !important;
+    background: var(--accent) !important; color: var(--accent-text) !important; border-color: var(--accent) !important;
 }
-.paginator ul li.active a { background: var(--gold) !important; color: #000 !important; font-weight: 600 !important; border-color: var(--gold) !important; }
+.paginator ul li.active a { background: var(--accent) !important; color: var(--accent-text) !important; font-weight: 600 !important; border-color: var(--accent) !important; }
 
 /* ============ FILTER PANEL ============ */
 #content-main.list-content, #content-main {
@@ -499,7 +565,7 @@ a:hover { color: var(--gold); }
     position: static !important;
     order: -1 !important;
     background: var(--bg-card) !important;
-    border: 1px solid var(--gold-border) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 12px !important;
     padding: 12px 16px !important;
     margin-bottom: 10px !important;
@@ -524,7 +590,9 @@ a:hover { color: var(--gold); }
 #result_list td .action-checkbox,
 #result_list td input[type="checkbox"],
 #result_list th input[type="checkbox"],
-.action-checkbox-column, .action-checkbox {
+.action-checkbox-column,
+#changelist .action-checkbox,
+.actions .action-checkbox {
     display: none !important;
 }
 .actions label, .actions span {
@@ -556,13 +624,13 @@ a:hover { color: var(--gold); }
     width: auto !important;
 }
 #changelist-filter select, [id*="changelist-filter"] select {
-    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    background: var(--bg-input) !important; border: 1px solid var(--border) !important;
     color: var(--text-primary) !important; border-radius: 8px !important;
     padding: 8px 12px !important; font-size: 13px !important;
     min-width: 140px !important;
 }
 #changelist-filter select:focus, [id*="changelist-filter"] select:focus {
-    border-color: var(--gold) !important; box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
+    border-color: var(--gold) !important; box-shadow: 0 0 0 3px var(--accent-border) !important;
 }
 #changelist-filter label, [id*="changelist-filter"] label {
     color: var(--text-muted) !important; font-size: 12px !important;
@@ -570,7 +638,7 @@ a:hover { color: var(--gold); }
 }
 #changelist-filter li { list-style: none !important; display: inline-block !important; }
 #changelist-filter a { color: var(--text-muted) !important; font-size: 13px !important; }
-#changelist-filter a:hover, #changelist-filter li.selected a { color: var(--gold) !important; }
+#changelist-filter a:hover, #changelist-filter li.selected a { color: var(--accent) !important; }
 #changelist-filter > .label { display: none !important; }
 
 /* Search/toolbar */
@@ -589,11 +657,12 @@ a:hover { color: var(--gold); }
 
 /* Search bar */
 input[type="search"], input[name="q"], input.validate, #icon_prefix, .input-field input {
-    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    background: var(--bg-input) !important; border: 1px solid var(--border) !important;
     color: var(--text-primary) !important; border-radius: 8px !important;
     padding: 10px 14px !important; width: 100% !important;
     box-shadow: none !important; height: auto !important;
     font-size: 14px !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
 }
 input[type="search"]::placeholder, input[name="q"]::placeholder,
 input.validate::placeholder, #icon_prefix::placeholder {
@@ -601,12 +670,12 @@ input.validate::placeholder, #icon_prefix::placeholder {
 }
 .input-field { margin-top: 4px !important; margin-bottom: 4px !important; }
 .input-field label { color: var(--text-muted) !important; font-size: 13px !important; }
-.input-field label.active { color: var(--gold) !important; transform: translateY(-14px) scale(0.8) !important; }
+.input-field label.active { color: var(--accent) !important; transform: translateY(-14px) scale(0.8) !important; }
 .input-field input:focus { border-bottom: none !important; box-shadow: none !important; }
 input:not([type]):focus:not([readonly]),
 input[type=text]:not(.browser-default):focus:not([readonly]) {
     border-bottom: none !important; box-shadow: none !important;
-    border-color: var(--gold) !important;
+    border-color: var(--accent) !important;
 }
 input[type="number"] {
     -moz-appearance: textfield !important;
@@ -622,7 +691,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* ============ ACTION BAR ============ */
 .actions, #changelist .actions, div.actions {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     border-radius: 12px !important; padding: 0 !important;
     margin-bottom: 16px !important;
 }
@@ -636,14 +705,14 @@ input[type="number"]::-webkit-outer-spin-button {
     color: var(--text-muted) !important; font-size: 13px !important;
 }
 .actions select, .actions .card-content select, select[name="action"] {
-    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    background: var(--bg-input) !important; border: 1px solid var(--border) !important;
     color: var(--text-primary) !important; border-radius: 8px !important;
     padding: 8px 12px !important; font-size: 13px !important;
     height: auto !important;
 }
 .actions button, .actions input[type="submit"],
 .card-action button, .card-action input[type="submit"] {
-    background: var(--gold) !important; color: #000 !important;
+    background: var(--accent) !important; color: var(--accent-text) !important;
     border: none !important; border-radius: 8px !important;
     padding: 8px 16px !important; font-weight: 600 !important;
     cursor: pointer !important; font-size: 13px !important;
@@ -662,7 +731,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .object-tools a, .object-tools li a,
 #content ul li a[href*="add"], a[href*="/add/"] {
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
+    background: var(--accent) !important; color: var(--accent-text) !important;
     border-radius: 8px !important; padding: 8px 18px !important;
     font-size: 13px !important; font-weight: 600 !important;
     text-decoration: none !important; display: inline-flex !important;
@@ -670,10 +739,10 @@ input[type="number"]::-webkit-outer-spin-button {
     transition: all 0.2s !important;
 }
 .object-tools a:hover, #content ul li a[href*="add"]:hover, a[href*="/add/"]:hover {
-    background: linear-gradient(135deg, var(--gold-light), var(--gold)) !important;
+    background: var(--accent-dark) !important;
     transform: translateY(-1px) !important;
 }
-.object-tools a i, #content ul li a i, a[href*="/add/"] i { font-size: 16px !important; color: #000 !important; }
+.object-tools a i, #content ul li a i, a[href*="/add/"] i { font-size: 16px !important; color: var(--accent-text) !important; }
 .object-tools a::after, #content ul li a[href*="add"]::after, a[href*="/add/"]::after { content: ' Add New'; }
 a[href*="/add/"] { overflow: visible !important; white-space: nowrap !important; line-height: 1.4 !important; }
 
@@ -685,20 +754,20 @@ a[href*="/add/"] { overflow: visible !important; white-space: nowrap !important;
 .paginator:not(:has(a)):not(:has(span.this-page)) {
     text-align: center !important; padding: 40px 16px !important;
     color: var(--text-muted) !important; font-size: 14px !important;
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     border-radius: 12px !important;
 }
 
 /* View links */
 td a[href*="/settlementhistory/"], td:last-child a[href*="/view/"] {
-    color: var(--gold) !important; font-weight: 500 !important;
-    background: var(--gold-bg) !important; padding: 4px 10px !important;
+    color: var(--accent) !important; font-weight: 500 !important;
+    background: var(--accent-bg) !important; padding: 4px 10px !important;
     border-radius: 6px !important; font-size: 12px !important;
-    border: 1px solid var(--gold-border) !important;
+    border: 1px solid var(--accent-border) !important;
 }
-td a[href*="/settlementhistory/"]:hover, td:last-child a[href*="/view/"]:hover { background: var(--gold) !important; color: #000 !important; }
+td a[href*="/settlementhistory/"]:hover, td:last-child a[href*="/view/"]:hover { background: var(--accent) !important; color: var(--accent-text) !important; }
 td a[href*="/toggle-user/"] { color: var(--success) !important; font-weight: 500 !important; }
-#result_list td a[href*="/wallethistory/"] { color: var(--gold) !important; font-weight: 600 !important; }
+#result_list td a[href*="/wallethistory/"] { color: var(--accent) !important; font-weight: 600 !important; }
 #changelist form, .changelist form {
     background: transparent !important; border: none !important;
     box-shadow: none !important;
@@ -706,7 +775,7 @@ td a[href*="/toggle-user/"] { color: var(--success) !important; font-weight: 500
 
 /* ============ CARDS ============ */
 .card, .card-panel {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     border-radius: 12px !important; box-shadow: var(--shadow-sm) !important;
 }
 .card-content {
@@ -720,7 +789,7 @@ td a[href*="/toggle-user/"] { color: var(--success) !important; font-weight: 500
 
 /* ============ MODULE / APP LIST ============ */
 .app-list .module, .module {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     border-radius: 12px !important; padding: 20px !important;
 }
 .module h2, .module caption {
@@ -728,34 +797,36 @@ td a[href*="/toggle-user/"] { color: var(--success) !important; font-weight: 500
     font-weight: 600 !important; text-transform: none !important;
 }
 .module table a, .module td a { color: var(--text-secondary) !important; font-size: 13px !important; }
-.module table a:hover { color: var(--gold) !important; }
+.module table a:hover { color: var(--accent) !important; }
 
 /* ============ FIELDSETS (Forms) ============ */
-fieldset h2, fieldset .collapse-toggle, #content fieldset h2 {
+fieldset h2, fieldset .collapse-toggle, #content fieldset > h2,
+fieldset h2 {
     background: var(--bg-elevated) !important;
     color: var(--text-primary) !important; font-size: 13px !important;
     font-weight: 600 !important; text-transform: uppercase !important;
     letter-spacing: 0.5px !important; padding: 14px 20px !important;
     margin: 0 !important; border-radius: 12px 12px 0 0 !important;
-    border: none !important; border-bottom: 1px solid var(--gold-border) !important;
-}
+    border: none !important; border-bottom: 1px solid var(--border) !important;
+ border-left: 3px solid var(--accent) !important; padding-left: 12px !important;}
 fieldset {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     border-radius: 12px !important; margin-bottom: 16px !important;
     padding: 0 !important;
 }
 fieldset .form-row, fieldset .field-box {
-    padding: 12px 20px !important; border-bottom: 1px solid var(--border) !important;
-    display: flex !important; flex-wrap: wrap !important; gap: 12px !important;
-    align-items: flex-start !important;
+    padding: 14px 20px !important; border-bottom: 1px solid var(--border) !important;
+    display: grid !important; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 16px 24px !important; align-items: start !important;
 }
 fieldset .form-row > .input-field,
 fieldset .form-row > .field-box,
 fieldset .form-row > div {
-    flex: 1 1 200px !important; min-width: 0 !important;
+    min-width: 0 !important; width: 100% !important;
 }
-fieldset .form-row > .input-field.checkbox-row {
-    flex: 0 0 auto !important;
+fieldset .form-row > .input-field:only-child,
+fieldset .form-row > div:only-child {
+    grid-column: 1 / -1 !important;
 }
 fieldset .form-row input[type="text"],
 fieldset .form-row input[type="number"],
@@ -765,55 +836,109 @@ fieldset .form-row input[type="password"],
 fieldset .form-row textarea,
 fieldset .form-row select {
     width: 100% !important; box-sizing: border-box !important;
+    padding: 10px 14px !important;
 }
 fieldset label {
     color: var(--text-secondary) !important; font-size: 12px !important;
-    font-weight: 500 !important; margin-bottom: 3px !important;
-    display: block !important;
+    font-weight: 600 !important; margin-bottom: 6px !important;
+    display: block !important; text-transform: uppercase !important;
+    letter-spacing: 0.4px !important;
 }
 fieldset .form-row .help {
     font-size: 11px !important; color: var(--text-muted) !important;
-    margin-top: 2px !important;
+    margin-top: 4px !important; grid-column: 1 / -1 !important;
+}
+fieldset .form-row .readonly {
+    color: var(--text-primary) !important; padding: 10px 0 !important;
+    font-size: 13px !important;
 }
 @media (max-width: 768px) {
-    fieldset .form-row { flex-direction: column !important; }
+    fieldset .form-row { grid-template-columns: 1fr !important; }
     fieldset .form-row > .input-field,
-    fieldset .form-row > div { flex: 1 1 100% !important; }
+    fieldset .form-row > div { width: 100% !important; }
+    .related-widget-wrapper, .related-wrapper { flex-direction: column !important; }
+}
+
+/* Date/time picker icons & calendar shortcuts */
+fieldset i[title="Calendar"], fieldset i[title="Today"],
+fieldset i[title="Clock"], fieldset i[title="Now"],
+.datetimeshortcuts a, .calendarbox a {
+    color: var(--accent) !important; cursor: pointer !important;
 }
 
 /* ============ SELECT2 ============ */
 .select2-container--default .select2-selection--single,
 .select2-container .select2-selection,
 span[class*="select2"] {
-    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    background: var(--bg-input) !important; border: 1px solid var(--border) !important;
     color: var(--text-primary) !important; border-radius: 8px !important;
+    min-height: 40px !important; display: flex !important; align-items: center !important;
+}
+.select2-hidden-accessible { display: none !important; }
+.select2-container { width: 100% !important; max-width: 100% !important; }
+/* Related widget wrapper - both class variants */
+.related-widget-wrapper, .related-wrapper {
+    display: flex !important; flex-wrap: wrap !important;
+    gap: 8px !important; width: 100% !important; align-items: center !important;
+}
+.related-widget-wrapper select, .related-wrapper select { display: none !important; }
+.related-widget-wrapper .select2-container, .related-wrapper .select2-container {
+    flex: 1 1 200px !important; min-width: 0 !important; order: 1 !important;
+}
+.related-widget-wrapper > div:first-child,
+.related-wrapper > .related-wrapper-row {
+    order: 2 !important; flex-shrink: 0 !important;
+    display: flex !important; gap: 4px !important; align-items: center !important;
+}
+.related-widget-wrapper > div:first-child a,
+.related-wrapper > .related-wrapper-row a {
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+    width: 36px !important; height: 36px !important; border-radius: 8px !important;
+    background: var(--accent-bg) !important; border: 1px solid var(--accent-border) !important;
+    color: var(--accent) !important; text-decoration: none !important;
+}
+.related-widget-wrapper > div:first-child a:hover,
+.related-wrapper > .related-wrapper-row a:hover {
+    background: var(--accent) !important; color: var(--accent-text) !important;
+    border-color: var(--accent) !important;
+}
+.related-widget-wrapper > div:first-child a i,
+.related-wrapper > .related-wrapper-row a i {
+    font-size: 16px !important; color: inherit !important;
 }
 .select2-dropdown, .select2-results {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     color: var(--text-primary) !important;
 }
 .select2-results__option { color: var(--text-secondary) !important; }
-.select2-results__option--highlighted { background: var(--gold-bg-hover) !important; color: var(--gold) !important; }
+.select2-results__option--highlighted { background: var(--accent-bg-hover) !important; color: var(--accent) !important; }
 .select2-container--default .select2-selection--single .select2-selection__rendered {
     color: var(--text-primary) !important;
 }
 
+/* ============ PASSWORD DISPLAY ============ */
+fieldset .form-row .readonly bdi {
+    color: var(--text-muted) !important;
+    font-family: monospace !important;
+    font-size: 12px !important;
+}
+
 /* ============ FILE INPUT ============ */
 input[type="file"] {
-    background: var(--bg-elevated) !important; border: 1px solid var(--border) !important;
+    background: var(--bg-input) !important; border: 1px solid var(--border) !important;
     color: var(--text-secondary) !important; padding: 8px !important;
     border-radius: 8px !important;
 }
 input[type="file"]::-webkit-file-upload-button {
-    background: var(--bg-card) !important; color: var(--text-primary) !important;
-    border: 1px solid var(--gold-border) !important; border-radius: 6px !important;
+    background: var(--bg-elevated) !important; color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important; border-radius: 6px !important;
     padding: 6px 14px !important; cursor: pointer !important;
     font-size: 13px !important;
 }
 
 /* ============ SUBMIT ROW ============ */
 .submit-row {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     border-radius: 12px !important; padding: 16px 20px !important;
     margin-top: 16px !important; display: flex !important;
     gap: 12px !important; flex-wrap: wrap !important;
@@ -826,14 +951,47 @@ input[type="file"]::-webkit-file-upload-button {
     background: var(--bg-elevated) !important; color: var(--text-primary) !important;
     padding: 14px 20px !important; border-radius: 12px 12px 0 0 !important;
     font-size: 13px !important; text-transform: uppercase !important;
-    border-bottom: 1px solid var(--gold-border) !important;
+    border-bottom: 1px solid var(--border) !important;
 }
-.inline-related { background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important; border-radius: 12px !important; }
+.inline-related { background: var(--bg-card) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; }
 
 /* ============ CHECKBOX ============ */
 input[type="checkbox"] {
-    width: 16px !important; height: 16px !important;
-    accent-color: var(--gold) !important;
+    width: 18px !important; height: 18px !important;
+    accent-color: var(--accent) !important;
+    cursor: pointer !important;
+    vertical-align: middle !important;
+    margin-right: 8px !important;
+}
+fieldset .form-row label[for*="id_is"],
+fieldset .form-row label[for*="id_Is"],
+fieldset .form-row .checkbox label,
+fieldset .form-row .vCheckboxLabel {
+    display: inline !important; font-size: 13px !important;
+    text-transform: none !important; font-weight: 500 !important;
+    vertical-align: middle !important; cursor: pointer !important;
+    letter-spacing: normal !important;
+}
+fieldset .form-row .help {
+    display: block !important; margin-top: 4px !important;
+}
+/* Checkbox row in change forms */
+fieldset .form-row .checkbox-row .action-checkbox,
+fieldset .form-row .input-field.checkbox-row .action-checkbox {
+    display: inline-flex !important; align-items: center !important;
+}
+fieldset .form-row .checkbox-row .action-checkbox label,
+fieldset .form-row .input-field.checkbox-row .action-checkbox label {
+    display: inline-flex !important; align-items: center !important;
+    cursor: pointer !important;
+}
+fieldset .form-row .checkbox-row .checkbox-label label {
+    display: inline !important; font-size: 13px !important;
+    text-transform: none !important; font-weight: 500 !important;
+    cursor: pointer !important; letter-spacing: normal !important;
+}
+fieldset .form-row .input-field.checkbox-row {
+    display: flex !important; align-items: center !important; gap: 8px !important;
 }
 
 /* ============ HIDE NUMBER SPINNERS ============ */
@@ -857,17 +1015,33 @@ form > div > div:last-child > div:first-child:has(a[href="#"]) {
     display: none !important;
 }
 
-/* ============ MESSAGES ============ */
-.messagelist { display: block !important; }
+/* ============ TOAST MESSAGES ============ */
+.messagelist {
+    display: block !important;
+    position: fixed !important;
+    top: 64px; right: 16px;
+    z-index: 9500;
+    max-width: 380px; width: calc(100% - 32px);
+    list-style: none !important; padding: 0 !important; margin: 0 !important;
+}
 .messagelist li {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
-    border-radius: 12px !important; padding: 12px 16px !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
+    border-radius: 12px !important; padding: 12px 36px 12px 16px !important;
     color: var(--text-primary) !important; margin-bottom: 8px !important;
-    font-size: 13px !important;
+    font-size: 13px !important; box-shadow: var(--shadow) !important;
+    animation: toastSlideIn 0.3s ease; position: relative;
+    list-style: none !important;
 }
 .messagelist .success { border-left: 3px solid var(--success) !important; }
-.messagelist .error { border-left: 3px solid var(--danger) !important; }
-.messagelist .warning { border-left: 3px solid var(--warning) !important; }
+.messagelist .error { border-left: 3px solid var(--danger) !important; background: rgba(239,68,68,0.06) !important; }
+.messagelist .warning { border-left: 3px solid var(--warning) !important; background: rgba(245,158,11,0.06) !important; }
+.messagelist .info { border-left: 3px solid var(--info) !important; }
+.toast-close {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; font-size: 16px; padding: 2px 5px; border-radius: 4px; line-height: 1;
+}
+.toast-close:hover { color: var(--text-primary); background: var(--bg-elevated); }
 
 /* Error lists */
 .errorlist, ul.errorlist {
@@ -881,6 +1055,24 @@ form > div > div:last-child > div:first-child:has(a[href="#"]) {
 .help, .helptext, p.help {
     color: var(--text-muted) !important; font-size: 12px !important;
 }
+
+/* ============ DATE SHORTCUTS ============ */
+.datetimeshortcuts {
+    display: inline-flex !important; gap: 4px !important; align-items: center !important;
+    vertical-align: middle !important;
+}
+.datetimeshortcuts a, .datetimeshortcuts i {
+    color: var(--text-muted) !important; cursor: pointer !important;
+}
+.datetimeshortcuts a:hover, .datetimeshortcuts i:hover {
+    color: var(--gold) !important;
+}
+.vDateField, .vTimeField {
+    width: calc(100% - 60px) !important;
+}
+/* File input wrapper */
+.file-upload { display: flex !important; flex-direction: column !important; gap: 4px !important; }
+.file-upload input[type="text"] { margin-top: 4px !important; }
 
 /* ============ CALENDAR ============ */
 .calendarbox, .calendar, .datetimeshortcuts {
@@ -912,7 +1104,7 @@ nav, .nav-wrapper, .brand-logo {
 
 /* Dropdown */
 .dropdown-content {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     box-shadow: var(--shadow) !important;
 }
 .dropdown-content li > a { color: var(--text-secondary) !important; }
@@ -946,7 +1138,7 @@ td img[src*="icon-yes"], td img[src*="icon-no"] { width: 18px !important; height
 }
 .custom-tabs a.active, .custom-tabs a:hover,
 .user-tabs .tab-active {
-    background: var(--gold); color: #000; border-color: var(--gold);
+    background: var(--accent); color: var(--accent-text); border-color: var(--accent);
 }
 .user-tabs .tab-inactive {
     background: var(--bg-elevated); color: var(--text-secondary); border-color: var(--border);
@@ -958,15 +1150,15 @@ td img[src*="icon-yes"], td img[src*="icon-no"] { width: 18px !important; height
 
 /* Export button */
 .export-btn, a.export-btn {
-    background: transparent !important; color: var(--gold) !important;
-    border: 1px solid var(--gold-border-strong) !important; border-radius: 8px !important;
+    background: transparent !important; color: var(--accent) !important;
+    border: 1px solid var(--accent-border) !important; border-radius: 8px !important;
     padding: 8px 18px !important; font-weight: 500 !important;
     font-size: 13px !important; text-decoration: none !important;
     display: inline-flex !important; align-items: center !important;
     transition: all 0.2s !important;
 }
 .export-btn:hover, a.export-btn:hover {
-    background: var(--gold) !important; color: #000 !important;
+    background: var(--accent) !important; color: var(--accent-text) !important;
 }
 
 /* ============ LOGIN PAGE ============ */
@@ -1006,20 +1198,21 @@ body.login #login-form input[type="email"],
 body.login #login-form input[type="password"] {
     width: 100% !important; padding: 12px 14px !important;
     border: 1px solid var(--border) !important; border-radius: 10px !important;
-    font-size: 14px !important; background: var(--bg-elevated) !important;
+    font-size: 14px !important; background: var(--bg-input) !important;
     color: var(--text-primary) !important; margin-bottom: 12px !important;
     box-sizing: border-box !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
 }
 body.login #login-form input[type="text"]:focus,
 body.login #login-form input[type="email"]:focus,
 body.login #login-form input[type="password"]:focus {
-    border-color: var(--gold) !important; outline: none !important;
-    box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
+    border-color: var(--accent) !important; outline: none !important;
+    box-shadow: 0 0 0 3px var(--accent-bg) !important;
 }
 body.login #login-form input[type="submit"],
 body.login #login-form .submit-row input {
     width: 100% !important; padding: 12px !important;
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
+    background: var(--accent) !important; color: #FFFFFF !important;
     border: none !important; border-radius: 10px !important;
     font-size: 15px !important; font-weight: 600 !important;
     cursor: pointer !important; margin-top: 8px !important;
@@ -1071,13 +1264,13 @@ body.login form#login-form input[type="password"] {
 }
 body.login form input[type="text"]:focus,
 body.login form input[type="password"]:focus {
-    border-color: var(--gold) !important; outline: none !important;
-    box-shadow: 0 0 0 3px rgba(212,168,67,0.15) !important;
+    border-color: var(--accent) !important; outline: none !important;
+    box-shadow: 0 0 0 3px var(--accent-bg) !important;
 }
 body.login form#login-form button[type="submit"],
 body.login form#login-form input[type="submit"] {
     width: 100% !important; padding: 12px !important;
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important; color: #000 !important;
+    background: var(--accent) !important; color: #FFFFFF !important;
     border: none !important; border-radius: 10px !important;
     font-size: 15px !important; font-weight: 600 !important;
     cursor: pointer !important; margin-top: 12px !important;
@@ -1115,7 +1308,7 @@ body.login #header { display: none !important; }
     gap: 12px; margin-bottom: 20px;
 }
 .dash-card {
-    background: var(--bg-card); border: 1px solid var(--gold-border); border-radius: 12px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
     padding: 16px 18px; position: relative; overflow: hidden;
     transition: all 0.2s;
 }
@@ -1146,7 +1339,7 @@ body.login #header { display: none !important; }
 
 .dash-grid, .dash-table, .dash-filter { width: 100% !important; max-width: 100% !important; }
 .dash-table {
-    background: var(--bg-card); border: 1px solid var(--gold-border); border-radius: 12px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
     overflow: hidden; margin-top: 14px;
 }
 .dash-table h3 {
@@ -1185,7 +1378,7 @@ body.login #header { display: none !important; }
     z-index: 10000 !important; backdrop-filter: blur(6px);
 }
 .modal-overlay .modal-content {
-    background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
+    background: var(--bg-card) !important; border: 1px solid var(--border) !important;
     border-radius: 16px !important; padding: 28px !important;
     max-width: 440px !important; width: 90% !important;
     box-shadow: 0 24px 64px rgba(0,0,0,0.5) !important;
@@ -1197,29 +1390,102 @@ body.login #header { display: none !important; }
 /* Hide breadcrumbs */
 div.breadcrumbs { display: none !important; }
 
-/* ============ RESPONSIVE ============ */
-@media (max-width: 1024px) {
-    #kokoroko-sidebar { transform: translateX(-100%); transition: transform 0.3s; }
-    #kokoroko-sidebar.open { transform: translateX(0); }
-    #kokoroko-main, #container { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important; }
-    .table-scroll-wrapper { max-width: calc(100vw - 32px) !important; }
-    .mobile-toggle { display: block !important; }
-    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8999; }
-    .sidebar-backdrop.show { display: block; }
-    #content, #content-main { padding: 16px !important; }
-}
+/* ============ SHARED RESPONSIVE HELPERS ============ */
 .mobile-toggle {
     display: none; background: none; border: none; color: var(--text-primary);
-    cursor: pointer; padding: 4px;
+    cursor: pointer; padding: 0; border-radius: 6px; transition: background 0.2s;
+    width: 36px; height: 36px; min-width: 36px; min-height: 36px;
+    flex-shrink: 0; align-items: center; justify-content: center;
+    font-size: 22px; line-height: 36px; text-align: center;
 }
-@media (max-width: 1200px) {
-    .dash-grid { grid-template-columns: repeat(3, 1fr) !important; }
+.mobile-toggle i { font-size: 22px; line-height: 36px; display: block; width: 36px; height: 36px; }
+.mobile-toggle:hover { background: var(--gold-bg); }
+.sidebar-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 8999;
+    backdrop-filter: blur(2px); transition: opacity 0.3s;
 }
-@media (max-width: 768px) {
-    #kokoroko-header { padding: 10px 14px; gap: 12px; }
+.sidebar-backdrop.show { display: block; }
+
+/* ============ RESPONSIVE — TABLET (768px–1023px) Icon-only rail ============ */
+@media (min-width: 768px) and (max-width: 1023px) {
+    #kokoroko-sidebar {
+        width: 60px;
+        transition: width 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.3s;
+    }
+    #kokoroko-sidebar .sb-brand { padding: 14px 0; justify-content: center; }
+    #kokoroko-sidebar .sb-brand img { width: 28px; height: 28px; }
+    #kokoroko-sidebar .sb-brand span { display: none; }
+    #kokoroko-sidebar .sb-title { display: none; }
+    #kokoroko-sidebar .sb-item {
+        font-size: 0; line-height: 0;
+        padding: 12px 0; margin: 1px 4px;
+        justify-content: center;
+        border-left: none; overflow: hidden;
+        position: relative;
+    }
+    #kokoroko-sidebar .sb-item i { font-size: 20px; width: auto; opacity: 0.6; }
+    #kokoroko-sidebar .sb-item.active { background: var(--gold-bg-hover); }
+    #kokoroko-sidebar .sb-item.active i { opacity: 1; color: var(--accent); }
+    #kokoroko-sidebar .sb-item:hover i { opacity: 1; color: var(--gold-light); }
+    #kokoroko-sidebar .sb-badge { display: none !important; }
+    #kokoroko-sidebar .sb-divider { margin: 4px 10px; }
+    /* Tooltip on hover */
+    #kokoroko-sidebar:not(.expanded) .sb-item:hover::after {
+        content: attr(data-label);
+        position: absolute; left: 54px; top: 50%; transform: translateY(-50%);
+        background: var(--bg-card); color: var(--text-primary);
+        font-size: 12px; line-height: 1.3; padding: 5px 10px; border-radius: 6px;
+        border: 1px solid var(--gold-border); white-space: nowrap;
+        box-shadow: var(--shadow-sm); z-index: 9999; pointer-events: none;
+    }
+    /* Expanded state — full sidebar overlay */
+    #kokoroko-sidebar.expanded {
+        width: 220px; box-shadow: var(--shadow-lg);
+    }
+    #kokoroko-sidebar.expanded .sb-brand { justify-content: flex-start; padding: 16px 14px; }
+    #kokoroko-sidebar.expanded .sb-brand span { display: inline; }
+    #kokoroko-sidebar.expanded .sb-title { display: block; }
+    #kokoroko-sidebar.expanded .sb-item {
+        font-size: 13px; line-height: 1.4;
+        padding: 8px 14px; margin: 2px 6px;
+        justify-content: flex-start;
+        border-left: 3px solid transparent;
+    }
+    #kokoroko-sidebar.expanded .sb-item.active { border-left-color: var(--gold); }
+    #kokoroko-sidebar.expanded .sb-item i { font-size: 18px; width: 22px; }
+    #kokoroko-sidebar.expanded .sb-badge { display: none; }
+    #kokoroko-sidebar.expanded .sb-badge.has-count { display: inline-block !important; }
+    #kokoroko-sidebar.expanded .sb-divider { margin: 8px 18px; }
+    /* Main content */
+    #kokoroko-main { margin-left: 60px; width: calc(100vw - 60px); max-width: calc(100vw - 60px); }
+    html body #container, body > #container, #container#container {
+        margin-left: 60px !important; width: calc(100vw - 60px) !important; max-width: calc(100vw - 60px) !important;
+    }
+    .table-scroll-wrapper { max-width: calc(100vw - 60px - 32px) !important; }
+    #changelist-filter, [id*="changelist-filter"] { max-width: calc(100vw - 60px - 32px) !important; }
+    .mobile-toggle { display: flex !important; }
+    #content, #content-main { padding: 16px !important; }
+}
+
+/* ============ RESPONSIVE — MOBILE (<768px) Off-canvas ============ */
+@media (max-width: 767px) {
+    #kokoroko-sidebar {
+        width: 220px;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    #kokoroko-sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+    #kokoroko-main, html body #container, body > #container, #container#container {
+        margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important;
+    }
+    .table-scroll-wrapper { max-width: calc(100vw - 24px) !important; }
+    #changelist-filter, [id*="changelist-filter"] { max-width: calc(100vw - 24px) !important; }
+    .mobile-toggle { display: flex !important; }
+    #kokoroko-header { padding: 10px 14px; gap: 8px; }
     .header-btn { display: none !important; }
     .header-user span { display: none !important; }
-    .header-title { font-size: 16px !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .header-title { font-size: 16px !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
     #content, #content-main { padding: 12px !important; }
     .dash-grid { grid-template-columns: repeat(2, 1fr) !important; }
     #changelist-filter, .changelist-filter-wrapper, [id*="changelist-filter"],
@@ -1228,12 +1494,143 @@ div.breadcrumbs { display: none !important; }
     }
     .user-tabs { display: grid !important; grid-template-columns: 1fr 1fr !important; }
     .user-tabs a, .user-tabs .tab-btn { width: 100% !important; min-width: 0 !important; text-align: center !important; }
+    fieldset .form-row { flex-direction: column !important; }
+    fieldset .form-row > .input-field, fieldset .form-row > div { flex: 1 1 100% !important; }
+    .modal-overlay .modal-content { width: 95% !important; padding: 20px !important; }
+    .submit-row { flex-direction: column !important; }
+    .submit-row input[type="submit"], .submit-row .deletelink { width: 100% !important; text-align: center !important; }
+    /* Table cell compactness */
+    #result_list td, .results td { padding: 8px 6px !important; font-size: 12px !important; }
+    #result_list th, .results th { padding: 8px 6px !important; font-size: 10px !important; }
+    a[title="Deposit"], a[title="Withdraw"], a[title="Statement"],
+    a[title="Bet History"], a[title="Blacklist"], a[title="Whitelist"],
+    a[title="Reset Password"] { width: 36px; height: 36px; min-width: 36px; }
 }
-@media (max-width: 600px) {
+
+/* ============ RESPONSIVE — LARGE TABLET (1024px–1200px) ============ */
+@media (max-width: 1200px) {
+    .dash-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+/* ============ RESPONSIVE — SMALL MOBILE (<600px) ============ */
+@media (max-width: 599px) {
     .dash-grid { grid-template-columns: 1fr !important; }
-    #kokoroko-header { padding: 8px 12px; }
-    #content, #content-main { padding: 10px !important; }
+    #kokoroko-header { padding: 8px 10px; }
+    #content, #content-main { padding: 8px !important; }
     .user-tabs { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+    .dash-card { padding: 12px 14px; }
+    .dash-card .value { font-size: 17px; }
+    .header-title { max-width: 150px; font-size: 14px !important; }
+    /* Filter card fix */
+    #changelist-filter, .changelist-filter-wrapper, [id*="changelist-filter"],
+    .card-content#changelist-filter {
+        background: var(--bg-card) !important;
+        border-radius: var(--radius-sm) !important;
+        padding: 10px !important;
+        border: 1px solid var(--border) !important;
+    }
+    #changelist-filter label, [id*="changelist-filter"] label {
+        font-size: 11px !important;
+        color: var(--text-secondary) !important;
+    }
+    /* Table actions compact */
+    .action-btn, a[title="Deposit"], a[title="Withdraw"] {
+        width: 32px !important; height: 32px !important; min-width: 32px !important;
+        font-size: 12px !important;
+    }
+    .action-more-btn { width: 32px !important; height: 32px !important; }
+}
+
+/* ============ RESPONSIVE — VERY SMALL MOBILE (<400px) ============ */
+@media (max-width: 400px) {
+    .dash-grid { gap: 8px !important; }
+    .dash-card { padding: 10px 12px; }
+    .dash-card .value { font-size: 15px; }
+    .dash-card .label { font-size: 10px; }
+    #kokoroko-header { padding: 6px 8px; }
+    .header-title { font-size: 13px !important; max-width: 120px; }
+    .user-tabs a, .user-tabs .tab-btn { font-size: 11px !important; padding: 6px 8px !important; }
+    /* Even more compact table cells */
+    #result_list td, .results td { padding: 6px 4px !important; font-size: 11px !important; }
+    #result_list th, .results th { padding: 6px 4px !important; font-size: 9px !important; }
+}
+
+/* ============ RESPONSIVE — LAPTOP (1025px–1440px) ============ */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    #content, #content-main { padding: 20px 24px !important; }
+    .dash-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+/* ============ RESPONSIVE — DESKTOP (1441px–1920px) ============ */
+@media (min-width: 1441px) and (max-width: 1920px) {
+    #content, #content-main { padding: 24px 32px !important; max-width: 1400px; }
+    .dash-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 16px !important; }
+}
+
+/* ============ RESPONSIVE — LARGE DISPLAY (1921px+) ============ */
+@media (min-width: 1921px) {
+    #content, #content-main { padding: 28px 40px !important; max-width: 1600px; }
+    .dash-grid { grid-template-columns: repeat(5, 1fr) !important; gap: 18px !important; }
+    .dash-card .value { font-size: 22px; }
+    .dash-table { max-width: 1560px; }
+}
+
+/* ============ TOAST / MESSAGE ANIMATIONS ============ */
+@keyframes toastSlideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes toastFadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(120%); }
+}
+.toast-leaving { animation: toastFadeOut 0.3s ease forwards; }
+
+/* ============ LOADING SPINNER ============ */
+@keyframes kkSpin { to { transform: rotate(360deg); } }
+.btn-loading {
+    position: relative !important; pointer-events: none !important; opacity: 0.7 !important;
+    color: transparent !important;
+}
+.btn-loading::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 16px; height: 16px; margin: -8px 0 0 -8px;
+    border: 2px solid rgba(0,0,0,0.2); border-top-color: #000;
+    border-radius: 50%; animation: kkSpin 0.6s linear infinite;
+}
+
+/* ============ EMPTY STATE ============ */
+.admin-empty-state {
+    text-align: center; padding: 48px 24px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px;
+}
+.admin-empty-state i {
+    font-size: 48px !important; color: var(--gold); opacity: 0.35;
+    display: block !important; margin-bottom: 12px;
+}
+.admin-empty-state .empty-title {
+    font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;
+}
+.admin-empty-state .empty-sub {
+    font-size: 13px; color: var(--text-muted);
+}
+
+/* ============ ACTION BUTTON IMPROVEMENTS ============ */
+/* Deposit actions on deposit/withdrawal list pages */
+td a[href*="/accept/"], td input[value*="Accept"], td button[name*="accept"] {
+    color: var(--success) !important;
+}
+td a[href*="/reject/"], td input[value*="Reject"], td button[name*="reject"],
+td a[href*="/delete/"], a.deletelink {
+    color: var(--danger) !important;
+}
+td a[href*="/approve/"] {
+    color: var(--success) !important;
+}
+/* Consistent min touch target for inline action buttons */
+td a[title], td .action-more-btn {
+    min-width: 30px; min-height: 30px;
 }
 
 /* ============ SCROLLBAR GLOBAL ============ */
@@ -1274,7 +1671,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<div class="sb-brand"><img src="/static/admin/img/logo.png"><span>Kokoroko</span></div>' +
 
         '<div class="sb-section">' +
-        '<a href="/" class="sb-item" data-path="DASHBOARD"><i>dashboard</i>Dashboard</a>' +
+        '<a href="/userManager/user/" class="sb-item" data-path="DASHBOARD"><i>dashboard</i>Dashboard</a>' +
         '</div>' +
 
         '<div class="sb-divider"></div>' +
@@ -1282,11 +1679,11 @@ document.addEventListener('DOMContentLoaded', function() {
         '<div class="sb-section">' +
         '<div class="sb-title">Management</div>' +
         '<a href="/userManager/user/?is_staff__exact=0" class="sb-item" data-path="/userManager/user/"><i>people</i>Users</a>' +
+        '<a href="/cockfightManager/zone/" class="sb-item" data-path="/cockfightManager/zone/"><i>category</i>Categories</a>' +
         '<a href="/cockfightManager/cockfightmatch/" class="sb-item" data-path="/cockfightManager/cockfightmatch/"><i>live_tv</i>Cockfight Matches<span class="sb-badge sb-badge-green" id="badge-live"></span></a>' +
         '<a href="/cockfightManager/cockfightautomatch/" class="sb-item" data-path="/cockfightManager/cockfightautomatch/"><i>public</i>China Market</a>' +
         '<a href="/cockfightManager/livesession/" class="sb-item" data-path="/cockfightManager/livesession/"><i>videocam</i>Live Sessions</a>' +
-        '<a href="/cockfightManager/oddsconfig/" class="sb-item" data-path="/cockfightManager/oddsconfig/"><i>trending_up</i>Odds Config</a>' +
-        '<a href="/dicePlayManager/board/" class="sb-item" data-path="/dicePlayManager/"><i>casino</i>Dice Matches</a>' +
+                '<a href="/dicePlayManager/board/" class="sb-item" data-path="/dicePlayManager/"><i>casino</i>Dice Matches</a>' +
         '</div>' +
 
         '<div class="sb-divider"></div>' +
@@ -1306,9 +1703,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '<div class="sb-section">' +
         '<div class="sb-title">Content</div>' +
         '<a href="/base/banner/" class="sb-item" data-path="/base/banner/"><i>image</i>Banners</a>' +
-        '<a href="/base/highlight/" class="sb-item" data-path="/base/highlight/"><i>stars</i>Highlights</a>' +
-        '<a href="/base/learningvideo/" class="sb-item" data-path="/base/learningvideo/"><i>play_circle</i>Videos</a>' +
-        '<a href="/base/setting/" class="sb-item" data-path="/base/setting/"><i>settings</i>App Settings</a>' +
+                        '<a href="/base/setting/" class="sb-item" data-path="/base/setting/"><i>settings</i>App Settings</a>' +
         '<a href="/admin-api/theme-settings/" class="sb-item" data-path="/admin-api/theme-settings/"><i>palette</i>Theme Settings</a>' +
         '<a href="/admin-api/feature-controls/" class="sb-item" data-path="/admin-api/feature-controls/"><i>tune</i>Feature Controls</a>' +
         '</div>' +
@@ -1318,7 +1713,6 @@ document.addEventListener('DOMContentLoaded', function() {
         '<div class="sb-section">' +
         '<div class="sb-title">Reports</div>' +
         '<a href="/cockfightManager/cockfightmatchbet/" class="sb-item" data-path="/cockfightManager/cockfightmatchbet/"><i>analytics</i>Bet History<span class="sb-badge" id="badge-bets"></span></a>' +
-        '<a href="/wallet/bonusrange/" class="sb-item" data-path="/wallet/bonusrange/"><i>redeem</i>Bonus Ranges</a>' +
         '</div>' +
 
         '<div style="flex:1;"></div>' +
@@ -1332,7 +1726,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!document.querySelector('.sidebar-backdrop')) {
         var backdrop = document.createElement('div');
         backdrop.className = 'sidebar-backdrop';
-        backdrop.addEventListener('click', function() { toggleSidebar(); });
+        backdrop.addEventListener('click', function() { closeSidebar(); });
         document.body.appendChild(backdrop);
     }
 
@@ -1343,11 +1737,11 @@ document.addEventListener('DOMContentLoaded', function() {
         header.id = 'kokoroko-header';
         var pageTitle = document.title.replace(' | Kokoroko Admin', '').replace('Kokoroko Admin', 'Dashboard');
         header.innerHTML = '<div style="display:flex;align-items:center;gap:12px;">' +
-            '<button class="mobile-toggle" onclick="toggleSidebar()"><i style="font-size:22px;color:#F5F1E8;">menu</i></button>' +
+            '<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu"><i style="font-size:22px;color:#F5F1E8;line-height:36px;width:36px;height:36px;display:block;text-align:center;">menu</i></button>' +
             '<div class="header-title">' + pageTitle + '</div>' +
             '</div>' +
             '<div class="header-right">' +
-            '<a href="/" class="header-btn"><i style="font-size:16px;vertical-align:middle;margin-right:4px;color:#000;">dashboard</i>Dashboard</a>' +
+            '<a href="/userManager/user/" class="header-btn"><i style="font-size:16px;vertical-align:middle;margin-right:4px;color:var(--accent);">dashboard</i>Dashboard</a>' +
             '<div class="header-user"><div class="avatar">A</div><span>Admin</span></div>' +
             '</div>';
         container.insertAdjacentElement('afterbegin', header);
@@ -1602,8 +1996,21 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleSidebar() {
     var sb = document.getElementById('kokoroko-sidebar');
     var bd = document.querySelector('.sidebar-backdrop');
-    if (sb) sb.classList.toggle('open');
-    if (bd) bd.classList.toggle('show');
+    if (!sb) return;
+    var w = window.innerWidth;
+    if (w >= 768 && w < 1024) {
+        sb.classList.toggle('expanded');
+        if (bd) bd.classList.toggle('show');
+    } else if (w < 768) {
+        sb.classList.toggle('open');
+        if (bd) bd.classList.toggle('show');
+    }
+}
+function closeSidebar() {
+    var sb = document.getElementById('kokoroko-sidebar');
+    var bd = document.querySelector('.sidebar-backdrop');
+    if (sb) { sb.classList.remove('open'); sb.classList.remove('expanded'); }
+    if (bd) bd.classList.remove('show');
 }
 
 // ===== REAL-TIME AUTO-REFRESH FOR ALL ADMIN PAGES =====
@@ -1795,21 +2202,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, REFRESH_INTERVAL);
     }
 
-    if (window.location.pathname.indexOf('oddsconfig') !== -1) {
-        setInterval(function() {
-            fetch(window.location.href, { credentials: 'same-origin' })
-                .then(function(r) { return r.text(); })
-                .then(function(html) {
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(html, 'text/html');
-                    var newContent = doc.getElementById('kokoroko-content') || doc.getElementById('content-main');
-                    var curContent = document.getElementById('kokoroko-content') || document.getElementById('content-main');
-                    if (newContent && curContent) curContent.innerHTML = newContent.innerHTML;
-                    flashIndicator();
-                })
-                .catch(function() {});
-        }, 15000);
-    }
+
 })();
 });
 
@@ -1913,7 +2306,9 @@ function fixContainerWidth() {
     var container = document.getElementById('container');
     if (container) {
         var sidebarWidth = 220;
-        if (window.innerWidth <= 1024) sidebarWidth = 0;
+        var w = window.innerWidth;
+        if (w < 768) sidebarWidth = 0;
+        else if (w < 1024) sidebarWidth = 60;
         container.style.setProperty('width', 'calc(100vw - ' + sidebarWidth + 'px)', 'important');
         container.style.setProperty('max-width', 'calc(100vw - ' + sidebarWidth + 'px)', 'important');
         container.style.setProperty('margin-left', sidebarWidth + 'px', 'important');
@@ -1931,7 +2326,65 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function() {
         document.querySelectorAll('.action-more-dropdown.show').forEach(function(d) { d.classList.remove('show'); });
     });
-    window.addEventListener('resize', fixContainerWidth);
+    window.addEventListener('resize', function() {
+        fixContainerWidth();
+        closeSidebar();
+    });
+
+    // ====== SIDEBAR DATA-LABEL FOR TABLET TOOLTIPS ======
+    document.querySelectorAll('#kokoroko-sidebar .sb-item').forEach(function(item) {
+        var text = '';
+        item.childNodes.forEach(function(node) {
+            if (node.nodeType === 3) text += node.textContent.trim();
+        });
+        if (text) item.setAttribute('data-label', text);
+    });
+
+    // ====== TOAST SETUP (close buttons + auto-dismiss) ======
+    document.querySelectorAll('.messagelist li').forEach(function(li) {
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'toast-close';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.addEventListener('click', function() { dismissToast(li); });
+        li.appendChild(closeBtn);
+        setTimeout(function() { dismissToast(li); }, 6000);
+    });
+
+    function dismissToast(el) {
+        if (el.classList.contains('toast-leaving')) return;
+        el.classList.add('toast-leaving');
+        setTimeout(function() { el.remove(); }, 300);
+    }
+
+    // ====== FORM SUBMIT LOADING STATE ======
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+            var btn = form.querySelector('input[type=\"submit\"], button[type=\"submit\"]');
+            if (btn && !btn.classList.contains('btn-loading')) {
+                btn.classList.add('btn-loading');
+            }
+        });
+    });
+
+    // ====== ENHANCED EMPTY STATE ======
+    document.querySelectorAll('.paginator').forEach(function(p) {
+        var text = p.textContent.trim();
+        if (text.match(/^(0|No )/i) || text === '') {
+            var modelName = document.querySelector('.header-title');
+            var name = modelName ? modelName.textContent.trim() : 'records';
+            p.innerHTML = '<div class=\"admin-empty-state\">' +
+                '<i class=\"material-icons\">inbox</i>' +
+                '<div class=\"empty-title\">No ' + name.toLowerCase() + ' found</div>' +
+                '<div class=\"empty-sub\">Try adjusting your filters or check back later</div>' +
+                '</div>';
+            p.style.cssText = 'border:none!important;padding:0!important;background:transparent!important;';
+        }
+    });
+
+    // ====== ESCAPE KEY CLOSES SIDEBAR ======
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSidebar();
+    });
 });
 </script>
 {% endblock %}

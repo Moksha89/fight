@@ -4,7 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kokoroko - Play</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+    /* Local Material Icons font - no CDN dependency */
+    @font-face {
+        font-family: 'Material Icons';
+        font-style: normal;
+        font-weight: 400;
+        src: url('/fonts/materialicons.woff2') format('woff2');
+    }
+    .material-icons {
+        font-family: 'Material Icons';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+    }
+    </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -825,10 +848,7 @@
         .cockfight-layout { display: flex; gap: 16px; align-items: flex-start; }
         .cockfight-layout .cockfight-left { flex: 1; min-width: 0; }
         .cockfight-layout .cockfight-right { width: 380px; flex-shrink: 0; }
-        @media(max-width:900px) {
-            .cockfight-layout { flex-direction: column; }
-            .cockfight-layout .cockfight-right { width: 100%; }
-        }
+        /* cockfight layout handled in main responsive section */
         /* Match History List (with proof) */
         .match-history-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
         .match-history-card .mhc-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
@@ -855,11 +875,7 @@
         .match-history-scroll::-webkit-scrollbar { width: 4px; }
         .match-history-scroll::-webkit-scrollbar-track { background: transparent; }
         .match-history-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        @media(max-width:600px) {
-            .mh-table-header, .mh-row { grid-template-columns: 45px 55px 1fr 65px; padding: 8px 10px; }
-            .mh-fight, .mh-winner { font-size: 12px; }
-            .proof-btn { width: 26px; height: 26px; font-size: 13px; }
-        }
+        /* match history responsive handled in main responsive section */
         /* Match Result Banner */
         .match-result-banner {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
@@ -1246,78 +1262,491 @@
         .modal-close .material-icons { font-size: 18px; color: var(--text-secondary); }
         .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .app-sidebar { transform: translateX(-100%); z-index: 95; }
-            .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
+        /* =====================================================
+           COMPREHENSIVE RESPONSIVE SYSTEM
+           Breakpoints:
+           - Mobile:      320px – 480px
+           - Large Mobile: 481px – 767px
+           - Tablet:      768px – 1024px
+           - Laptop:      1025px – 1440px
+           - Desktop:     1441px – 1920px
+           - Large:       1920px+
+           ===================================================== */
+
+        /* --- Sidebar overlay for mobile/tablet --- */
+        .sidebar-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 94; display: none; backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.show { display: block; }
+
+        /* === MOBILE: 320px – 480px === */
+        @media (max-width: 480px) {
+            :root { --header-height: 56px; --sidebar-width: 260px; }
+
+            /* Layout */
+            .app-sidebar { transform: translateX(-100%); z-index: 95; width: var(--sidebar-width); }
+            .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
             .sidebar-toggle { display: flex; }
-            .app-main { margin-left: 0; padding: 16px; padding-bottom: 80px; }
+            .app-main { margin-left: 0; padding: 12px; padding-bottom: 72px; }
             .bottom-nav { display: flex; }
-            .sidebar-overlay {
-                position: fixed; inset: 0; background: rgba(0,0,0,0.3);
-                z-index: 94; display: none;
-            }
-            .sidebar-overlay.show { display: block; }
-            .banner-carousel { height: 140px; border-radius: 10px; }
-            .banner-slide { padding: 14px 16px; }
-            .banner-content h3 { font-size: 15px; margin-bottom: 4px; }
-            .banner-content p { font-size: 11px; }
-            .banner-content .banner-cta { padding: 6px 14px; font-size: 11px; margin-top: 6px; }
-            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-            .quick-action { padding: 10px 4px; }
-            .quick-action .qa-icon { width: 36px; height: 36px; font-size: 18px; }
-            .quick-action .qa-label { font-size: 10px; }
-            .header-right { gap: 4px; }
-            .header-action-btn { width: 32px; height: 32px; }
-            .header-wallet { padding: 4px 10px 4px 8px; }
-            .header-wallet span:last-child { font-size: 11px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-            .header-brand h2 { font-size: 16px; }
-            .header-brand img { width: 30px; height: 30px; }
+
+            /* Header compact — hide deposit/withdraw btns on small mobile */
+            .app-header { padding: 0 10px; height: var(--header-height); }
+            .header-brand h2 { font-size: 15px; }
+            .header-brand img { width: 28px; height: 28px; border-radius: 6px; }
+            .header-right { gap: 3px; }
+            .header-action-btn { width: 30px; height: 30px; }
+            .header-action-btn .material-icons { font-size: 18px !important; }
+            .header-action-btn.deposit-btn,
+            .header-action-btn.withdraw-btn { display: none; }
+            .header-wallet { padding: 3px 8px 3px 6px; gap: 4px; }
+            .header-wallet .material-icons { font-size: 16px !important; }
+            .header-wallet span:last-child { font-size: 11px; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .header-profile { width: 30px; height: 30px; }
+            .header-profile .material-icons { font-size: 18px; }
+            .profile-dropdown { right: -4px; min-width: 180px; }
+
+            /* Banner */
+            .banner-carousel { height: 120px; border-radius: 10px; margin-bottom: 14px; }
+            .banner-slide { padding: 12px 14px; }
+            .banner-content h3 { font-size: 14px; margin-bottom: 3px; }
+            .banner-content h3 .material-icons { font-size: 18px !important; }
+            .banner-content p { font-size: 10px; }
+            .banner-content .banner-cta { padding: 5px 12px; font-size: 10px; margin-top: 4px; }
+            .banner-dots { bottom: 6px; right: 10px; }
+
+            /* Quick Actions */
+            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+            .quick-action { padding: 8px 2px; border-radius: 10px; }
+            .quick-action .qa-icon { width: 32px; height: 32px; border-radius: 8px; }
+            .quick-action .qa-icon img { width: 20px !important; height: 20px !important; }
+            .quick-action .qa-icon .material-icons { font-size: 18px !important; }
+            .quick-action .qa-label { font-size: 9px; }
+
+            /* Game Cards */
+            .game-cards { grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
+            .game-card-img { height: 80px; }
+            .game-card-body { padding: 10px; }
+            .game-card-body h4 { font-size: 13px; }
+            .game-card-body p { font-size: 10px; }
+
+            /* Stats */
+            .stats-bar { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .stat-card { padding: 10px 6px; }
+            .stat-card .stat-value { font-size: 16px; }
+            .stat-card .stat-label { font-size: 9px; }
+
+            /* Page titles */
+            .page-title { font-size: 17px; margin-bottom: 14px; }
+            .page-title .material-icons { font-size: 20px; }
+
+            /* Cockfight */
+            .cockfight-layout { flex-direction: column; }
+            .cockfight-layout .cockfight-right { width: 100%; }
+            .match-header { padding: 10px 12px; }
+            .match-title { font-size: 12px; }
+            .odds-value { font-size: 18px; }
+            .odds-team { font-size: 11px; }
+            .mascot-side img { width: 44px; height: 44px; }
+            .mascot-label { font-size: 13px; }
+            .vs-badge { width: 36px; height: 36px; font-size: 11px; }
+            .chip { width: 42px; height: 42px; font-size: 10px; }
+            .chips-row { padding: 8px 10px; gap: 6px; }
+            .bet-actions { padding: 8px 10px; gap: 6px; }
+            .bet-amount-input { font-size: 13px; padding: 8px 10px; }
+            .bet-submit { padding: 8px 16px; font-size: 12px; }
+            .bet-cancel { padding: 8px 12px; font-size: 12px; }
+            .stream-container { max-height: 200px; }
+            .stream-container iframe { height: 200px; }
+            .mh-table-header, .mh-row { grid-template-columns: 40px 50px 1fr 60px; padding: 6px 8px; }
+            .mh-fight, .mh-winner { font-size: 11px; }
+            .proof-btn { width: 24px; height: 24px; font-size: 12px; }
+
+            /* Dice */
             .dice-desktop-layout { flex-direction: column; }
             .dice-right-col { width: 100%; }
             .dice-picker-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-            .dice-result-face { width: 44px; height: 44px; }
-            .dice-result-face .dice-pip-grid { padding: 5px; }
-            .dice-result-face .dice-pip { width: 7px; height: 7px; }
-            .dice-rolling-placeholder { width: 44px; height: 44px; font-size: 16px; }
-            .dice-visual-area { min-height: 160px; padding: 14px; }
-            .dice-pick-num { width: 38px; height: 38px; }
+            .dice-pick-card { padding: 8px 0; }
+            .dice-pick-num { width: 34px; height: 34px; }
             .dice-pick-num .dice-pip-grid { padding: 4px; }
-            .dice-pick-num .dice-pip { width: 6px; height: 6px; }
-            .dice-pick-card { padding: 10px 0; }
-            .dice-phase-label { font-size: 9px; }
+            .dice-pick-num .dice-pip { width: 5px; height: 5px; }
+            .dice-pick-label { font-size: 9px; }
+            .dice-visual-area { min-height: 140px; padding: 12px; }
+            .dice-result-face { width: 40px; height: 40px; }
+            .dice-result-face .dice-pip-grid { padding: 4px; }
+            .dice-result-face .dice-pip { width: 6px; height: 6px; }
+            .dice-rolling-placeholder { width: 40px; height: 40px; font-size: 14px; }
+            .dice-phase-label { font-size: 8px; }
             .dice-rolling-text { font-size: 10px; }
-            .dice-result-card { padding: 20px 28px; }
-            .dice-result-emoji { font-size: 40px; }
-            .dice-result-text { font-size: 20px; }
-            .dice-result-amount { font-size: 16px; }
-            .dice-match-card { min-width: 150px; padding: 8px 10px; }
-            .dice-round-bar { padding: 8px 10px; }
-            .game-cards { grid-template-columns: 1fr; }
-            .stats-bar { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .match-teams { padding: 14px; }
-            .team img { width: 48px; height: 48px; }
+            .dice-round-bar { padding: 7px 8px; }
+            .dice-timer-val { font-size: 15px; }
+            .dice-bet-panel { padding: 10px; }
+            .dice-chips-row { gap: 4px; }
+            .dice-chip { padding: 5px 10px; font-size: 11px; }
+            .dice-bet-input { font-size: 13px; padding: 8px 10px; }
+            .dice-place-btn { padding: 10px 16px; font-size: 12px; }
+            .dice-match-card { min-width: 130px; padding: 7px 8px; }
+            .dice-result-card { padding: 16px 20px; }
+            .dice-result-emoji { font-size: 36px; }
+            .dice-result-text { font-size: 18px; }
+            .dice-result-amount { font-size: 14px; }
+
+            /* Wallet */
+            .wallet-card { padding: 20px 16px; border-radius: 12px; }
+            .wallet-amount { font-size: 28px; }
+            .wallet-actions { gap: 8px; }
+            .wallet-action-btn { padding: 10px; font-size: 12px; }
+            .wallet-summary { gap: 6px; }
+            .wallet-summary-item { padding: 10px 6px; }
+            .wallet-summary-item .ws-label { font-size: 9px; }
+            .wallet-summary-item .ws-value { font-size: 14px; }
+
+            /* My Bets summary */
+            #mybets-summary { gap: 4px !important; flex-wrap: wrap; }
+            #mybets-summary > div { min-width: calc(50% - 4px); flex: 1 1 calc(50% - 4px) !important; }
+            #mybets-summary > div > div:first-child { font-size: 9px !important; }
+            #mybets-summary > div > div:last-child { font-size: 15px !important; }
+
+            /* Statements */
+            .stmt-tabs { gap: 2px; }
+            .stmt-tab { padding: 7px 4px; font-size: 11px; }
+            .txn-item { padding: 10px 12px; gap: 10px; }
+            .txn-icon { width: 32px; height: 32px; }
+            .txn-icon .material-icons { font-size: 16px !important; }
+            .txn-desc { font-size: 12px; }
+            .txn-date { font-size: 10px; }
+            .txn-amount { font-size: 13px; }
+
+            /* Profile */
+            .profile-card { padding: 20px 16px; }
+            .profile-avatar { width: 60px; height: 60px; }
+            .profile-avatar .material-icons { font-size: 28px; }
+            .profile-name { font-size: 16px; }
+            .profile-menu-item { padding: 12px 14px; }
+            .profile-menu-item span:nth-child(2) { font-size: 13px; }
+
+            /* Referral */
+            #sec-referral > div:first-of-type { padding: 20px 14px !important; }
+            #sec-referral h3 { font-size: 17px !important; }
+            #referral-code { font-size: 16px !important; }
+
+            /* Modals / Deposit / Withdrawal */
+            .dep-modal { padding: 16px; max-height: 90vh; }
+            .dep-modal h3 { font-size: 16px; }
+            .modal-content { padding: 20px; }
+            .modal-title { font-size: 16px; }
+            .confirm-box { padding: 22px 18px 16px; }
+
+            /* Notifications */
+            .section-label { font-size: 13px; }
+
+            /* Bottom Nav adjustments */
+            .nav-item { padding: 4px 6px; }
+            .nav-item .material-icons { font-size: 20px; }
+            .nav-item span:last-child { font-size: 9px; }
+
+            /* Social Links */
+            .social-links { gap: 10px; padding: 14px 0; }
+            .social-link { width: 36px; height: 36px; }
+            .social-link svg { width: 16px; height: 16px; }
+
+            /* WhatsApp Float */
+            .whatsapp-float { bottom: 72px; right: 12px; width: 44px; height: 44px; }
+            .whatsapp-float svg { width: 22px; height: 22px; }
+
+            /* Live strip */
+            .live-strip { padding: 14px 14px; border-radius: 12px; }
+            .live-strip-title { font-size: 12px; }
+            .live-strip-team img { width: 38px; height: 38px; }
+            .live-strip-team span { font-size: 11px; }
+            .live-strip-vs { font-size: 14px; }
+
+            /* Auth */
+            .auth-card { padding: 28px 20px; }
+            .auth-logo h1 { font-size: 20px; }
+            .auth-logo img { width: 48px; height: 48px; }
+
+            /* Winner overlay */
+            .wo-ko-text { font-size: 50px; letter-spacing: 4px; }
+            .wo-winner-name { font-size: 20px; }
+            .wo-rooster { font-size: 70px; }
+
+            /* Empty state */
+            .empty-state { padding: 32px 16px; }
+            .empty-state .material-icons { font-size: 40px; }
+            .empty-state p { font-size: 13px; }
         }
 
-        @media (min-width: 769px) {
+        /* === LARGE MOBILE: 481px – 767px === */
+        @media (min-width: 481px) and (max-width: 767px) {
+            :root { --header-height: 58px; --sidebar-width: 280px; }
+
+            .app-sidebar { transform: translateX(-100%); z-index: 95; }
+            .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+            .sidebar-toggle { display: flex; }
+            .app-main { margin-left: 0; padding: 16px; padding-bottom: 76px; }
+            .bottom-nav { display: flex; }
+
+            .app-header { padding: 0 14px; }
+            .header-brand h2 { font-size: 16px; }
+            .header-brand img { width: 32px; height: 32px; }
+            .header-right { gap: 4px; }
+            .header-action-btn { width: 34px; height: 34px; }
+            .header-wallet { padding: 4px 10px 4px 8px; }
+            .header-wallet span:last-child { font-size: 12px; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+            .banner-carousel { height: 150px; border-radius: 12px; }
+            .banner-content h3 { font-size: 16px; }
+            .banner-content p { font-size: 11px; }
+            .banner-content .banner-cta { padding: 6px 14px; font-size: 11px; }
+
+            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .quick-action .qa-icon { width: 38px; height: 38px; }
+            .quick-action .qa-label { font-size: 10px; }
+
+            .game-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .game-card-img { height: 85px; }
+
+            .cockfight-layout { flex-direction: column; }
+            .cockfight-layout .cockfight-right { width: 100%; }
+            .stream-container { max-height: 220px; }
+            .stream-container iframe { height: 220px; }
+
+            .dice-desktop-layout { flex-direction: column; }
+            .dice-right-col { width: 100%; }
+            .dice-visual-area { min-height: 160px; padding: 16px; }
+            .dice-result-face { width: 46px; height: 46px; }
+            .dice-rolling-placeholder { width: 46px; height: 46px; }
+            .dice-pick-num { width: 40px; height: 40px; }
+
+            .wallet-amount { font-size: 32px; }
+            .page-title { font-size: 18px; }
+
+            /* My Bets summary 2x2 grid */
+            #mybets-summary { flex-wrap: wrap !important; gap: 6px !important; }
+            #mybets-summary > div { flex: 1 1 calc(50% - 6px) !important; }
+
+            .whatsapp-float { bottom: 76px; right: 14px; width: 48px; height: 48px; }
+            .wo-ko-text { font-size: 60px; }
+        }
+
+        /* === TABLET: 768px – 1024px === */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            :root { --header-height: 60px; --sidebar-width: 72px; }
+
+            /* Collapsible sidebar - icon only */
+            .app-sidebar { width: var(--sidebar-width); overflow-x: hidden; }
+            .sidebar-section-title { font-size: 0; padding: 0 0 6px; text-align: center; border-bottom: 1px solid var(--border-subtle); margin: 0 8px 6px; }
+            .sidebar-item { padding: 12px 0; justify-content: center; gap: 0; border-left: none; border-radius: 0; }
+            .sidebar-item span:not(.material-icons):not(.badge) { display: none; }
+            .sidebar-item .material-icons { font-size: 22px; margin: 0; }
+            .sidebar-item.active { background: var(--gold-bg); border-left: 3px solid var(--gold); }
+            .sidebar-item .badge { position: absolute; top: 4px; right: 8px; margin: 0; }
+            .sidebar-section { position: relative; }
+            .sidebar-toggle { display: none; }
+
+            /* Expanded sidebar on hover */
+            .app-sidebar:hover { width: 220px; box-shadow: 4px 0 20px rgba(0,0,0,0.2); }
+            .app-sidebar:hover .sidebar-section-title { font-size: 10px; padding: 0 16px; text-align: left; border-bottom: none; margin: 0 0 6px; }
+            .app-sidebar:hover .sidebar-item { padding: 10px 16px; justify-content: flex-start; gap: 12px; }
+            .app-sidebar:hover .sidebar-item span:not(.material-icons):not(.badge) { display: inline; }
+            .app-sidebar:hover .sidebar-item .badge { position: static; margin-left: auto; }
+
+            .app-main { margin-left: var(--sidebar-width); padding: 20px; }
+            .bottom-nav { display: none !important; }
+
+            .banner-carousel { height: 180px; }
+            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+            .game-cards { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .game-card-img { height: 100px; }
+
+            .cockfight-layout { flex-direction: column; }
+            .cockfight-layout .cockfight-right { width: 100%; }
+            .stream-container { max-height: 260px; }
+            .stream-container iframe { height: 260px; }
+
+            .dice-desktop-layout { flex-direction: row; }
+            .dice-right-col { width: 280px; }
+
+            .wallet-card { padding: 24px 20px; }
+            .wallet-amount { font-size: 34px; }
+
+            /* Profile 2-col on tablet */
+            .profile-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .profile-menu-item { margin-bottom: 0; }
+
+            .page-title { font-size: 20px; }
+        }
+
+        /* === LAPTOP: 1025px – 1440px === */
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            :root { --sidebar-width: 240px; --header-height: 64px; }
+
+            .app-sidebar { width: var(--sidebar-width); }
+            .sidebar-toggle { display: none; }
+            .app-main { margin-left: var(--sidebar-width); padding: 24px; max-width: calc(100% - var(--sidebar-width)); }
+            .bottom-nav { display: none !important; }
+
+            .banner-carousel { height: 200px; }
+            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+            .game-cards { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+            .game-card-img { height: 110px; }
+
+            .cockfight-layout { flex-direction: row; }
+            .cockfight-layout .cockfight-right { width: 360px; }
+
+            .dice-desktop-layout { flex-direction: row; }
+            .dice-right-col { width: 320px; }
+            .dice-visual-area { min-height: 220px; padding: 24px; }
+
+            .page-title { font-size: 22px; }
+            .wallet-amount { font-size: 36px; }
+
+            /* Profile layout */
+            .profile-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .profile-menu-item { margin-bottom: 0; }
+        }
+
+        /* === DESKTOP: 1441px – 1920px === */
+        @media (min-width: 1441px) and (max-width: 1920px) {
+            :root { --sidebar-width: 260px; --header-height: 68px; }
+
+            .app-sidebar { width: var(--sidebar-width); }
+            .sidebar-toggle { display: none; }
+            .app-main {
+                margin-left: var(--sidebar-width); padding: 28px 32px;
+                max-width: 1400px;
+            }
+            .bottom-nav { display: none !important; }
+
+            .app-header { padding: 0 28px; }
+            .header-brand h2 { font-size: 19px; }
+
+            .banner-carousel { height: 220px; border-radius: var(--radius-lg); }
+            .banner-content h3 { font-size: 26px; }
+            .banner-content p { font-size: 14px; }
+            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+            .quick-action .qa-icon { width: 48px; height: 48px; border-radius: 14px; }
+            .quick-action .qa-label { font-size: 12px; }
+
+            .game-cards { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+            .game-card-img { height: 120px; }
+            .game-card-body h4 { font-size: 15px; }
+            .game-card-body p { font-size: 12px; }
+
+            .cockfight-layout .cockfight-right { width: 400px; }
+            .dice-right-col { width: 340px; }
+            .dice-visual-area { min-height: 240px; padding: 28px; }
+            .dice-result-face { width: 60px; height: 60px; }
+            .dice-result-face .dice-pip { width: 10px; height: 10px; }
+            .dice-rolling-placeholder { width: 60px; height: 60px; }
+            .dice-pick-num { width: 48px; height: 48px; }
+
+            .wallet-amount { font-size: 38px; }
+            .page-title { font-size: 24px; }
+
+            .stats-bar { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+            .stat-card .stat-value { font-size: 22px; }
+
+            .profile-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .profile-menu-item { margin-bottom: 0; }
+        }
+
+        /* === LARGE DISPLAY: 1921px+ === */
+        @media (min-width: 1921px) {
+            :root { --sidebar-width: 280px; --header-height: 72px; }
+
+            .app-sidebar { width: var(--sidebar-width); }
+            .sidebar-toggle { display: none; }
+            .app-main {
+                margin-left: var(--sidebar-width); padding: 32px;
+                max-width: 1600px;
+            }
+            .bottom-nav { display: none !important; }
+
+            .app-header { padding: 0 32px; }
+
+            .banner-carousel { height: 240px; }
+            .banner-content h3 { font-size: 28px; }
+            .banner-content p { font-size: 15px; }
+            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+            .quick-action { padding: 16px 10px; }
+            .quick-action .qa-icon { width: 52px; height: 52px; border-radius: 14px; }
+            .quick-action .qa-label { font-size: 13px; }
+
+            .game-cards { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+            .game-card-img { height: 130px; }
+            .game-card-body { padding: 14px; }
+            .game-card-body h4 { font-size: 16px; }
+            .game-card-body p { font-size: 13px; }
+
+            .cockfight-layout .cockfight-right { width: 420px; }
+            .dice-game-wrap { max-width: 1200px; }
+            .dice-right-col { width: 360px; }
+            .dice-visual-area { min-height: 260px; padding: 32px; }
+            .dice-result-face { width: 66px; height: 66px; }
+            .dice-result-face .dice-pip { width: 11px; height: 11px; }
+            .dice-rolling-placeholder { width: 66px; height: 66px; }
+            .dice-pick-num { width: 50px; height: 50px; }
+
+            .wallet-card { padding: 32px 28px; }
+            .wallet-amount { font-size: 42px; }
+            .page-title { font-size: 26px; }
+
+            .stats-bar { gap: 16px; }
+            .stat-card .stat-value { font-size: 24px; }
+            .stat-card .stat-label { font-size: 12px; }
+
+            .profile-card { padding: 28px; }
+            .profile-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .profile-menu-item { margin-bottom: 0; }
+
+            /* Referral wider on large screens */
+            #sec-referral > div:first-of-type { max-width: 600px; margin-left: auto; margin-right: auto; }
+
+            .txn-item { padding: 16px 20px; }
+        }
+
+        /* === CROSS-BREAKPOINT: Tablet+ hides bottom nav === */
+        @media (min-width: 768px) {
             .bottom-nav { display: none !important; }
         }
 
-        /* Desktop polish: larger screens */
-        @media (min-width: 1440px) {
-            .dice-visual-area { min-height: 240px; padding: 28px; }
-            .dice-result-face { width: 62px; height: 62px; }
-            .dice-result-face .dice-pip { width: 10px; height: 10px; }
-            .dice-rolling-placeholder { width: 62px; height: 62px; }
-            .dice-pick-num { width: 48px; height: 48px; }
-            .dice-match-cards { gap: 12px; }
+        /* === CROSS-BREAKPOINT: Mobile shows bottom nav + hamburger === */
+        @media (max-width: 767px) {
+            .bottom-nav { display: flex; }
+            .sidebar-toggle { display: flex; }
+            .app-sidebar { transform: translateX(-100%); z-index: 95; }
+            .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 30px rgba(0,0,0,0.5); }
+            .app-main { margin-left: 0; }
         }
-        @media (min-width: 2560px) {
-            .dice-game-wrap { max-width: 1400px; }
-            .dice-visual-area { min-height: 280px; padding: 32px; }
-            .dice-result-face { width: 68px; height: 68px; }
-            .dice-result-face .dice-pip { width: 11px; height: 11px; }
-            .dice-rolling-placeholder { width: 68px; height: 68px; }
+
+        /* === Deposit/Withdrawal Modal mobile bottom-sheet === */
+        @media (max-width: 600px) {
+            .dep-modal-overlay { align-items: flex-end; padding: 0; }
+            .dep-modal {
+                border-radius: 20px 20px 0 0; max-height: 92vh;
+                padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+                animation: sheetSlideUp 0.3s ease;
+            }
+            @keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+            .modal-overlay { align-items: flex-end; padding: 0; }
+            .modal-content {
+                border-radius: 20px 20px 0 0; max-width: 100%;
+                padding: 24px 16px calc(16px + env(safe-area-inset-bottom));
+            }
+            .confirm-box { width: 95%; }
+        }
+
+        /* === Table scroll for mobile match history === */
+        @media (max-width: 600px) {
+            .mh-table-header, .mh-row { grid-template-columns: 40px 50px 1fr 55px; padding: 6px 8px; font-size: 10px; }
+            .mh-fight, .mh-winner { font-size: 11px; }
+            .proof-btn { width: 24px; height: 24px; font-size: 12px; }
+            .dice-mybets-compact th, .dice-mybets-compact td { padding: 4px 5px; font-size: 11px; }
+            .dice-mybets-table th, .dice-mybets-table td { padding: 5px 6px; font-size: 11px; }
+            .dice-history-table th, .dice-history-table td { padding: 5px 6px; font-size: 11px; }
         }
 
         /* Info card */
@@ -1438,12 +1867,12 @@
                 <button class="auth-btn" id="reg-btn" onclick="handleRegister()">Send OTP & Register</button>
             </div>
         </div>
-        <footer style="text-align:center;margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:6px;">
-            <div style="display:flex;gap:16px;align-items:center;">
-                <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);"><span class="material-icons" style="font-size:14px;">18_up_rating</span> 18+ Only</span>
-                <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);"><span class="material-icons" style="font-size:14px;">verified_user</span> Secure Play</span>
+        <footer style="text-align:center;margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:400px;">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
+                <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);white-space:nowrap;"><span class="material-icons" style="font-size:14px;">18_up_rating</span> 18+ Only</span>
+                <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);white-space:nowrap;"><span class="material-icons" style="font-size:14px;">verified_user</span> Secure Play</span>
             </div>
-            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted);"><span class="material-icons" style="font-size:13px;">shield</span> Account recovery protected by SMS OTP</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted);text-align:center;flex-wrap:wrap;justify-content:center;"><span class="material-icons" style="font-size:13px;">shield</span> Account recovery protected by SMS OTP</span>
         </footer>
     </div>
 
@@ -1557,21 +1986,18 @@
                 <div class="sidebar-item" onclick="navigateSidebar('sec-dice')">
                     <span class="material-icons">casino</span> Dice Games
                 </div>
+                <div class="sidebar-item" onclick="navigateSidebar('sec-mybets')">
+                    <span class="material-icons">history</span> My Bets
+                </div>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title">More</div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-promotions')">
-                    <span class="material-icons">local_offer</span> Promotions
-                </div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-lottery')">
-                    <span class="material-icons">emoji_events</span> Lottery
-                </div>
+
+
                 <div class="sidebar-item" onclick="navigateSidebar('sec-referral')">
                     <span class="material-icons">group_add</span> Referral & Earn
                 </div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-learning')">
-                    <span class="material-icons">play_circle</span> Learning Videos
-                </div>
+
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Account</div>
@@ -1755,6 +2181,40 @@
                 </div>
             </div>
 
+
+            <!-- MY BETS -->
+            <div id="sec-mybets" class="section">
+                <div class="page-title"><span class="material-icons">history</span> My Bets</div>
+                <div class="stmt-tabs">
+                    <div class="stmt-tab active" onclick="filterBets('all')" id="bet-tab-all">All</div>
+                    <div class="stmt-tab" onclick="filterBets('cockfight')" id="bet-tab-cockfight">Cockfight</div>
+                    <div class="stmt-tab" onclick="filterBets('dice')" id="bet-tab-dice">Dice</div>
+                    <div class="stmt-tab" onclick="filterBets('won')" id="bet-tab-won">Won</div>
+                    <div class="stmt-tab" onclick="filterBets('lost')" id="bet-tab-lost">Lost</div>
+                </div>
+                <div id="mybets-summary" style="display:flex;gap:8px;margin-bottom:16px;">
+                    <div style="flex:1;background:var(--bg-card);border-radius:var(--radius);padding:12px;text-align:center;border:1px solid var(--border);">
+                        <div style="font-size:11px;color:var(--text-muted);">Total Bets</div>
+                        <div style="font-size:18px;font-weight:700;" id="bets-total-count">0</div>
+                    </div>
+                    <div style="flex:1;background:var(--bg-card);border-radius:var(--radius);padding:12px;text-align:center;border:1px solid var(--border);">
+                        <div style="font-size:11px;color:var(--text-muted);">Won</div>
+                        <div style="font-size:18px;font-weight:700;color:var(--success);" id="bets-won-count">0</div>
+                    </div>
+                    <div style="flex:1;background:var(--bg-card);border-radius:var(--radius);padding:12px;text-align:center;border:1px solid var(--border);">
+                        <div style="font-size:11px;color:var(--text-muted);">Lost</div>
+                        <div style="font-size:18px;font-weight:700;color:var(--danger);" id="bets-lost-count">0</div>
+                    </div>
+                    <div style="flex:1;background:var(--bg-card);border-radius:var(--radius);padding:12px;text-align:center;border:1px solid var(--border);">
+                        <div style="font-size:11px;color:var(--text-muted);">Wagered</div>
+                        <div style="font-size:18px;font-weight:700;color:var(--gold);" id="bets-total-wagered">₹0</div>
+                    </div>
+                </div>
+                <div id="mybets-list">
+                    <div class="empty-state"><span class="material-icons">history</span><p>Loading bet history...</p></div>
+                </div>
+            </div>
+
             <!-- STATEMENT -->
             <div id="sec-statement" class="section">
                 <div class="page-title">
@@ -1881,32 +2341,7 @@
                 </div>
             </div>
 
-            <!-- PROMOTIONS -->
-            <div id="sec-promotions" class="section">
-                <div class="page-title"><span class="material-icons">local_offer</span> Promotions</div>
-                <div id="promotions-container">
-                    <div class="empty-state"><span class="material-icons">local_offer</span><p>Loading promotions...</p></div>
-                </div>
-                <div id="promo-order-history" style="margin-top:20px;display:none;">
-                    <div class="section-label"><span class="material-icons">history</span> My Orders</div>
-                    <div id="promo-orders-list"></div>
-                </div>
-            </div>
 
-            <!-- LOTTERY -->
-            <div id="sec-lottery" class="section">
-                <div class="page-title"><span class="material-icons">emoji_events</span> Lottery</div>
-                <div style="display:flex;gap:8px;margin-bottom:16px;">
-                    <button class="auth-btn lottery-tab active" onclick="switchLotteryTab('gift')" id="lottery-tab-gift" style="flex:1;margin:0;padding:10px;font-size:13px;">Gift Pools</button>
-                    <button class="auth-btn lottery-tab" onclick="switchLotteryTab('price')" id="lottery-tab-price" style="flex:1;margin:0;padding:10px;font-size:13px;background:var(--bg);color:var(--text-primary);">Price Pools</button>
-                </div>
-                <div id="lottery-gift-container">
-                    <div class="empty-state"><span class="material-icons">emoji_events</span><p>Loading lottery pools...</p></div>
-                </div>
-                <div id="lottery-price-container" style="display:none;">
-                    <div class="empty-state"><span class="material-icons">emoji_events</span><p>Loading price pools...</p></div>
-                </div>
-            </div>
 
             <!-- REFERRAL -->
             <div id="sec-referral" class="section">
@@ -1945,13 +2380,7 @@
                 </div>
             </div>
 
-            <!-- LEARNING VIDEOS -->
-            <div id="sec-learning" class="section">
-                <div class="page-title"><span class="material-icons">play_circle</span> Learning Videos</div>
-                <div id="learning-container">
-                    <div class="empty-state"><span class="material-icons">play_circle</span><p>Loading videos...</p></div>
-                </div>
-            </div>
+
 
             <!-- NOTIFICATIONS -->
             <div id="sec-notifications" class="section">
@@ -1972,9 +2401,9 @@
                 <span class="material-icons">sports_mma</span>
                 <span>Live</span>
             </div>
-            <div class="nav-item" onclick="navigate('sec-statement')">
-                <span class="material-icons">receipt_long</span>
-                <span>History</span>
+            <div class="nav-item" onclick="navigate('sec-mybets')">
+                <span class="material-icons">history</span>
+                <span>Bets</span>
             </div>
             <div class="nav-item" onclick="navigate('sec-wallet')">
                 <span class="material-icons">account_balance_wallet</span>
@@ -2245,16 +2674,18 @@
         if (!phone || phone.length < 10) { showForgotError('Enter a valid 10-digit mobile number'); return; }
         document.getElementById('forgot-error').style.display = 'none';
         try {
-            var res = await fetch(API + '/user/getotp/', {
+            var res = await fetch(API + '/user/forgot-password/request-otp/', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({phone_number: phone})
+                body: JSON.stringify({mobile: phone})
             });
             var data = await res.json();
-            if (res.ok && data.success !== false) {
+            if (res.ok) {
                 document.getElementById('forgot-step-phone').classList.add('hidden');
                 document.getElementById('forgot-step-otp').classList.remove('hidden');
             } else {
-                showForgotError(data.message || data.error || 'Failed to send OTP');
+                var errMsg = data.error;
+                if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Failed to send OTP';
+                showForgotError(errMsg || data.message || 'Failed to send OTP');
             }
         } catch(e) { showForgotError('Network error. Please try again.'); }
     }
@@ -2268,19 +2699,34 @@
         if (newPw !== confirmPw) { showForgotError('Passwords do not match'); return; }
         document.getElementById('forgot-error').style.display = 'none';
         try {
-            var res = await fetch(API + '/user/reset-password/', {
+            // Step 1: Verify OTP and get reset token
+            var verifyRes = await fetch(API + '/user/forgot-password/verify-otp/', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({phone_number: phone, otp: otp, new_password: newPw})
+                body: JSON.stringify({mobile: phone, otp: otp})
             });
-            var data = await res.json();
-            if (res.ok && data.success !== false) {
+            var verifyData = await verifyRes.json();
+            if (!verifyRes.ok || !verifyData.reset_token) {
+                var errMsg = verifyData.error;
+                if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Invalid OTP';
+                showForgotError(errMsg || verifyData.message || 'Invalid OTP. Please try again.');
+                return;
+            }
+            // Step 2: Reset password with token
+            var resetRes = await fetch(API + '/user/forgot-password/reset/', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({reset_token: verifyData.reset_token, new_password: newPw, confirm_password: newPw})
+            });
+            var resetData = await resetRes.json();
+            if (resetRes.ok) {
                 closeForgotPassword();
                 showError('Password reset successful! Please login.');
                 document.getElementById('auth-error').style.background = 'rgba(34,197,94,0.1)';
                 document.getElementById('auth-error').style.borderColor = 'rgba(34,197,94,0.3)';
                 document.getElementById('auth-error').style.color = 'var(--success)';
             } else {
-                showForgotError(data.message || data.error || 'Reset failed. Check OTP and try again.');
+                var errMsg2 = resetData.error;
+                if (errMsg2 && typeof errMsg2 === 'object') errMsg2 = errMsg2.message || errMsg2.detail || 'Reset failed';
+                showForgotError(errMsg2 || resetData.message || 'Reset failed. Please try again.');
             }
         } catch(e) { showForgotError('Network error. Please try again.'); }
     }
@@ -3141,8 +3587,8 @@
         document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
         const sidebarMap = {
             'sec-home': 0, 'sec-cockfight': 1, 'sec-dice': 2,
-            'sec-promotions': 3, 'sec-lottery': 4, 'sec-referral': 5, 'sec-learning': 6,
-            'sec-wallet': 7, 'sec-notifications': 8, 'sec-statement': 9, 'sec-profile': 10
+            'sec-mybets': 3, 'sec-referral': 4,
+            'sec-wallet': 5, 'sec-notifications': 6, 'sec-statement': 7, 'sec-profile': 8
         };
         const sidebarItems = document.querySelectorAll('.sidebar-item');
         if (sidebarMap[sectionId] !== undefined && sidebarItems[sidebarMap[sectionId]]) {
@@ -3153,10 +3599,8 @@
         if (sectionId === 'sec-home' || sectionId === 'sec-cockfight') { loadMatches(); loadUserBets(); }
         if (sectionId === 'sec-dice') { loadDiceGames(); loadDiceMyBets(); }
         if (sectionId === 'sec-wallet') { loadStatement(); }
-        if (sectionId === 'sec-promotions') loadPromotions();
-        if (sectionId === 'sec-lottery') loadLottery();
+        if (sectionId === 'sec-mybets') loadMyBets();
         if (sectionId === 'sec-referral') loadReferral();
-        if (sectionId === 'sec-learning') loadLearningVideos();
         if (sectionId === 'sec-notifications') loadNotifications();
         window.scrollTo(0, 0);
     }
@@ -4647,115 +5091,106 @@
         diceTimerWs.onclose = function() { setTimeout(function() { if (token) { diceTimerWs = null; connectDiceWebSocket(); } }, 5000); };
     }
 
-    // ===== PROMOTIONS =====
-    async function loadPromotions() {
+
+    // ===== MY BETS =====
+    var allMyBets = [];
+    var currentBetFilter = 'all';
+
+    async function loadMyBets() {
         try {
-            var res = await fetch(API + '/base/products/', {headers:{'Authorization':'Bearer '+token}});
-            var data = await res.json();
-            var products = data.results || data || [];
-            if (products.length === 0) {
-                document.getElementById('promotions-container').innerHTML = '<div class="empty-state"><span class="material-icons">local_offer</span><p>No promotions available right now</p></div>';
-                return;
-            }
-            var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">';
-            products.forEach(function(p) {
-                var imgUrl = p.image ? (p.image.startsWith('http') ? p.image : location.origin + p.image) : '';
-                var imgHtml = imgUrl ? '<img src="'+imgUrl+'" style="width:100%;height:140px;object-fit:cover;border-radius:8px 8px 0 0;"/>' : '<div style="height:100px;background:linear-gradient(135deg,#1a1a1a,#2a1f0e);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;"><span class="material-icons" style="font-size:40px;color:var(--gold);">local_offer</span></div>';
-                html += '<div style="background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;">';
-                html += imgHtml;
-                html += '<div style="padding:12px;">';
-                html += '<h4 style="font-size:14px;margin-bottom:4px;">'+((p.name||p.title||'Product')+'</h4>');
-                html += '<p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">'+((p.description||'')+'</p>');
-                if (p.price) html += '<div style="font-size:16px;font-weight:700;color:var(--gold);margin-bottom:8px;">₹'+p.price+'</div>';
-                html += '<button class="auth-btn" onclick="orderProduct('+p.id+')" style="background:var(--gold);color:#000;padding:8px;font-size:13px;margin:0;">Order Now</button>';
-                html += '</div></div>';
+            var [cfRes, diceRes] = await Promise.all([
+                fetch(API + '/cockfight/bets/', {headers:{'Authorization':'Bearer '+token}}),
+                fetch(API + '/dice-play/bets/', {headers:{'Authorization':'Bearer '+token}})
+            ]);
+            var cfData = cfRes.ok ? await cfRes.json() : [];
+            var diceData = diceRes.ok ? await diceRes.json() : [];
+            var cfBets = (cfData.results || cfData || []).map(function(b) {
+                var teamNames = {1:'Meron',2:'Wala',3:'Draw'};
+                var status = b.matchWinStatus === 0 ? 'pending' : b.matchWinStatus === 4 ? 'cancelled' : b.matchWinStatus === b.betTeam ? 'won' : 'lost';
+                return {
+                    id: b.id, game: 'cockfight', gameLabel: 'Cockfight',
+                    icon: 'sports_mma', amount: b.amount,
+                    detail: (teamNames[b.betTeam]||'Team '+b.betTeam) + (b.matchNumber ? ' · #'+b.matchNumber : '') + (b.matchType==='A'?' (24/7)':' (Manual)'),
+                    status: status, ratio: b.betRatio,
+                    date: b.createdDate, matchWinStatus: b.matchWinStatus, betTeam: b.betTeam
+                };
             });
-            html += '</div>';
-            document.getElementById('promotions-container').innerHTML = html;
-            loadOrderHistory();
-        } catch(e) { document.getElementById('promotions-container').innerHTML = '<div class="empty-state"><span class="material-icons">local_offer</span><p>Could not load promotions</p></div>'; }
-    }
-    async function orderProduct(productId) {
-        if (!await customConfirm('Place order for this product?', {title:'Confirm Order', icon:'🛒', okText:'Order'})) return;
-        try {
-            var res = await fetch(API + '/base/product-order/', {method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}, body:JSON.stringify({product:productId})});
-            if (res.ok || res.status===201) { showToast('Order placed!','success'); loadOrderHistory(); }
-            else { var d = await res.json(); showToast(d.detail||d.error||'Order failed','error'); }
-        } catch(e) { showToast('Network error','error'); }
-    }
-    async function loadOrderHistory() {
-        try {
-            var res = await fetch(API + '/base/product-order/', {headers:{'Authorization':'Bearer '+token}});
-            var data = await res.json();
-            var orders = data.results || data || [];
-            if (orders.length === 0) return;
-            document.getElementById('promo-order-history').style.display = 'block';
-            var html = '';
-            orders.forEach(function(o) {
-                var status = o.status || 'pending';
-                var statusColor = status==='approved'?'var(--success)':status==='rejected'?'var(--danger)':'#f59e0b';
-                html += '<div style="background:var(--bg-card);border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">';
-                html += '<div><div style="font-size:13px;font-weight:600;">'+((o.product_name||'Order #'+o.id)+'</div><div style="font-size:11px;color:var(--text-muted);">'+(o.created_at?new Date(o.created_at).toLocaleString():'')+'</div></div>');
-                html += '<span style="font-size:12px;font-weight:600;color:'+statusColor+';text-transform:uppercase;">'+status+'</span>';
-                html += '</div>';
+            var diceBets = (diceData.results || diceData || []).map(function(b) {
+                var status = b.matchWinStatus === 0 ? 'pending' : b.matchWinStatus === 4 ? 'cancelled' : b.matchWinStatus === 1 ? 'won' : 'lost';
+                return {
+                    id: b.id, game: 'dice', gameLabel: 'Dice Play',
+                    icon: 'casino', amount: b.amount,
+                    detail: 'Face '+b.diceNumber + (b.rolled_count > 0 ? ' · x'+b.rolled_count : '') + (b.payout_amount > 0 ? ' · Payout ₹'+b.payout_amount : ''),
+                    status: status, ratio: b.rolled_count,
+                    date: b.createdDate, matchWinStatus: b.matchWinStatus
+                };
             });
-            document.getElementById('promo-orders-list').innerHTML = html;
-        } catch(e) {}
+            allMyBets = cfBets.concat(diceBets).sort(function(a,b) {
+                return new Date(b.date) - new Date(a.date);
+            });
+            updateBetsSummary();
+            renderMyBets();
+        } catch(e) {
+            document.getElementById('mybets-list').innerHTML = '<div class="empty-state"><span class="material-icons">error</span><p>Could not load bet history</p></div>';
+        }
     }
 
-    // ===== LOTTERY =====
-    function switchLotteryTab(tab) {
-        document.getElementById('lottery-tab-gift').style.background = tab==='gift'?'var(--gold)':'var(--bg)';
-        document.getElementById('lottery-tab-gift').style.color = tab==='gift'?'#000':'var(--text-primary)';
-        document.getElementById('lottery-tab-gift').classList.toggle('active', tab==='gift');
-        document.getElementById('lottery-tab-price').style.background = tab==='price'?'var(--gold)':'var(--bg)';
-        document.getElementById('lottery-tab-price').style.color = tab==='price'?'#000':'var(--text-primary)';
-        document.getElementById('lottery-tab-price').classList.toggle('active', tab==='price');
-        document.getElementById('lottery-gift-container').style.display = tab==='gift'?'block':'none';
-        document.getElementById('lottery-price-container').style.display = tab==='price'?'block':'none';
+    function updateBetsSummary() {
+        var total = allMyBets.length;
+        var won = allMyBets.filter(function(b){return b.status==='won';}).length;
+        var lost = allMyBets.filter(function(b){return b.status==='lost';}).length;
+        var wagered = allMyBets.reduce(function(s,b){return s+b.amount;},0);
+        document.getElementById('bets-total-count').textContent = total;
+        document.getElementById('bets-won-count').textContent = won;
+        document.getElementById('bets-lost-count').textContent = lost;
+        document.getElementById('bets-total-wagered').textContent = '₹'+wagered.toLocaleString();
     }
-    async function loadLottery() {
-        try {
-            var [giftRes, priceRes] = await Promise.all([
-                fetch(API.replace('/api','') + '/api/lottery/gift-pools/', {headers:{'Authorization':'Bearer '+token}}),
-                fetch(API.replace('/api','') + '/api/lottery/price-pools/', {headers:{'Authorization':'Bearer '+token}})
-            ]);
-            var giftData = giftRes.ok ? await giftRes.json() : [];
-            var priceData = priceRes.ok ? await priceRes.json() : [];
-            var gifts = Array.isArray(giftData) ? giftData : (giftData.results || []);
-            var prices = Array.isArray(priceData) ? priceData : (priceData.results || []);
-            if (gifts.length === 0) document.getElementById('lottery-gift-container').innerHTML = '<div class="empty-state"><span class="material-icons">emoji_events</span><p>No gift pools available</p></div>';
-            else {
-                var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">';
-                gifts.forEach(function(g) {
-                    html += '<div style="background:var(--bg-card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);">';
-                    html += '<div style="font-size:32px;text-align:center;margin-bottom:8px;">🎁</div>';
-                    html += '<h4 style="font-size:14px;text-align:center;margin-bottom:4px;">'+((g.name||g.title||'Gift Pool')+'</h4>');
-                    html += '<p style="font-size:12px;color:var(--text-secondary);text-align:center;">'+((g.description||'')+'</p>');
-                    if (g.prize_amount) html += '<div style="font-size:18px;font-weight:700;color:var(--gold);text-align:center;margin-top:8px;">₹'+g.prize_amount+'</div>';
-                    html += '</div>';
-                });
-                html += '</div>';
-                document.getElementById('lottery-gift-container').innerHTML = html;
-            }
-            if (prices.length === 0) document.getElementById('lottery-price-container').innerHTML = '<div class="empty-state"><span class="material-icons">emoji_events</span><p>No price pools available</p></div>';
-            else {
-                var html2 = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">';
-                prices.forEach(function(p) {
-                    html2 += '<div style="background:var(--bg-card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);">';
-                    html2 += '<div style="font-size:32px;text-align:center;margin-bottom:8px;">🎰</div>';
-                    html2 += '<h4 style="font-size:14px;text-align:center;margin-bottom:4px;">'+((p.name||p.title||'Price Pool')+'</h4>');
-                    html2 += '<p style="font-size:12px;color:var(--text-secondary);text-align:center;">'+((p.description||'')+'</p>');
-                    if (p.ticket_price) html2 += '<div style="font-size:14px;color:var(--text-secondary);text-align:center;margin-top:4px;">Ticket: ₹'+p.ticket_price+'</div>';
-                    if (p.prize_amount) html2 += '<div style="font-size:18px;font-weight:700;color:var(--gold);text-align:center;margin-top:4px;">Prize: ₹'+p.prize_amount+'</div>';
-                    html2 += '</div>';
-                });
-                html2 += '</div>';
-                document.getElementById('lottery-price-container').innerHTML = html2;
-            }
-        } catch(e) {
-            document.getElementById('lottery-gift-container').innerHTML = '<div class="empty-state"><span class="material-icons">emoji_events</span><p>Could not load lottery</p></div>';
+
+    function filterBets(filter) {
+        currentBetFilter = filter;
+        document.querySelectorAll('#sec-mybets .stmt-tab').forEach(function(t){t.classList.remove('active');});
+        var tabEl = document.getElementById('bet-tab-'+filter);
+        if (tabEl) tabEl.classList.add('active');
+        renderMyBets();
+    }
+
+    function renderMyBets() {
+        var filtered = allMyBets;
+        if (currentBetFilter === 'cockfight') filtered = allMyBets.filter(function(b){return b.game==='cockfight';});
+        else if (currentBetFilter === 'dice') filtered = allMyBets.filter(function(b){return b.game==='dice';});
+        else if (currentBetFilter === 'won') filtered = allMyBets.filter(function(b){return b.status==='won';});
+        else if (currentBetFilter === 'lost') filtered = allMyBets.filter(function(b){return b.status==='lost';});
+
+        if (filtered.length === 0) {
+            document.getElementById('mybets-list').innerHTML = '<div class="empty-state"><span class="material-icons">history</span><p>No bets found</p></div>';
+            return;
         }
+
+        var statusColors = {won:'var(--success)',lost:'var(--danger)',pending:'#f59e0b',cancelled:'var(--text-muted)'};
+        var statusIcons = {won:'check_circle',lost:'cancel',pending:'schedule',cancelled:'block'};
+        var html = '';
+        filtered.forEach(function(b) {
+            var time = b.date ? new Date(b.date).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+            var sc = statusColors[b.status] || '#f59e0b';
+            var si = statusIcons[b.status] || 'help';
+            html += '<div style="background:var(--bg-card);border-radius:var(--radius);padding:12px;margin-bottom:8px;border:1px solid var(--border);border-left:3px solid '+sc+';">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+            html += '<div style="display:flex;align-items:center;gap:8px;">';
+            html += '<span class="material-icons" style="font-size:18px;color:var(--gold);">'+b.icon+'</span>';
+            html += '<div>';
+            html += '<div style="font-size:13px;font-weight:600;">'+b.gameLabel+'</div>';
+            html += '<div style="font-size:11px;color:var(--text-muted);">'+b.detail+'</div>';
+            html += '</div></div>';
+            html += '<div style="text-align:right;">';
+            html += '<div style="font-size:14px;font-weight:700;">₹'+b.amount+'</div>';
+            html += '<div style="display:flex;align-items:center;gap:2px;justify-content:flex-end;">';
+            html += '<span class="material-icons" style="font-size:12px;color:'+sc+';">'+si+'</span>';
+            html += '<span style="font-size:11px;font-weight:600;color:'+sc+';text-transform:uppercase;">'+b.status+'</span>';
+            html += '</div></div></div>';
+            html += '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;">'+time+'</div>';
+            html += '</div>';
+        });
+        document.getElementById('mybets-list').innerHTML = html;
     }
 
     // ===== REFERRAL =====
@@ -4783,29 +5218,6 @@
         if (navigator.share) { navigator.share({title:'Kokoroko Referral', text:text}).catch(function(){}); }
         else { copyReferralCode(); showToast('Link copied — share it with friends!','success'); }
     }
-
-    // ===== LEARNING VIDEOS =====
-    async function loadLearningVideos() {
-        try {
-            var res = await fetch(API + '/base/learningvideos/');
-            var data = await res.json();
-            var videos = data.results || data || [];
-            if (videos.length === 0) { document.getElementById('learning-container').innerHTML = '<div class="empty-state"><span class="material-icons">play_circle</span><p>No learning videos available yet</p></div>'; return; }
-            var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
-            videos.forEach(function(v) {
-                var thumb = v.thumbnail ? (v.thumbnail.startsWith('http') ? v.thumbnail : location.origin + v.thumbnail) : '';
-                html += '<div style="background:var(--bg-card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);cursor:pointer;" onclick="playVideo(\''+((v.video_url||v.url||'#')+'\')">');
-                if (thumb) html += '<img src="'+thumb+'" style="width:100%;height:160px;object-fit:cover;"/>';
-                else html += '<div style="height:120px;background:linear-gradient(135deg,#1a1a1a,#312e81);display:flex;align-items:center;justify-content:center;"><span class="material-icons" style="font-size:48px;color:var(--gold);">play_circle</span></div>';
-                html += '<div style="padding:12px;"><h4 style="font-size:13px;margin-bottom:4px;">'+((v.title||'Video')+'</h4>');
-                if (v.description) html += '<p style="font-size:12px;color:var(--text-secondary);">'+v.description+'</p>';
-                html += '</div></div>';
-            });
-            html += '</div>';
-            document.getElementById('learning-container').innerHTML = html;
-        } catch(e) { document.getElementById('learning-container').innerHTML = '<div class="empty-state"><span class="material-icons">play_circle</span><p>Could not load videos</p></div>'; }
-    }
-    function playVideo(url) { if (url && url !== '#') window.open(url, '_blank'); }
 
     // ===== PROVABLY FAIR =====
     function openProvablyFairModal(matchData) {
