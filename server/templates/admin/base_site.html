@@ -1231,16 +1231,31 @@ body.login .input-field .prefix { display: none !important; }
 body.login nav, body.login .ma-tools-icons { display: none !important; }
 body.login img[src="/static/logo.png"] { display: none !important; }
 body.login footer, body.login #footer { display: none !important; }
-body.login > div.indent { display: flex !important; justify-content: center !important; align-items: center !important; min-height: 100vh !important; background: var(--bg-main) !important; }
+body.login > div.indent { display: flex !important; justify-content: center !important; align-items: center !important; min-height: 100vh !important; background: var(--bg-main) !important; padding: 16px !important; }
 body.login > div.indent > img { display: none !important; }
 body.login #img-lightbox { display: none !important; }
 body.login #live-refresh-indicator { display: none !important; }
+body.login #content, body.login #layout-content, body.login .text-content {
+    display: flex !important; justify-content: center !important; align-items: center !important;
+    width: 100% !important; max-width: 100% !important;
+    margin: 0 !important; padding: 0 !important;
+    background: transparent !important; border: none !important; box-shadow: none !important;
+}
 body.login form#login-form { 
     background: var(--bg-card) !important; border-radius: 16px !important;
     box-shadow: var(--shadow) !important;
     padding: 40px 32px !important; border: 1px solid var(--gold-border) !important;
     width: 380px !important; max-width: 90vw !important;
     display: block !important;
+    margin: 0 auto !important;
+}
+@media (max-width: 480px) {
+    body.login form#login-form {
+        padding: 28px 20px !important;
+        width: 100% !important; max-width: 100% !important;
+        border-radius: 14px !important;
+    }
+    body.login > div.indent { padding: 12px !important; }
 }
 body.login .row, body.login .col, body.login .s12 {
     width: 100% !important; max-width: 100% !important;
@@ -1463,7 +1478,8 @@ div.breadcrumbs { display: none !important; }
         margin-left: 60px !important; width: calc(100vw - 60px) !important; max-width: calc(100vw - 60px) !important;
     }
     .table-scroll-wrapper { max-width: calc(100vw - 60px - 32px) !important; }
-    #changelist-filter, [id*="changelist-filter"] { max-width: calc(100vw - 60px - 32px) !important; }
+    #changelist-filter, .card-content#changelist-filter, [id*="changelist-filter"],
+    .changelist-filter-wrapper { max-width: calc(100vw - 60px - 32px) !important; }
     .mobile-toggle { display: flex !important; }
     #content, #content-main { padding: 16px !important; }
 }
@@ -1480,7 +1496,8 @@ div.breadcrumbs { display: none !important; }
         margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important;
     }
     .table-scroll-wrapper { max-width: calc(100vw - 24px) !important; }
-    #changelist-filter, [id*="changelist-filter"] { max-width: calc(100vw - 24px) !important; }
+    #changelist-filter, .card-content#changelist-filter, [id*="changelist-filter"],
+    .changelist-filter-wrapper { max-width: calc(100vw - 24px) !important; }
     .mobile-toggle { display: flex !important; }
     #kokoroko-header { padding: 10px 14px; gap: 8px; }
     .header-btn { display: none !important; }
@@ -1504,7 +1521,10 @@ div.breadcrumbs { display: none !important; }
     #result_list th, .results th { padding: 8px 6px !important; font-size: 10px !important; }
     a[title="Deposit"], a[title="Withdraw"], a[title="Statement"],
     a[title="Bet History"], a[title="Blacklist"], a[title="Whitelist"],
-    a[title="Reset Password"] { width: 36px; height: 36px; min-width: 36px; }
+    a[title="Reset Password"] { width: 28px; height: 28px; min-width: 28px; font-size: 9px !important; margin-right: 2px; }
+    .action-more-btn { width: 28px !important; height: 28px !important; min-width: 28px !important; font-size: 14px !important; }
+    /* Ensure action column doesn't wrap */
+    td:last-child { white-space: nowrap !important; }
 }
 
 /* ============ RESPONSIVE — LARGE TABLET (1024px–1200px) ============ */
@@ -1759,12 +1779,15 @@ document.addEventListener('DOMContentLoaded', function() {
         var searchBtn = searchForm.querySelector('button[type="submit"]');
         if (searchInput) {
             var searchWrapper = document.createElement('div');
-            searchWrapper.style.cssText = 'display:flex;align-items:center;gap:6px;margin-left:auto;';
-            searchInput.style.cssText = 'width:200px !important;padding:8px 12px !important;border:1px solid rgba(255,255,255,0.06) !important;border-radius:8px !important;font-size:13px !important;background:#1A1A1A !important;color:#F5F1E8 !important;';
+            var isMobileSearch = window.innerWidth < 768;
+            searchWrapper.style.cssText = isMobileSearch
+                ? 'display:flex;align-items:center;gap:6px;width:100%;'
+                : 'display:flex;align-items:center;gap:6px;margin-left:auto;';
+            searchInput.style.cssText = (isMobileSearch ? 'width:100%' : 'width:200px') + ' !important;padding:8px 12px !important;border:1px solid var(--border) !important;border-radius:8px !important;font-size:13px !important;background:var(--bg-input) !important;color:var(--text-primary) !important;';
             searchInput.placeholder = 'Search...';
             searchWrapper.appendChild(searchInput);
             if (searchBtn) {
-                searchBtn.style.cssText = 'background:linear-gradient(135deg,#D4A843,#B8922E) !important;color:#000 !important;border:none !important;border-radius:8px !important;padding:8px 12px !important;cursor:pointer !important;';
+                searchBtn.style.cssText = 'background:var(--accent) !important;color:var(--accent-text) !important;border:none !important;border-radius:8px !important;padding:8px 12px !important;cursor:pointer !important;';
                 searchWrapper.appendChild(searchBtn);
             }
             filterPanel.appendChild(searchWrapper);
@@ -1774,16 +1797,26 @@ document.addEventListener('DOMContentLoaded', function() {
     var sideWrapper = document.querySelector('.side-wrapper');
     if (sideWrapper) sideWrapper.style.display = 'none';
     if (filterPanel) {
-        filterPanel.style.cssText = 'display:flex !important;flex-wrap:wrap !important;align-items:center !important;gap:12px !important;width:100% !important;padding:12px 16px !important;background:#141414 !important;border:1px solid rgba(212,168,67,0.18) !important;border-radius:12px !important;margin-bottom:12px !important;height:auto !important;min-height:0 !important;flex-grow:0 !important;flex-shrink:0 !important;flex-basis:auto !important;align-self:flex-start !important;position:static !important;float:none !important;order:-1 !important;';
+        var isMobile = window.innerWidth < 768;
+        var filterDir = isMobile ? 'flex-direction:column !important;align-items:stretch !important;' : 'align-items:center !important;';
+        var filterMaxW = isMobile ? 'max-width:100% !important;' : '';
+        filterPanel.style.cssText = 'display:flex !important;flex-wrap:wrap !important;' + filterDir + 'gap:12px !important;width:100% !important;' + filterMaxW + 'padding:12px 16px !important;background:var(--bg-card) !important;border:1px solid var(--border) !important;border-radius:12px !important;margin-bottom:12px !important;height:auto !important;min-height:0 !important;flex-grow:0 !important;flex-shrink:0 !important;flex-basis:auto !important;align-self:stretch !important;position:static !important;float:none !important;order:-1 !important;';
         var innerRows = filterPanel.querySelectorAll('.row');
         innerRows.forEach(function(row) {
             row.style.cssText = 'display:contents !important;';
         });
         filterPanel.querySelectorAll('.col, [class*="col "]').forEach(function(col) {
-            col.style.cssText = 'width:auto !important;display:inline-flex !important;align-items:center !important;gap:6px !important;padding:0 !important;margin:0 !important;float:none !important;flex-grow:0 !important;flex-shrink:0 !important;';
+            col.style.cssText = isMobile
+                ? 'width:100% !important;display:flex !important;align-items:center !important;gap:6px !important;padding:0 !important;margin:0 !important;float:none !important;'
+                : 'width:auto !important;display:inline-flex !important;align-items:center !important;gap:6px !important;padding:0 !important;margin:0 !important;float:none !important;flex-grow:0 !important;flex-shrink:0 !important;';
         });
         filterPanel.querySelectorAll('.input-field').forEach(function(f) {
             f.style.cssText = 'margin:0 !important;padding:0 !important;';
+        });
+        filterPanel.querySelectorAll('select').forEach(function(sel) {
+            sel.style.cssText = isMobile
+                ? 'width:100% !important;max-width:100% !important;'
+                : '';
         });
     }
     var actionForm = document.querySelector('.actions form, #changelist-form .actions');
@@ -1920,9 +1953,9 @@ document.addEventListener('DOMContentLoaded', function() {
             '<p class="balance">Balance: ' + balance + '</p>' +
             '<form method="post" action="' + href + '">' +
             '<input type="hidden" name="csrfmiddlewaretoken" value="' + getCookie('csrftoken') + '">' +
-            '<input type="number" name="amount" min="1" step="1" required autofocus placeholder="Enter amount..." style="width:100%;margin-bottom:14px;background:#1A1A1A !important;border:1px solid rgba(255,255,255,0.06) !important;color:#F5F1E8 !important;">' +
+            '<input type="number" name="amount" min="1" step="1" required autofocus placeholder="Enter amount..." style="width:100%;margin-bottom:14px;background:var(--bg-input) !important;border:1px solid var(--border) !important;color:var(--text-primary) !important;">' +
             '<button type="submit" style="background:' + actionColor + ' !important;color:#000 !important;padding:12px;width:100%;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;" onclick="return confirm(\'Confirm ' + actionType.toLowerCase() + '?\')">Confirm ' + actionType + '</button>' +
-            '<button type="button" style="background:#1A1A1A;color:#A8A29E;border:1px solid rgba(255,255,255,0.06);padding:10px;width:100%;border-radius:8px;margin-top:8px;cursor:pointer;font-size:13px;" onclick="this.closest(\'.modal-overlay\').remove()">Cancel</button>' +
+            '<button type="button" style="background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);padding:10px;width:100%;border-radius:8px;margin-top:8px;cursor:pointer;font-size:13px;" onclick="this.closest(\'.modal-overlay\').remove()">Cancel</button>' +
             '</form></div>';
         document.body.appendChild(overlay);
         overlay.querySelector('input[name="amount"]').focus();

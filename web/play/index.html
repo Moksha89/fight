@@ -171,6 +171,7 @@
         .auth-container {
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -1462,10 +1463,23 @@
             .live-strip-team span { font-size: 11px; }
             .live-strip-vs { font-size: 14px; }
 
-            /* Auth */
-            .auth-card { padding: 28px 20px; }
+            /* Auth — mobile responsive */
+            .auth-container { padding: 12px; }
+            .auth-card { 
+                padding: 24px 16px; 
+                max-width: 100%; 
+                width: 100%;
+                box-sizing: border-box;
+            }
             .auth-logo h1 { font-size: 20px; }
             .auth-logo img { width: 48px; height: 48px; }
+            .auth-logo { margin-bottom: 20px; }
+            .auth-tabs { margin-bottom: 16px; }
+            .auth-tab { font-size: 13px; padding: 8px 12px; }
+            .form-group input { font-size: 16px; }
+            .auth-btn { font-size: 14px; padding: 12px; }
+            .otp-row { gap: 6px; }
+            .otp-row input { width: 36px; height: 42px; font-size: 18px; }
 
             /* Winner overlay */
             .wo-ko-text { font-size: 50px; letter-spacing: 4px; }
