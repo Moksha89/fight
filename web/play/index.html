@@ -1343,7 +1343,9 @@
             .page-title .material-icons { font-size: 20px; }
 
             /* Cockfight */
-            .cockfight-layout { flex-direction: column; }
+            #sec-cockfight .match-card { margin-left: -12px; margin-right: -12px; border-radius: 0; border-left: none; border-right: none; }
+            .cockfight-layout { flex-direction: column; align-items: stretch; }
+            .cockfight-layout .cockfight-left { width: 100%; }
             .cockfight-layout .cockfight-right { width: 100%; }
             .match-header { padding: 10px 12px; }
             .match-title { font-size: 12px; }
@@ -1522,8 +1524,10 @@
             .game-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .game-card-img { height: 85px; }
 
-            .cockfight-layout { flex-direction: column; }
+            .cockfight-layout { flex-direction: column; align-items: stretch; }
+            .cockfight-layout .cockfight-left { width: 100%; }
             .cockfight-layout .cockfight-right { width: 100%; }
+            #sec-cockfight .match-card { margin-left: -16px; margin-right: -16px; border-radius: 0; border-left: none; border-right: none; }
             .stream-container { max-height: 220px; }
             .stream-container iframe { height: 220px; }
 
@@ -1575,7 +1579,8 @@
             .game-cards { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             .game-card-img { height: 100px; }
 
-            .cockfight-layout { flex-direction: column; }
+            .cockfight-layout { flex-direction: column; align-items: stretch; }
+            .cockfight-layout .cockfight-left { width: 100%; }
             .cockfight-layout .cockfight-right { width: 100%; }
             .stream-container { max-height: 260px; }
             .stream-container iframe { height: 260px; }
@@ -1816,7 +1821,7 @@
     <div id="auth-screen" class="auth-container">
         <div class="auth-card">
             <div class="auth-logo">
-                <img src="/static/logo.png" alt="RoosterRun" onerror="this.style.display='none'">
+                <img src="/static/logo.png?v=2" alt="RoosterRun" onerror="this.style.display='none'">
                 <h1>RoosterRun</h1>
                 <p id="auth-subtitle">Welcome back</p>
             </div>
@@ -1934,7 +1939,7 @@
                     <span class="material-icons">menu</span>
                 </button>
                 <div class="header-brand">
-                    <img src="/static/logo.png" alt="K" onerror="this.outerHTML='<div style=&quot;width:36px;height:36px;background:var(--black);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:16px&quot;>K</div>'">
+                    <img src="/static/logo.png?v=2" alt="K" onerror="this.outerHTML='<div style=&quot;width:36px;height:36px;background:var(--black);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:16px&quot;>K</div>'">
                     <h2>RoosterRun</h2>
                 </div>
             </div>
@@ -2160,7 +2165,7 @@
                 </div>
 
                 <div style="text-align:center;padding:8px 0 16px;color:var(--text-muted);font-size:11px;">
-                    © 2024 RoosterRun. All rights reserved.
+                    © 2026 RoosterRun. All rights reserved.
                 </div>
             </div>
 

@@ -133,7 +133,7 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
 #branding, .login-form { display: none !important; }
 
 /* ============ LAYOUT ============ */
-#kokoroko-sidebar {
+#roosterrun-sidebar {
     position: fixed;
     top: 0; left: 0;
     width: 220px;
@@ -146,10 +146,10 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     display: flex;
     flex-direction: column;
 }
-#kokoroko-sidebar::-webkit-scrollbar { width: 3px; }
-#kokoroko-sidebar::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+#roosterrun-sidebar::-webkit-scrollbar { width: 3px; }
+#roosterrun-sidebar::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
 
-#kokoroko-main {
+#roosterrun-main {
     margin-left: 220px;
     flex: 1;
     min-height: 100vh;
@@ -162,7 +162,7 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     overflow-y: auto;
     height: 100vh;
 }
-#kokoroko-header {
+#roosterrun-header {
     background: var(--bg-header);
     border-bottom: 1px solid var(--border);
     padding: 12px 24px;
@@ -175,7 +175,7 @@ nav.navbar, .ma-tools-icons, [class*="ma-tools"],
     min-height: 52px;
     flex-shrink: 0;
 }
-#kokoroko-content {
+#roosterrun-content {
     flex: 1;
     padding: 20px 24px;
 }
@@ -1162,15 +1162,15 @@ td img[src*="icon-yes"], td img[src*="icon-no"] { width: 18px !important; height
 }
 
 /* ============ LOGIN PAGE ============ */
-body.login #kokoroko-sidebar,
-body.login #kokoroko-header,
+body.login #roosterrun-sidebar,
+body.login #roosterrun-header,
 body.login .mobile-toggle,
 body.login .sidebar-backdrop { display: none !important; }
-body.login #kokoroko-main { margin-left: 0 !important; }
+body.login #roosterrun-main { margin-left: 0 !important; }
 body.login #container { margin-left: 0 !important; width: 100% !important; }
 body.login { background: var(--bg-main) !important; }
 body.login #content-main, body.login #content {
-    display: flex !important; justify-content: center !important;
+    display: flex !important; flex-direction: column !important; justify-content: center !important;
     align-items: center !important; min-height: 100vh !important;
     padding: 20px !important; background: var(--bg-main) !important;
 }
@@ -1229,17 +1229,25 @@ body.login .card, body.login .card-content,
 body.login .input-field { margin: 0 !important; padding: 0 !important; box-shadow: none !important; }
 body.login .input-field .prefix { display: none !important; }
 body.login nav, body.login .ma-tools-icons { display: none !important; }
-body.login img[src="/static/logo.png"] { display: none !important; }
+body.login img[src="/static/logo.png?v=2"] { display: none !important; }
 body.login footer, body.login #footer { display: none !important; }
 body.login > div.indent { display: flex !important; justify-content: center !important; align-items: center !important; min-height: 100vh !important; background: var(--bg-main) !important; padding: 16px !important; }
 body.login > div.indent > img { display: none !important; }
 body.login #img-lightbox { display: none !important; }
 body.login #live-refresh-indicator { display: none !important; }
 body.login #content, body.login #layout-content, body.login .text-content {
-    display: flex !important; justify-content: center !important; align-items: center !important;
+    display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important;
     width: 100% !important; max-width: 100% !important;
     margin: 0 !important; padding: 0 !important;
     background: transparent !important; border: none !important; box-shadow: none !important;
+}
+body.login .errornote, body.login p.errornote {
+    background: #fff3f3 !important; color: #d32f2f !important;
+    border: 1px solid #ffcdd2 !important; border-radius: 10px !important;
+    padding: 12px 16px !important; font-size: 13px !important;
+    margin-bottom: 12px !important; text-align: center !important;
+    max-width: 380px !important; width: 90vw !important;
+    box-sizing: border-box !important;
 }
 body.login form#login-form { 
     background: var(--bg-card) !important; border-radius: 16px !important;
@@ -1311,7 +1319,7 @@ body.login .indent {
 }
 body.login #layout-content, body.login .text-content,
 body.login #content, body.login #content-main {
-    display: flex !important; justify-content: center !important;
+    display: flex !important; flex-direction: column !important; justify-content: center !important;
     align-items: center !important; background: var(--bg-main) !important;
 }
 body.login .side-bar { display: none !important; }
@@ -1425,29 +1433,29 @@ div.breadcrumbs { display: none !important; }
 
 /* ============ RESPONSIVE — TABLET (768px–1023px) Icon-only rail ============ */
 @media (min-width: 768px) and (max-width: 1023px) {
-    #kokoroko-sidebar {
+    #roosterrun-sidebar {
         width: 60px;
         transition: width 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.3s;
     }
-    #kokoroko-sidebar .sb-brand { padding: 14px 0; justify-content: center; }
-    #kokoroko-sidebar .sb-brand img { width: 28px; height: 28px; }
-    #kokoroko-sidebar .sb-brand span { display: none; }
-    #kokoroko-sidebar .sb-title { display: none; }
-    #kokoroko-sidebar .sb-item {
+    #roosterrun-sidebar .sb-brand { padding: 14px 0; justify-content: center; }
+    #roosterrun-sidebar .sb-brand img { width: 28px; height: 28px; }
+    #roosterrun-sidebar .sb-brand span { display: none; }
+    #roosterrun-sidebar .sb-title { display: none; }
+    #roosterrun-sidebar .sb-item {
         font-size: 0; line-height: 0;
         padding: 12px 0; margin: 1px 4px;
         justify-content: center;
         border-left: none; overflow: hidden;
         position: relative;
     }
-    #kokoroko-sidebar .sb-item i { font-size: 20px; width: auto; opacity: 0.6; }
-    #kokoroko-sidebar .sb-item.active { background: var(--gold-bg-hover); }
-    #kokoroko-sidebar .sb-item.active i { opacity: 1; color: var(--accent); }
-    #kokoroko-sidebar .sb-item:hover i { opacity: 1; color: var(--gold-light); }
-    #kokoroko-sidebar .sb-badge { display: none !important; }
-    #kokoroko-sidebar .sb-divider { margin: 4px 10px; }
+    #roosterrun-sidebar .sb-item i { font-size: 20px; width: auto; opacity: 0.6; }
+    #roosterrun-sidebar .sb-item.active { background: var(--gold-bg-hover); }
+    #roosterrun-sidebar .sb-item.active i { opacity: 1; color: var(--accent); }
+    #roosterrun-sidebar .sb-item:hover i { opacity: 1; color: var(--gold-light); }
+    #roosterrun-sidebar .sb-badge { display: none !important; }
+    #roosterrun-sidebar .sb-divider { margin: 4px 10px; }
     /* Tooltip on hover */
-    #kokoroko-sidebar:not(.expanded) .sb-item:hover::after {
+    #roosterrun-sidebar:not(.expanded) .sb-item:hover::after {
         content: attr(data-label);
         position: absolute; left: 54px; top: 50%; transform: translateY(-50%);
         background: var(--bg-card); color: var(--text-primary);
@@ -1456,25 +1464,25 @@ div.breadcrumbs { display: none !important; }
         box-shadow: var(--shadow-sm); z-index: 9999; pointer-events: none;
     }
     /* Expanded state — full sidebar overlay */
-    #kokoroko-sidebar.expanded {
+    #roosterrun-sidebar.expanded {
         width: 220px; box-shadow: var(--shadow-lg);
     }
-    #kokoroko-sidebar.expanded .sb-brand { justify-content: flex-start; padding: 16px 14px; }
-    #kokoroko-sidebar.expanded .sb-brand span { display: inline; }
-    #kokoroko-sidebar.expanded .sb-title { display: block; }
-    #kokoroko-sidebar.expanded .sb-item {
+    #roosterrun-sidebar.expanded .sb-brand { justify-content: flex-start; padding: 16px 14px; }
+    #roosterrun-sidebar.expanded .sb-brand span { display: inline; }
+    #roosterrun-sidebar.expanded .sb-title { display: block; }
+    #roosterrun-sidebar.expanded .sb-item {
         font-size: 13px; line-height: 1.4;
         padding: 8px 14px; margin: 2px 6px;
         justify-content: flex-start;
         border-left: 3px solid transparent;
     }
-    #kokoroko-sidebar.expanded .sb-item.active { border-left-color: var(--gold); }
-    #kokoroko-sidebar.expanded .sb-item i { font-size: 18px; width: 22px; }
-    #kokoroko-sidebar.expanded .sb-badge { display: none; }
-    #kokoroko-sidebar.expanded .sb-badge.has-count { display: inline-block !important; }
-    #kokoroko-sidebar.expanded .sb-divider { margin: 8px 18px; }
+    #roosterrun-sidebar.expanded .sb-item.active { border-left-color: var(--gold); }
+    #roosterrun-sidebar.expanded .sb-item i { font-size: 18px; width: 22px; }
+    #roosterrun-sidebar.expanded .sb-badge { display: none; }
+    #roosterrun-sidebar.expanded .sb-badge.has-count { display: inline-block !important; }
+    #roosterrun-sidebar.expanded .sb-divider { margin: 8px 18px; }
     /* Main content */
-    #kokoroko-main { margin-left: 60px; width: calc(100vw - 60px); max-width: calc(100vw - 60px); }
+    #roosterrun-main { margin-left: 60px; width: calc(100vw - 60px); max-width: calc(100vw - 60px); }
     html body #container, body > #container, #container#container {
         margin-left: 60px !important; width: calc(100vw - 60px) !important; max-width: calc(100vw - 60px) !important;
     }
@@ -1487,20 +1495,20 @@ div.breadcrumbs { display: none !important; }
 
 /* ============ RESPONSIVE — MOBILE (<768px) Off-canvas ============ */
 @media (max-width: 767px) {
-    #kokoroko-sidebar {
+    #roosterrun-sidebar {
         width: 220px;
         transform: translateX(-100%);
         transition: transform 0.3s cubic-bezier(.4,0,.2,1);
     }
-    #kokoroko-sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
-    #kokoroko-main, html body #container, body > #container, #container#container {
+    #roosterrun-sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+    #roosterrun-main, html body #container, body > #container, #container#container {
         margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important;
     }
     .table-scroll-wrapper { max-width: calc(100vw - 24px) !important; }
     #changelist-filter, .card-content#changelist-filter, [id*="changelist-filter"],
     .changelist-filter-wrapper { max-width: calc(100vw - 24px) !important; }
     .mobile-toggle { display: flex !important; }
-    #kokoroko-header { padding: 10px 14px; gap: 8px; }
+    #roosterrun-header { padding: 10px 14px; gap: 8px; }
     .header-btn { display: none !important; }
     .header-user span { display: none !important; }
     .header-title { font-size: 16px !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
@@ -1536,7 +1544,7 @@ div.breadcrumbs { display: none !important; }
 /* ============ RESPONSIVE — SMALL MOBILE (<600px) ============ */
 @media (max-width: 599px) {
     .dash-grid { grid-template-columns: 1fr !important; }
-    #kokoroko-header { padding: 8px 10px; }
+    #roosterrun-header { padding: 8px 10px; }
     #content, #content-main { padding: 8px !important; }
     .user-tabs { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
     .dash-card { padding: 12px 14px; }
@@ -1568,7 +1576,7 @@ div.breadcrumbs { display: none !important; }
     .dash-card { padding: 10px 12px; }
     .dash-card .value { font-size: 15px; }
     .dash-card .label { font-size: 10px; }
-    #kokoroko-header { padding: 6px 8px; }
+    #roosterrun-header { padding: 6px 8px; }
     .header-title { font-size: 13px !important; max-width: 120px; }
     .user-tabs a, .user-tabs .tab-btn { font-size: 11px !important; padding: 6px 8px !important; }
     /* Even more compact table cells */
@@ -1694,9 +1702,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ====== BUILD SIDEBAR ======
     var sidebar = document.createElement('div');
-    sidebar.id = 'kokoroko-sidebar';
+    sidebar.id = 'roosterrun-sidebar';
     sidebar.innerHTML = '' +
-        '<div class="sb-brand"><img src="/static/admin/img/logo.png"><span>RoosterRun</span></div>' +
+        '<div class="sb-brand"><img src="/static/admin/img/logo.png?v=2"><span>RoosterRun</span></div>' +
 
         '<div class="sb-section">' +
         '<a href="/userManager/user/" class="sb-item" data-path="DASHBOARD"><i>dashboard</i>Dashboard</a>' +
@@ -1762,7 +1770,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var container = document.getElementById('container') || document.querySelector('#container');
     if (container) {
         var header = document.createElement('div');
-        header.id = 'kokoroko-header';
+        header.id = 'roosterrun-header';
         var pageTitle = document.title.replace(' | RoosterRun Admin', '').replace('RoosterRun Admin', 'Dashboard');
         var canGoBack = window.history.length > 1 && window.location.pathname !== '/userManager/user/' && window.location.pathname !== '/';
         var backBtn = canGoBack
@@ -1843,7 +1851,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ====== ACTIVE SIDEBAR ITEM ======
     var path = window.location.pathname;
-    var items = document.querySelectorAll('#kokoroko-sidebar .sb-item');
+    var items = document.querySelectorAll('#roosterrun-sidebar .sb-item');
     var bestMatch = null, bestLen = 0;
 
     items.forEach(function(item) {
@@ -2044,7 +2052,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function toggleSidebar() {
-    var sb = document.getElementById('kokoroko-sidebar');
+    var sb = document.getElementById('roosterrun-sidebar');
     var bd = document.querySelector('.sidebar-backdrop');
     if (!sb) return;
     var w = window.innerWidth;
@@ -2057,7 +2065,7 @@ function toggleSidebar() {
     }
 }
 function closeSidebar() {
-    var sb = document.getElementById('kokoroko-sidebar');
+    var sb = document.getElementById('roosterrun-sidebar');
     var bd = document.querySelector('.sidebar-backdrop');
     if (sb) { sb.classList.remove('open'); sb.classList.remove('expanded'); }
     if (bd) bd.classList.remove('show');
@@ -2382,7 +2390,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ====== SIDEBAR DATA-LABEL FOR TABLET TOOLTIPS ======
-    document.querySelectorAll('#kokoroko-sidebar .sb-item').forEach(function(item) {
+    document.querySelectorAll('#roosterrun-sidebar .sb-item').forEach(function(item) {
         var text = '';
         item.childNodes.forEach(function(node) {
             if (node.nodeType === 3) text += node.textContent.trim();
@@ -2436,5 +2444,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape') closeSidebar();
     });
 });
+
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.body && document.body.classList.contains('login')) {
+        var form = document.getElementById('login-form');
+        if (form) {
+            var action = form.getAttribute('action') || '';
+            if (action.indexOf('next=/') !== -1 && action.indexOf('next=/userManager') === -1 && action.indexOf('next=/admin') === -1) {
+                form.setAttribute('action', action.replace('next=/', 'next=/userManager/user/'));
+            } else if (action.indexOf('next=') === -1) {
+                form.setAttribute('action', action + (action.indexOf('?') === -1 ? '?' : '&') + 'next=/userManager/user/');
+            }
+        }
+    }
+});
+</script>
+
 {% endblock %}
