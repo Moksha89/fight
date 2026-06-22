@@ -112,8 +112,7 @@ table, thead, tbody, tr, td, th {
 /* Hide ALL default admin chrome */
 #header, .breadcrumbs, #user-tools, .header,
 nav.navbar, .ma-tools-icons, [class*="ma-tools"],
-#branding, .login-form, #container > div:first-child > div:first-child,
-.messagelist { display: none !important; }
+#branding, .login-form { display: none !important; }
 
 /* ============ LAYOUT ============ */
 #kokoroko-sidebar {
@@ -857,17 +856,33 @@ form > div > div:last-child > div:first-child:has(a[href="#"]) {
     display: none !important;
 }
 
-/* ============ MESSAGES ============ */
-.messagelist { display: block !important; }
+/* ============ TOAST MESSAGES ============ */
+.messagelist {
+    display: block !important;
+    position: fixed !important;
+    top: 64px; right: 16px;
+    z-index: 9500;
+    max-width: 380px; width: calc(100% - 32px);
+    list-style: none !important; padding: 0 !important; margin: 0 !important;
+}
 .messagelist li {
     background: var(--bg-card) !important; border: 1px solid var(--gold-border) !important;
-    border-radius: 12px !important; padding: 12px 16px !important;
+    border-radius: 12px !important; padding: 12px 36px 12px 16px !important;
     color: var(--text-primary) !important; margin-bottom: 8px !important;
-    font-size: 13px !important;
+    font-size: 13px !important; box-shadow: var(--shadow) !important;
+    animation: toastSlideIn 0.3s ease; position: relative;
+    list-style: none !important;
 }
 .messagelist .success { border-left: 3px solid var(--success) !important; }
-.messagelist .error { border-left: 3px solid var(--danger) !important; }
-.messagelist .warning { border-left: 3px solid var(--warning) !important; }
+.messagelist .error { border-left: 3px solid var(--danger) !important; background: rgba(239,68,68,0.06) !important; }
+.messagelist .warning { border-left: 3px solid var(--warning) !important; background: rgba(245,158,11,0.06) !important; }
+.messagelist .info { border-left: 3px solid var(--info) !important; }
+.toast-close {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; font-size: 16px; padding: 2px 5px; border-radius: 4px; line-height: 1;
+}
+.toast-close:hover { color: var(--text-primary); background: var(--bg-elevated); }
 
 /* Error lists */
 .errorlist, ul.errorlist {
@@ -1197,29 +1212,102 @@ body.login #header { display: none !important; }
 /* Hide breadcrumbs */
 div.breadcrumbs { display: none !important; }
 
-/* ============ RESPONSIVE ============ */
-@media (max-width: 1024px) {
-    #kokoroko-sidebar { transform: translateX(-100%); transition: transform 0.3s; }
-    #kokoroko-sidebar.open { transform: translateX(0); }
-    #kokoroko-main, #container { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important; }
-    .table-scroll-wrapper { max-width: calc(100vw - 32px) !important; }
-    .mobile-toggle { display: block !important; }
-    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8999; }
-    .sidebar-backdrop.show { display: block; }
-    #content, #content-main { padding: 16px !important; }
-}
+/* ============ SHARED RESPONSIVE HELPERS ============ */
 .mobile-toggle {
     display: none; background: none; border: none; color: var(--text-primary);
-    cursor: pointer; padding: 4px;
+    cursor: pointer; padding: 0; border-radius: 6px; transition: background 0.2s;
+    width: 36px; height: 36px; min-width: 36px; min-height: 36px;
+    flex-shrink: 0; align-items: center; justify-content: center;
+    font-size: 22px; line-height: 36px; text-align: center;
 }
-@media (max-width: 1200px) {
-    .dash-grid { grid-template-columns: repeat(3, 1fr) !important; }
+.mobile-toggle i { font-size: 22px; line-height: 36px; display: block; width: 36px; height: 36px; }
+.mobile-toggle:hover { background: var(--gold-bg); }
+.sidebar-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 8999;
+    backdrop-filter: blur(2px); transition: opacity 0.3s;
 }
-@media (max-width: 768px) {
-    #kokoroko-header { padding: 10px 14px; gap: 12px; }
+.sidebar-backdrop.show { display: block; }
+
+/* ============ RESPONSIVE — TABLET (768px–1023px) Icon-only rail ============ */
+@media (min-width: 768px) and (max-width: 1023px) {
+    #kokoroko-sidebar {
+        width: 60px;
+        transition: width 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.3s;
+    }
+    #kokoroko-sidebar .sb-brand { padding: 14px 0; justify-content: center; }
+    #kokoroko-sidebar .sb-brand img { width: 28px; height: 28px; }
+    #kokoroko-sidebar .sb-brand span { display: none; }
+    #kokoroko-sidebar .sb-title { display: none; }
+    #kokoroko-sidebar .sb-item {
+        font-size: 0; line-height: 0;
+        padding: 12px 0; margin: 1px 4px;
+        justify-content: center;
+        border-left: none; overflow: hidden;
+        position: relative;
+    }
+    #kokoroko-sidebar .sb-item i { font-size: 20px; width: auto; opacity: 0.6; }
+    #kokoroko-sidebar .sb-item.active { background: var(--gold-bg-hover); }
+    #kokoroko-sidebar .sb-item.active i { opacity: 1; color: var(--gold); }
+    #kokoroko-sidebar .sb-item:hover i { opacity: 1; color: var(--gold-light); }
+    #kokoroko-sidebar .sb-badge { display: none !important; }
+    #kokoroko-sidebar .sb-divider { margin: 4px 10px; }
+    /* Tooltip on hover */
+    #kokoroko-sidebar:not(.expanded) .sb-item:hover::after {
+        content: attr(data-label);
+        position: absolute; left: 54px; top: 50%; transform: translateY(-50%);
+        background: var(--bg-card); color: var(--text-primary);
+        font-size: 12px; line-height: 1.3; padding: 5px 10px; border-radius: 6px;
+        border: 1px solid var(--gold-border); white-space: nowrap;
+        box-shadow: var(--shadow-sm); z-index: 9999; pointer-events: none;
+    }
+    /* Expanded state — full sidebar overlay */
+    #kokoroko-sidebar.expanded {
+        width: 220px; box-shadow: var(--shadow-lg);
+    }
+    #kokoroko-sidebar.expanded .sb-brand { justify-content: flex-start; padding: 16px 14px; }
+    #kokoroko-sidebar.expanded .sb-brand span { display: inline; }
+    #kokoroko-sidebar.expanded .sb-title { display: block; }
+    #kokoroko-sidebar.expanded .sb-item {
+        font-size: 13px; line-height: 1.4;
+        padding: 8px 14px; margin: 2px 6px;
+        justify-content: flex-start;
+        border-left: 3px solid transparent;
+    }
+    #kokoroko-sidebar.expanded .sb-item.active { border-left-color: var(--gold); }
+    #kokoroko-sidebar.expanded .sb-item i { font-size: 18px; width: 22px; }
+    #kokoroko-sidebar.expanded .sb-badge { display: none; }
+    #kokoroko-sidebar.expanded .sb-badge.has-count { display: inline-block !important; }
+    #kokoroko-sidebar.expanded .sb-divider { margin: 8px 18px; }
+    /* Main content */
+    #kokoroko-main { margin-left: 60px; width: calc(100vw - 60px); max-width: calc(100vw - 60px); }
+    html body #container, body > #container, #container#container {
+        margin-left: 60px !important; width: calc(100vw - 60px) !important; max-width: calc(100vw - 60px) !important;
+    }
+    .table-scroll-wrapper { max-width: calc(100vw - 60px - 32px) !important; }
+    #changelist-filter, [id*="changelist-filter"] { max-width: calc(100vw - 60px - 32px) !important; }
+    .mobile-toggle { display: flex !important; }
+    #content, #content-main { padding: 16px !important; }
+}
+
+/* ============ RESPONSIVE — MOBILE (<768px) Off-canvas ============ */
+@media (max-width: 767px) {
+    #kokoroko-sidebar {
+        width: 220px;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    #kokoroko-sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+    #kokoroko-main, html body #container, body > #container, #container#container {
+        margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important;
+    }
+    .table-scroll-wrapper { max-width: calc(100vw - 24px) !important; }
+    #changelist-filter, [id*="changelist-filter"] { max-width: calc(100vw - 24px) !important; }
+    .mobile-toggle { display: flex !important; }
+    #kokoroko-header { padding: 10px 14px; gap: 8px; }
     .header-btn { display: none !important; }
     .header-user span { display: none !important; }
-    .header-title { font-size: 16px !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .header-title { font-size: 16px !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
     #content, #content-main { padding: 12px !important; }
     .dash-grid { grid-template-columns: repeat(2, 1fr) !important; }
     #changelist-filter, .changelist-filter-wrapper, [id*="changelist-filter"],
@@ -1228,12 +1316,91 @@ div.breadcrumbs { display: none !important; }
     }
     .user-tabs { display: grid !important; grid-template-columns: 1fr 1fr !important; }
     .user-tabs a, .user-tabs .tab-btn { width: 100% !important; min-width: 0 !important; text-align: center !important; }
+    fieldset .form-row { flex-direction: column !important; }
+    fieldset .form-row > .input-field, fieldset .form-row > div { flex: 1 1 100% !important; }
+    .modal-overlay .modal-content { width: 95% !important; padding: 20px !important; }
+    .submit-row { flex-direction: column !important; }
+    .submit-row input[type="submit"], .submit-row .deletelink { width: 100% !important; text-align: center !important; }
+    /* Table cell compactness */
+    #result_list td, .results td { padding: 8px 6px !important; font-size: 12px !important; }
+    #result_list th, .results th { padding: 8px 6px !important; font-size: 10px !important; }
+    a[title="Deposit"], a[title="Withdraw"], a[title="Statement"],
+    a[title="Bet History"], a[title="Blacklist"], a[title="Whitelist"],
+    a[title="Reset Password"] { width: 36px; height: 36px; min-width: 36px; }
 }
-@media (max-width: 600px) {
+
+/* ============ RESPONSIVE — LARGE TABLET (1024px–1200px) ============ */
+@media (max-width: 1200px) {
+    .dash-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+/* ============ RESPONSIVE — SMALL MOBILE (<600px) ============ */
+@media (max-width: 599px) {
     .dash-grid { grid-template-columns: 1fr !important; }
-    #kokoroko-header { padding: 8px 12px; }
-    #content, #content-main { padding: 10px !important; }
+    #kokoroko-header { padding: 8px 10px; }
+    #content, #content-main { padding: 8px !important; }
     .user-tabs { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+    .dash-card { padding: 12px 14px; }
+    .dash-card .value { font-size: 17px; }
+    .header-title { max-width: 150px; font-size: 14px !important; }
+}
+
+/* ============ TOAST / MESSAGE ANIMATIONS ============ */
+@keyframes toastSlideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes toastFadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(120%); }
+}
+.toast-leaving { animation: toastFadeOut 0.3s ease forwards; }
+
+/* ============ LOADING SPINNER ============ */
+@keyframes kkSpin { to { transform: rotate(360deg); } }
+.btn-loading {
+    position: relative !important; pointer-events: none !important; opacity: 0.7 !important;
+    color: transparent !important;
+}
+.btn-loading::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 16px; height: 16px; margin: -8px 0 0 -8px;
+    border: 2px solid rgba(0,0,0,0.2); border-top-color: #000;
+    border-radius: 50%; animation: kkSpin 0.6s linear infinite;
+}
+
+/* ============ EMPTY STATE ============ */
+.admin-empty-state {
+    text-align: center; padding: 48px 24px;
+    background: var(--bg-card); border: 1px solid var(--gold-border);
+    border-radius: 12px;
+}
+.admin-empty-state i {
+    font-size: 48px !important; color: var(--gold); opacity: 0.35;
+    display: block !important; margin-bottom: 12px;
+}
+.admin-empty-state .empty-title {
+    font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;
+}
+.admin-empty-state .empty-sub {
+    font-size: 13px; color: var(--text-muted);
+}
+
+/* ============ ACTION BUTTON IMPROVEMENTS ============ */
+/* Deposit actions on deposit/withdrawal list pages */
+td a[href*="/accept/"], td input[value*="Accept"], td button[name*="accept"] {
+    color: var(--success) !important;
+}
+td a[href*="/reject/"], td input[value*="Reject"], td button[name*="reject"],
+td a[href*="/delete/"], a.deletelink {
+    color: var(--danger) !important;
+}
+td a[href*="/approve/"] {
+    color: var(--success) !important;
+}
+/* Consistent min touch target for inline action buttons */
+td a[title], td .action-more-btn {
+    min-width: 30px; min-height: 30px;
 }
 
 /* ============ SCROLLBAR GLOBAL ============ */
@@ -1332,7 +1499,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!document.querySelector('.sidebar-backdrop')) {
         var backdrop = document.createElement('div');
         backdrop.className = 'sidebar-backdrop';
-        backdrop.addEventListener('click', function() { toggleSidebar(); });
+        backdrop.addEventListener('click', function() { closeSidebar(); });
         document.body.appendChild(backdrop);
     }
 
@@ -1343,7 +1510,7 @@ document.addEventListener('DOMContentLoaded', function() {
         header.id = 'kokoroko-header';
         var pageTitle = document.title.replace(' | Kokoroko Admin', '').replace('Kokoroko Admin', 'Dashboard');
         header.innerHTML = '<div style="display:flex;align-items:center;gap:12px;">' +
-            '<button class="mobile-toggle" onclick="toggleSidebar()"><i style="font-size:22px;color:#F5F1E8;">menu</i></button>' +
+            '<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu"><i style="font-size:22px;color:#F5F1E8;line-height:36px;width:36px;height:36px;display:block;text-align:center;">menu</i></button>' +
             '<div class="header-title">' + pageTitle + '</div>' +
             '</div>' +
             '<div class="header-right">' +
@@ -1602,8 +1769,21 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleSidebar() {
     var sb = document.getElementById('kokoroko-sidebar');
     var bd = document.querySelector('.sidebar-backdrop');
-    if (sb) sb.classList.toggle('open');
-    if (bd) bd.classList.toggle('show');
+    if (!sb) return;
+    var w = window.innerWidth;
+    if (w >= 768 && w < 1024) {
+        sb.classList.toggle('expanded');
+        if (bd) bd.classList.toggle('show');
+    } else if (w < 768) {
+        sb.classList.toggle('open');
+        if (bd) bd.classList.toggle('show');
+    }
+}
+function closeSidebar() {
+    var sb = document.getElementById('kokoroko-sidebar');
+    var bd = document.querySelector('.sidebar-backdrop');
+    if (sb) { sb.classList.remove('open'); sb.classList.remove('expanded'); }
+    if (bd) bd.classList.remove('show');
 }
 
 // ===== REAL-TIME AUTO-REFRESH FOR ALL ADMIN PAGES =====
@@ -1913,7 +2093,9 @@ function fixContainerWidth() {
     var container = document.getElementById('container');
     if (container) {
         var sidebarWidth = 220;
-        if (window.innerWidth <= 1024) sidebarWidth = 0;
+        var w = window.innerWidth;
+        if (w < 768) sidebarWidth = 0;
+        else if (w < 1024) sidebarWidth = 60;
         container.style.setProperty('width', 'calc(100vw - ' + sidebarWidth + 'px)', 'important');
         container.style.setProperty('max-width', 'calc(100vw - ' + sidebarWidth + 'px)', 'important');
         container.style.setProperty('margin-left', sidebarWidth + 'px', 'important');
@@ -1931,7 +2113,65 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function() {
         document.querySelectorAll('.action-more-dropdown.show').forEach(function(d) { d.classList.remove('show'); });
     });
-    window.addEventListener('resize', fixContainerWidth);
+    window.addEventListener('resize', function() {
+        fixContainerWidth();
+        closeSidebar();
+    });
+
+    // ====== SIDEBAR DATA-LABEL FOR TABLET TOOLTIPS ======
+    document.querySelectorAll('#kokoroko-sidebar .sb-item').forEach(function(item) {
+        var text = '';
+        item.childNodes.forEach(function(node) {
+            if (node.nodeType === 3) text += node.textContent.trim();
+        });
+        if (text) item.setAttribute('data-label', text);
+    });
+
+    // ====== TOAST SETUP (close buttons + auto-dismiss) ======
+    document.querySelectorAll('.messagelist li').forEach(function(li) {
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'toast-close';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.addEventListener('click', function() { dismissToast(li); });
+        li.appendChild(closeBtn);
+        setTimeout(function() { dismissToast(li); }, 6000);
+    });
+
+    function dismissToast(el) {
+        if (el.classList.contains('toast-leaving')) return;
+        el.classList.add('toast-leaving');
+        setTimeout(function() { el.remove(); }, 300);
+    }
+
+    // ====== FORM SUBMIT LOADING STATE ======
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+            var btn = form.querySelector('input[type=\"submit\"], button[type=\"submit\"]');
+            if (btn && !btn.classList.contains('btn-loading')) {
+                btn.classList.add('btn-loading');
+            }
+        });
+    });
+
+    // ====== ENHANCED EMPTY STATE ======
+    document.querySelectorAll('.paginator').forEach(function(p) {
+        var text = p.textContent.trim();
+        if (text.match(/^(0|No )/i) || text === '') {
+            var modelName = document.querySelector('.header-title');
+            var name = modelName ? modelName.textContent.trim() : 'records';
+            p.innerHTML = '<div class=\"admin-empty-state\">' +
+                '<i class=\"material-icons\">inbox</i>' +
+                '<div class=\"empty-title\">No ' + name.toLowerCase() + ' found</div>' +
+                '<div class=\"empty-sub\">Try adjusting your filters or check back later</div>' +
+                '</div>';
+            p.style.cssText = 'border:none!important;padding:0!important;background:transparent!important;';
+        }
+    });
+
+    // ====== ESCAPE KEY CLOSES SIDEBAR ======
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSidebar();
+    });
 });
 </script>
 {% endblock %}
