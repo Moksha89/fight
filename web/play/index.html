@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark">
     <title>RoosterRun - Play</title>
     <style>
     /* Local Material Icons font - no CDN dependency */
@@ -32,6 +33,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
+            color-scheme: dark;
             /* ── Brand (synced with Android ThemeContext + Admin base_site) ── */
             --gold: #D4A843;
             --gold-dark: #B8922E;
@@ -218,9 +220,18 @@
         .form-group input {
             width: 100%; padding: 12px 14px;
             background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 10px; color: var(--text-primary);
+            border-radius: 10px; color: #F5F1E8 !important;
+            -webkit-text-fill-color: #F5F1E8 !important;
+            color-scheme: dark;
             font-size: 14px; font-family: inherit;
             transition: border 0.2s; outline: none;
+        }
+        .form-group input:-webkit-autofill,
+        .form-group input:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--text-primary) !important;
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+            background-color: var(--bg-input) !important;
+            color: var(--text-primary) !important;
         }
         .form-group input:focus {
             border-color: var(--gold);
@@ -251,7 +262,7 @@
             font-size: 18px; font-weight: 600;
             background: var(--bg); border: 1px solid var(--border);
             border-radius: 10px; color: var(--text-primary); outline: none;
-        }
+         -webkit-text-fill-color: var(--text-primary); color-scheme: dark; }
         .otp-row input:focus { border-color: var(--gold); }
 
         /* ===== APP LAYOUT ===== */
@@ -1850,7 +1861,7 @@
                         <input class="login-otp-input" type="text" maxlength="1" data-idx="5">
                     </div>
                 </div>
-                <button class="auth-btn" id="login-btn" onclick="handleLogin()">Send OTP & Login</button>
+                <button class="auth-btn" id="login-btn" onclick="handleLogin()">Login</button>
                 <div style="text-align:center;margin-top:12px;">
                     <a onclick="showForgotPassword()" style="color:var(--gold);font-size:13px;cursor:pointer;text-decoration:none;">Forgot Password?</a>
                 </div>
@@ -1883,7 +1894,7 @@
                         <input class="reg-otp-input" type="text" maxlength="1" data-idx="5">
                     </div>
                 </div>
-                <button class="auth-btn" id="reg-btn" onclick="handleRegister()">Send OTP & Register</button>
+                <button class="auth-btn" id="reg-btn" onclick="handleRegister()">Register</button>
             </div>
             <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;align-items:center;gap:6px;">
                 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
@@ -2665,8 +2676,8 @@
         regStep = 'form';
         document.getElementById('login-otp-section').classList.add('hidden');
         document.getElementById('reg-otp-section').classList.add('hidden');
-        document.getElementById('login-btn').textContent = 'Send OTP & Login';
-        document.getElementById('reg-btn').textContent = 'Send OTP & Register';
+        document.getElementById('login-btn').textContent = 'Login';
+        document.getElementById('reg-btn').textContent = 'Register';
     }
 
     // ── Forgot Password ──
@@ -2755,46 +2766,27 @@
         const password = document.getElementById('login-password').value;
         if (!identifier || !password) { showError('Please enter username/mobile and password'); return; }
 
-        if (loginStep === 'credentials') {
-            let mobile = identifier;
-            try {
-                const res = await fetch(`${API}/user/getotp/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({mobile})
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    loginStep = 'otp';
-                    loginMobile = mobile;
-                    document.getElementById('login-otp-section').classList.remove('hidden');
-                    document.getElementById('login-btn').textContent = 'Verify & Login';
-                    hideError();
-                    showToast('OTP sent! Use 123456', 'success');
-                } else {
-                    showError(extractErrorMessage(data));
-                }
-            } catch(e) { showError('Network error. Try again.'); }
-        } else {
-            const otpInputs = document.querySelectorAll('.login-otp-input');
-            const otp = Array.from(otpInputs).map(i => i.value).join('');
-            if (otp.length !== 6) { showError('Enter the 6-digit OTP'); return; }
-            try {
-                const res = await fetch(`${API}/user/login/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({identifier, password, otp})
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    token = data.access_token;
-                    localStorage.setItem('access_token', token);
-                    localStorage.setItem('refresh_token', data.refresh_token);
-                    localStorage.setItem('userInfo', JSON.stringify(data.user || {}));
-                    userInfo = data.user || {};
-                    showApp();
-                } else { showError(extractErrorMessage(data)); }
-            } catch(e) { showError('Network error'); }
+        try {
+            document.getElementById('login-btn').disabled = true;
+            document.getElementById('login-btn').textContent = 'Logging in...';
+            const res = await fetch(`${API}/user/login/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({identifier, password, otp: '123456'})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                token = data.access_token;
+                localStorage.setItem('access_token', token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                localStorage.setItem('userInfo', JSON.stringify(data.user || {}));
+                userInfo = data.user || {};
+                showApp();
+            } else { showError(extractErrorMessage(data)); }
+        } catch(e) { showError('Network error'); }
+        finally {
+            document.getElementById('login-btn').disabled = false;
+            document.getElementById('login-btn').textContent = 'Login';
         }
     }
 
@@ -2808,45 +2800,30 @@
         if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
         if (password !== confirm) { showError('Passwords do not match'); return; }
 
-        if (regStep === 'form') {
-            try {
-                const res = await fetch(`${API}/user/getotp/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({mobile})
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    regStep = 'otp';
-                    document.getElementById('reg-otp-section').classList.remove('hidden');
-                    document.getElementById('reg-btn').textContent = 'Verify & Register';
-                    hideError();
-                    showToast('OTP sent! Use 123456', 'success');
-                } else { showError(extractErrorMessage(data)); }
-            } catch(e) { showError('Network error'); }
-        } else {
-            const otpInputs = document.querySelectorAll('.reg-otp-input');
-            const otp = Array.from(otpInputs).map(i => i.value).join('');
-            if (otp.length !== 6) { showError('Enter the 6-digit OTP'); return; }
-            try {
-                const res = await fetch(`${API}/user/register/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({mobile, username, password, confirmPassword: confirm, otp})
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    token = data.access_token;
-                    localStorage.setItem('access_token', token);
-                    localStorage.setItem('refresh_token', data.refresh_token);
-                    userInfo = {username, phoneNumber: mobile};
-                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                    showApp();
-                    showToast('Registration successful!', 'success');
-                } else {
-                    showError(extractErrorMessage(data));
-                }
-            } catch(e) { showError('Network error'); }
+        try {
+            document.getElementById('reg-btn').disabled = true;
+            document.getElementById('reg-btn').textContent = 'Registering...';
+            const res = await fetch(`${API}/user/register/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mobile, username, password, confirmPassword: confirm, otp: '123456'})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                token = data.access_token;
+                localStorage.setItem('access_token', token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                userInfo = {username, phoneNumber: mobile};
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                showApp();
+                showToast('Registration successful!', 'success');
+            } else {
+                showError(extractErrorMessage(data));
+            }
+        } catch(e) { showError('Network error'); }
+        finally {
+            document.getElementById('reg-btn').disabled = false;
+            document.getElementById('reg-btn').textContent = 'Register';
         }
     }
 

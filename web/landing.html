@@ -51,6 +51,7 @@
     .nav-brand img { width: 40px; height: 40px; border-radius: 50%; }
     .nav-brand span { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
     .nav-links { display: flex; align-items: center; gap: 32px; }
+    .btn-login-mobile { display: none; }
     .nav-links a {
       color: var(--text-secondary);
       text-decoration: none;
@@ -428,6 +429,7 @@
     /* Responsive */
     @media (max-width: 768px) {
       .nav-links { display: none; }
+      .btn-login-mobile { display: inline-flex; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
       .games-grid { grid-template-columns: 1fr; }
       .footer-inner { justify-content: center; text-align: center; }
@@ -450,9 +452,9 @@
       <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#games">Games</a>
-        <a href="/play/">Play Now</a>
-        <a href="/play/" class="btn-nav">Play Now</a>
+        <a href="/play/" class="btn-nav">Login</a>
       </div>
+      <a href="/play/" class="btn-nav btn-login-mobile">Login</a>
     </div>
   </nav>
 
