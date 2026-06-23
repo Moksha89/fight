@@ -2733,7 +2733,7 @@
                 if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Failed to send OTP';
                 showForgotError(errMsg || data.message || 'Failed to send OTP');
             }
-        } catch(e) { showForgotError('Network error. Please try again.'); }
+        } catch(e) { showForgotError('Unable to connect. Check your internet connection.'); }
     }
     async function handleForgotResetPassword() {
         var phone = document.getElementById('forgot-phone').value.trim();
@@ -2774,7 +2774,7 @@
                 if (errMsg2 && typeof errMsg2 === 'object') errMsg2 = errMsg2.message || errMsg2.detail || 'Reset failed';
                 showForgotError(errMsg2 || resetData.message || 'Reset failed. Please try again.');
             }
-        } catch(e) { showForgotError('Network error. Please try again.'); }
+        } catch(e) { showForgotError('Unable to connect. Check your internet connection.'); }
     }
 
 
@@ -2796,12 +2796,24 @@
         try {
             document.getElementById('login-btn').disabled = true;
             document.getElementById('login-btn').textContent = 'Logging in...';
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
             const res = await fetch(`${API}/user/login/`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({identifier, password, otp: '123456'})
+                body: JSON.stringify({identifier, password, otp: '123456'}),
+                signal: controller.signal
             });
-            const data = await res.json();
+            clearTimeout(timeout);
+            if (res.status === 429 || res.status === 503) {
+                showError('Too many attempts. Please wait a moment and try again.');
+                return;
+            }
+            let data;
+            try { data = await res.json(); } catch(pe) {
+                showError('Server error. Please try again.');
+                return;
+            }
             if (res.ok) {
                 token = data.access_token;
                 localStorage.setItem('access_token', token);
@@ -2810,7 +2822,13 @@
                 userInfo = data.user || {};
                 showApp();
             } else { showError(extractErrorMessage(data)); }
-        } catch(e) { showError('Network error'); }
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                showError('Connection timed out. Check your internet and try again.');
+            } else {
+                showError('Unable to connect. Check your internet connection.');
+            }
+        }
         finally {
             document.getElementById('login-btn').disabled = false;
             document.getElementById('login-btn').textContent = 'Login';
@@ -2830,12 +2848,21 @@
         try {
             document.getElementById('reg-btn').disabled = true;
             document.getElementById('reg-btn').textContent = 'Registering...';
+            const controller = new AbortController();
+            const regTimeout = setTimeout(() => controller.abort(), 15000);
             const res = await fetch(`${API}/user/register/`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
+                signal: controller.signal,
                 body: JSON.stringify({mobile, username, password, confirmPassword: confirm, otp: '123456'})
             });
-            const data = await res.json();
+            clearTimeout(regTimeout);
+            if (res.status === 429 || res.status === 503) {
+                showError('Too many attempts. Please wait a moment and try again.');
+                return;
+            }
+            let data;
+            try { data = await res.json(); } catch(pe) { showError('Server error. Please try again.'); return; }
             if (res.ok) {
                 token = data.access_token;
                 localStorage.setItem('access_token', token);
@@ -2847,7 +2874,13 @@
             } else {
                 showError(extractErrorMessage(data));
             }
-        } catch(e) { showError('Network error'); }
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                showError('Connection timed out. Check your internet and try again.');
+            } else {
+                showError('Unable to connect. Check your internet connection.');
+            }
+        }
         finally {
             document.getElementById('reg-btn').disabled = false;
             document.getElementById('reg-btn').textContent = 'Register';
@@ -3359,7 +3392,7 @@
                 loadUserBets();
                 clearAutoBet();
             } else { showToast(data.error || data.detail || Object.values(data).flat().join(', ') || 'Bet failed', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     async function loadUserInfo() {
@@ -3542,7 +3575,7 @@
                 showToast('Bet placed successfully!', 'success');
                 loadUserInfo();
             } else { showToast(data.error || data.detail || 'Bet failed', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     let allTransactions = [];
@@ -3679,7 +3712,7 @@
                 document.getElementById('cp-new').value = '';
                 document.getElementById('cp-confirm').value = '';
             } else { showToast(data.error || 'Failed', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     function logout() {
@@ -3821,7 +3854,7 @@
             }
             document.getElementById('dep-options-list').innerHTML = html;
             depGoToStep(2);
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
     function selectDepOption(el, type, data) {
         document.querySelectorAll('#dep-options-list .dep-option-card').forEach(c => c.classList.remove('selected'));
@@ -3874,7 +3907,7 @@
                 const msg = data.error || data.detail || (typeof data === 'object' ? Object.values(data).flat().join(', ') : 'Failed');
                 showToast(msg, 'error');
             }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     // ===== WITHDRAWAL =====
@@ -3968,7 +4001,7 @@
                 const msg = data.detail || data.error || (typeof data === 'object' ? Object.values(data).flat().join(', ') : 'Failed');
                 showToast(msg, 'error');
             }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     // ===== WALLET SUMMARY =====
@@ -4785,7 +4818,7 @@
                 toggleProfileEdit(false);
                 loadUserInfo();
             } else { showToast('Failed to update', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     // OTP auto-focus
