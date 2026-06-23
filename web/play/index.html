@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="color-scheme" content="dark">
     <title>RoosterRun - Play</title>
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/play/manifest.json">
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RoosterRun">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="RoosterRun">
+    <meta name="msapplication-TileColor" content="#0D0D0D">
+    <meta name="msapplication-TileImage" content="/static/pwa/icon-144x144.png">
+    <link rel="apple-touch-icon" href="/static/pwa/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/pwa/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/pwa/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/static/pwa/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/pwa/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/pwa/icon-96x96.png">
+
     <style>
     /* Local Material Icons font - no CDN dependency */
     @font-face {
@@ -1838,9 +1855,115 @@
             color: #fff;
         }
         .confirm-btn.danger:hover { filter: brightness(1.1); }
+
+        /* ── PWA Splash Screen ── */
+        #pwa-splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0B0B0B; z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #pwa-splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+        #pwa-splash img { width: 120px; height: 120px; margin-bottom: 20px; animation: splashPulse 1.5s ease-in-out infinite; }
+        #pwa-splash h2 { color: #D4A843; font-size: 26px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+        #pwa-splash p { color: #6B6560; font-size: 13px; }
+        #pwa-splash .splash-loader { width: 40px; height: 40px; margin-top: 30px; border: 3px solid #222; border-top: 3px solid #D4A843; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes splashPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── PWA Install Banner ── */
+        #pwa-install-banner {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 10000;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            border-top: 1px solid rgba(212,168,67,0.3);
+            padding: 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.6);
+        }
+        #pwa-install-banner.show { transform: translateY(0); }
+        .install-banner-inner {
+            padding: 16px 20px; display: flex; align-items: center; gap: 14px;
+        }
+        .install-banner-icon { width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0; }
+        .install-banner-text { flex: 1; min-width: 0; }
+        .install-banner-text h4 { color: #F5F1E8; font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+        .install-banner-text p { color: #8a8580; font-size: 12px; line-height: 1.3; }
+        .install-banner-btn {
+            background: linear-gradient(135deg, #D4A843, #B8922E); color: #000;
+            font-weight: 700; font-size: 13px; padding: 10px 20px; border: none;
+            border-radius: 10px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .install-banner-btn:active { transform: scale(0.96); }
+        .install-banner-close {
+            position: absolute; top: 8px; right: 12px; background: none; border: none;
+            color: #6B6560; font-size: 20px; cursor: pointer; padding: 4px; line-height: 1;
+        }
+        .install-banner-stars { display: flex; gap: 2px; margin-top: 2px; }
+        .install-banner-stars span { color: #D4A843; font-size: 11px; }
+
+        /* ── Native App Behaviors ── */
+        body.pwa-standalone {
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+            user-select: none; -webkit-user-select: none;
+        }
+        body.pwa-standalone * { -webkit-tap-highlight-color: transparent; }
+        body.pwa-standalone input, body.pwa-standalone textarea, body.pwa-standalone select {
+            user-select: text; -webkit-user-select: text;
+        }
+
+        /* iOS safe area padding */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            body.pwa-standalone .header { padding-top: calc(10px + env(safe-area-inset-top)); }
+            body.pwa-standalone .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+            body.pwa-standalone #pwa-install-banner { padding-bottom: env(safe-area-inset-bottom); }
+        }
+
+        /* ── Page transition animation ── */
+        .page-transition { animation: pageSlideIn 0.25s ease-out; }
+        @keyframes pageSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Pull-to-refresh indicator ── */
+        #ptr-indicator {
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%) translateY(-60px);
+            z-index: 9998; width: 36px; height: 36px; background: #1a1a1a;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4); transition: transform 0.2s ease;
+            border: 1px solid rgba(212,168,67,0.2);
+        }
+        #ptr-indicator .ptr-spinner { width: 20px; height: 20px; border: 2px solid #333; border-top: 2px solid #D4A843; border-radius: 50%; }
+        #ptr-indicator.pulling .ptr-spinner { animation: spin 0.8s linear infinite; }
     </style>
 </head>
 <body>
+
+    <!-- PWA Splash Screen -->
+    <div id="pwa-splash">
+        <img src="/static/logo.png?v=2" alt="RoosterRun">
+        <h2>RoosterRun</h2>
+        <p>Live Betting & Games</p>
+        <div class="splash-loader"></div>
+    </div>
+
+    <!-- Pull to Refresh Indicator -->
+    <div id="ptr-indicator"><div class="ptr-spinner"></div></div>
+
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner">
+        <button class="install-banner-close" onclick="dismissInstallBanner()">&times;</button>
+        <div class="install-banner-inner">
+            <img class="install-banner-icon" src="/static/logo.png?v=2" alt="RoosterRun">
+            <div class="install-banner-text">
+                <h4>RoosterRun</h4>
+                <div class="install-banner-stars">
+                    <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                </div>
+                <p>Install app for the best experience</p>
+            </div>
+            <button class="install-banner-btn" onclick="installPWA()">Install</button>
+        </div>
+    </div>
+
     <!-- AUTH -->
     <div id="auth-screen" class="auth-container">
         <div class="auth-card">
@@ -5342,6 +5465,185 @@
     }
     loadBanners();
     loadThemeFromApi();
+    </script>
+
+    <!-- PWA Service Worker & Native App Behavior -->
+    <script>
+    // ── Service Worker Registration ──
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/play/sw.js', { scope: '/play/' })
+                .then(reg => {
+                    console.log('SW registered, scope:', reg.scope);
+                    reg.addEventListener('updatefound', () => {
+                        const newSW = reg.installing;
+                        newSW.addEventListener('statechange', () => {
+                            if (newSW.state === 'activated' && navigator.serviceWorker.controller) {
+                                showToast('App updated! Refreshing...', 'success');
+                                setTimeout(() => location.reload(), 1500);
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.log('SW registration failed:', err));
+        });
+    }
+
+    // ── Splash Screen ──
+    (function() {
+        const splash = document.getElementById('pwa-splash');
+        if (!splash) return;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+        if (!isStandalone) {
+            splash.classList.add('hide');
+            setTimeout(() => splash.remove(), 600);
+            return;
+        }
+        // In standalone mode, show splash for 1.5s
+        setTimeout(() => {
+            splash.classList.add('hide');
+            setTimeout(() => splash.remove(), 600);
+        }, 1500);
+    })();
+
+    // ── Standalone Mode Detection ──
+    (function() {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+        if (isStandalone) {
+            document.body.classList.add('pwa-standalone');
+            // Prevent pull-to-refresh in standalone
+            let startY = 0;
+            document.addEventListener('touchstart', e => { startY = e.touches[0].pageY; }, {passive: true});
+            document.addEventListener('touchmove', e => {
+                const y = e.touches[0].pageY;
+                if (document.scrollingElement.scrollTop === 0 && y > startY + 10) {
+                    // Show refresh indicator
+                    const ptr = document.getElementById('ptr-indicator');
+                    if (ptr) ptr.style.transform = 'translateX(-50%) translateY(10px)';
+                }
+            }, {passive: true});
+            document.addEventListener('touchend', () => {
+                const ptr = document.getElementById('ptr-indicator');
+                if (ptr && ptr.style.transform.includes('10px')) {
+                    ptr.classList.add('pulling');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 600);
+                }
+            });
+
+            // Theme color updates based on page
+            const metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.content = '#0D0D0D';
+        }
+    })();
+
+    // ── Page Transition Animation ──
+    (function() {
+        const origShowPage = window.showPage;
+        if (typeof origShowPage === 'function') {
+            window.showPage = function(page) {
+                origShowPage(page);
+                const pages = document.querySelectorAll('.page');
+                pages.forEach(p => {
+                    if (p.style.display !== 'none' && !p.classList.contains('page-transition')) {
+                        p.classList.add('page-transition');
+                        setTimeout(() => p.classList.remove('page-transition'), 300);
+                    }
+                });
+            };
+        }
+    })();
+
+    // ── PWA Install Prompt ──
+    let deferredPrompt = null;
+    const installBanner = document.getElementById('pwa-install-banner');
+
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Show install banner after 3 seconds if not dismissed before
+        const dismissed = localStorage.getItem('pwa-install-dismissed');
+        if (dismissed) {
+            const dismissedTime = parseInt(dismissed);
+            // Show again after 3 days
+            if (Date.now() - dismissedTime < 3 * 24 * 60 * 60 * 1000) return;
+        }
+        setTimeout(() => {
+            if (installBanner && deferredPrompt) installBanner.classList.add('show');
+        }, 3000);
+    });
+
+    function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(result => {
+            if (result.outcome === 'accepted') {
+                if (typeof showToast === 'function') showToast('App installed!', 'success');
+            }
+            deferredPrompt = null;
+            if (installBanner) installBanner.classList.remove('show');
+        });
+    }
+
+    function dismissInstallBanner() {
+        localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+        if (installBanner) installBanner.classList.remove('show');
+    }
+
+    // Auto-hide install banner when app is installed
+    window.addEventListener('appinstalled', () => {
+        if (installBanner) installBanner.classList.remove('show');
+        deferredPrompt = null;
+        if (typeof showToast === 'function') showToast('RoosterRun installed!', 'success');
+    });
+
+    // ── iOS Install Instructions ──
+    (function() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isStandalone = window.navigator.standalone === true;
+        if (isIOS && !isStandalone) {
+            const dismissed = localStorage.getItem('ios-install-dismissed');
+            if (dismissed && Date.now() - parseInt(dismissed) < 3 * 24 * 60 * 60 * 1000) return;
+            setTimeout(() => {
+                const banner = document.getElementById('pwa-install-banner');
+                if (!banner) return;
+                // Change button to show iOS instructions
+                const btn = banner.querySelector('.install-banner-btn');
+                const text = banner.querySelector('.install-banner-text p');
+                if (btn) btn.textContent = 'How To';
+                if (text) text.innerHTML = 'Tap <b>Share</b> → <b>Add to Home Screen</b>';
+                if (btn) btn.onclick = function() {
+                    alert('To install RoosterRun:\n\n1. Tap the Share button (box with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"\n\nThe app will appear on your home screen!');
+                };
+                banner.classList.add('show');
+            }, 4000);
+        }
+    })();
+
+    // ── Online/Offline Status ──
+    window.addEventListener('online', () => {
+        if (typeof showToast === 'function') showToast('Back online', 'success');
+    });
+    window.addEventListener('offline', () => {
+        if (typeof showToast === 'function') showToast('You are offline', 'error');
+    });
+
+    // ── Haptic Feedback (where supported) ──
+    function haptic(style) {
+        if (navigator.vibrate) {
+            if (style === 'light') navigator.vibrate(10);
+            else if (style === 'medium') navigator.vibrate(25);
+            else if (style === 'heavy') navigator.vibrate([30, 10, 30]);
+        }
+    }
+    // Add haptic to important buttons
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('button, .btn, .auth-tab, .nav-item, .bottom-nav-item');
+        if (btn) haptic('light');
+    });
     </script>
 </body>
 </html>
