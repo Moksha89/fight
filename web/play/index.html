@@ -1873,7 +1873,7 @@
 
         /* ── PWA Install Banner ── */
         #pwa-install-banner {
-            position: fixed; bottom: 0; left: 0; right: 0; z-index: 10000;
+            position: fixed; bottom: 60px; left: 0; right: 0; z-index: 99;
             background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
             border-top: 1px solid rgba(212,168,67,0.3);
             padding: 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
@@ -2060,9 +2060,9 @@
                     <label>Registered Mobile Number</label>
                     <input type="text" id="forgot-phone" placeholder="Enter 10-digit mobile number">
                 </div>
-                <button class="auth-btn" onclick="handleForgotSendOtp()">Send OTP</button>
+                <button class="auth-btn" onclick="handleForgotVerify()">Verify Account</button>
             </div>
-            <div id="forgot-step-otp" class="hidden">
+            <div id="forgot-step-reset" class="hidden">
                 <div class="form-group">
                     <label>OTP Code</label>
                     <input type="text" id="forgot-otp" placeholder="Enter 6-digit OTP" maxlength="6">
@@ -2148,11 +2148,11 @@
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Games</div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-cockfight')">
+                <div class="sidebar-item" data-game="cockfight" onclick="navigateSidebar('sec-cockfight')">
                     <span class="material-icons">sports_mma</span> Cockfight Betting
                     <span class="badge" id="live-count" style="display:none">0</span>
                 </div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-dice')">
+                <div class="sidebar-item" data-game="dice" onclick="navigateSidebar('sec-dice')">
                     <span class="material-icons">casino</span> Dice Games
                 </div>
                 <div class="sidebar-item" onclick="navigateSidebar('sec-mybets')">
@@ -2256,27 +2256,8 @@
                     <span class="material-icons">casino</span>
                     <span style="font-weight:700;">Games</span>
                 </div>
-                <div class="game-cards">
-                    <div class="game-card" onclick="navigate('sec-cockfight')">
-                        <div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">
-                            <span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>
-                            <img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>
-                            <img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>
-                        </div>
-                        <div class="game-card-body">
-                            <h4>Cockfight Betting</h4>
-                            <p>24/7 live matches. Pick Meron or Wala and win big with real-time odds.</p>
-                        </div>
-                    </div>
-                    <div class="game-card" onclick="navigate('sec-dice')">
-                        <div class="game-card-img" style="background:linear-gradient(135deg,#312e81,#6d28d9);display:flex;align-items:center;justify-content:center;">
-                            <span class="material-icons" style="font-size:52px;color:#c4b5fd;">casino</span>
-                        </div>
-                        <div class="game-card-body">
-                            <h4>Dice Play (Gundata)</h4>
-                            <p>Pick a dice face from 1 to 6. Match the roll and multiply your bet!</p>
-                        </div>
-                    </div>
+                <div class="game-cards" id="game-cards-container">
+                    <!-- Game cards loaded dynamically from API -->
                 </div>
 
                 <!-- Stats Bar -->
@@ -2320,7 +2301,7 @@
             </div>
 
             <!-- COCKFIGHT -->
-            <div id="sec-cockfight" class="section">
+            <div id="sec-cockfight" class="section" data-game="cockfight">
                 <div class="page-title">
                     <span class="material-icons">sports_mma</span>
                     Cockfight Matches
@@ -2340,7 +2321,7 @@
             </div>
 
             <!-- DICE -->
-            <div id="sec-dice" class="section">
+            <div id="sec-dice" class="section" data-game="dice">
                 <div class="page-title">
                     <span class="material-icons">casino</span>
                     Dice Games — Gundata
@@ -2431,7 +2412,7 @@
                     My Requests
                 </div>
                 <div id="request-tracking" style="margin-bottom:16px;">
-                    <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:12px;">Loading...</div>
+                    <div style="color:var(--text-muted);font-size:12px;text-align:center;padding:10px;">No pending requests</div>
                 </div>
                 <div class="section-label">
                     <span class="material-icons">receipt_long</span>
@@ -2566,7 +2547,7 @@
                 <span class="material-icons">home</span>
                 <span>Home</span>
             </div>
-            <div class="nav-item" onclick="navigate('sec-cockfight')">
+            <div class="nav-item" data-game="cockfight" onclick="navigate('sec-cockfight')">
                 <span class="material-icons">sports_mma</span>
                 <span>Live</span>
             </div>
@@ -2825,7 +2806,7 @@
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
         document.getElementById('forgot-step-phone').classList.remove('hidden');
-        document.getElementById('forgot-step-otp').classList.add('hidden');
+        document.getElementById('forgot-step-reset').classList.add('hidden');
         document.getElementById('forgot-error').style.display = 'none';
         document.getElementById('forgot-phone').value = '';
     }
@@ -2838,7 +2819,8 @@
         var el = document.getElementById('forgot-error');
         el.textContent = msg; el.style.display = 'block';
     }
-    async function handleForgotSendOtp() {
+    var forgotResetToken = null;
+    async function handleForgotVerify() {
         var phone = document.getElementById('forgot-phone').value.trim();
         if (!phone || phone.length < 10) { showForgotError('Enter a valid 10-digit mobile number'); return; }
         document.getElementById('forgot-error').style.display = 'none';
@@ -2848,42 +2830,30 @@
                 body: JSON.stringify({mobile: phone})
             });
             var data = await res.json();
-            if (res.ok) {
+            if (res.ok && data.reset_token) {
+                forgotResetToken = data.reset_token;
                 document.getElementById('forgot-step-phone').classList.add('hidden');
-                document.getElementById('forgot-step-otp').classList.remove('hidden');
+                document.getElementById('forgot-step-reset').classList.remove('hidden');
+            } else if (res.ok) {
+                showForgotError(data.message || 'No account found with this mobile number.');
             } else {
                 var errMsg = data.error;
-                if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Failed to send OTP';
-                showForgotError(errMsg || data.message || 'Failed to send OTP');
+                if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Verification failed';
+                showForgotError(errMsg || data.message || 'Verification failed');
             }
         } catch(e) { showForgotError('Unable to connect. Check your internet connection.'); }
     }
     async function handleForgotResetPassword() {
-        var phone = document.getElementById('forgot-phone').value.trim();
-        var otp = document.getElementById('forgot-otp').value.trim();
         var newPw = document.getElementById('forgot-new-password').value;
         var confirmPw = document.getElementById('forgot-confirm-password').value;
-        if (!otp || otp.length < 4) { showForgotError('Enter the OTP sent to your phone'); return; }
         if (!newPw || newPw.length < 6) { showForgotError('Password must be at least 6 characters'); return; }
         if (newPw !== confirmPw) { showForgotError('Passwords do not match'); return; }
+        if (!forgotResetToken) { showForgotError('Session expired. Please try again.'); return; }
         document.getElementById('forgot-error').style.display = 'none';
         try {
-            // Step 1: Verify OTP and get reset token
-            var verifyRes = await fetch(API + '/user/forgot-password/verify-otp/', {
-                method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({mobile: phone, otp: otp})
-            });
-            var verifyData = await verifyRes.json();
-            if (!verifyRes.ok || !verifyData.reset_token) {
-                var errMsg = verifyData.error;
-                if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Invalid OTP';
-                showForgotError(errMsg || verifyData.message || 'Invalid OTP. Please try again.');
-                return;
-            }
-            // Step 2: Reset password with token
             var resetRes = await fetch(API + '/user/forgot-password/reset/', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({reset_token: verifyData.reset_token, new_password: newPw, confirm_password: newPw})
+                body: JSON.stringify({reset_token: forgotResetToken, new_password: newPw, confirm_password: newPw})
             });
             var resetData = await resetRes.json();
             if (resetRes.ok) {
@@ -3031,6 +3001,57 @@
         connectDiceWebSocket();
         loadSocialLinks();
         loadThemeFromApi();
+        loadGameCards();
+    }
+
+    var activeGameIds = [];
+    function loadGameCards() {
+        fetch(`${API}/base/games/`).then(r => r.json()).then(games => {
+            const container = document.getElementById('game-cards-container');
+            if (!container) return;
+            activeGameIds = games.map(g => g.game_id);
+            let html = '';
+            games.forEach(g => {
+                let imgContent = '';
+                if (g.game_id === 'cockfight') {
+                    imgContent = '<span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>'
+                        + '<img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
+                        + '<img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>';
+                } else {
+                    imgContent = '<span class="material-icons" style="font-size:52px;color:rgba(255,255,255,0.7);">' + g.icon + '</span>';
+                }
+                html += '<div class="game-card" onclick="navigate(\'' + g.section_id + '\')">'
+                    + '<div class="game-card-img" style="background:linear-gradient(135deg,' + g.gradient_from + ',' + g.gradient_to + ');display:flex;align-items:center;justify-content:center;position:relative;">'
+                    + imgContent
+                    + '</div>'
+                    + '<div class="game-card-body"><h4>' + g.name + '</h4><p>' + g.description + '</p></div>'
+                    + '</div>';
+            });
+            container.innerHTML = html;
+            updateNavVisibility();
+        }).catch(e => {
+            console.log('Games load error:', e);
+            const container = document.getElementById('game-cards-container');
+            if (container) {
+                container.innerHTML = '<div class="game-card" onclick="navigate(\'sec-cockfight\')">'
+                    + '<div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">'
+                    + '<span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>'
+                    + '<img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
+                    + '<img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>'
+                    + '</div><div class="game-card-body"><h4>Cockfight Betting</h4><p>24/7 live matches. Pick Meron or Wala and win big.</p></div></div>'
+                    + '<div class="game-card" onclick="navigate(\'sec-dice\')">'
+                    + '<div class="game-card-img" style="background:linear-gradient(135deg,#312e81,#6d28d9);display:flex;align-items:center;justify-content:center;">'
+                    + '<span class="material-icons" style="font-size:52px;color:#c4b5fd;">casino</span>'
+                    + '</div><div class="game-card-body"><h4>Dice Play (Gundata)</h4><p>Pick a dice face from 1 to 6. Match the roll and multiply your bet!</p></div></div>';
+            }
+        });
+    }
+
+    function updateNavVisibility() {
+        document.querySelectorAll('[data-game]').forEach(el => {
+            const gid = el.getAttribute('data-game');
+            el.style.display = activeGameIds.includes(gid) ? '' : 'none';
+        });
     }
 
     function loadSocialLinks() {
@@ -3540,6 +3561,9 @@
                 document.getElementById('pd-phone').textContent = data.phoneNumber || '';
                 // Load request tracking
                 loadRequestTracking();
+            } else if (res.status !== 401) {
+                // Still try to load request tracking even if user/me had issues
+                loadRequestTracking();
             } else if (res.status === 401) { logout(); }
         } catch(e) {}
     }
@@ -3753,8 +3777,12 @@
 
     // Navigation
     function navigate(sectionId) {
+        var sec = document.getElementById(sectionId);
+        if (sec && sec.dataset.game && !activeGameIds.includes(sec.dataset.game)) {
+            sectionId = 'sec-home'; sec = document.getElementById(sectionId);
+        }
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
+        sec.classList.add('active');
 
         // Update bottom nav
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
