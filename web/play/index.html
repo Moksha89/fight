@@ -6006,6 +6006,112 @@
             bannerIndex = 0;
         } catch(e) { console.error('Banner load error:', e); }
     }
+
+    // ===== PUSH NOTIFICATIONS =====
+    var VAPID_PUBLIC_KEY = 'BBY-3rK4C_jIVRoJDMF90RZQsDr15NQvzvBaAbIAMYVrdp_Kf6YPo_J4cRNAIotNELs4rfIxU1ZkouBwlIL_RUA';
+
+    function urlBase64ToUint8Array(base64String) {
+        var padding = '='.repeat((4 - base64String.length % 4) % 4);
+        var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        var raw = atob(base64);
+        var arr = new Uint8Array(raw.length);
+        for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        return arr;
+    }
+
+    async function setupPushNotifications() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        if (!token) return;
+
+        try {
+            var reg = await navigator.serviceWorker.ready;
+            var sub = await reg.pushManager.getSubscription();
+
+            if (sub) {
+                // Already subscribed — send to server in case it's missing
+                sendSubscriptionToServer(sub);
+                return;
+            }
+
+            // Check permission
+            if (Notification.permission === 'denied') return;
+            if (Notification.permission === 'default') {
+                // Show a nice prompt after a delay
+                setTimeout(showPushPermissionBanner, 10000);
+            }
+        } catch(e) { console.error('Push setup error:', e); }
+    }
+
+    function showPushPermissionBanner() {
+        if (document.getElementById('push-permission-banner')) return;
+        var banner = document.createElement('div');
+        banner.id = 'push-permission-banner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#1a1a2e,#16213e);padding:14px 16px;z-index:9999;display:flex;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,0.3);border-bottom:1px solid var(--gold-border);';
+        banner.innerHTML = '<span class="material-icons" style="color:var(--gold);font-size:28px;">notifications_active</span>'
+            + '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#fff;">Enable Notifications</div>'
+            + '<div style="font-size:11px;color:#8b949e;">Get notified when your deposit is approved, bet wins, or new matches start.</div></div>'
+            + '<button onclick="requestPushPermission()" style="padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:var(--radius);font-weight:700;cursor:pointer;font-size:12px;white-space:nowrap;">Allow</button>'
+            + '<button onclick="dismissPushBanner()" style="background:none;border:none;color:#8b949e;cursor:pointer;padding:4px;"><span class="material-icons" style="font-size:18px;">close</span></button>';
+        document.body.appendChild(banner);
+    }
+
+    function dismissPushBanner() {
+        var b = document.getElementById('push-permission-banner');
+        if (b) b.remove();
+        localStorage.setItem('rr_push_dismissed', '1');
+    }
+
+    async function requestPushPermission() {
+        dismissPushBanner();
+        try {
+            var perm = await Notification.requestPermission();
+            if (perm === 'granted') {
+                await subscribeToPush();
+                showToast('Notifications enabled!', 'success');
+            }
+        } catch(e) {
+            showToast('Could not enable notifications', 'error');
+        }
+    }
+
+    async function subscribeToPush() {
+        try {
+            var reg = await navigator.serviceWorker.ready;
+            var sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+            await sendSubscriptionToServer(sub);
+        } catch(e) {
+            console.error('Push subscribe error:', e);
+        }
+    }
+
+    async function sendSubscriptionToServer(sub) {
+        try {
+            var subJson = sub.toJSON();
+            await fetch(API + '/push/subscribe/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    endpoint: subJson.endpoint,
+                    keys: {
+                        p256dh: subJson.keys.p256dh,
+                        auth: subJson.keys.auth
+                    }
+                })
+            });
+        } catch(e) { console.error('Subscription sync error:', e); }
+    }
+
+    // Auto-setup push after login
+    if (token) {
+        setTimeout(setupPushNotifications, 3000);
+    }
+
     loadBanners();
     loadThemeFromApi();
     </script>
