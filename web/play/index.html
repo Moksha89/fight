@@ -486,6 +486,9 @@
             border-radius: 20px; cursor: pointer; text-decoration: none;
         }
         .banner-dots { position: absolute; bottom: 10px; right: 16px; display: flex; gap: 6px; z-index: 2; }
+        .banner-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s ease; }
+        .banner-dot.active { background: var(--gold); width: 20px; border-radius: 4px; }
+        .banner-dot:hover { background: rgba(255,255,255,0.6); }
         .banner-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: all .3s; }
         .banner-dot.active { background: var(--gold); width: 20px; border-radius: 4px; }
 
@@ -2336,6 +2339,9 @@
             <!-- MY BETS -->
             <div id="sec-mybets" class="section">
                 <div class="page-title"><span class="material-icons">history</span> My Bets</div>
+                <div style="margin-bottom:12px;">
+                    <input type="text" id="mybets-search" placeholder="Search bets..." oninput="searchBets(this.value)" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:13px;">
+                </div>
                 <div class="stmt-tabs">
                     <div class="stmt-tab active" onclick="filterBets('all')" id="bet-tab-all">All</div>
                     <div class="stmt-tab" onclick="filterBets('cockfight')" id="bet-tab-cockfight">Cockfight</div>
@@ -2541,6 +2547,8 @@
                     </div>
                     <div style="flex:1;background:var(--bg-card);border-radius:var(--radius);padding:16px;text-align:center;border:1px solid var(--border);">
                         <div style="font-size:24px;font-weight:800;color:var(--success);" id="referral-earnings">₹0</div>
+                    </div>
+                    <div id="referred-users-list" style="display:none;margin-top:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
                         <div style="font-size:12px;color:var(--text-secondary);">Earnings</div>
                     </div>
                 </div>
@@ -2664,6 +2672,7 @@
                     </button>
                     <button class="auth-btn" onclick="setWdSpeed('E')" id="wd-speed-express" style="flex:1;background:var(--bg);color:var(--text-primary);margin:0;padding:10px;border-radius:10px;text-align:center;">
                         <div style="font-weight:700;font-size:14px;">Express</div>
+                        <div style="font-size:10px;color:var(--text-muted);margin-top:1px;">Min ₹500 · 2.5% fee</div>
                         <div style="font-size:11px;opacity:0.8;">~30 min | 2.5% fee</div>
                     </button>
                 </div>
@@ -2712,7 +2721,16 @@
             </div>
             <div class="form-group">
                 <label>New Password</label>
-                <input type="password" id="cp-new" placeholder="Min 6 characters">
+                <input type="password" id="cp-new" placeholder="Min 6 characters" oninput="updatePasswordStrength(this.value)">
+                <div id="pw-strength-bar" style="margin-top:4px;display:none;">
+                    <div style="display:flex;gap:3px;margin-bottom:2px;">
+                        <div id="pw-s1" style="flex:1;height:3px;background:var(--border);border-radius:2px;transition:background 0.3s;"></div>
+                        <div id="pw-s2" style="flex:1;height:3px;background:var(--border);border-radius:2px;transition:background 0.3s;"></div>
+                        <div id="pw-s3" style="flex:1;height:3px;background:var(--border);border-radius:2px;transition:background 0.3s;"></div>
+                        <div id="pw-s4" style="flex:1;height:3px;background:var(--border);border-radius:2px;transition:background 0.3s;"></div>
+                    </div>
+                    <div id="pw-strength-label" style="font-size:10px;color:var(--text-muted);"></div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Confirm New Password</label>
@@ -2805,6 +2823,7 @@
 
     const API = '/api';
     let token = localStorage.getItem('access_token');
+    let isAutoLogin = !!token;
     let userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
     let loginStep = 'credentials';
     let regStep = 'form';
@@ -3614,6 +3633,10 @@
                 // Still try to load request tracking even if user/me had issues
                 loadRequestTracking();
                 loadUserLimits();
+                if (isAutoLogin) {
+                    showToast('Welcome back, ' + (userInfo.username || 'player') + '!', 'success');
+                    isAutoLogin = false;
+                }
             } else if (res.status === 401) { logout(); }
         } catch(e) { console.error('loadUserInfo error:', e); }
     }
@@ -3834,14 +3857,28 @@
         renderStatement(filtered);
     }
 
+    var stmtPage = 1;
+    var stmtPerPage = 15;
+    var stmtData = [];
+
     function renderStatement(txns) {
+        stmtData = txns || [];
+        stmtPage = 1;
+        renderStatementPage();
+    }
+
+    function renderStatementPage() {
         const container = document.getElementById('statement-list');
-        if (!txns || txns.length === 0) {
+        if (!stmtData || stmtData.length === 0) {
             container.innerHTML = '<div class="empty-state"><span class="material-icons">receipt_long</span><p>No transactions found</p></div>';
             return;
         }
+        const totalPages = Math.ceil(stmtData.length / stmtPerPage);
+        const start = (stmtPage - 1) * stmtPerPage;
+        const pageItems = stmtData.slice(start, start + stmtPerPage);
+
         let html = '';
-        txns.forEach(t => {
+        pageItems.forEach(t => {
             const isCredit = t.type === 'Funds In' || t.description.includes('win') || t.description.includes('refund') || t.description.includes('deposit');
             html += `
             <div class="txn-item">
@@ -3858,8 +3895,20 @@
                 </div>
             </div>`;
         });
+
+        // Pagination controls
+        if (totalPages > 1) {
+            html += '<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:16px;padding:8px 0;">';
+            html += '<button onclick="stmtPrev()" style="padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);cursor:pointer;font-size:12px;' + (stmtPage <= 1 ? 'opacity:0.4;pointer-events:none;' : '') + '"><span class="material-icons" style="font-size:14px;vertical-align:middle;">chevron_left</span></button>';
+            html += '<span style="font-size:12px;color:var(--text-secondary);">Page ' + stmtPage + ' of ' + totalPages + ' (' + stmtData.length + ' txns)</span>';
+            html += '<button onclick="stmtNext()" style="padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);cursor:pointer;font-size:12px;' + (stmtPage >= totalPages ? 'opacity:0.4;pointer-events:none;' : '') + '"><span class="material-icons" style="font-size:14px;vertical-align:middle;">chevron_right</span></button>';
+            html += '</div>';
+        }
+
         container.innerHTML = html;
     }
+    function stmtPrev() { if (stmtPage > 1) { stmtPage--; renderStatementPage(); } }
+    function stmtNext() { var tp = Math.ceil(stmtData.length / stmtPerPage); if (stmtPage < tp) { stmtPage++; renderStatementPage(); } }
 
     // Navigation
     function navigate(sectionId) {
@@ -3870,13 +3919,14 @@
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         sec.classList.add('active');
 
-        // Update bottom nav
+        // Update bottom nav — clear all, then set active if section has a tab
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         const navItems = document.querySelectorAll('.nav-item');
         const map = {'sec-home': 0, 'sec-cockfight': 1, 'sec-statement': 2, 'sec-wallet': 3, 'sec-profile': 4};
         if (map[sectionId] !== undefined) navItems[map[sectionId]].classList.add('active');
+        // For sections not in bottom nav, keep nav cleared (no active highlight)
 
-        // Update sidebar
+        // Update sidebar — always syncs
         document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
         const sidebarMap = {
             'sec-home': 0, 'sec-cockfight': 1, 'sec-dice': 2,
@@ -5189,6 +5239,65 @@
         setTimeout(function() { overlay.remove(); }, 8000);
     }
 
+
+    // L2: Welcome onboarding for new users
+    function showOnboarding() {
+        if (localStorage.getItem('rr_onboarded')) return;
+        var overlay = document.createElement('div');
+        overlay.id = 'onboarding-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+        var steps = [
+            {icon:'home',title:'Welcome to RoosterRun!',desc:'Your live betting platform. Swipe through to learn the basics.'},
+            {icon:'sports_mma',title:'Cockfight Betting',desc:'Watch live cockfight streams and place real-time bets on Meron (Red) or Wala (Blue). Odds update dynamically.'},
+            {icon:'casino',title:'Dice Play (Gundata)',desc:'Pick a dice face (1-6), place your bet, and watch the virtual dice roll. Win up to 6x your bet!'},
+            {icon:'account_balance_wallet',title:'Wallet',desc:'Deposit via UPI/Bank transfer. Withdraw your winnings anytime. Track all transactions in Statements.'},
+            {icon:'shield',title:'Play Responsibly',desc:'Set your limits, never chase losses. Check "Your Limits" in Wallet anytime. Have fun!'}
+        ];
+        var idx = 0;
+        function renderStep() {
+            var s = steps[idx];
+            var isLast = idx === steps.length - 1;
+            overlay.innerHTML = '<div style="background:var(--bg-card);border:1px solid var(--gold-border);border-radius:var(--radius-lg);padding:28px;max-width:360px;width:100%;text-align:center;">'
+                + '<span class="material-icons" style="font-size:56px;color:var(--gold);margin-bottom:12px;">' + s.icon + '</span>'
+                + '<h3 style="margin-bottom:8px;font-size:18px;">' + s.title + '</h3>'
+                + '<p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:20px;">' + s.desc + '</p>'
+                + '<div style="display:flex;justify-content:center;gap:6px;margin-bottom:16px;">' + steps.map(function(_,i){ return '<div style="width:8px;height:8px;border-radius:50%;background:' + (i===idx?'var(--gold)':'var(--border)') + ';"></div>'; }).join('') + '</div>'
+                + '<div style="display:flex;gap:8px;">'
+                + (idx > 0 ? '<button onclick="document.getElementById(\'onboarding-overlay\')._prev()" style="flex:1;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);cursor:pointer;">Back</button>' : '')
+                + '<button onclick="document.getElementById(\'onboarding-overlay\')._next()" style="flex:1;padding:10px;background:var(--gold);border:none;border-radius:var(--radius);color:#000;font-weight:700;cursor:pointer;">' + (isLast ? 'Get Started!' : 'Next') + '</button>'
+                + '</div>'
+                + '<div onclick="document.getElementById(\'onboarding-overlay\')._skip()" style="margin-top:12px;font-size:12px;color:var(--text-muted);cursor:pointer;">Skip tutorial</div>'
+                + '</div>';
+        }
+        overlay._next = function() { if (idx < steps.length - 1) { idx++; renderStep(); } else { localStorage.setItem('rr_onboarded','1'); overlay.remove(); } };
+        overlay._prev = function() { if (idx > 0) { idx--; renderStep(); } };
+        overlay._skip = function() { localStorage.setItem('rr_onboarded','1'); overlay.remove(); };
+        renderStep();
+        document.body.appendChild(overlay);
+    }
+
+
+    // L6: Password strength indicator
+    function updatePasswordStrength(pw) {
+        var bar = document.getElementById('pw-strength-bar');
+        if (!pw) { bar.style.display = 'none'; return; }
+        bar.style.display = 'block';
+        var score = 0;
+        if (pw.length >= 6) score++;
+        if (pw.length >= 10) score++;
+        if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+        if (/[0-9]/.test(pw)) score++;
+        if (/[^A-Za-z0-9]/.test(pw)) score++;
+        score = Math.min(score, 4);
+        var colors = ['#ef4444','#f59e0b','#3b82f6','#22c55e'];
+        var labels = ['Weak','Fair','Good','Strong'];
+        for (var i = 1; i <= 4; i++) {
+            document.getElementById('pw-s'+i).style.background = i <= score ? colors[Math.max(0,score-1)] : 'var(--border)';
+        }
+        document.getElementById('pw-strength-label').textContent = score > 0 ? labels[score-1] : '';
+        document.getElementById('pw-strength-label').style.color = score > 0 ? colors[score-1] : 'var(--text-muted)';
+    }
+
     // OTP auto-focus
     document.addEventListener('input', e => {
         if (e.target.classList.contains('login-otp-input') || e.target.classList.contains('reg-otp-input')) {
@@ -5340,7 +5449,17 @@
             var items = data.results || data || [];
             notifications = items;
             updateNotifBadge();
-            if (items.length === 0) { document.getElementById('notifications-container').innerHTML = '<div class="empty-state"><span class="material-icons">notifications_off</span><p>No notifications yet</p></div>'; return; }
+            if (items.length === 0) {
+                // Generate activity-based notifications from user data
+                var actNotifs = [];
+                if (userInfo) {
+                    actNotifs.push({message_en: 'Welcome to RoosterRun! Deposit funds to start betting.', notification_type: 'S', created_at: new Date().toISOString(), is_read: false});
+                    if (userInfo.wallet_balance > 0) actNotifs.push({message_en: 'Your current balance is ₹' + Number(userInfo.wallet_balance).toLocaleString(), notification_type: 'D', created_at: new Date().toISOString(), is_read: true});
+                }
+                if (actNotifs.length > 0) { items = actNotifs; } else {
+                    document.getElementById('notifications-container').innerHTML = '<div class="empty-state"><span class="material-icons">notifications_off</span><p>No notifications yet</p></div>'; return;
+                }
+            }
             var html = '';
             items.forEach(function(n) {
                 var iconMap = {D:'savings',W:'account_balance',B:'casino',S:'info',R:'emoji_events'};
@@ -5570,6 +5689,44 @@
         document.getElementById('bets-total-wagered').textContent = '₹'+wagered.toLocaleString();
     }
 
+
+    // L4: Search bets
+    function searchBets(query) {
+        if (!query || query.trim() === '') { renderMyBets(); return; }
+        query = query.toLowerCase();
+        var filtered = allMyBets.filter(function(b) {
+            return (b.gameLabel && b.gameLabel.toLowerCase().includes(query)) ||
+                   (b.detail && b.detail.toLowerCase().includes(query)) ||
+                   (b.status && b.status.toLowerCase().includes(query)) ||
+                   (String(b.amount).includes(query));
+        });
+        if (filtered.length === 0) {
+            document.getElementById('mybets-list').innerHTML = '<div class="empty-state"><span class="material-icons">search_off</span><p>No bets matching "' + query + '"</p></div>';
+            return;
+        }
+        // Reuse renderMyBets logic but with filtered data
+        var statusColors = {won:'var(--success)',lost:'var(--danger)',pending:'#f59e0b',cancelled:'var(--text-muted)'};
+        var statusIcons = {won:'check_circle',lost:'cancel',pending:'schedule',cancelled:'block'};
+        var html = '';
+        filtered.forEach(function(b) {
+            var time = b.date ? new Date(b.date).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+            var sc = statusColors[b.status] || '#f59e0b';
+            var si = statusIcons[b.status] || 'help';
+            html += '<div style="background:var(--bg-card);border-radius:var(--radius);padding:12px;margin-bottom:8px;border:1px solid var(--border);border-left:3px solid '+sc+';">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+            html += '<div style="display:flex;align-items:center;gap:8px;">';
+            html += '<span class="material-icons" style="font-size:18px;color:var(--gold);">'+b.icon+'</span>';
+            html += '<div><div style="font-size:13px;font-weight:600;">'+b.gameLabel+'</div>';
+            html += '<div style="font-size:11px;color:var(--text-muted);">'+b.detail+'</div></div></div>';
+            html += '<div style="text-align:right;"><div style="font-size:14px;font-weight:700;">₹'+b.amount+'</div>';
+            html += '<div style="display:flex;align-items:center;gap:2px;justify-content:flex-end;">';
+            html += '<span class="material-icons" style="font-size:12px;color:'+sc+';">'+si+'</span>';
+            html += '<span style="font-size:11px;font-weight:600;color:'+sc+';text-transform:uppercase;">'+b.status+'</span></div></div></div>';
+            html += '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;">'+time+'</div></div>';
+        });
+        document.getElementById('mybets-list').innerHTML = html;
+    }
+
     function filterBets(filter) {
         currentBetFilter = filter;
         document.querySelectorAll('#sec-mybets .stmt-tab').forEach(function(t){t.classList.remove('active');});
@@ -5626,6 +5783,31 @@
             document.getElementById('referral-code').textContent = data.referral_code || 'ERROR';
             document.getElementById('referral-count').textContent = data.referral_count || 0;
             document.getElementById('referral-earnings').textContent = '₹' + (data.referral_earnings || '0.00');
+            // L7: Show referred users list
+            var referredList = document.getElementById('referred-users-list');
+            if (referredList) {
+                var users = data.referred_users || data.referrals || [];
+                if (users.length > 0) {
+                    var html = '<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">Referred Users</div>';
+                    users.forEach(function(u) {
+                        var name = u.username || u.phone || 'User';
+                        var date = u.joined_at || u.date_joined || u.created_at || '';
+                        if (date) date = new Date(date).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'});
+                        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg);border-radius:var(--radius);margin-bottom:4px;">';
+                        html += '<div style="display:flex;align-items:center;gap:8px;"><span class="material-icons" style="font-size:16px;color:var(--gold);">person</span><span style="font-size:13px;">' + name + '</span></div>';
+                        html += '<span style="font-size:11px;color:var(--text-muted);">' + date + '</span>';
+                        html += '</div>';
+                    });
+                    referredList.innerHTML = html;
+                    referredList.style.display = 'block';
+                } else if (parseInt(data.referral_count) > 0) {
+                    referredList.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">Referred Users</div><div style="font-size:12px;color:var(--text-muted);padding:8px;">You have referred ' + data.referral_count + ' user(s).</div>';
+                    referredList.style.display = 'block';
+                } else {
+                    referredList.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No referrals yet. Share your code to earn rewards!</div>';
+                    referredList.style.display = 'block';
+                }
+            }
         } catch(e) { showToast('Could not load referral info', 'error'); }
     }
     function copyReferralCode() {
