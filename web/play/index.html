@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark">
     <title>RoosterRun - Play</title>
     <!-- PWA Meta Tags -->
@@ -2094,11 +2094,11 @@
                 </div>
             </div>
             <div class="header-right">
-                <button class="header-action-btn notification-btn" onclick="navigate('sec-notifications')" title="Notifications" style="position:relative;">
+                <button class="header-action-btn notification-btn" onclick="navigate('sec-notifications')" title="Notifications" aria-label="View notifications" style="position:relative;">
                     <span class="material-icons">notifications</span>
                     <span id="header-notif-badge" style="display:none;position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;">0</span>
                 </button>
-                <button class="header-action-btn deposit-btn" onclick="openDeposit()" title="Deposit">
+                <button class="header-action-btn deposit-btn" onclick="openDeposit()" title="Deposit" aria-label="Make a deposit">
                     <span class="material-icons">add_circle</span>
                 </button>
                 <button class="header-action-btn withdraw-btn" onclick="openWithdraw()" title="Withdraw">
@@ -2127,7 +2127,7 @@
                         <a onclick="showPasswordModal(); closeDropdown();">
                             <span class="material-icons">lock</span> Change Password
                         </a>
-                        <button class="danger" onclick="logout()">
+                        <button class="danger" onclick="logout()" aria-label="Logout">
                             <span class="material-icons">logout</span> Logout
                         </button>
                     </div>
@@ -2142,20 +2142,20 @@
         <div class="app-sidebar" id="app-sidebar">
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Main</div>
-                <div class="sidebar-item active" onclick="navigateSidebar('sec-home')">
+                <div class="sidebar-item active" onclick="navigateSidebar('sec-home')" aria-label="Home">
                     <span class="material-icons">home</span> Home
                 </div>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Games</div>
-                <div class="sidebar-item" data-game="cockfight" onclick="navigateSidebar('sec-cockfight')">
+                <div class="sidebar-item" data-game="cockfight" onclick="navigateSidebar('sec-cockfight')" aria-label="Cockfight Live">
                     <span class="material-icons">sports_mma</span> Cockfight Betting
                     <span class="badge" id="live-count" style="display:none">0</span>
                 </div>
-                <div class="sidebar-item" data-game="dice" onclick="navigateSidebar('sec-dice')">
+                <div class="sidebar-item" data-game="dice" onclick="navigateSidebar('sec-dice')" aria-label="Dice Games">
                     <span class="material-icons">casino</span> Dice Games
                 </div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-mybets')">
+                <div class="sidebar-item" onclick="navigateSidebar('sec-mybets')" aria-label="My Bets">
                     <span class="material-icons">history</span> My Bets
                 </div>
             </div>
@@ -2163,24 +2163,24 @@
                 <div class="sidebar-section-title">More</div>
 
 
-                <div class="sidebar-item" onclick="navigateSidebar('sec-referral')">
+                <div class="sidebar-item" onclick="navigateSidebar('sec-referral')" aria-label="Referral">
                     <span class="material-icons">group_add</span> Referral & Earn
                 </div>
 
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Account</div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-wallet')">
+                <div class="sidebar-item" onclick="navigateSidebar('sec-wallet')" aria-label="Wallet">
                     <span class="material-icons">account_balance_wallet</span> Wallet
                 </div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-notifications')">
+                <div class="sidebar-item" onclick="navigateSidebar('sec-notifications')" aria-label="Notifications">
                     <span class="material-icons">notifications</span> Notifications
                     <span class="badge" id="notif-count" style="display:none">0</span>
                 </div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-statement')">
+                <div class="sidebar-item" onclick="navigateSidebar('sec-statement')" aria-label="Statement">
                     <span class="material-icons">receipt_long</span> Statements
                 </div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-profile')">
+                <div class="sidebar-item" onclick="navigateSidebar('sec-profile')" aria-label="Profile">
                     <span class="material-icons">person</span> Profile
                 </div>
             </div>
@@ -2225,7 +2225,7 @@
                 <!-- Quick Actions -->
                 <div class="quick-actions">
                     <div class="quick-action" onclick="navigate('sec-cockfight')">
-                        <div class="qa-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);"><img src="/static/red_roaster.png" style="width:28px;height:28px;filter:brightness(2);"/></div>
+                        <div class="qa-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);"><img src="/static/red_roaster.png" alt="Cockfight" style="width:28px;height:28px;filter:brightness(2);"/></div>
                         <div class="qa-label">Cockfight</div>
                     </div>
                     <div class="quick-action" onclick="navigate('sec-dice')">
@@ -2247,7 +2247,8 @@
                     <span class="live-dot"></span>
                     <span style="font-weight:700;">Live Now</span>
                 </div>
-                <div id="matches-container">
+                <div id="matches-container"></div>
+                <div id="auto-history-container">
                     <div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches at the moment</p></div>
                 </div>
 
@@ -2449,6 +2450,19 @@
                             <label>Phone Number</label>
                             <input type="text" id="edit-phone" placeholder="Phone number" readonly style="opacity:0.6;">
                         </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="edit-dob" style="color-scheme:dark;">
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="edit-gender" style="width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:14px;">
+                                <option value="">Select</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                                <option value="O">Other</option>
+                            </select>
+                        </div>
                         <div style="display:flex;gap:8px;">
                             <button class="auth-btn" onclick="saveProfile()" style="background:var(--gold);color:#000;flex:1;">Save</button>
                             <button class="auth-btn" onclick="toggleProfileEdit(false)" style="background:var(--bg);color:var(--text-primary);flex:1;">Cancel</button>
@@ -2456,7 +2470,7 @@
                     </div>
                 </div>
                 <div class="profile-menu">
-                    <div class="profile-menu-item" onclick="toggleProfileEdit(true)">
+                    <div class="profile-menu-item" onclick="toggleProfileEdit(true)" aria-label="Edit Profile">
                         <span class="material-icons">edit</span>
                         <span>Edit Profile</span>
                         <span class="material-icons arrow">chevron_right</span>
@@ -2485,6 +2499,16 @@
                         <span class="material-icons">lock</span>
                         <span>Change Password</span>
                         <span class="material-icons arrow">chevron_right</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="showTerms()" aria-label="Terms and Conditions">
+                        <span class="material-icons">description</span>
+                        <span>Terms & Conditions</span>
+                        <span class="material-icons" style="margin-left:auto;font-size:18px;color:var(--text-secondary);">chevron_right</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="showResponsibleGambling()" aria-label="Responsible Gambling">
+                        <span class="material-icons">shield</span>
+                        <span>Responsible Gambling</span>
+                        <span class="material-icons" style="margin-left:auto;font-size:18px;color:var(--text-secondary);">chevron_right</span>
                     </div>
                     <div class="profile-menu-item danger" onclick="logout()">
                         <span class="material-icons">logout</span>
@@ -2546,11 +2570,11 @@
 
         <!-- Bottom Nav (mobile) -->
         <div class="bottom-nav">
-            <div class="nav-item active" onclick="navigate('sec-home')">
+            <div class="nav-item active" onclick="navigate('sec-home')" aria-label="Home">
                 <span class="material-icons">home</span>
                 <span>Home</span>
             </div>
-            <div class="nav-item" data-game="cockfight" onclick="navigate('sec-cockfight')">
+            <div class="nav-item" data-game="cockfight" onclick="navigate('sec-cockfight')" aria-label="Live cockfight">
                 <span class="material-icons">sports_mma</span>
                 <span>Live</span>
             </div>
@@ -2558,11 +2582,11 @@
                 <span class="material-icons">history</span>
                 <span>Bets</span>
             </div>
-            <div class="nav-item" onclick="navigate('sec-wallet')">
+            <div class="nav-item" onclick="navigate('sec-wallet')" aria-label="Wallet">
                 <span class="material-icons">account_balance_wallet</span>
                 <span>Wallet</span>
             </div>
-            <div class="nav-item" onclick="navigate('sec-profile')">
+            <div class="nav-item" onclick="navigate('sec-profile')" aria-label="Profile">
                 <span class="material-icons">person</span>
                 <span>Profile</span>
             </div>
@@ -2572,7 +2596,7 @@
     <!-- Deposit Modal -->
     <div class="dep-modal-overlay" id="deposit-modal">
         <div class="dep-modal">
-            <h3>Deposit Funds <button onclick="closeDeposit()"><span class="material-icons">close</span></button></h3>
+            <h3>Deposit Funds <button onclick="closeDeposit()" aria-label="Close deposit"><span class="material-icons">close</span></button></h3>
             <div id="dep-pending-check"></div>
             <!-- Step 1: Select Payment Method Type -->
             <div id="dep-step-1" class="dep-step active">
@@ -2602,7 +2626,7 @@
             <div id="dep-step-3" class="dep-step">
                 <div id="dep-selected-details" style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:13px;"></div>
                 <div id="dep-qr-preview" style="text-align:center;margin-bottom:12px;display:none;">
-                    <img id="dep-qr-img" style="max-width:200px;border-radius:8px;border:2px solid var(--gold);" />
+                    <img id="dep-qr-img" alt="Payment QR Code" style="max-width:200px;border-radius:8px;border:2px solid var(--gold);" />
                 </div>
                 <div class="form-group">
                     <label>UTR / Transaction ID</label>
@@ -2625,7 +2649,7 @@
     <!-- Withdrawal Modal -->
     <div class="dep-modal-overlay" id="withdraw-modal">
         <div class="dep-modal">
-            <h3>Withdraw Funds <button onclick="closeWithdraw()"><span class="material-icons">close</span></button></h3>
+            <h3>Withdraw Funds <button onclick="closeWithdraw()" aria-label="Close withdrawal"><span class="material-icons">close</span></button></h3>
             <div id="wd-pending-check"></div>
             <div id="wd-form">
                 <div class="form-group">
@@ -3018,8 +3042,8 @@
                 let imgContent = '';
                 if (g.game_id === 'cockfight') {
                     imgContent = '<span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>'
-                        + '<img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
-                        + '<img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>';
+                        + '<img src="/static/red_roaster.png" alt="Meron Rooster" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
+                        + '<img src="/static/blue_roaster.png" alt="Wala Rooster" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>';
                 } else {
                     imgContent = '<span class="material-icons" style="font-size:52px;color:rgba(255,255,255,0.7);">' + g.icon + '</span>';
                 }
@@ -3039,8 +3063,8 @@
                 container.innerHTML = '<div class="game-card" onclick="navigate(\'sec-cockfight\')">'
                     + '<div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">'
                     + '<span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>'
-                    + '<img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
-                    + '<img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>'
+                    + '<img src="/static/red_roaster.png" alt="Meron Rooster" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
+                    + '<img src="/static/blue_roaster.png" alt="Wala Rooster" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>'
                     + '</div><div class="game-card-body"><h4>Cockfight Betting</h4><p>24/7 live matches. Pick Meron or Wala and win big.</p></div></div>'
                     + '<div class="game-card" onclick="navigate(\'sec-dice\')">'
                     + '<div class="game-card-img" style="background:linear-gradient(135deg,#312e81,#6d28d9);display:flex;align-items:center;justify-content:center;">'
@@ -3279,8 +3303,21 @@
         const liveUrl = d.liveUrl || '';
         let streamHtml = '';
         if (liveUrl) {
-            streamHtml = `<div class="stream-container">
-                <iframe src="${liveUrl}" allowfullscreen></iframe>
+            streamHtml = `<div class="stream-container" style="position:relative;">
+                <div id="stream-loading" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1;">
+                    <div style="text-align:center;color:var(--text-secondary);">
+                        <span class="material-icons" style="font-size:40px;color:var(--gold);animation:pulse 1.5s ease-in-out infinite;">live_tv</span>
+                        <p style="margin-top:8px;font-size:13px;">Loading live stream...</p>
+                    </div>
+                </div>
+                <iframe src="${liveUrl}" allowfullscreen onload="var el=document.getElementById('stream-loading');if(el)el.style.display='none';"></iframe>
+            </div>`;
+        } else {
+            streamHtml = `<div class="stream-container" style="display:flex;align-items:center;justify-content:center;background:var(--bg);min-height:200px;">
+                <div style="text-align:center;color:var(--text-secondary);">
+                    <span class="material-icons" style="font-size:48px;opacity:0.4;">videocam_off</span>
+                    <p style="margin-top:8px;font-size:13px;">Waiting for live stream...</p>
+                </div>
             </div>`;
         }
         const oddsMin = currentOdds.meron_min || '0.50';
@@ -3534,7 +3571,16 @@
             });
             const data = await res.json();
             if (res.ok || res.status === 201) {
-                showToast('Bet placed successfully!', 'success');
+                const betId = data.id || data.bet_id || '—';
+                const potentialWin = (parseFloat(amount) * ratio).toFixed(2);
+                showBetReceipt({
+                    type: 'Cockfight (Auto)',
+                    team: selectedBets['auto'].teamName,
+                    amount: amount,
+                    odds: ratio + 'x',
+                    potentialWin: '₹' + potentialWin,
+                    betId: betId
+                });
                 loadUserInfo();
                 loadUserBets();
                 clearAutoBet();
@@ -3633,6 +3679,34 @@
                 renderMatches(data.results || data);
             }
         } catch(e) { console.error('loadMatches error:', e); }
+        // Also load auto-match history for results table
+        try {
+            const res2 = await fetch(`${API}/cockfight/auto-history/?limit=20`, { headers: {'Authorization': `Bearer ${token}`} });
+            if (res2.ok) {
+                const autoData = await res2.json();
+                const matches = Array.isArray(autoData) ? autoData : (autoData.results || []);
+                renderAutoHistory(matches.slice(0, 20));
+            }
+        } catch(e) { console.error('loadAutoHistory error:', e); }
+    }
+
+    function renderAutoHistory(matches) {
+        const container = document.getElementById('auto-history-container');
+        if (!container || !matches.length) return;
+        let html = '<div class="section-header"><span class="material-icons">history</span> Recent Auto-Match Results</div>';
+        html += '<div style="overflow-x:auto;"><table style="width:100%;font-size:12px;border-collapse:collapse;">';
+        html += '<tr style="color:var(--text-secondary);border-bottom:1px solid var(--border);"><th style="padding:8px;text-align:left;">Fight</th><th style="padding:8px;text-align:center;">Winner</th><th style="padding:8px;text-align:right;">Date</th></tr>';
+        matches.forEach(m => {
+            const winner = m.winTeam === 1 ? '<span style="color:#ef4444;font-weight:700;">Meron</span>' : m.winTeam === 2 ? '<span style="color:#3b82f6;font-weight:700;">Wala</span>' : m.winTeam === 3 ? '<span style="color:#a855f7;font-weight:700;">Draw</span>' : '<span style="color:var(--text-secondary);">—</span>';
+            const date = m.createdDate ? new Date(m.createdDate).toLocaleDateString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+            html += '<tr style="border-bottom:1px solid var(--border);">';
+            html += '<td style="padding:8px;">#' + (m.matchNumber || '?') + '</td>';
+            html += '<td style="padding:8px;text-align:center;">' + winner + '</td>';
+            html += '<td style="padding:8px;text-align:right;color:var(--text-secondary);">' + date + '</td>';
+            html += '</tr>';
+        });
+        html += '</table></div>';
+        container.innerHTML = html;
     }
 
     function renderMatches(zones) {
@@ -3723,7 +3797,15 @@
             });
             const data = await res.json();
             if (res.ok || res.status === 201) {
-                showToast('Bet placed successfully!', 'success');
+                const betId = data.id || data.bet_id || '—';
+                showBetReceipt({
+                    type: 'Cockfight',
+                    team: selectedBets[matchId].teamName,
+                    amount: amount,
+                    odds: '—',
+                    potentialWin: '—',
+                    betId: betId
+                });
                 loadUserInfo();
             } else { showToast(data.error || data.detail || 'Bet failed', 'error'); }
         } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
@@ -4038,7 +4120,7 @@
                 qrs.forEach(q => {
                     html += `<div class="dep-option-card" onclick="selectDepOption(this, 'Q', ${JSON.stringify(q).replace(/"/g,'&quot;')})">
                         <div style="display:flex;align-items:center;gap:10px;">
-                            ${q.qr_image ? `<img src="${q.qr_image}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;" />` : '<span class="material-icons" style="font-size:40px;color:var(--gold);">qr_code</span>'}
+                            ${q.qr_image ? `<img src="${q.qr_image}" alt="Payment QR" style="width:50px;height:50px;border-radius:6px;object-fit:cover;" />` : '<span class="material-icons" style="font-size:40px;color:var(--gold);">qr_code</span>'}
                             <div>
                                 <div class="dep-option-name">${q.display_name || q.upi_id}</div>
                                 <div class="dep-option-detail">UPI: ${q.upi_id}</div>
@@ -5015,16 +5097,23 @@
         if (show && userInfo) {
             document.getElementById('edit-username').value = userInfo.username || '';
             document.getElementById('edit-phone').value = userInfo.phoneNumber || '';
+            document.getElementById('edit-dob').value = userInfo.dateOfBirth || '';
+            document.getElementById('edit-gender').value = userInfo.gender || '';
         }
     }
     async function saveProfile() {
         const username = document.getElementById('edit-username').value.trim();
         if (!username) { showToast('Username is required', 'error'); return; }
+        const dob = document.getElementById('edit-dob').value || null;
+        const gender = document.getElementById('edit-gender').value || null;
+        const body = {username};
+        if (dob) body.dateOfBirth = dob;
+        if (gender) body.gender = gender;
         try {
             const res = await fetch(`${API}/user/me/`, {
                 method: 'PATCH',
                 headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
-                body: JSON.stringify({username})
+                body: JSON.stringify(body)
             });
             if (res.ok) {
                 showToast('Profile updated!', 'success');
@@ -5032,6 +5121,72 @@
                 loadUserInfo();
             } else { showToast('Failed to update', 'error'); }
         } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
+    }
+
+
+    // M6: Terms & Conditions / Responsible Gambling
+    function showTerms() {
+        var html = '<h3 style="margin-bottom:12px;">Terms & Conditions</h3>';
+        html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;max-height:60vh;overflow-y:auto;">';
+        html += '<p><strong>1. Eligibility:</strong> You must be 18 years or older to use RoosterRun.</p>';
+        html += '<p><strong>2. Account:</strong> You are responsible for maintaining the security of your account credentials.</p>';
+        html += '<p><strong>3. Deposits:</strong> All deposits are subject to verification. Minimum and maximum limits apply per payment method.</p>';
+        html += '<p><strong>4. Withdrawals:</strong> Withdrawal requests are processed within 6 hours (normal) or 30 minutes (express, 2.5% fee).</p>';
+        html += '<p><strong>5. Betting:</strong> All bets are final once placed. Results are determined by the outcome of the match/game.</p>';
+        html += '<p><strong>6. Fair Play:</strong> Any attempt to manipulate outcomes or exploit system vulnerabilities will result in account suspension.</p>';
+        html += '<p><strong>7. Responsible Gambling:</strong> We encourage responsible gambling. Set your own limits and never bet more than you can afford to lose.</p>';
+        html += '<p><strong>8. Privacy:</strong> Your personal data is protected and will not be shared with third parties without consent.</p>';
+        html += '</div>';
+        showInfoModal(html);
+    }
+    function showResponsibleGambling() {
+        var html = '<h3 style="margin-bottom:12px;">Responsible Gambling</h3>';
+        html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;max-height:60vh;overflow-y:auto;">';
+        html += '<p style="margin-bottom:12px;">RoosterRun is committed to promoting responsible gambling. Please follow these guidelines:</p>';
+        html += '<p><strong>Set Limits:</strong> Your account has daily bet limits (₹50,000), single bet maximum (₹10,000), and daily deposit limits. Check "Your Limits" in the Wallet section.</p>';
+        html += '<p><strong>Never Chase Losses:</strong> Accept that losing is part of gambling. Do not try to recover losses by betting more.</p>';
+        html += '<p><strong>Take Breaks:</strong> If you feel stressed or anxious about gambling, take a break.</p>';
+        html += '<p><strong>Budget:</strong> Only gamble with money you can afford to lose. Never use money needed for bills or essentials.</p>';
+        html += '<p><strong>Seek Help:</strong> If you believe you have a gambling problem, please reach out to a gambling helpline in your region.</p>';
+        html += '<p style="margin-top:16px;"><strong>Self-Exclusion:</strong> Contact our support team if you wish to temporarily or permanently exclude yourself from the platform.</p>';
+        html += '</div>';
+        showInfoModal(html);
+    }
+    function showInfoModal(html) {
+        var overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+        overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+        var card = document.createElement('div');
+        card.style.cssText = 'background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;max-width:440px;width:100%;position:relative;';
+        card.innerHTML = '<button onclick="this.closest(\'.modal-overlay\').remove()" style="position:absolute;top:12px;right:12px;background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;"><span class="material-icons" style="font-size:18px;">close</span></button>' + html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+    }
+
+
+    // M9: Bet confirmation receipt
+    function showBetReceipt(info) {
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn 0.2s ease;';
+        overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+        var card = document.createElement('div');
+        card.style.cssText = 'background:var(--bg-card);border:1px solid var(--gold-border);border-radius:var(--radius-lg);padding:24px;max-width:340px;width:100%;text-align:center;animation:slideUp 0.3s ease;';
+        card.innerHTML = `
+            <span class="material-icons" style="font-size:48px;color:var(--success);margin-bottom:8px;">check_circle</span>
+            <h3 style="margin-bottom:16px;color:var(--gold);">Bet Placed!</h3>
+            <div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:left;font-size:13px;margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text-secondary);">Game</span><span style="font-weight:600;">${info.type}</span></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text-secondary);">Selection</span><span style="font-weight:600;">${info.team || info.face || '—'}</span></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text-secondary);">Amount</span><span style="font-weight:700;color:var(--gold);">₹${info.amount}</span></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text-secondary);">Odds</span><span>${info.odds}</span></div>
+                <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;"><span style="color:var(--text-secondary);">Potential Win</span><span style="font-weight:700;color:var(--success);">${info.potentialWin}</span></div>
+            </div>
+            <button onclick="this.closest('div[style*=position\\:fixed]').remove()" style="background:var(--gold);color:#000;border:none;border-radius:var(--radius);padding:10px 24px;font-weight:700;cursor:pointer;width:100%;">OK</button>
+        `;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+        setTimeout(function() { overlay.remove(); }, 8000);
     }
 
     // OTP auto-focus

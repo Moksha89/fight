@@ -484,12 +484,12 @@
     <div class="auth-card">
       <img src="/static/logo.png" alt="RoosterRun" class="auth-logo">
       <h1 class="auth-title">Welcome</h1>
-      <p class="auth-subtitle">Enter your mobile number to continue</p>
+      <p class="auth-subtitle">Join RoosterRun and start betting</p>
       <div class="input-group">
-        <label>Mobile Number</label>
-        <input type="tel" id="email-input" placeholder="9876543210" autocomplete="tel" pattern="[0-9]{10,15}">
+        <label style="display:none;">Mobile Number</label>
+        <input type="tel" id="email-input" placeholder="9876543210" autocomplete="tel" pattern="[0-9]{10,15}" style="display:none;">
       </div>
-      <button class="btn-primary" id="btn-get-otp">Register</button>
+      <button class="btn-primary" id="btn-get-otp">Register / Login</button>
       <div id="email-error" class="error-msg hidden"></div>
       <div id="email-info" class="info-msg hidden"></div>
     </div>
@@ -828,33 +828,7 @@
       },
 
       async getOtp() {
-        const email = document.getElementById('email-input').value.trim();
-        if (!email) return;
-        const btn = document.getElementById('btn-get-otp');
-        btn.disabled = true; btn.textContent = 'Sending...';
-        document.getElementById('email-error').classList.add('hidden');
-        try {
-          const res = await fetch(`${BASE_URL}/api/user/getotp/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mobile: email })
-          });
-          const data = await res.json();
-          if (res.ok) {
-            document.getElementById('screen-email').classList.add('hidden');
-            document.getElementById('screen-otp').classList.remove('hidden');
-            document.getElementById('otp-subtitle').textContent = `Enter the code sent to ${email.slice(0,2)}****${email.slice(-2)}`;
-            document.querySelectorAll('#otp-inputs input')[0].focus();
-            this._email = email;
-          } else {
-            document.getElementById('email-error').textContent = data.message || data.error || 'Failed to send OTP';
-            document.getElementById('email-error').classList.remove('hidden');
-          }
-        } catch(e) {
-          document.getElementById('email-error').textContent = 'Network error';
-          document.getElementById('email-error').classList.remove('hidden');
-        }
-        btn.disabled = false; btn.textContent = 'Register';
+        window.location.href = '/play/';
       },
 
       async verifyOtp() {
