@@ -3,7 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark">
     <title>RoosterRun - Play</title>
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/play/manifest.json">
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RoosterRun">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="RoosterRun">
+    <meta name="msapplication-TileColor" content="#0D0D0D">
+    <meta name="msapplication-TileImage" content="/static/pwa/icon-144x144.png">
+    <link rel="apple-touch-icon" href="/static/pwa/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/pwa/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/pwa/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/static/pwa/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/pwa/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/pwa/icon-96x96.png">
+
     <style>
     /* Local Material Icons font - no CDN dependency */
     @font-face {
@@ -32,6 +50,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
+            color-scheme: dark;
             /* ── Brand (synced with Android ThemeContext + Admin base_site) ── */
             --gold: #D4A843;
             --gold-dark: #B8922E;
@@ -218,10 +237,32 @@
         .form-group input {
             width: 100%; padding: 12px 14px;
             background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 10px; color: var(--text-primary);
+            border-radius: 10px; color: #F5F1E8 !important;
+            -webkit-text-fill-color: #F5F1E8 !important;
+            color-scheme: dark;
             font-size: 14px; font-family: inherit;
             transition: border 0.2s; outline: none;
         }
+        .form-group input:-webkit-autofill,
+        .form-group input:-webkit-autofill:focus,
+        .form-group input:-webkit-autofill:hover,
+        .form-group input:-webkit-autofill:active {
+            -webkit-text-fill-color: #F5F1E8 !important;
+            -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+            background-color: #1a1a1a !important;
+            color: #F5F1E8 !important;
+            caret-color: #F5F1E8;
+        }
+
+        .form-group { position: relative; }
+        .password-toggle {
+            position: absolute; right: 12px; bottom: 13px;
+            background: none; border: none; color: #6B6560; cursor: pointer;
+            font-size: 20px; padding: 4px; line-height: 1;
+            font-family: 'Material Icons'; -webkit-text-fill-color: #6B6560 !important;
+        }
+        .password-toggle:hover { color: #F5F1E8; -webkit-text-fill-color: #F5F1E8 !important; }
+        .form-group.has-toggle input { padding-right: 40px; }
         .form-group input:focus {
             border-color: var(--gold);
             box-shadow: 0 0 0 3px rgba(212,168,67,0.15);
@@ -251,7 +292,7 @@
             font-size: 18px; font-weight: 600;
             background: var(--bg); border: 1px solid var(--border);
             border-radius: 10px; color: var(--text-primary); outline: none;
-        }
+         -webkit-text-fill-color: var(--text-primary); color-scheme: dark; }
         .otp-row input:focus { border-color: var(--gold); }
 
         /* ===== APP LAYOUT ===== */
@@ -1814,9 +1855,115 @@
             color: #fff;
         }
         .confirm-btn.danger:hover { filter: brightness(1.1); }
+
+        /* ── PWA Splash Screen ── */
+        #pwa-splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0B0B0B; z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #pwa-splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+        #pwa-splash img { width: 120px; height: 120px; margin-bottom: 20px; animation: splashPulse 1.5s ease-in-out infinite; }
+        #pwa-splash h2 { color: #D4A843; font-size: 26px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+        #pwa-splash p { color: #6B6560; font-size: 13px; }
+        #pwa-splash .splash-loader { width: 40px; height: 40px; margin-top: 30px; border: 3px solid #222; border-top: 3px solid #D4A843; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes splashPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── PWA Install Banner ── */
+        #pwa-install-banner {
+            position: fixed; bottom: 60px; left: 0; right: 0; z-index: 99;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            border-top: 1px solid rgba(212,168,67,0.3);
+            padding: 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.6);
+        }
+        #pwa-install-banner.show { transform: translateY(0); }
+        .install-banner-inner {
+            padding: 16px 20px; display: flex; align-items: center; gap: 14px;
+        }
+        .install-banner-icon { width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0; }
+        .install-banner-text { flex: 1; min-width: 0; }
+        .install-banner-text h4 { color: #F5F1E8; font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+        .install-banner-text p { color: #8a8580; font-size: 12px; line-height: 1.3; }
+        .install-banner-btn {
+            background: linear-gradient(135deg, #D4A843, #B8922E); color: #000;
+            font-weight: 700; font-size: 13px; padding: 10px 20px; border: none;
+            border-radius: 10px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .install-banner-btn:active { transform: scale(0.96); }
+        .install-banner-close {
+            position: absolute; top: 8px; right: 12px; background: none; border: none;
+            color: #6B6560; font-size: 20px; cursor: pointer; padding: 4px; line-height: 1;
+        }
+        .install-banner-stars { display: flex; gap: 2px; margin-top: 2px; }
+        .install-banner-stars span { color: #D4A843; font-size: 11px; }
+
+        /* ── Native App Behaviors ── */
+        body.pwa-standalone {
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+            user-select: none; -webkit-user-select: none;
+        }
+        body.pwa-standalone * { -webkit-tap-highlight-color: transparent; }
+        body.pwa-standalone input, body.pwa-standalone textarea, body.pwa-standalone select {
+            user-select: text; -webkit-user-select: text;
+        }
+
+        /* iOS safe area padding */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            body.pwa-standalone .header { padding-top: calc(10px + env(safe-area-inset-top)); }
+            body.pwa-standalone .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+            body.pwa-standalone #pwa-install-banner { padding-bottom: env(safe-area-inset-bottom); }
+        }
+
+        /* ── Page transition animation ── */
+        .page-transition { animation: pageSlideIn 0.25s ease-out; }
+        @keyframes pageSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Pull-to-refresh indicator ── */
+        #ptr-indicator {
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%) translateY(-60px);
+            z-index: 9998; width: 36px; height: 36px; background: #1a1a1a;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4); transition: transform 0.2s ease;
+            border: 1px solid rgba(212,168,67,0.2);
+        }
+        #ptr-indicator .ptr-spinner { width: 20px; height: 20px; border: 2px solid #333; border-top: 2px solid #D4A843; border-radius: 50%; }
+        #ptr-indicator.pulling .ptr-spinner { animation: spin 0.8s linear infinite; }
     </style>
 </head>
 <body>
+
+    <!-- PWA Splash Screen -->
+    <div id="pwa-splash">
+        <img src="/static/logo.png?v=2" alt="RoosterRun">
+        <h2>RoosterRun</h2>
+        <p>Live Betting & Games</p>
+        <div class="splash-loader"></div>
+    </div>
+
+    <!-- Pull to Refresh Indicator -->
+    <div id="ptr-indicator"><div class="ptr-spinner"></div></div>
+
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner">
+        <button class="install-banner-close" onclick="dismissInstallBanner()">&times;</button>
+        <div class="install-banner-inner">
+            <img class="install-banner-icon" src="/static/logo.png?v=2" alt="RoosterRun">
+            <div class="install-banner-text">
+                <h4>RoosterRun</h4>
+                <div class="install-banner-stars">
+                    <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                </div>
+                <p>Install app for the best experience</p>
+            </div>
+            <button class="install-banner-btn" onclick="installPWA()">Install</button>
+        </div>
+    </div>
+
     <!-- AUTH -->
     <div id="auth-screen" class="auth-container">
         <div class="auth-card">
@@ -1838,6 +1985,7 @@
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" id="login-password" placeholder="Enter password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('login-password', this)">visibility_off</button>
                 </div>
                 <div id="login-otp-section" class="otp-section hidden">
                     <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;">Enter OTP</label>
@@ -1850,7 +1998,7 @@
                         <input class="login-otp-input" type="text" maxlength="1" data-idx="5">
                     </div>
                 </div>
-                <button class="auth-btn" id="login-btn" onclick="handleLogin()">Send OTP & Login</button>
+                <button class="auth-btn" id="login-btn" onclick="handleLogin()">Login</button>
                 <div style="text-align:center;margin-top:12px;">
                     <a onclick="showForgotPassword()" style="color:var(--gold);font-size:13px;cursor:pointer;text-decoration:none;">Forgot Password?</a>
                 </div>
@@ -1867,10 +2015,12 @@
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" id="reg-password" placeholder="Min 6 characters">
+                    <button type="button" class="password-toggle" onclick="togglePassword('reg-password', this)">visibility_off</button>
                 </div>
                 <div class="form-group">
                     <label>Confirm Password</label>
                     <input type="password" id="reg-confirm" placeholder="Re-enter password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('reg-confirm', this)">visibility_off</button>
                 </div>
                 <div id="reg-otp-section" class="otp-section hidden">
                     <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;">Enter OTP</label>
@@ -1883,7 +2033,7 @@
                         <input class="reg-otp-input" type="text" maxlength="1" data-idx="5">
                     </div>
                 </div>
-                <button class="auth-btn" id="reg-btn" onclick="handleRegister()">Send OTP & Register</button>
+                <button class="auth-btn" id="reg-btn" onclick="handleRegister()">Register</button>
             </div>
             <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;align-items:center;gap:6px;">
                 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
@@ -1910,9 +2060,9 @@
                     <label>Registered Mobile Number</label>
                     <input type="text" id="forgot-phone" placeholder="Enter 10-digit mobile number">
                 </div>
-                <button class="auth-btn" onclick="handleForgotSendOtp()">Send OTP</button>
+                <button class="auth-btn" onclick="handleForgotVerify()">Verify Account</button>
             </div>
-            <div id="forgot-step-otp" class="hidden">
+            <div id="forgot-step-reset" class="hidden">
                 <div class="form-group">
                     <label>OTP Code</label>
                     <input type="text" id="forgot-otp" placeholder="Enter 6-digit OTP" maxlength="6">
@@ -1998,11 +2148,11 @@
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Games</div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-cockfight')">
+                <div class="sidebar-item" data-game="cockfight" onclick="navigateSidebar('sec-cockfight')">
                     <span class="material-icons">sports_mma</span> Cockfight Betting
                     <span class="badge" id="live-count" style="display:none">0</span>
                 </div>
-                <div class="sidebar-item" onclick="navigateSidebar('sec-dice')">
+                <div class="sidebar-item" data-game="dice" onclick="navigateSidebar('sec-dice')">
                     <span class="material-icons">casino</span> Dice Games
                 </div>
                 <div class="sidebar-item" onclick="navigateSidebar('sec-mybets')">
@@ -2106,27 +2256,8 @@
                     <span class="material-icons">casino</span>
                     <span style="font-weight:700;">Games</span>
                 </div>
-                <div class="game-cards">
-                    <div class="game-card" onclick="navigate('sec-cockfight')">
-                        <div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">
-                            <span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>
-                            <img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>
-                            <img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>
-                        </div>
-                        <div class="game-card-body">
-                            <h4>Cockfight Betting</h4>
-                            <p>24/7 live matches. Pick Meron or Wala and win big with real-time odds.</p>
-                        </div>
-                    </div>
-                    <div class="game-card" onclick="navigate('sec-dice')">
-                        <div class="game-card-img" style="background:linear-gradient(135deg,#312e81,#6d28d9);display:flex;align-items:center;justify-content:center;">
-                            <span class="material-icons" style="font-size:52px;color:#c4b5fd;">casino</span>
-                        </div>
-                        <div class="game-card-body">
-                            <h4>Dice Play (Gundata)</h4>
-                            <p>Pick a dice face from 1 to 6. Match the roll and multiply your bet!</p>
-                        </div>
-                    </div>
+                <div class="game-cards" id="game-cards-container">
+                    <!-- Game cards loaded dynamically from API -->
                 </div>
 
                 <!-- Stats Bar -->
@@ -2170,7 +2301,7 @@
             </div>
 
             <!-- COCKFIGHT -->
-            <div id="sec-cockfight" class="section">
+            <div id="sec-cockfight" class="section" data-game="cockfight">
                 <div class="page-title">
                     <span class="material-icons">sports_mma</span>
                     Cockfight Matches
@@ -2190,7 +2321,7 @@
             </div>
 
             <!-- DICE -->
-            <div id="sec-dice" class="section">
+            <div id="sec-dice" class="section" data-game="dice">
                 <div class="page-title">
                     <span class="material-icons">casino</span>
                     Dice Games — Gundata
@@ -2281,7 +2412,7 @@
                     My Requests
                 </div>
                 <div id="request-tracking" style="margin-bottom:16px;">
-                    <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:12px;">Loading...</div>
+                    <div style="color:var(--text-muted);font-size:12px;text-align:center;padding:10px;">No pending requests</div>
                 </div>
                 <div class="section-label">
                     <span class="material-icons">receipt_long</span>
@@ -2416,7 +2547,7 @@
                 <span class="material-icons">home</span>
                 <span>Home</span>
             </div>
-            <div class="nav-item" onclick="navigate('sec-cockfight')">
+            <div class="nav-item" data-game="cockfight" onclick="navigate('sec-cockfight')">
                 <span class="material-icons">sports_mma</span>
                 <span>Live</span>
             </div>
@@ -2665,8 +2796,8 @@
         regStep = 'form';
         document.getElementById('login-otp-section').classList.add('hidden');
         document.getElementById('reg-otp-section').classList.add('hidden');
-        document.getElementById('login-btn').textContent = 'Send OTP & Login';
-        document.getElementById('reg-btn').textContent = 'Send OTP & Register';
+        document.getElementById('login-btn').textContent = 'Login';
+        document.getElementById('reg-btn').textContent = 'Register';
     }
 
     // ── Forgot Password ──
@@ -2675,7 +2806,7 @@
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
         document.getElementById('forgot-step-phone').classList.remove('hidden');
-        document.getElementById('forgot-step-otp').classList.add('hidden');
+        document.getElementById('forgot-step-reset').classList.add('hidden');
         document.getElementById('forgot-error').style.display = 'none';
         document.getElementById('forgot-phone').value = '';
     }
@@ -2688,7 +2819,8 @@
         var el = document.getElementById('forgot-error');
         el.textContent = msg; el.style.display = 'block';
     }
-    async function handleForgotSendOtp() {
+    var forgotResetToken = null;
+    async function handleForgotVerify() {
         var phone = document.getElementById('forgot-phone').value.trim();
         if (!phone || phone.length < 10) { showForgotError('Enter a valid 10-digit mobile number'); return; }
         document.getElementById('forgot-error').style.display = 'none';
@@ -2698,42 +2830,30 @@
                 body: JSON.stringify({mobile: phone})
             });
             var data = await res.json();
-            if (res.ok) {
+            if (res.ok && data.reset_token) {
+                forgotResetToken = data.reset_token;
                 document.getElementById('forgot-step-phone').classList.add('hidden');
-                document.getElementById('forgot-step-otp').classList.remove('hidden');
+                document.getElementById('forgot-step-reset').classList.remove('hidden');
+            } else if (res.ok) {
+                showForgotError(data.message || 'No account found with this mobile number.');
             } else {
                 var errMsg = data.error;
-                if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Failed to send OTP';
-                showForgotError(errMsg || data.message || 'Failed to send OTP');
+                if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Verification failed';
+                showForgotError(errMsg || data.message || 'Verification failed');
             }
-        } catch(e) { showForgotError('Network error. Please try again.'); }
+        } catch(e) { showForgotError('Unable to connect. Check your internet connection.'); }
     }
     async function handleForgotResetPassword() {
-        var phone = document.getElementById('forgot-phone').value.trim();
-        var otp = document.getElementById('forgot-otp').value.trim();
         var newPw = document.getElementById('forgot-new-password').value;
         var confirmPw = document.getElementById('forgot-confirm-password').value;
-        if (!otp || otp.length < 4) { showForgotError('Enter the OTP sent to your phone'); return; }
         if (!newPw || newPw.length < 6) { showForgotError('Password must be at least 6 characters'); return; }
         if (newPw !== confirmPw) { showForgotError('Passwords do not match'); return; }
+        if (!forgotResetToken) { showForgotError('Session expired. Please try again.'); return; }
         document.getElementById('forgot-error').style.display = 'none';
         try {
-            // Step 1: Verify OTP and get reset token
-            var verifyRes = await fetch(API + '/user/forgot-password/verify-otp/', {
-                method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({mobile: phone, otp: otp})
-            });
-            var verifyData = await verifyRes.json();
-            if (!verifyRes.ok || !verifyData.reset_token) {
-                var errMsg = verifyData.error;
-                if (errMsg && typeof errMsg === 'object') errMsg = errMsg.message || errMsg.detail || 'Invalid OTP';
-                showForgotError(errMsg || verifyData.message || 'Invalid OTP. Please try again.');
-                return;
-            }
-            // Step 2: Reset password with token
             var resetRes = await fetch(API + '/user/forgot-password/reset/', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({reset_token: verifyData.reset_token, new_password: newPw, confirm_password: newPw})
+                body: JSON.stringify({reset_token: forgotResetToken, new_password: newPw, confirm_password: newPw})
             });
             var resetData = await resetRes.json();
             if (resetRes.ok) {
@@ -2747,54 +2867,64 @@
                 if (errMsg2 && typeof errMsg2 === 'object') errMsg2 = errMsg2.message || errMsg2.detail || 'Reset failed';
                 showForgotError(errMsg2 || resetData.message || 'Reset failed. Please try again.');
             }
-        } catch(e) { showForgotError('Network error. Please try again.'); }
+        } catch(e) { showForgotError('Unable to connect. Check your internet connection.'); }
     }
 
+
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'visibility';
+        } else {
+            input.type = 'password';
+            btn.textContent = 'visibility_off';
+        }
+    }
     async function handleLogin() {
         const identifier = document.getElementById('login-identifier').value.trim();
         const password = document.getElementById('login-password').value;
         if (!identifier || !password) { showError('Please enter username/mobile and password'); return; }
 
-        if (loginStep === 'credentials') {
-            let mobile = identifier;
-            try {
-                const res = await fetch(`${API}/user/getotp/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({mobile})
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    loginStep = 'otp';
-                    loginMobile = mobile;
-                    document.getElementById('login-otp-section').classList.remove('hidden');
-                    document.getElementById('login-btn').textContent = 'Verify & Login';
-                    hideError();
-                    showToast('OTP sent! Use 123456', 'success');
-                } else {
-                    showError(extractErrorMessage(data));
-                }
-            } catch(e) { showError('Network error. Try again.'); }
-        } else {
-            const otpInputs = document.querySelectorAll('.login-otp-input');
-            const otp = Array.from(otpInputs).map(i => i.value).join('');
-            if (otp.length !== 6) { showError('Enter the 6-digit OTP'); return; }
-            try {
-                const res = await fetch(`${API}/user/login/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({identifier, password, otp})
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    token = data.access_token;
-                    localStorage.setItem('access_token', token);
-                    localStorage.setItem('refresh_token', data.refresh_token);
-                    localStorage.setItem('userInfo', JSON.stringify(data.user || {}));
-                    userInfo = data.user || {};
-                    showApp();
-                } else { showError(extractErrorMessage(data)); }
-            } catch(e) { showError('Network error'); }
+        try {
+            document.getElementById('login-btn').disabled = true;
+            document.getElementById('login-btn').textContent = 'Logging in...';
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
+            const res = await fetch(`${API}/user/login/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({identifier, password, otp: '123456'}),
+                signal: controller.signal
+            });
+            clearTimeout(timeout);
+            if (res.status === 429 || res.status === 503) {
+                showError('Too many attempts. Please wait a moment and try again.');
+                return;
+            }
+            let data;
+            try { data = await res.json(); } catch(pe) {
+                showError('Server error. Please try again.');
+                return;
+            }
+            if (res.ok) {
+                token = data.access_token;
+                localStorage.setItem('access_token', token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                localStorage.setItem('userInfo', JSON.stringify(data.user || {}));
+                userInfo = data.user || {};
+                showApp();
+            } else { showError(extractErrorMessage(data)); }
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                showError('Connection timed out. Check your internet and try again.');
+            } else {
+                showError('Unable to connect. Check your internet connection.');
+            }
+        }
+        finally {
+            document.getElementById('login-btn').disabled = false;
+            document.getElementById('login-btn').textContent = 'Login';
         }
     }
 
@@ -2808,45 +2938,45 @@
         if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
         if (password !== confirm) { showError('Passwords do not match'); return; }
 
-        if (regStep === 'form') {
-            try {
-                const res = await fetch(`${API}/user/getotp/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({mobile})
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    regStep = 'otp';
-                    document.getElementById('reg-otp-section').classList.remove('hidden');
-                    document.getElementById('reg-btn').textContent = 'Verify & Register';
-                    hideError();
-                    showToast('OTP sent! Use 123456', 'success');
-                } else { showError(extractErrorMessage(data)); }
-            } catch(e) { showError('Network error'); }
-        } else {
-            const otpInputs = document.querySelectorAll('.reg-otp-input');
-            const otp = Array.from(otpInputs).map(i => i.value).join('');
-            if (otp.length !== 6) { showError('Enter the 6-digit OTP'); return; }
-            try {
-                const res = await fetch(`${API}/user/register/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({mobile, username, password, confirmPassword: confirm, otp})
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    token = data.access_token;
-                    localStorage.setItem('access_token', token);
-                    localStorage.setItem('refresh_token', data.refresh_token);
-                    userInfo = {username, phoneNumber: mobile};
-                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                    showApp();
-                    showToast('Registration successful!', 'success');
-                } else {
-                    showError(extractErrorMessage(data));
-                }
-            } catch(e) { showError('Network error'); }
+        try {
+            document.getElementById('reg-btn').disabled = true;
+            document.getElementById('reg-btn').textContent = 'Registering...';
+            const controller = new AbortController();
+            const regTimeout = setTimeout(() => controller.abort(), 15000);
+            const res = await fetch(`${API}/user/register/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                signal: controller.signal,
+                body: JSON.stringify({mobile, username, password, confirmPassword: confirm, otp: '123456'})
+            });
+            clearTimeout(regTimeout);
+            if (res.status === 429 || res.status === 503) {
+                showError('Too many attempts. Please wait a moment and try again.');
+                return;
+            }
+            let data;
+            try { data = await res.json(); } catch(pe) { showError('Server error. Please try again.'); return; }
+            if (res.ok) {
+                token = data.access_token;
+                localStorage.setItem('access_token', token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                userInfo = {username, phoneNumber: mobile};
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                showApp();
+                showToast('Registration successful!', 'success');
+            } else {
+                showError(extractErrorMessage(data));
+            }
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                showError('Connection timed out. Check your internet and try again.');
+            } else {
+                showError('Unable to connect. Check your internet connection.');
+            }
+        }
+        finally {
+            document.getElementById('reg-btn').disabled = false;
+            document.getElementById('reg-btn').textContent = 'Register';
         }
     }
 
@@ -2871,6 +3001,57 @@
         connectDiceWebSocket();
         loadSocialLinks();
         loadThemeFromApi();
+        loadGameCards();
+    }
+
+    var activeGameIds = [];
+    function loadGameCards() {
+        fetch(`${API}/base/games/`).then(r => r.json()).then(games => {
+            const container = document.getElementById('game-cards-container');
+            if (!container) return;
+            activeGameIds = games.map(g => g.game_id);
+            let html = '';
+            games.forEach(g => {
+                let imgContent = '';
+                if (g.game_id === 'cockfight') {
+                    imgContent = '<span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>'
+                        + '<img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
+                        + '<img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>';
+                } else {
+                    imgContent = '<span class="material-icons" style="font-size:52px;color:rgba(255,255,255,0.7);">' + g.icon + '</span>';
+                }
+                html += '<div class="game-card" onclick="navigate(\'' + g.section_id + '\')">'
+                    + '<div class="game-card-img" style="background:linear-gradient(135deg,' + g.gradient_from + ',' + g.gradient_to + ');display:flex;align-items:center;justify-content:center;position:relative;">'
+                    + imgContent
+                    + '</div>'
+                    + '<div class="game-card-body"><h4>' + g.name + '</h4><p>' + g.description + '</p></div>'
+                    + '</div>';
+            });
+            container.innerHTML = html;
+            updateNavVisibility();
+        }).catch(e => {
+            console.log('Games load error:', e);
+            const container = document.getElementById('game-cards-container');
+            if (container) {
+                container.innerHTML = '<div class="game-card" onclick="navigate(\'sec-cockfight\')">'
+                    + '<div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">'
+                    + '<span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>'
+                    + '<img src="/static/red_roaster.png" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
+                    + '<img src="/static/blue_roaster.png" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>'
+                    + '</div><div class="game-card-body"><h4>Cockfight Betting</h4><p>24/7 live matches. Pick Meron or Wala and win big.</p></div></div>'
+                    + '<div class="game-card" onclick="navigate(\'sec-dice\')">'
+                    + '<div class="game-card-img" style="background:linear-gradient(135deg,#312e81,#6d28d9);display:flex;align-items:center;justify-content:center;">'
+                    + '<span class="material-icons" style="font-size:52px;color:#c4b5fd;">casino</span>'
+                    + '</div><div class="game-card-body"><h4>Dice Play (Gundata)</h4><p>Pick a dice face from 1 to 6. Match the roll and multiply your bet!</p></div></div>';
+            }
+        });
+    }
+
+    function updateNavVisibility() {
+        document.querySelectorAll('[data-game]').forEach(el => {
+            const gid = el.getAttribute('data-game');
+            el.style.display = activeGameIds.includes(gid) ? '' : 'none';
+        });
     }
 
     function loadSocialLinks() {
@@ -3355,7 +3536,7 @@
                 loadUserBets();
                 clearAutoBet();
             } else { showToast(data.error || data.detail || Object.values(data).flat().join(', ') || 'Bet failed', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     async function loadUserInfo() {
@@ -3379,6 +3560,9 @@
                 document.getElementById('pd-name').textContent = data.username || 'User';
                 document.getElementById('pd-phone').textContent = data.phoneNumber || '';
                 // Load request tracking
+                loadRequestTracking();
+            } else if (res.status !== 401) {
+                // Still try to load request tracking even if user/me had issues
                 loadRequestTracking();
             } else if (res.status === 401) { logout(); }
         } catch(e) {}
@@ -3538,7 +3722,7 @@
                 showToast('Bet placed successfully!', 'success');
                 loadUserInfo();
             } else { showToast(data.error || data.detail || 'Bet failed', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     let allTransactions = [];
@@ -3593,8 +3777,12 @@
 
     // Navigation
     function navigate(sectionId) {
+        var sec = document.getElementById(sectionId);
+        if (sec && sec.dataset.game && !activeGameIds.includes(sec.dataset.game)) {
+            sectionId = 'sec-home'; sec = document.getElementById(sectionId);
+        }
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
+        sec.classList.add('active');
 
         // Update bottom nav
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -3675,7 +3863,7 @@
                 document.getElementById('cp-new').value = '';
                 document.getElementById('cp-confirm').value = '';
             } else { showToast(data.error || 'Failed', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     function logout() {
@@ -3817,7 +4005,7 @@
             }
             document.getElementById('dep-options-list').innerHTML = html;
             depGoToStep(2);
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
     function selectDepOption(el, type, data) {
         document.querySelectorAll('#dep-options-list .dep-option-card').forEach(c => c.classList.remove('selected'));
@@ -3870,7 +4058,7 @@
                 const msg = data.error || data.detail || (typeof data === 'object' ? Object.values(data).flat().join(', ') : 'Failed');
                 showToast(msg, 'error');
             }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     // ===== WITHDRAWAL =====
@@ -3964,7 +4152,7 @@
                 const msg = data.detail || data.error || (typeof data === 'object' ? Object.values(data).flat().join(', ') : 'Failed');
                 showToast(msg, 'error');
             }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     // ===== WALLET SUMMARY =====
@@ -4781,7 +4969,7 @@
                 toggleProfileEdit(false);
                 loadUserInfo();
             } else { showToast('Failed to update', 'error'); }
-        } catch(e) { showToast('Network error', 'error'); }
+        } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
     // OTP auto-focus
@@ -5305,6 +5493,185 @@
     }
     loadBanners();
     loadThemeFromApi();
+    </script>
+
+    <!-- PWA Service Worker & Native App Behavior -->
+    <script>
+    // ── Service Worker Registration ──
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/play/sw.js', { scope: '/play/' })
+                .then(reg => {
+                    console.log('SW registered, scope:', reg.scope);
+                    reg.addEventListener('updatefound', () => {
+                        const newSW = reg.installing;
+                        newSW.addEventListener('statechange', () => {
+                            if (newSW.state === 'activated' && navigator.serviceWorker.controller) {
+                                showToast('App updated! Refreshing...', 'success');
+                                setTimeout(() => location.reload(), 1500);
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.log('SW registration failed:', err));
+        });
+    }
+
+    // ── Splash Screen ──
+    (function() {
+        const splash = document.getElementById('pwa-splash');
+        if (!splash) return;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+        if (!isStandalone) {
+            splash.classList.add('hide');
+            setTimeout(() => splash.remove(), 600);
+            return;
+        }
+        // In standalone mode, show splash for 1.5s
+        setTimeout(() => {
+            splash.classList.add('hide');
+            setTimeout(() => splash.remove(), 600);
+        }, 1500);
+    })();
+
+    // ── Standalone Mode Detection ──
+    (function() {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+        if (isStandalone) {
+            document.body.classList.add('pwa-standalone');
+            // Prevent pull-to-refresh in standalone
+            let startY = 0;
+            document.addEventListener('touchstart', e => { startY = e.touches[0].pageY; }, {passive: true});
+            document.addEventListener('touchmove', e => {
+                const y = e.touches[0].pageY;
+                if (document.scrollingElement.scrollTop === 0 && y > startY + 10) {
+                    // Show refresh indicator
+                    const ptr = document.getElementById('ptr-indicator');
+                    if (ptr) ptr.style.transform = 'translateX(-50%) translateY(10px)';
+                }
+            }, {passive: true});
+            document.addEventListener('touchend', () => {
+                const ptr = document.getElementById('ptr-indicator');
+                if (ptr && ptr.style.transform.includes('10px')) {
+                    ptr.classList.add('pulling');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 600);
+                }
+            });
+
+            // Theme color updates based on page
+            const metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.content = '#0D0D0D';
+        }
+    })();
+
+    // ── Page Transition Animation ──
+    (function() {
+        const origShowPage = window.showPage;
+        if (typeof origShowPage === 'function') {
+            window.showPage = function(page) {
+                origShowPage(page);
+                const pages = document.querySelectorAll('.page');
+                pages.forEach(p => {
+                    if (p.style.display !== 'none' && !p.classList.contains('page-transition')) {
+                        p.classList.add('page-transition');
+                        setTimeout(() => p.classList.remove('page-transition'), 300);
+                    }
+                });
+            };
+        }
+    })();
+
+    // ── PWA Install Prompt ──
+    let deferredPrompt = null;
+    const installBanner = document.getElementById('pwa-install-banner');
+
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Show install banner after 3 seconds if not dismissed before
+        const dismissed = localStorage.getItem('pwa-install-dismissed');
+        if (dismissed) {
+            const dismissedTime = parseInt(dismissed);
+            // Show again after 3 days
+            if (Date.now() - dismissedTime < 3 * 24 * 60 * 60 * 1000) return;
+        }
+        setTimeout(() => {
+            if (installBanner && deferredPrompt) installBanner.classList.add('show');
+        }, 3000);
+    });
+
+    function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(result => {
+            if (result.outcome === 'accepted') {
+                if (typeof showToast === 'function') showToast('App installed!', 'success');
+            }
+            deferredPrompt = null;
+            if (installBanner) installBanner.classList.remove('show');
+        });
+    }
+
+    function dismissInstallBanner() {
+        localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+        if (installBanner) installBanner.classList.remove('show');
+    }
+
+    // Auto-hide install banner when app is installed
+    window.addEventListener('appinstalled', () => {
+        if (installBanner) installBanner.classList.remove('show');
+        deferredPrompt = null;
+        if (typeof showToast === 'function') showToast('RoosterRun installed!', 'success');
+    });
+
+    // ── iOS Install Instructions ──
+    (function() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isStandalone = window.navigator.standalone === true;
+        if (isIOS && !isStandalone) {
+            const dismissed = localStorage.getItem('ios-install-dismissed');
+            if (dismissed && Date.now() - parseInt(dismissed) < 3 * 24 * 60 * 60 * 1000) return;
+            setTimeout(() => {
+                const banner = document.getElementById('pwa-install-banner');
+                if (!banner) return;
+                // Change button to show iOS instructions
+                const btn = banner.querySelector('.install-banner-btn');
+                const text = banner.querySelector('.install-banner-text p');
+                if (btn) btn.textContent = 'How To';
+                if (text) text.innerHTML = 'Tap <b>Share</b> → <b>Add to Home Screen</b>';
+                if (btn) btn.onclick = function() {
+                    alert('To install RoosterRun:\n\n1. Tap the Share button (box with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"\n\nThe app will appear on your home screen!');
+                };
+                banner.classList.add('show');
+            }, 4000);
+        }
+    })();
+
+    // ── Online/Offline Status ──
+    window.addEventListener('online', () => {
+        if (typeof showToast === 'function') showToast('Back online', 'success');
+    });
+    window.addEventListener('offline', () => {
+        if (typeof showToast === 'function') showToast('You are offline', 'error');
+    });
+
+    // ── Haptic Feedback (where supported) ──
+    function haptic(style) {
+        if (navigator.vibrate) {
+            if (style === 'light') navigator.vibrate(10);
+            else if (style === 'medium') navigator.vibrate(25);
+            else if (style === 'heavy') navigator.vibrate([30, 10, 30]);
+        }
+    }
+    // Add haptic to important buttons
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('button, .btn, .auth-tab, .nav-item, .bottom-nav-item');
+        if (btn) haptic('light');
+    });
     </script>
 </body>
 </html>
