@@ -2399,6 +2399,9 @@
                         <button class="wallet-action-btn deposit" onclick="openDeposit()">Deposit</button>
                         <button class="wallet-action-btn withdraw" onclick="openWithdraw()">Withdraw</button>
                     </div>
+                    <div id="bet-limits-info" style="display:none;margin-top:12px;padding:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);">
+                        <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text-primary);display:flex;align-items:center;gap:6px;"><span class="material-icons" style="font-size:16px;color:var(--gold);">info</span> Your Limits</div>
+                    </div>
                 </div>
                 <div class="wallet-summary" id="wallet-summary">
                     <div class="wallet-summary-item"><div class="ws-label">Deposited</div><div class="ws-value credit" id="ws-deposited">₹0</div></div>
@@ -3564,8 +3567,9 @@
             } else if (res.status !== 401) {
                 // Still try to load request tracking even if user/me had issues
                 loadRequestTracking();
+                loadUserLimits();
             } else if (res.status === 401) { logout(); }
-        } catch(e) {}
+        } catch(e) { console.error('loadUserInfo error:', e); }
     }
 
     async function loadRequestTracking() {
@@ -3628,7 +3632,7 @@
                 const data = await res.json();
                 renderMatches(data.results || data);
             }
-        } catch(e) {}
+        } catch(e) { console.error('loadMatches error:', e); }
     }
 
     function renderMatches(zones) {
@@ -3735,7 +3739,7 @@
                 renderStatement(allTransactions);
                 updateWalletSummary();
             }
-        } catch(e) {}
+        } catch(e) { showToast('Could not load statement', 'error'); }
     }
 
     function filterStatement(type) {
@@ -3810,7 +3814,24 @@
         if (sectionId === 'sec-referral') loadReferral();
         if (sectionId === 'sec-notifications') loadNotifications();
         window.scrollTo(0, 0);
+        // H3: Push state for browser back button support
+        if (window._navPush !== false) {
+            history.pushState({section: sectionId}, '', '#' + sectionId.replace('sec-',''));
+        }
     }
+
+    // H3: Handle browser back button
+    window.addEventListener('popstate', function(e) {
+        if (e.state && e.state.section) {
+            window._navPush = false;
+            navigate(e.state.section);
+            window._navPush = true;
+        } else {
+            window._navPush = false;
+            navigate('sec-home');
+            window._navPush = true;
+        }
+    });
 
     function navigateSidebar(sectionId) {
         navigate(sectionId);
@@ -3866,7 +3887,42 @@
         } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
+
+    // H4: Load and display bet limits
+    async function loadUserLimits() {
+        try {
+            var res = await fetch(API + '/user/my-limits/', {headers:{'Authorization':'Bearer '+token}});
+            if (res.ok) {
+                var lim = await res.json();
+                var limitsEl = document.getElementById('bet-limits-info');
+                if (limitsEl) {
+                    limitsEl.innerHTML = `
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+                            <div style="background:var(--bg);padding:8px 10px;border-radius:8px;">
+                                <div style="color:var(--text-secondary);margin-bottom:2px;">Single Bet Max</div>
+                                <div style="font-weight:700;color:var(--gold);">₹${Number(lim.single_bet_max).toLocaleString()}</div>
+                            </div>
+                            <div style="background:var(--bg);padding:8px 10px;border-radius:8px;">
+                                <div style="color:var(--text-secondary);margin-bottom:2px;">Daily Bet Limit</div>
+                                <div style="font-weight:700;color:var(--gold);">₹${Number(lim.daily_bet_limit).toLocaleString()}</div>
+                            </div>
+                            <div style="background:var(--bg);padding:8px 10px;border-radius:8px;">
+                                <div style="color:var(--text-secondary);margin-bottom:2px;">Daily Deposit</div>
+                                <div style="font-weight:700;color:var(--gold);">₹${Number(lim.daily_deposit_limit).toLocaleString()}</div>
+                            </div>
+                            <div style="background:var(--bg);padding:8px 10px;border-radius:8px;">
+                                <div style="color:var(--text-secondary);margin-bottom:2px;">Daily Withdrawal</div>
+                                <div style="font-weight:700;color:var(--gold);">₹${Number(lim.daily_withdrawal_limit).toLocaleString()}</div>
+                            </div>
+                        </div>`;
+                    limitsEl.style.display = 'block';
+                }
+            }
+        } catch(e) { console.error('loadUserLimits error:', e); }
+    }
+
     function logout() {
+        if (!confirm('Are you sure you want to logout?')) return;
         localStorage.clear();
         token = null;
         userInfo = null;
@@ -3955,7 +4011,7 @@
                     </div>`;
                 } else { document.getElementById('dep-pending-check').innerHTML = ''; }
             }
-        } catch(e) {}
+        } catch(e) { console.error('Deposit check error:', e); }
     }
     async function cancelDeposit() {
         if (!await customConfirm('Cancel your pending deposit request?', {title: 'Cancel Deposit', icon: '⚠️', okText: 'Yes, Cancel', danger: true})) return;
@@ -4037,7 +4093,13 @@
     }
     async function submitDeposit() {
         if (!depSelectedOption) { showToast('Select a payment method', 'error'); return; }
-        const amount = document.getElementById('dep-amount').value;
+        const amount = parseFloat(document.getElementById('dep-amount').value);
+        if (!amount || amount <= 0) { showToast('Enter a valid deposit amount', 'error'); return; }
+        const minDep = depSelectedOption.data.min_deposit || 100;
+        const maxDep = depSelectedOption.data.max_deposit || 1000000;
+        if (amount < minDep) { showToast(`Minimum deposit for this method is ₹${minDep}`, 'error'); return; }
+        if (amount > maxDep) { showToast(`Maximum deposit for this method is ₹${maxDep}`, 'error'); return; }
+        if (!depFile) { showToast('Please upload payment screenshot', 'error'); return; }
         const utr = document.getElementById('dep-utr').value.trim();
         if (!utr) { showToast('Enter UTR/Transaction ID', 'error'); return; }
         const fd = new FormData();
@@ -4114,7 +4176,7 @@
                     </div>`;
                 } else { document.getElementById('wd-pending-check').innerHTML = ''; }
             } else { document.getElementById('wd-pending-check').innerHTML = ''; }
-        } catch(e) {}
+        } catch(e) { console.error('Withdrawal check error:', e); }
     }
     async function cancelWithdraw() {
         if (!await customConfirm('Cancel your withdrawal? Amount will be refunded to wallet.', {title: 'Cancel Withdrawal', icon: '⚠️', okText: 'Yes, Cancel', danger: true})) return;
@@ -4259,7 +4321,7 @@
                 diceBoards = data.results || data || [];
                 renderDiceGames();
             }
-        } catch(e) {}
+        } catch(e) { showToast('Could not load dice games', 'error'); }
     }
 
     async function loadDiceMyBets() {
@@ -4270,7 +4332,7 @@
                 diceMyBets = data.results || data || [];
                 renderDiceMyBets();
             }
-        } catch(e) {}
+        } catch(e) { console.error('loadDiceMyBets error:', e); }
     }
 
     function getDiceRolls(match) {
@@ -4806,7 +4868,7 @@
                 userBets = data.results || data || [];
                 if (currentChannel === 'auto' && autoMatchData) renderAutoMatch();
             }
-        } catch(e) {}
+        } catch(e) { console.error('loadUserBets error:', e); }
     }
     function renderBetHistory() {
         const teamNames = {1: 'Meron', 2: 'Wala', 3: 'Draw'};
@@ -5065,7 +5127,7 @@
                 localStorage.setItem('roosterrun_theme', JSON.stringify(data.colors));
                 applyThemeColors(data.colors);
             }
-        } catch(e) {}
+        } catch(e) { console.error('Theme load error:', e); }
     }
     function applyThemeColors(colors) {
         var root = document.documentElement;
@@ -5409,7 +5471,7 @@
             document.getElementById('referral-code').textContent = data.referral_code || 'ERROR';
             document.getElementById('referral-count').textContent = data.referral_count || 0;
             document.getElementById('referral-earnings').textContent = '₹' + (data.referral_earnings || '0.00');
-        } catch(e) {}
+        } catch(e) { showToast('Could not load referral info', 'error'); }
     }
     function copyReferralCode() {
         var code = document.getElementById('referral-code').textContent;
@@ -5489,7 +5551,7 @@
             track.innerHTML = trackHtml;
             dotsC.innerHTML = dotsHtml;
             bannerIndex = 0;
-        } catch(e) {}
+        } catch(e) { console.error('Banner load error:', e); }
     }
     loadBanners();
     loadThemeFromApi();
