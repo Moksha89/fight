@@ -2377,7 +2377,7 @@
                 <div class="page-title">
                     <span class="material-icons">receipt_long</span>
                     Transaction History
-                </div>
+                <button onclick="downloadStatementCSV()" style="margin-left:auto;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-secondary);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px;" aria-label="Download CSV"><span class="material-icons" style="font-size:14px;">download</span>CSV</button></div>
                 <div class="stmt-tabs">
                     <div class="stmt-tab active" onclick="filterStatement('all')">All</div>
                     <div class="stmt-tab" onclick="filterStatement('deposit')">Deposits</div>
@@ -2445,6 +2445,10 @@
                     </div>
                     <div class="profile-name" id="profile-name">User</div>
                     <div class="profile-phone" id="profile-phone"></div>
+                    <div style="margin-top:4px;font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
+                        <span class="material-icons" style="font-size:12px;">schedule</span>
+                        Session: <span id="session-timer">0h 0m</span>
+                    </div>
                 </div>
                 <div id="profile-edit-section" style="margin-bottom:16px;display:none;">
                     <div style="background:var(--bg-card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);">
@@ -2824,6 +2828,27 @@
     const API = '/api';
     let token = localStorage.getItem('access_token');
     let isAutoLogin = !!token;
+
+    // F3: Check self-exclusion on page load
+    (function() {
+        var excUntil = localStorage.getItem('rr_self_exclude_until');
+        if (excUntil && new Date(excUntil) > new Date()) {
+            var remaining = Math.ceil((new Date(excUntil) - new Date()) / 86400000);
+            var authScreen = document.getElementById('auth-screen');
+            if (authScreen) {
+                authScreen.innerHTML = '<div style="text-align:center;padding:40px 20px;">'
+                    + '<span class="material-icons" style="font-size:64px;color:var(--danger);margin-bottom:16px;">block</span>'
+                    + '<h2 style="margin-bottom:8px;">Self-Exclusion Active</h2>'
+                    + '<p style="color:var(--text-secondary);margin-bottom:20px;">You have excluded yourself from RoosterRun.<br>Your exclusion period ends in <strong>' + remaining + ' day(s)</strong>.</p>'
+                    + '<p style="font-size:12px;color:var(--text-muted);">If you need help, contact support via Telegram.</p></div>';
+                authScreen.style.display = 'flex';
+            }
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            token = null;
+        }
+    })();
+
     let userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
     let loginStep = 'credentials';
     let regStep = 'form';
@@ -5298,6 +5323,97 @@
         document.getElementById('pw-strength-label').style.color = score > 0 ? colors[score-1] : 'var(--text-muted)';
     }
 
+
+    // F1: Support widget toggle
+    function toggleSupport() {
+        var menu = document.getElementById('support-menu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+    document.addEventListener('click', function(e) {
+        var sw = document.getElementById('support-widget');
+        if (sw && !sw.contains(e.target)) {
+            document.getElementById('support-menu').style.display = 'none';
+        }
+    });
+
+    // F4: Game rules / help
+    function showGameRules() {
+        var html = '<h3 style="margin-bottom:16px;color:var(--gold);">Game Rules</h3>';
+        html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;max-height:60vh;overflow-y:auto;">';
+        html += '<h4 style="color:var(--text-primary);margin:12px 0 6px;">Cockfight Betting</h4>';
+        html += '<p><strong>How it works:</strong> Two roosters fight in a live-streamed match. Bet on Meron (Red), Wala (Blue), or Draw.</p>';
+        html += '<p><strong>Odds:</strong> Dynamic odds update in real-time based on all bets placed. Higher risk = higher reward.</p>';
+        html += '<p><strong>Settlement:</strong> Bets are settled immediately after the match result is declared.</p>';
+        html += '<p><strong>Min bet:</strong> Rs.10 | <strong>Max bet:</strong> Rs.10,000 per match</p>';
+        html += '<h4 style="color:var(--text-primary);margin:16px 0 6px;">Dice Play (Gundata)</h4>';
+        html += '<p><strong>How it works:</strong> Pick a dice face (1-6) and place your bet. Six virtual dice are rolled.</p>';
+        html += '<p><strong>Payouts:</strong> If your face appears X times out of 6 rolls, you win X times your bet amount. If it never appears, you lose your bet.</p>';
+        html += '<p><strong>Example:</strong> Bet Rs.100 on face 3. Dice rolls show face 3 appears 2 times = you win Rs.200.</p>';
+        html += '<p><strong>Provably Fair:</strong> Every round uses a cryptographic commitment hash. After the round, the server seed is revealed so you can verify the result.</p>';
+        html += '<h4 style="color:var(--text-primary);margin:16px 0 6px;">Deposits and Withdrawals</h4>';
+        html += '<p><strong>Deposits:</strong> Pay via UPI QR code or bank transfer. Upload payment screenshot + UTR number. Admin approves within minutes.</p>';
+        html += '<p><strong>Withdrawals:</strong> Normal (free, ~6 hours) or Express (2.5% fee, ~30 minutes). Min Rs.500 for express.</p>';
+        html += '</div>';
+        showInfoModal(html);
+        document.getElementById('support-menu').style.display = 'none';
+    }
+
+    // F3: Self-exclusion
+    function showSelfExclusion() {
+        var html = '<h3 style="margin-bottom:16px;color:var(--danger);">Self-Exclusion</h3>';
+        html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">';
+        html += '<p style="margin-bottom:12px;">If you feel you are gambling too much, take a break. Choose a self-exclusion period:</p>';
+        html += '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">';
+        html += '<button onclick="selfExclude(1)" style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);cursor:pointer;text-align:left;font-size:13px;"><strong>24 Hours</strong> - Take a day off</button>';
+        html += '<button onclick="selfExclude(7)" style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);cursor:pointer;text-align:left;font-size:13px;"><strong>7 Days</strong> - One week break</button>';
+        html += '<button onclick="selfExclude(30)" style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);cursor:pointer;text-align:left;font-size:13px;"><strong>30 Days</strong> - Monthly cooldown</button>';
+        html += '</div>';
+        html += '<div style="background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.3);border-radius:var(--radius);padding:12px;font-size:12px;">';
+        html += '<strong style="color:var(--danger);">Warning:</strong> During self-exclusion, you will be logged out and unable to login or place bets until the period expires.';
+        html += '</div></div>';
+        showInfoModal(html);
+        document.getElementById('support-menu').style.display = 'none';
+    }
+
+    function selfExclude(days) {
+        if (!confirm('Are you sure you want to exclude yourself for ' + days + ' day(s)? You will be logged out immediately.')) return;
+        localStorage.setItem('rr_self_exclude_until', new Date(Date.now() + days * 86400000).toISOString());
+        showToast('Self-exclusion activated for ' + days + ' day(s). Logging out...', 'success');
+        setTimeout(function() { localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); location.reload(); }, 2000);
+    }
+
+    // F2: Download statement CSV
+    function downloadStatementCSV() {
+        if (!stmtData || stmtData.length === 0) { showToast('No transactions to export', 'error'); return; }
+        var csv = 'Date,Description,Type,Amount,Hash\n';
+        stmtData.forEach(function(t) {
+            var isCredit = t.type === 'Funds In' || (t.description && (t.description.includes('win') || t.description.includes('refund') || t.description.includes('deposit')));
+            csv += '"' + (t.date||'') + '","' + (t.description||'').replace(/"/g,'""') + '","' + (isCredit?'Credit':'Debit') + '","' + (isCredit?'+':'-') + t.amount + '","' + (t.hash||'') + '"\n';
+        });
+        var blob = new Blob([csv], {type:'text/csv'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'RoosterRun_Statement_' + new Date().toISOString().slice(0,10) + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Statement downloaded as CSV', 'success');
+    }
+
+    // F3: Session tracking - hourly reminders
+    var sessionStartTime = Date.now();
+    setInterval(function() {
+        var elapsed = Math.floor((Date.now() - sessionStartTime) / 60000);
+        if (elapsed === 60) showToast('You have been playing for 1 hour. Consider taking a break.', 'warning');
+        if (elapsed === 120) showToast('You have been playing for 2 hours. Please take a break!', 'error');
+        var sessionLabel = document.getElementById('session-timer');
+        if (sessionLabel) {
+            var h = Math.floor(elapsed / 60);
+            var m = elapsed % 60;
+            sessionLabel.textContent = h + 'h ' + m + 'm';
+        }
+    }, 60000);
+
     // OTP auto-focus
     document.addEventListener('input', e => {
         if (e.target.classList.contains('login-otp-input') || e.target.classList.contains('reg-otp-input')) {
@@ -6072,5 +6188,27 @@
         if (btn) haptic('light');
     });
     </script>
+
+    <!-- F1: Customer Support Widget -->
+    <div id="support-widget" style="position:fixed;bottom:70px;right:16px;z-index:998;">
+        <div id="support-menu" style="display:none;position:absolute;bottom:56px;right:0;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--gold);">Need Help?</div>
+            <a href="https://t.me/roosterrun_official" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--radius);color:var(--text-primary);text-decoration:none;background:var(--bg);margin-bottom:4px;">
+                <span class="material-icons" style="color:#0088cc;">send</span>
+                <div><div style="font-size:13px;font-weight:600;">Telegram</div><div style="font-size:10px;color:var(--text-muted);">Chat with support</div></div>
+            </a>
+            <div onclick="showGameRules()" style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--radius);color:var(--text-primary);cursor:pointer;background:var(--bg);margin-bottom:4px;">
+                <span class="material-icons" style="color:var(--gold);">help</span>
+                <div><div style="font-size:13px;font-weight:600;">Game Rules</div><div style="font-size:10px;color:var(--text-muted);">How to play</div></div>
+            </div>
+            <div onclick="showSelfExclusion()" style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--radius);color:var(--text-primary);cursor:pointer;background:var(--bg);">
+                <span class="material-icons" style="color:var(--danger);">block</span>
+                <div><div style="font-size:13px;font-weight:600;">Self-Exclusion</div><div style="font-size:10px;color:var(--text-muted);">Take a break</div></div>
+            </div>
+        </div>
+        <button onclick="toggleSupport()" style="width:48px;height:48px;border-radius:50%;background:var(--gold);border:none;color:#000;cursor:pointer;box-shadow:0 4px 16px rgba(212,168,67,0.4);display:flex;align-items:center;justify-content:center;" aria-label="Customer support">
+            <span class="material-icons" style="font-size:24px;">support_agent</span>
+        </button>
+    </div>
 </body>
 </html>
