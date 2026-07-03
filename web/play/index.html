@@ -3240,10 +3240,10 @@
         overlay.className = 'winner-overlay';
         overlay.onclick = () => { overlay.remove(); };
         overlay.innerHTML = `
-            ${loseImg ? `<img src="${loseImg}" class="wo-loser-rooster left" style="width:80px;height:80px;" />` : ''}
-            ${loseImg ? `<img src="${loseImg}" class="wo-loser-rooster right" style="width:80px;height:80px;transform:scaleX(-1);" />` : ''}
+            ${loseImg ? `<img src="${loseImg}" class="wo-loser-rooster left" style="width:80px;height:80px;" alt="Losing rooster" />` : ''}
+            ${loseImg ? `<img src="${loseImg}" class="wo-loser-rooster right" style="width:80px;height:80px;transform:scaleX(-1);" alt="Losing rooster" />` : ''}
             <div class="wo-content">
-                ${winImg ? `<img src="${winImg}" class="wo-rooster ${winCls}" style="width:120px;height:120px;" />` : '<div class="wo-rooster" style="font-size:100px;">🐓</div>'}
+                ${winImg ? `<img src="${winImg}" class="wo-rooster ${winCls}" style="width:120px;height:120px;" alt="Winning rooster" />` : '<div class="wo-rooster" style="font-size:100px;">🐓</div>'}
                 <div class="wo-ko-text ${winCls}">K.O!</div>
                 <div class="wo-winner-name">${winName} WINS!</div>
                 <div class="wo-fight-num">Fight #${fightNum || '?'}</div>
@@ -3691,7 +3691,7 @@
                     </div>`;
                 }
             }
-        } catch(e) {}
+        } catch(e) { console.error("Deposit status check failed:", e); }
         // Check withdrawal request
         try {
             const wdRes = await fetch(`${API}/wallet/withdrawal/current/`, {headers:{'Authorization':`Bearer ${token}`}});
@@ -3713,7 +3713,7 @@
                     </div>`;
                 }
             }
-        } catch(e) {}
+        } catch(e) { console.error("Withdrawal status check failed:", e); }
         if (!html) html = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:10px;">No pending requests</div>';
         container.innerHTML = html;
     }
@@ -5324,6 +5324,32 @@
     }
 
 
+
+    // L2: Show placeholder when no live cockfight matches
+    function checkLiveMatchPlaceholder() {
+        var videoContainer = document.getElementById('cockfight-video-container');
+        if (videoContainer && !videoContainer.querySelector('iframe') && !document.getElementById('no-live-matches-msg')) {
+            var msg = document.createElement('div');
+            msg.id = 'no-live-matches-msg';
+            msg.style.cssText = 'text-align:center;padding:40px 20px;color:var(--text-muted);';
+            msg.innerHTML = '<span class="material-icons" style="font-size:48px;color:var(--gold);opacity:0.5;display:block;margin-bottom:12px;">live_tv</span>'
+                + '<div style="font-size:14px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">No Live Matches Right Now</div>'
+                + '<div style="font-size:12px;">Check back soon or view match history below</div>';
+            videoContainer.appendChild(msg);
+        }
+    }
+    setTimeout(checkLiveMatchPlaceholder, 3000);
+
+    // C2: Show message when no referrals
+    function checkReferralEmpty() {
+        var list = document.getElementById('referred-users-list');
+        if (list && list.children.length === 0) {
+            list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">'
+                + '<span class="material-icons" style="font-size:36px;color:var(--gold);opacity:0.5;display:block;margin-bottom:8px;">group_add</span>'
+                + 'No referrals yet. Share your code to earn rewards!</div>';
+        }
+    }
+
     // F1: Support widget toggle
     function toggleSupport() {
         var menu = document.getElementById('support-menu');
@@ -5993,7 +6019,7 @@
                     try {
                         const u = new URL(bannerUrl);
                         bannerUrl = location.origin + u.pathname;
-                    } catch(e) {}
+                    } catch(e) { /* relative URL - use as-is */ }
                 }
                 const bgImg = bannerUrl ? `url(${bannerUrl})` : 'linear-gradient(135deg,#1a1a1a,#2a1f0e)';
                 const catLabels = {S:'Cockfight',P:'Promotion',D:'Dice Play',W:'Wallet',V:'Videos'};
