@@ -2178,7 +2178,7 @@
         .hp-wrap > * { position: relative; z-index: 1; }
 
         /* ---- top bar ---- */
-        .hp-top { display: flex; align-items: center; gap: 8px; padding: 12px 14px 10px; }
+        .hp-top { display: flex; align-items: center; gap: 8px; padding: 6px 14px 10px; }
         .hp-bal { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 16px; color: #fff; cursor: pointer; }
         .hp-bal .material-icons { color: #F5C542; font-size: 22px; }
         .hp-coins { display: flex; align-items: center; gap: 5px; background: linear-gradient(90deg,#5a2b12,#7a3d18); border: 1px solid #C98A3A; border-radius: 14px; padding: 3px 12px 3px 7px; font-weight: 700; font-size: 13px; color: #FFD9A0; }
@@ -2200,6 +2200,10 @@
         .hp-cat .hp-cat-ic { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
         .hp-cat .hp-cat-ic .material-icons { font-size: 30px; }
         .hp-cat .hp-cat-ic img { width: 30px; height: 30px; object-fit: contain; }
+        .hp-cat .hp-cat-ic .ic { display: block; width: 32px; height: 32px; background-color: currentColor; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; }
+        .hp-brand { display: flex; align-items: center; gap: 9px; padding: 12px 14px 2px; }
+        .hp-brand img { width: 30px; height: 30px; border-radius: 7px; object-fit: contain; }
+        .hp-brand h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--gold); letter-spacing: -0.3px; }
         .hp-cat.active { background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; box-shadow: 0 6px 16px rgba(204,54,48,0.5); }
         .hp-cat.active .hp-cat-ic .material-icons { color: #fff; }
 
@@ -2492,6 +2496,11 @@
             <!-- HOME -->
             <div id="sec-home" class="section active hp-root">
               <div class="hp-wrap">
+                <!-- Brand -->
+                <div class="hp-brand">
+                    <img src="/static/logo.png?v=2" alt="RoosterRun" onerror="this.style.display='none'">
+                    <h2>RoosterRun</h2>
+                </div>
                 <!-- Top bar: balance, coins, Login/Register (logged out) or profile (logged in) -->
                 <div class="hp-top">
                     <div class="hp-bal" onclick="if(token)navigate('sec-wallet')"><span class="material-icons">savings</span> <span id="hp-balance">G0.00</span></div>
@@ -2543,13 +2552,13 @@
                 <div class="hp-body">
                     <aside class="hp-rail">
                         <div class="hp-cat active" data-cat="games" onclick="hpSelectCat(this,'sec-home')">
-                            <span class="hp-cat-ic"><span class="material-icons">live_tv</span></span>Games
+                            <span class="hp-cat-ic"><i class="ic" style="-webkit-mask-image:url(/static/ic_gamepad.svg);mask-image:url(/static/ic_gamepad.svg)"></i></span>Games
                         </div>
                         <div class="hp-cat" data-cat="cockfight" data-game="cockfight" onclick="hpSelectCat(this,'sec-cockfight')">
-                            <span class="hp-cat-ic"><img src="/static/red_roaster.svg" alt="Cockfight"></span>Cockfight
+                            <span class="hp-cat-ic"><i class="ic" style="-webkit-mask-image:url(/static/ic_rooster.svg);mask-image:url(/static/ic_rooster.svg)"></i></span>Cockfight
                         </div>
                         <div class="hp-cat" data-cat="dice" data-game="dice" onclick="hpSelectCat(this,'sec-dice')">
-                            <span class="hp-cat-ic"><span class="material-icons">casino</span></span>Dice
+                            <span class="hp-cat-ic"><i class="ic" style="-webkit-mask-image:url(/static/ic_dice.svg);mask-image:url(/static/ic_dice.svg)"></i></span>Dice
                         </div>
                     </aside>
                     <main class="hp-main">
