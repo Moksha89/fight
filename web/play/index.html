@@ -576,6 +576,81 @@
         }
         .gbanner .gb-live .live-dot { background: #fff; }
 
+        /* ===== VIDEO-STYLE COCKFIGHT SCREEN (reference) ===== */
+        .cf-screen { background: #f3f4f6; color: #111; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+        .cf-topbar { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #fff; border-bottom: 1px solid #eee; }
+        .cf-topbar .cf-back { background: none; border: none; color: #111; cursor: pointer; display: flex; align-items: center; padding: 2px; }
+        .cf-topbar .cf-back .material-icons { font-size: 26px; }
+        .cf-topbar .cf-title { flex: 1; text-align: center; font-size: 16px; font-weight: 600; letter-spacing: 1px; color: #444; text-transform: uppercase; }
+        .cf-topbar .cf-wallet { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#f59e0b,#d97706); color: #111; font-weight: 800; font-size: 14px; padding: 8px 14px; border-radius: 10px; }
+        .cf-topbar .cf-wallet .material-icons { font-size: 18px; }
+
+        .cf-promo { background: #fde8e8; overflow: hidden; white-space: nowrap; }
+        .cf-promo-track { display: inline-block; padding: 8px 0; padding-left: 100%; color: #b91c1c; font-weight: 600; font-size: 13px; animation: cfmarquee 16s linear infinite; }
+        @keyframes cfmarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        .cf-video { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+        .cf-video iframe, .cf-video video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+        .cf-video .cf-vloading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 13px; z-index: 1; }
+
+        .cf-controls { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #e5e7eb; }
+        .cf-chip-247 { background: #d1d5db; color: #374151; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 6px; }
+        .cf-lang { position: relative; background: #f59e0b; color: #fff; font-weight: 800; font-size: 13px; padding: 6px 16px; border-radius: 6px; cursor: pointer; }
+        .cf-lang::before { content: ''; position: absolute; top: -6px; left: 18px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 6px solid #f59e0b; }
+        .cf-sound { margin-left: auto; display: flex; gap: 16px; }
+        .cf-sound .material-icons { font-size: 24px; color: #4b5563; cursor: pointer; }
+        .cf-sound .material-icons.active { color: #111; }
+        .cf-sound .material-icons.muted { color: #dc2626; }
+
+        .cf-arena { position: relative; padding: 16px 12px 20px; overflow: hidden; }
+        .cf-arena::before { content: ''; position: absolute; inset: 0; z-index: 0;
+            background:
+                radial-gradient(70% 120% at 0% 50%, rgba(249,115,22,0.85), rgba(120,20,10,0.2) 55%, transparent 70%),
+                radial-gradient(70% 120% at 100% 50%, rgba(37,99,235,0.85), rgba(10,25,80,0.2) 55%, transparent 70%),
+                linear-gradient(180deg, #201008 0%, #0d0d16 100%); }
+        .cf-match-title { position: relative; z-index: 2; text-align: center; color: #fff; font-size: 20px; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.6); margin-bottom: 14px; }
+        .cf-odds { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: center; }
+        .cf-odd { border-radius: 16px; min-height: 128px; padding: 16px 8px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; cursor: pointer; color: #fff; text-align: center; box-shadow: 0 8px 18px rgba(0,0,0,0.5); border: 2px solid transparent; transition: transform .15s, border-color .15s; }
+        .cf-odd .cf-mult { font-size: 22px; font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+        .cf-odd .cf-team { font-size: 17px; font-weight: 700; }
+        .cf-meron { background: linear-gradient(180deg, #b01414 0%, #4a0d0d 100%); }
+        .cf-draw { background: linear-gradient(180deg, #2fbf4f 0%, #14622f 100%); min-height: 150px; }
+        .cf-wala { background: linear-gradient(180deg, #1e40af 0%, #0a1f52 100%); }
+        .cf-odd.selected { border-color: #fde047; transform: translateY(-3px); box-shadow: 0 0 0 3px rgba(253,224,71,0.55), 0 8px 18px rgba(0,0,0,0.5); }
+        .cf-odd.disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .cf-chips { position: relative; z-index: 2; display: flex; gap: 6px; justify-content: space-between; overflow-x: auto; margin-top: 16px; padding: 2px 0 6px; -webkit-overflow-scrolling: touch; }
+        .cf-chips::-webkit-scrollbar { height: 0; }
+        .cf-coin { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #e5e7eb; cursor: pointer; user-select: none;
+            background: radial-gradient(circle at 50% 32%, #6b7280, #1f2937 70%);
+            border: 3px dashed rgba(255,255,255,0.4); box-shadow: 0 3px 8px rgba(0,0,0,0.5); transition: transform .12s; }
+        .cf-coin:active { transform: scale(0.94); }
+        .cf-coin.selected { color: #3a2500; background: radial-gradient(circle at 50% 32%, #fbbf24, #b45309 72%); border-color: #fde68a; box-shadow: 0 0 0 3px rgba(245,158,11,0.55), 0 3px 8px rgba(0,0,0,0.5); }
+
+        .cf-actions { display: flex; align-items: center; gap: 10px; padding: 14px 12px; background: #f3f4f6; }
+        .cf-act { width: 54px; height: 50px; border-radius: 12px; background: #e5e7eb; border: none; display: flex; align-items: center; justify-content: center; color: #374151; cursor: pointer; }
+        .cf-act .material-icons { font-size: 24px; }
+        .cf-bet { flex: 1; height: 50px; border-radius: 12px; background: #d1d5db; color: #6b7280; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; border: none; cursor: pointer; transition: all .2s; }
+        .cf-bet.ready { background: linear-gradient(135deg, #f59e0b, #d97706); color: #1a1a1a; box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
+
+        .cf-roadmap { background: #fff; border-radius: 14px; margin: 12px; padding: 14px 12px; display: flex; gap: 14px; align-items: flex-start; }
+        .cf-road-legend { display: flex; flex-direction: column; gap: 20px; font-size: 13px; font-weight: 700; color: #333; padding-top: 2px; }
+        .cf-legend-item { display: flex; align-items: center; gap: 7px; }
+        .cf-ldot { width: 11px; height: 11px; border-radius: 50%; }
+        .cf-ldot.meron { background: #dc2626; } .cf-ldot.draw { background: #16a34a; } .cf-ldot.wala { background: #2563eb; }
+        .cf-grid { flex: 1; display: grid; grid-auto-flow: column; grid-template-rows: repeat(3, 22px); gap: 5px; overflow-x: auto; padding-bottom: 4px; }
+        .cf-grid::-webkit-scrollbar { height: 4px; } .cf-grid::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+        .cf-cell { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #e5e7eb; }
+        .cf-cell.meron { background: #dc2626; border-color: #b91c1c; }
+        .cf-cell.wala { background: #2563eb; border-color: #1d4ed8; }
+        .cf-cell.draw { background: #16a34a; border-color: #15803d; }
+
+        @media (max-width: 480px) {
+            .cf-odd .cf-mult { font-size: 19px; } .cf-odd .cf-team { font-size: 15px; }
+            .cf-coin { width: 38px; height: 38px; font-size: 10px; }
+            .cf-topbar .cf-title { font-size: 14px; }
+        }
+
         /* ===== LIVE MATCH STRIP ===== */
         .live-strip {
             background: linear-gradient(135deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
@@ -2353,12 +2428,12 @@
 
             <!-- COCKFIGHT -->
             <div id="sec-cockfight" class="section" data-game="cockfight">
-                <div class="page-title">
+                <div class="page-title" style="display:none;">
                     <span class="material-icons">sports_mma</span>
                     Cockfight Matches
                 </div>
                 <!-- Channel Tabs -->
-                <div id="channel-tabs" style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;">
+                <div id="channel-tabs" style="display:none;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;">
                     <div class="channel-tab active" data-channel="auto" onclick="switchChannel('auto')" style="padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;background:var(--gold);color:#000;border:2px solid var(--gold);transition:all .2s;letter-spacing:0.3px;">🌏 24/7</div>
                 </div>
                 <!-- Auto Match Card (China Market) -->
@@ -3399,116 +3474,147 @@
         const isAccepting = d.isAcceptingBet;
         const matchNum = d.matchNumber || '?';
         const liveUrl = d.liveUrl || '';
-        let streamHtml = '';
+        let videoInner = '';
         if (liveUrl) {
-            streamHtml = `<div class="stream-container" style="position:relative;">
-                <div id="stream-loading" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1;">
-                    <div style="text-align:center;color:var(--text-secondary);">
-                        <span class="material-icons" style="font-size:40px;color:var(--gold);animation:pulse 1.5s ease-in-out infinite;">live_tv</span>
-                        <p style="margin-top:8px;font-size:13px;">Loading live stream...</p>
-                    </div>
-                </div>
-                <iframe src="${liveUrl}" allowfullscreen onload="var el=document.getElementById('stream-loading');if(el)el.style.display='none';"></iframe>
-            </div>`;
+            videoInner = `<div class="cf-vloading" id="stream-loading"><span class="material-icons" style="font-size:34px;color:#f59e0b;animation:pulse 1.5s ease-in-out infinite;">live_tv</span></div>
+                <iframe src="${liveUrl}" allowfullscreen onload="var el=document.getElementById('stream-loading');if(el)el.style.display='none';"></iframe>`;
         } else {
-            streamHtml = `<div class="stream-container" style="display:flex;align-items:center;justify-content:center;background:var(--bg);min-height:200px;">
-                <div style="text-align:center;color:var(--text-secondary);">
-                    <span class="material-icons" style="font-size:48px;opacity:0.4;">videocam_off</span>
-                    <p style="margin-top:8px;font-size:13px;">Waiting for live stream...</p>
-                </div>
-            </div>`;
+            videoInner = `<div class="cf-vloading"><div style="text-align:center;"><span class="material-icons" style="font-size:40px;opacity:0.5;">videocam_off</span><p style="margin-top:6px;">Waiting for live stream...</p></div></div>`;
         }
-        const oddsMin = currentOdds.meron_min || '0.50';
-        const oddsMax = currentOdds.wala_max || '0.95';
-        const meronMax = currentOdds.meron_max || '0.95';
-        const walaMin = currentOdds.wala_min || '0.50';
-        const drawMin = currentOdds.draw_min || '3.00';
-        const drawMax = currentOdds.draw_max || '10.00';
-        const oddsSystem = currentOdds.system || 'manual';
+        const meronMult = (1 + parseFloat(currentOdds.meron_max || '0.85')).toFixed(2);
+        const walaMult  = (1 + parseFloat(currentOdds.wala_max  || '0.85')).toFixed(2);
+        const drawMult  = (1 + parseFloat(currentOdds.draw_max  || '5.00')).toFixed(2);
+        const bal = (typeof userInfo === 'object' && userInfo) ? (userInfo.wallet_balance || 0) : 0;
+        const coins = [50, 100, 200, 300, 500, 1000, 2500, 5000];
+        const coinsHtml = coins.map(c => `<div class="cf-coin" data-amt="${c}" onclick="cfSelectCoin(this, ${c})">${c >= 1000 ? (c/1000)+'K' : c}</div>`).join('');
+        const clk = isAccepting ? '' : ' disabled';
 
         container.innerHTML = `
-        ${getLastMatchResultHtml()}
-        <div class="cockfight-layout">
-            <div class="cockfight-left">
-                <div class="match-card">
-                    <div class="match-header">
-                        <div class="match-title">
-                            <span class="live-dot"></span>
-                            Fight #${matchNum}
-                        </div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            ${getMatchTimerHtml()}
-                            ${isAccepting ? '<span class="match-live">BETTING OPEN</span>' : '<span class="match-closed">IN PROGRESS</span>'}
-                        </div>
-                    </div>
-                    ${streamHtml}
-                    <!-- Odds Display -->
-                    <div class="odds-display">
-                        <div class="odds-col" id="odds-meron" onclick="${isAccepting ? "selectOddsTeam(this, 1, 'Meron')" : ''}">
-                            <div class="odds-value meron">${meronMax}x</div>
-                            <div class="odds-team meron">🔴 Meron</div>
-                        </div>
-                        <div class="odds-col" id="odds-draw" onclick="${isAccepting ? "selectOddsTeam(this, 3, 'Draw')" : ''}">
-                            <div class="odds-value draw">${drawMax}x</div>
-                            <div class="odds-team draw">⚡ BDD</div>
-                        </div>
-                        <div class="odds-col" id="odds-wala" onclick="${isAccepting ? "selectOddsTeam(this, 2, 'Wala')" : ''}">
-                            <div class="odds-value wala">${oddsMax}x</div>
-                            <div class="odds-team wala">🔵 Wala</div>
-                        </div>
-                    </div>
-                    <!-- Mascots -->
-                    <div class="mascot-row">
-                        <div class="mascot-side">
-                            <img src="/static/red_roaster.png" alt="Meron">
-                            <div class="mascot-label meron">Meron</div>
-                        </div>
-                        <div class="vs-badge">VS</div>
-                        <div class="mascot-side" style="flex-direction:row-reverse;">
-                            <img src="/static/blue_roaster.png" alt="Wala">
-                            <div class="mascot-label wala">Wala</div>
-                        </div>
-                    </div>
-                    ${isAccepting ? `
-                    <!-- Chips -->
-                    <div class="chips-row">
-                        <div class="chip" onclick="selectChip(this, 50)">₹50</div>
-                        <div class="chip" onclick="selectChip(this, 100)">₹100</div>
-                        <div class="chip" onclick="selectChip(this, 500)">₹500</div>
-                        <div class="chip" onclick="selectChip(this, 1000)">₹1K</div>
-                        <div class="chip" onclick="selectChip(this, 5000)">₹5K</div>
-                    </div>
-                    <input type="hidden" id="auto-ratio-slider" value="0.80">
-                    <span id="auto-ratio-display" style="display:none;">0.80</span>
-                    <!-- Bet Actions -->
-                    <div class="bet-actions">
-                        <input type="number" class="bet-amount-input" placeholder="Enter amount or select chip" id="bet-amt-auto" min="10">
-                        <button class="bet-submit" onclick="placeAutoBet()">✓ BET</button>
-                        <button class="bet-cancel" onclick="clearAutoBet()">✕</button>
-                    </div>` : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;background:#161616;">⏳ Waiting for betting window...</div>'}
-                    
-                    ${renderBetHistory()}
+        <div class="cf-screen">
+            <div class="cf-topbar">
+                <button class="cf-back" onclick="navigate('sec-home')" aria-label="Back"><span class="material-icons">arrow_back</span></button>
+                <div class="cf-title">Cock Fight Live</div>
+                <span class="cf-wallet"><span class="material-icons">account_balance_wallet</span> ₹${formatCurrencyFull(bal)}</span>
+            </div>
+            <div class="cf-promo"><div class="cf-promo-track">FREE BET FRIDAY : Deposit 500 today and get a 500 free.</div></div>
+            <div class="cf-video">${videoInner}</div>
+            <div class="cf-controls">
+                <span class="cf-chip-247">24/7</span>
+                <span class="cf-lang" id="cf-lang" onclick="cfCycleLang(this)">Telugu</span>
+                <div class="cf-sound">
+                    <span class="material-icons active" id="cf-snd-on" onclick="cfSetMute(false)" aria-label="Sound on">volume_up</span>
+                    <span class="material-icons muted" id="cf-snd-off" onclick="cfSetMute(true)" aria-label="Mute">music_off</span>
                 </div>
             </div>
-            <div class="cockfight-right">
-                <div class="match-history-card">
-                    <div class="mhc-header">
-                        <div class="mhc-title"><span class="material-icons">videocam</span> Match Results & Proof</div>
+            <div class="cf-arena">
+                <div class="cf-match-title">Match ${matchNum}</div>
+                <div class="cf-odds">
+                    <div class="cf-odd cf-meron${clk}" id="cf-odd-1" onclick="${isAccepting ? "selectOddsCard(1,'Meron')" : ''}">
+                        <div class="cf-mult">${meronMult}X</div><div class="cf-team">Meron</div>
                     </div>
-                    <div class="mh-table-header">
-                        <div>Fight</div>
-                        <div>Winner</div>
-                        <div>Date</div>
-                        <div style="text-align:right">Proof</div>
+                    <div class="cf-odd cf-draw${clk}" id="cf-odd-3" onclick="${isAccepting ? "selectOddsCard(3,'Draw')" : ''}">
+                        <div class="cf-mult">${drawMult}X</div><div class="cf-team">Draw</div>
                     </div>
-                    <div class="match-history-scroll">
-                        <div id="match-history-list"><div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">Loading...</div></div>
+                    <div class="cf-odd cf-wala${clk}" id="cf-odd-2" onclick="${isAccepting ? "selectOddsCard(2,'Wala')" : ''}">
+                        <div class="cf-mult">${walaMult}X</div><div class="cf-team">Wala</div>
                     </div>
                 </div>
+                <div class="cf-chips">${coinsHtml}</div>
+                <input type="hidden" id="auto-ratio-slider" value="0.80">
+                <input type="hidden" id="bet-amt-auto" value="">
             </div>
+            <div class="cf-actions">
+                <button class="cf-act" onclick="openCfSettings()" aria-label="Settings"><span class="material-icons">settings</span></button>
+                <button class="cf-act" onclick="navigate('sec-statement')" aria-label="Statement"><span class="material-icons">description</span></button>
+                <button class="cf-bet${isAccepting ? ' ready' : ''}" id="cf-bet-btn" onclick="cfPlaceBet()">${isAccepting ? 'PLACE BET' : 'Please Wait...'}</button>
+                <button class="cf-act" onclick="navigate('sec-wallet')" aria-label="Wallet"><span class="material-icons">account_balance_wallet</span></button>
+            </div>
+            <div class="cf-roadmap">
+                <div class="cf-road-legend">
+                    <div class="cf-legend-item"><span class="cf-ldot meron"></span>Meron</div>
+                    <div class="cf-legend-item"><span class="cf-ldot draw"></span>Draw</div>
+                    <div class="cf-legend-item"><span class="cf-ldot wala"></span>Wala</div>
+                </div>
+                <div class="cf-grid" id="cf-roadmap-grid"></div>
+            </div>
+            ${renderBetHistory()}
         </div>`;
-        // Load match history after render
+        // Restore selection state after re-render
+        if (selectedBets['auto']) {
+            const sel = document.getElementById('cf-odd-' + selectedBets['auto'].team);
+            if (sel) sel.classList.add('selected');
+        }
+        if (selectedChipAmount) {
+            const coinEl = document.querySelector('.cf-coin[data-amt="' + selectedChipAmount + '"]');
+            if (coinEl) coinEl.classList.add('selected');
+            const amtEl = document.getElementById('bet-amt-auto');
+            if (amtEl) amtEl.value = selectedChipAmount;
+        }
+        renderBeadPlate();
         setTimeout(loadMatchHistory, 100);
+    }
+
+    // ===== VIDEO-STYLE COCKFIGHT HELPERS =====
+    function selectOddsCard(team, name) {
+        document.querySelectorAll('.cf-odd').forEach(c => c.classList.remove('selected'));
+        const el = document.getElementById('cf-odd-' + team);
+        if (el) el.classList.add('selected');
+        selectedAutoTeam = team;
+        selectedAutoTeamName = name;
+        selectedBets['auto'] = {team, teamName: name};
+        const o = currentOdds;
+        let ratio;
+        if (team === 3) ratio = generateSeededRatio(parseFloat(o.draw_min || '3.00'), parseFloat(o.draw_max || '10.00'));
+        else if (team === 1) ratio = generateSeededRatio(parseFloat(o.meron_min || '0.50'), parseFloat(o.meron_max || '0.95'));
+        else ratio = generateSeededRatio(parseFloat(o.wala_min || '0.50'), parseFloat(o.wala_max || '0.95'));
+        const slider = document.getElementById('auto-ratio-slider');
+        if (slider) slider.value = ratio.toFixed(2);
+    }
+
+    function cfSelectCoin(el, amount) {
+        selectedChipAmount = amount;
+        document.querySelectorAll('.cf-coin').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        const inp = document.getElementById('bet-amt-auto');
+        if (inp) inp.value = amount;
+    }
+
+    function cfPlaceBet() {
+        if (!autoMatchData || !autoMatchData.isAcceptingBet) { showToast('Betting is closed. Please wait for the next match.', 'error'); return; }
+        if (!selectedBets['auto']) { showToast('Tap Meron, Draw or Wala first', 'error'); return; }
+        if (!selectedChipAmount) { showToast('Select a coin amount first', 'error'); return; }
+        placeAutoBet();
+    }
+
+    var cfMuted = true;
+    function cfSetMute(mute) {
+        cfMuted = mute;
+        const on = document.getElementById('cf-snd-on');
+        const off = document.getElementById('cf-snd-off');
+        if (on) on.classList.toggle('active', !mute);
+        if (off) off.classList.toggle('muted', mute);
+        showToast(mute ? 'Stream muted' : 'Stream unmuted', 'info');
+    }
+
+    var cfLangs = ['Telugu', 'Hindi', 'English', 'Tamil'];
+    function cfCycleLang(el) {
+        const i = cfLangs.indexOf(el.textContent.trim());
+        el.textContent = cfLangs[(i + 1) % cfLangs.length];
+        showToast('Commentary: ' + el.textContent, 'info');
+    }
+
+    function openCfSettings() {
+        customConfirm('Stream language and sound can be changed from the controls above the match. More settings coming soon.', {title: 'Settings', icon: '⚙️', okText: 'OK', cancelText: ''});
+    }
+
+    // Bead-plate roadmap from matchHistory (array of 'meron'|'wala'|'draw')
+    function renderBeadPlate() {
+        const grid = document.getElementById('cf-roadmap-grid');
+        if (!grid) return;
+        const beads = matchHistory.slice(-90);
+        if (!beads.length) { grid.innerHTML = '<div style="color:#999;font-size:12px;padding:8px;">No results yet</div>'; return; }
+        grid.innerHTML = beads.map(b => `<div class="cf-cell ${b}"></div>`).join('');
+        grid.scrollLeft = grid.scrollWidth;
     }
 
     function generateSeededRatio(min, max) {
@@ -4038,6 +4144,13 @@
 
         // Release low-latency WebRTC streams when leaving the cockfight section
         if (sectionId !== 'sec-cockfight' && typeof stopWhepPlayers === 'function') stopWhepPlayers();
+
+        // Immersive cockfight screen: hide the global header + support FAB (it has its own header)
+        const _isCf = (sectionId === 'sec-cockfight');
+        const _hdr = document.querySelector('.app-header');
+        const _fab = document.getElementById('support-widget');
+        if (_hdr) _hdr.style.display = _isCf ? 'none' : '';
+        if (_fab) _fab.style.display = _isCf ? 'none' : '';
 
         // Update bottom nav — clear all, then set active if section has a tab
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -5174,6 +5287,7 @@
                 });
             }
             renderMatchHistorySection();
+            renderBeadPlate();
         }).catch(e => console.log('Match history error:', e));
     }
 
@@ -5222,6 +5336,7 @@
                 lastAutoWinner = winTeam;
                 lastAutoMatchId = prevAutoMatchData.matchNumber;
                 addMatchResult(String(winTeam));
+                renderBeadPlate();
                 // Show celebration animation
                 showWinnerCelebration(winTeam, prevAutoMatchData.matchNumber);
                 // Check if user had a bet on that match
