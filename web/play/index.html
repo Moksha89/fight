@@ -632,13 +632,13 @@
             background: radial-gradient(circle at 50% 32%, #6b7280, #1f2937 70%);
             border: 3px dashed rgba(255,255,255,0.4); box-shadow: 0 3px 8px rgba(0,0,0,0.5); transition: transform .12s; }
         .cf-coin:active { transform: scale(0.94); }
-        .cf-coin.selected { color: #3a2500; background: radial-gradient(circle at 50% 32%, #6ABDA7, #b45309 72%); border-color: #B4DDD1; box-shadow: 0 0 0 3px rgba(245,158,11,0.55), 0 3px 8px rgba(0,0,0,0.5); }
+        .cf-coin.selected { color: #17403a; background: radial-gradient(circle at 50% 32%, #B4DDD1, #4FA88F 72%); border-color: #6ABDA7; box-shadow: 0 0 0 3px rgba(106,189,167,0.55), 0 3px 8px rgba(0,0,0,0.35); }
 
         .cf-actions { display: flex; align-items: center; gap: 10px; padding: 14px 12px; background: #f3f4f6; }
         .cf-act { width: 54px; height: 50px; border-radius: 12px; background: #e5e7eb; border: none; display: flex; align-items: center; justify-content: center; color: #374151; cursor: pointer; }
         .cf-act .material-icons { font-size: 24px; }
         .cf-bet { flex: 1; height: 50px; border-radius: 12px; background: #d1d5db; color: #6b7280; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; border: none; cursor: pointer; transition: all .2s; }
-        .cf-bet.ready { background: linear-gradient(135deg, #6ABDA7, #4FA88F); color: #FFFFFF; box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
+        .cf-bet.ready { background: linear-gradient(135deg, #6ABDA7, #4FA88F); color: #FFFFFF; box-shadow: 0 4px 12px rgba(106,189,167,0.4); }
 
         .cf-roadmap { background: #fff; border-radius: 14px; margin: 12px; padding: 14px 12px; display: flex; gap: 14px; align-items: flex-start; }
         .cf-road-legend { display: flex; flex-direction: column; gap: 20px; font-size: 13px; font-weight: 700; color: #333; padding-top: 2px; }
@@ -663,7 +663,7 @@
         @keyframes cffade { from { opacity: 0; } to { opacity: 1; } }
         .cf-modal { width: 100%; max-width: 520px; max-height: 82vh; background: #fff; color: #111; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: cfslide .22s ease; }
         @keyframes cfslide { from { transform: translateY(30px); } to { transform: translateY(0); } }
-        .cf-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid #eee; font-size: 16px; font-weight: 800; color: #FFFFFF; }
+        .cf-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid #eee; font-size: 16px; font-weight: 800; color: #1F2528; }
         .cf-modal-close { background: #f3f4f6; border: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #444; }
         .cf-modal-body { overflow-y: auto; padding: 12px 16px 22px; }
         .cf-empty { text-align: center; padding: 36px 16px; color: #888; }
@@ -5050,7 +5050,7 @@
         var pf = window._dicePfData || {};
         var body = '<div style="padding:6px 2px;">'
             + '<div class="cf-wallet-bal" style="margin-bottom:14px;">Provably Fair round <b>#' + (pf.round || '—') + '</b></div>'
-            + '<button class="cf-wallet-btn" style="background:linear-gradient(135deg,#6366f1,#4338ca);" onclick="cfCloseModal(); openProvablyFairModal(window._dicePfData);"><span class="material-icons">verified</span> Verify Fairness</button>'
+            + '<button class="cf-wallet-btn" style="background:linear-gradient(135deg,#6ABDA7,#4FA88F);" onclick="cfCloseModal(); openProvablyFairModal(window._dicePfData);"><span class="material-icons">verified</span> Verify Fairness</button>'
             + '</div>';
         cfShowModal('Settings', body);
     }
@@ -5072,7 +5072,7 @@
                 if (payout === 0 && b.matchWinStatus === 1 && b.rolled_count > 0) payout = (b.amount || 0) + ((b.rolled_count || 0) * (b.amount || 0));
                 var payStr = (result === 'Won') ? ('+₹' + payout.toLocaleString('en-IN')) : (result === 'Lost' ? ('-₹' + (b.amount||0)) : '—');
                 rows += '<div class="cf-bh-row">'
-                    + '<div class="cf-bh-team" style="background:#7c3aed;min-width:44px;">' + b.diceNumber + '</div>'
+                    + '<div class="cf-bh-team" style="background:#4FA88F;min-width:44px;">' + b.diceNumber + '</div>'
                     + '<div class="cf-bh-mid"><div>Round #' + round + '</div><div class="cf-bh-sub">₹' + (b.amount||0) + '</div></div>'
                     + '<div class="cf-bh-res ' + rc + '">' + result + '<div class="cf-bh-payout">' + payStr + '</div></div>'
                     + '</div>';
