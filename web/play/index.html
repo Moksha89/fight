@@ -2167,6 +2167,71 @@
         .bet-submit { flex: 0 0 auto; padding: 12px 22px; border: none; border-radius: 12px; background: var(--gold); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
         .match-live { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #22c55e; background: rgba(34,197,94,0.15); padding: 4px 10px; border-radius: 12px; }
         .match-closed { font-size: 11px; color: var(--text-muted); font-weight: 600; padding: 4px 10px; border-radius: 12px; background: #f1f1f1; }
+
+        /* ============================================================
+           REFERENCE-STYLE HOME (dark purple/red/gold, left category rail,
+           big 3D game cards, banner carousel, fixed app-download bar)
+           ============================================================ */
+        #sec-home.hp-root { padding: 0 !important; margin: 0 !important; background: transparent; }
+        .hp-wrap { position: relative; min-height: 100vh; background: linear-gradient(180deg,#2b1533 0%, #271430 42%, #3a1522 100%); color: #fff; padding-bottom: 72px; overflow: hidden; }
+        .hp-wrap::before { content:''; position: absolute; top: 8%; left: 50%; transform: translateX(-50%); width: 340px; height: 340px; background: url('/static/red_roaster.svg') no-repeat center; background-size: contain; opacity: 0.05; filter: grayscale(0.2); pointer-events: none; z-index: 0; }
+        .hp-wrap > * { position: relative; z-index: 1; }
+
+        /* ---- top bar ---- */
+        .hp-top { display: flex; align-items: center; gap: 8px; padding: 12px 14px 10px; }
+        .hp-bal { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 16px; color: #fff; cursor: pointer; }
+        .hp-bal .material-icons { color: #F5C542; font-size: 22px; }
+        .hp-coins { display: flex; align-items: center; gap: 5px; background: linear-gradient(90deg,#5a2b12,#7a3d18); border: 1px solid #C98A3A; border-radius: 14px; padding: 3px 12px 3px 7px; font-weight: 700; font-size: 13px; color: #FFD9A0; }
+        .hp-coins .material-icons { color: #FFC24B; font-size: 16px; }
+        .hp-auth { margin-left: auto; display: flex; gap: 8px; }
+        .hp-btn-login { background: #1b2130; color: #fff; border: 1px solid rgba(255,255,255,0.28); border-radius: 22px; padding: 9px 20px; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .hp-btn-reg { background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; border: none; border-radius: 22px; padding: 10px 22px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(204,54,48,0.45); }
+        .hp-user { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+        .hp-icon-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .hp-icon-btn .material-icons { font-size: 22px; }
+
+        /* ---- carousel ---- */
+        #sec-home .banner-carousel { margin: 0 14px 6px; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 22px rgba(0,0,0,0.4); }
+
+        /* ---- body: rail + main ---- */
+        .hp-body { display: flex; align-items: flex-start; gap: 0; padding: 10px 12px 0; }
+        .hp-rail { flex: 0 0 82px; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 8px; }
+        .hp-cat { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 4px; border-radius: 16px; cursor: pointer; color: #d8c6df; font-size: 11px; font-weight: 600; text-align: center; transition: all .15s; }
+        .hp-cat .hp-cat-ic { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
+        .hp-cat .hp-cat-ic .material-icons { font-size: 30px; }
+        .hp-cat .hp-cat-ic img { width: 30px; height: 30px; object-fit: contain; }
+        .hp-cat.active { background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; box-shadow: 0 6px 16px rgba(204,54,48,0.5); }
+        .hp-cat.active .hp-cat-ic .material-icons { color: #fff; }
+
+        .hp-main { flex: 1 1 0; min-width: 0; padding: 2px 2px 0 12px; }
+        .hp-main .hp-sec { font-size: 18px; font-weight: 800; margin: 2px 0 12px; color: #fff; }
+        .hp-main .section-label { color: #fff; }
+
+        /* ---- big premium game cards ---- */
+        .hp-cards { display: flex; flex-direction: column; gap: 16px; margin-bottom: 18px; }
+        .hp-card { position: relative; border-radius: 16px; overflow: hidden; cursor: pointer; min-height: 118px; border: 2px solid rgba(255,201,92,0.55); box-shadow: 0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.06); background-size: cover; background-position: center; transition: transform .15s; }
+        .hp-card:active { transform: scale(0.985); }
+        .hp-card::after { content:''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.15) 55%, transparent 100%); }
+        .hp-card-art { position: absolute; right: -8px; bottom: 0; height: 108%; z-index: 1; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55)); }
+        .hp-card-art.two { right: 40%; opacity: 0.92; transform: scaleX(-1); }
+        .hp-card-body { position: absolute; z-index: 2; left: 16px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; max-width: 66%; }
+        .hp-card-title { font-size: 22px; font-weight: 900; line-height: 1.02; text-shadow: 0 2px 8px rgba(0,0,0,0.7); letter-spacing: 0.5px; text-transform: uppercase; }
+        .hp-card-title small { display: block; font-size: 13px; font-weight: 800; color: #FFD37A; letter-spacing: 2px; }
+        .hp-card-cta { align-self: flex-start; margin-top: 2px; background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; font-weight: 700; font-size: 12px; padding: 7px 16px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
+        .hp-live { position: absolute; z-index: 3; top: 10px; right: 10px; background: #cc3630; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px; display: flex; align-items: center; gap: 4px; letter-spacing: 0.5px; }
+        .hp-live .live-dot { width: 6px; height: 6px; }
+
+        /* ---- fixed app download bar ---- */
+        .hp-download { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: rgba(28,18,26,0.94); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.08); }
+        .hp-download .hp-dl-label { font-size: 15px; font-weight: 600; color: #e9e2ee; }
+        .hp-download .hp-dl-btn { color: #4aa3ff; font-weight: 800; font-size: 15px; cursor: pointer; background: none; border: none; }
+        .hp-copy { text-align: center; padding: 6px 0 20px; color: rgba(255,255,255,0.4); font-size: 11px; }
+        #sec-home .social-links { justify-content: center; gap: 12px; padding: 6px 0 4px; }
+
+        /* the explicit App-download bar replaces the legacy slide-up install promo */
+        #pwa-install-banner { display: none !important; }
+        /* keep home full-bleed even on desktop breakpoints */
+        @media (min-width: 900px) { .hp-rail { flex: 0 0 96px; } .hp-card { min-height: 150px; } .hp-card-title { font-size: 26px; } }
     </style>
 </head>
 <body>
@@ -2423,25 +2488,41 @@
         <!-- Main Content -->
         <div class="app-main">
             <!-- HOME -->
-            <div id="sec-home" class="section active">
-                <!-- Banner Carousel -->
+            <div id="sec-home" class="section active hp-root">
+              <div class="hp-wrap">
+                <!-- Top bar: balance, coins, Login/Register (logged out) or profile (logged in) -->
+                <div class="hp-top">
+                    <div class="hp-bal" onclick="if(token)navigate('sec-wallet')"><span class="material-icons">savings</span> <span id="hp-balance">G0.00</span></div>
+                    <div class="hp-coins"><span class="material-icons">diamond</span> <span id="hp-coins">0</span></div>
+                    <div class="hp-auth" id="hp-auth">
+                        <button class="hp-btn-login" onclick="showAuthScreen('login')">Login</button>
+                        <button class="hp-btn-reg" onclick="showAuthScreen('register')">Register</button>
+                    </div>
+                    <div class="hp-user" id="hp-user" style="display:none;">
+                        <button class="hp-icon-btn" onclick="openDeposit()" title="Deposit"><span class="material-icons">add_circle</span></button>
+                        <button class="hp-icon-btn" onclick="navigate('sec-notifications')" title="Notifications"><span class="material-icons">notifications</span></button>
+                        <button class="hp-icon-btn" onclick="navigate('sec-profile')" title="Profile"><span class="material-icons">person</span></button>
+                    </div>
+                </div>
+
+                <!-- Banner Carousel (admin-managed via /api/base/banners/) -->
                 <div class="banner-carousel" id="banner-carousel">
                     <div class="banner-track" id="banner-track">
-                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #FFFFFF 0%, #2a1f0e 50%, #FFFFFF 100%);">
+                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #7a1f12 0%, #3a0d0d 50%, #1a0808 100%);">
                             <div class="banner-content">
                                 <h3><span class="material-icons" style="vertical-align:middle;font-size:24px;margin-right:4px;">sports_mma</span> Live Cockfight Betting</h3>
                                 <p>24/7 live matches from China Market. Bet on Meron or Wala!</p>
                                 <span class="banner-cta" onclick="navigate('sec-cockfight')">Bet Now →</span>
                             </div>
                         </div>
-                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);">
+                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #3b1466 0%, #1e1b4b 50%, #0f0a24 100%);">
                             <div class="banner-content">
                                 <h3><span class="material-icons" style="vertical-align:middle;font-size:24px;margin-right:4px;">casino</span> Dice Play — Gundata</h3>
                                 <p>Pick a face, place your bet. Instant results!</p>
                                 <span class="banner-cta" onclick="navigate('sec-dice')">Play Now →</span>
                             </div>
                         </div>
-                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #FFFFFF 0%, #14532d 50%, #FFFFFF 100%);">
+                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #14532d 0%, #0b3a1e 50%, #05210f 100%);">
                             <div class="banner-content">
                                 <h3><span class="material-icons" style="vertical-align:middle;font-size:24px;margin-right:4px;">account_balance_wallet</span> Instant Deposits & Withdrawals</h3>
                                 <p>Add funds via UPI or bank. Withdraw winnings anytime.</p>
@@ -2456,62 +2537,32 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <div class="quick-action" onclick="navigate('sec-cockfight')">
-                        <div class="qa-icon" style="background:linear-gradient(135deg,#F8605B,#dc2626);"><img src="/static/red_roaster.png" alt="Cockfight" style="width:28px;height:28px;filter:brightness(2);"/></div>
-                        <div class="qa-label">Cockfight</div>
-                    </div>
-                    <div class="quick-action" onclick="navigate('sec-dice')">
-                        <div class="qa-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);"><span class="material-icons" style="font-size:22px;color:#fff;">casino</span></div>
-                        <div class="qa-label">Dice Play</div>
-                    </div>
-                    <div class="quick-action" onclick="openDeposit()">
-                        <div class="qa-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a);"><span class="material-icons" style="font-size:22px;color:#fff;">add_circle</span></div>
-                        <div class="qa-label">Deposit</div>
-                    </div>
-                    <div class="quick-action" onclick="openWithdraw()">
-                        <div class="qa-icon" style="background:linear-gradient(135deg,#6ABDA7,#4FA88F);"><span class="material-icons" style="font-size:22px;color:#fff;">account_balance</span></div>
-                        <div class="qa-label">Withdraw</div>
-                    </div>
-                </div>
+                <!-- Body: fixed left category rail + main game area -->
+                <div class="hp-body">
+                    <aside class="hp-rail">
+                        <div class="hp-cat active" data-cat="games" onclick="hpSelectCat(this,'sec-home')">
+                            <span class="hp-cat-ic"><span class="material-icons">live_tv</span></span>Games
+                        </div>
+                        <div class="hp-cat" data-cat="cockfight" data-game="cockfight" onclick="hpSelectCat(this,'sec-cockfight')">
+                            <span class="hp-cat-ic"><img src="/static/red_roaster.svg" alt="Cockfight"></span>Cockfight
+                        </div>
+                        <div class="hp-cat" data-cat="dice" data-game="dice" onclick="hpSelectCat(this,'sec-dice')">
+                            <span class="hp-cat-ic"><span class="material-icons">casino</span></span>Dice
+                        </div>
+                    </aside>
+                    <main class="hp-main">
+                        <div class="hp-sec">Games</div>
+                        <div class="game-banners hp-cards" id="game-cards-container">
+                            <!-- Premium 3D game cards loaded dynamically from /api/base/games/ -->
+                        </div>
 
-                <!-- Live Now Section -->
-                <div class="section-label" style="margin-bottom:12px;">
-                    <span class="live-dot"></span>
-                    <span style="font-weight:700;">Live Now</span>
-                </div>
-                <div id="matches-container"></div>
-
-                <!-- Games Section -->
-                <div class="section-label" style="margin-top:20px;margin-bottom:12px;">
-                    <span class="material-icons">casino</span>
-                    <span style="font-weight:700;">Games</span>
-                </div>
-                <div class="game-banners" id="game-cards-container">
-                    <!-- Colorful game banners loaded dynamically from API -->
-                </div>
-
-                <!-- Recent Results -->
-                <div id="auto-history-container">
-                    <div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches at the moment</p></div>
-                </div>
-
-                <!-- Stats Bar -->
-                <div class="stats-bar" style="margin-top:20px;">
-                    <div class="stat-card">
-                        <div class="stat-value">24/7</div>
-                        <div class="stat-label">Live Matches</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">Instant</div>
-                        <div class="stat-label">Payouts</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">Secure</div>
-                        <div class="stat-label">Platform</div>
-                    </div>
-                </div>
+                        <!-- Live Now -->
+                        <div class="section-label" style="margin-bottom:12px;">
+                            <span class="live-dot"></span>
+                            <span style="font-weight:700;">Live Now</span>
+                        </div>
+                        <div id="matches-container"></div>
+                        <div id="auto-history-container"></div>
 
                 <!-- Social Links -->
                 <div class="social-links" id="social-links">
@@ -2532,9 +2583,16 @@
                     </a>
                 </div>
 
-                <div style="text-align:center;padding:8px 0 16px;color:var(--text-muted);font-size:11px;">
-                    © 2026 RoosterRun. All rights reserved.
+                <div class="hp-copy">© 2026 RoosterRun. All rights reserved.</div>
+                    </main>
                 </div>
+
+                <!-- Fixed app download bar (does not hide the game list) -->
+                <div class="hp-download">
+                    <span class="hp-dl-label">App download</span>
+                    <button class="hp-dl-btn" onclick="hpDownload()">Download</button>
+                </div>
+              </div>
             </div>
 
             <!-- COCKFIGHT -->
@@ -3064,9 +3122,11 @@
     let isAutoLogin = !!token;
 
     // F3: Check self-exclusion on page load
+    var selfExcluded = false;
     (function() {
         var excUntil = localStorage.getItem('rr_self_exclude_until');
         if (excUntil && new Date(excUntil) > new Date()) {
+            selfExcluded = true;
             var remaining = Math.ceil((new Date(excUntil) - new Date()) / 86400000);
             var authScreen = document.getElementById('auth-screen');
             if (authScreen) {
@@ -3088,7 +3148,75 @@
     let regStep = 'form';
     let loginMobile = '';
 
-    if (token) showApp();
+    if (!selfExcluded) { if (token) { showApp(); } else { showPublicHome(); } }
+
+    // Browse-before-login: show the home page (games, banners, live matches) without auth.
+    function showPublicHome() {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        updateAuthUI();
+        loadBanners();
+        loadThemeFromApi();
+        loadSocialLinks();
+        loadGameCards();   // restoreSectionFromHash runs when cards are ready
+        loadMatches();
+    }
+
+    // Reflect auth state in the home top bar (Login/Register vs profile icons + balance).
+    function updateAuthUI() {
+        var authEl = document.getElementById('hp-auth');
+        var userEl = document.getElementById('hp-user');
+        if (authEl) authEl.style.display = token ? 'none' : 'flex';
+        if (userEl) userEl.style.display = token ? 'flex' : 'none';
+        var bal = document.getElementById('hp-balance');
+        if (bal && !token) bal.textContent = 'G0.00';
+    }
+
+    // Show the login/register screen (used by home Login/Register buttons + login-gated actions).
+    function showAuthScreen(tab) {
+        document.getElementById('app-screen').style.display = 'none';
+        var scr = document.getElementById('auth-screen');
+        scr.style.display = 'flex';
+        setAuthTab(tab === 'register' ? 'register' : 'login');
+    }
+
+    // Switch auth tab without relying on a click event (safe to call programmatically).
+    function setAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(function(t) {
+            t.classList.toggle('active', (t.textContent || '').trim().toLowerCase().indexOf(tab) === 0);
+        });
+        var lf = document.getElementById('login-form'), rf = document.getElementById('register-form');
+        if (lf) lf.classList.toggle('hidden', tab !== 'login');
+        if (rf) rf.classList.toggle('hidden', tab !== 'register');
+        var st = document.getElementById('auth-subtitle');
+        if (st) st.textContent = tab === 'login' ? 'Welcome back' : 'Create your account';
+        if (typeof hideError === 'function') hideError();
+    }
+
+    // Login gate for money actions. Returns true if logged in, else opens the auth screen.
+    function requireLogin() {
+        if (token) return true;
+        showAuthScreen('login');
+        return false;
+    }
+
+    // Left category rail selection + navigation to the chosen section.
+    function hpSelectCat(el, sectionId) {
+        document.querySelectorAll('.hp-cat').forEach(function(c) { c.classList.remove('active'); });
+        if (el) {
+            el.classList.add('active');
+        } else {
+            var m = { 'sec-home': 'games', 'sec-cockfight': 'cockfight', 'sec-dice': 'dice' };
+            var cat = m[sectionId];
+            if (cat) { var t = document.querySelector('.hp-cat[data-cat="' + cat + '"]'); if (t) t.classList.add('active'); }
+        }
+        navigate(sectionId);
+    }
+
+    function hpDownload() {
+        if (typeof deferredPrompt !== 'undefined' && deferredPrompt) { installPWA(); return; }
+        if (typeof showToast === 'function') showToast('Open your browser menu → "Add to Home screen" to install the app.', 'info');
+    }
 
     function switchAuthTab(tab) {
         document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -3306,7 +3434,9 @@
         connectDiceWebSocket();
         loadSocialLinks();
         loadThemeFromApi();
+        loadBanners();
         loadGameCards();
+        updateAuthUI();
     }
 
     // Restore the section the user was on before a refresh (from the URL hash).
@@ -3315,7 +3445,11 @@
         var _rh = (location.hash || '').replace('#', '').trim();
         var _rt = _rh ? ('sec-' + _rh) : 'sec-home';
         if (!document.getElementById(_rt)) _rt = 'sec-home';
-        if (_rt !== 'sec-home') { window._navPush = false; navigate(_rt); window._navPush = true; }
+        // Never restore into a login-gated section when browsing logged-out.
+        var _prot = { 'sec-wallet': 1, 'sec-profile': 1, 'sec-statement': 1, 'sec-mybets': 1, 'sec-referral': 1, 'sec-notifications': 1 };
+        if (!token && _prot[_rt]) _rt = 'sec-home';
+        // Always navigate (even to home) so the immersive chrome state is applied on load.
+        window._navPush = false; navigate(_rt); window._navPush = true;
     }
 
     var activeGameIds = [];
@@ -3345,27 +3479,29 @@
     // Build a colorful full-width game banner (reference style)
     function buildGameBanner(g) {
         var gid = (g.game_id || '').toLowerCase();
-        var theme = 'gbanner-default', art = '', live = '';
+        var bg, title, art = '', live = '';
         if (gid === 'cockfight') {
-            theme = 'gbanner-cockfight';
-            live = '<span class="gb-live"><span class="live-dot"></span>LIVE</span>';
-            art = '<div class="gb-art">'
-                + '<img src="/static/blue_roaster.png" alt="Wala rooster" style="margin-right:-14px;transform:scaleX(-1);">'
-                + '<img src="/static/red_roaster.png" alt="Meron rooster">'
-                + '</div>';
+            bg = 'radial-gradient(circle at 75% 40%, #b5321f 0%, #6e150c 45%, #2a0705 100%)';
+            live = '<span class="hp-live"><span class="live-dot"></span>LIVE</span>';
+            title = '<div class="hp-card-title">Cockfight<small>Livestream</small></div>';
+            art = '<img class="hp-card-art two" src="/static/blue_roaster.png" alt="">'
+                + '<img class="hp-card-art" src="/static/red_roaster.png" alt="">';
         } else if (gid === 'dice' || gid === 'color' || gid === 'colorgame') {
-            theme = (gid === 'color' || gid === 'colorgame') ? 'gbanner-color' : 'gbanner-dice';
-            live = '<span class="gb-live"><span class="live-dot"></span>LIVE</span>';
-            art = '<div class="gb-art"><span class="material-icons">casino</span></div>';
+            bg = 'radial-gradient(circle at 78% 40%, #6d28d9 0%, #3b1466 48%, #170a2e 100%)';
+            live = '<span class="hp-live"><span class="live-dot"></span>LIVE</span>';
+            title = '<div class="hp-card-title">' + (g.name || 'Color Game') + '<small>Fast Draw & Quick Win</small></div>';
+            art = '<img class="hp-card-art" src="/static/blue_roaster.svg" alt="" style="opacity:0;">'
+                + '<span class="material-icons hp-card-art" style="font-size:96px;color:#c4b5fd;right:14px;bottom:8px;height:auto;">casino</span>';
         } else {
-            art = '<div class="gb-art"><span class="material-icons">' + (g.icon || 'sports_esports') + '</span></div>';
+            bg = 'radial-gradient(circle at 78% 40%, #4b5563 0%, #1f2937 60%, #0b0f16 100%)';
+            title = '<div class="hp-card-title">' + (g.name || 'Game') + '</div>';
+            art = '<span class="material-icons hp-card-art" style="font-size:88px;color:#e5e7eb;right:18px;bottom:10px;height:auto;">' + (g.icon || 'sports_esports') + '</span>';
         }
-        return '<div class="gbanner ' + theme + '" onclick="navigate(\'' + g.section_id + '\')">'
+        return '<div class="hp-card" style="background:' + bg + ';" onclick="hpSelectCat(null,\'' + g.section_id + '\')">'
             + live + art
-            + '<div class="gb-text">'
-            + '<div class="gb-title">' + (g.name || '') + '</div>'
-            + '<div class="gb-sub">' + (g.description || '') + '</div>'
-            + '<span class="gb-play"><span class="material-icons" style="font-size:15px;">play_arrow</span> Play Now</span>'
+            + '<div class="hp-card-body">'
+            + title
+            + '<span class="hp-card-cta"><span class="material-icons" style="font-size:15px;">play_arrow</span> Play Now</span>'
             + '</div>'
             + '</div>';
     }
@@ -3718,6 +3854,7 @@
     }
 
     function cfPlaceBet() {
+        if (!requireLogin()) return;
         if (!autoMatchData || !autoMatchData.isAcceptingBet) { showToast('Betting is closed. Please wait for the next match.', 'error'); return; }
         if (!selectedBets['auto']) { showToast('Tap Meron, Draw or Wala first', 'error'); return; }
         if (!selectedChipAmount) { showToast('Select a coin amount first', 'error'); return; }
@@ -4022,6 +4159,7 @@
     }
 
     async function placeAutoBet() {
+        if (!requireLogin()) return;
         if (!selectedBets['auto']) { showToast('Select a team first (Meron, Wala, or Draw)', 'error'); return; }
         const amount = document.getElementById('bet-amt-auto').value;
         if (!amount || parseFloat(amount) < 10) { showToast('Minimum bet is ₹10', 'error'); return; }
@@ -4065,6 +4203,11 @@
                 // Exposure & bonus
                 const exposure = parseFloat(data.exposure || 0);
                 const bonus = parseFloat(data.wallet_balance || 0) - parseFloat(data.available_balance || 0) - exposure;
+                // Home top-bar balance + coins (diamond = bonus)
+                var _hb = document.getElementById('hp-balance');
+                if (_hb) _hb.textContent = 'G' + formatCurrencyFull(data.wallet_balance || 0);
+                var _hc = document.getElementById('hp-coins');
+                if (_hc) _hc.textContent = formatCurrencyShort(Math.max(0, bonus));
                 const expEl = document.getElementById('wallet-exposure');
                 const bonEl = document.getElementById('wallet-bonus');
                 if (expEl) expEl.textContent = '₹' + formatCurrencyShort(exposure);
@@ -4254,6 +4397,7 @@
     }
 
     async function placeBet(matchId) {
+        if (!requireLogin()) return;
         if (!selectedBets[matchId]) { showToast('Select a team first', 'error'); return; }
         const amount = document.getElementById(`bet-amt-${matchId}`).value;
         if (!amount || amount < 10) { showToast('Minimum bet is ₹10', 'error'); return; }
@@ -4358,6 +4502,10 @@
 
     // Navigation
     function navigate(sectionId) {
+        // Login gate: the home page is browsable by guests; entering a game or account page needs auth.
+        var _protected = { 'sec-cockfight': 1, 'sec-dice': 1, 'sec-wallet': 1, 'sec-profile': 1, 'sec-statement': 1, 'sec-mybets': 1, 'sec-referral': 1, 'sec-notifications': 1 };
+        if (!token && _protected[sectionId]) { showAuthScreen('login'); return; }
+
         var sec = document.getElementById(sectionId);
         if (sec && sec.dataset.game && Array.isArray(activeGameIds) && activeGameIds.length && !activeGameIds.includes(sec.dataset.game)) {
             sectionId = 'sec-home'; sec = document.getElementById(sectionId);
@@ -4368,14 +4516,23 @@
         // Release low-latency WebRTC streams when leaving the cockfight section
         if (sectionId !== 'sec-cockfight' && typeof stopWhepPlayers === 'function') stopWhepPlayers();
 
-        // Immersive game screens: hide the global header + support FAB (they have their own header)
-        const _isImmersive = (sectionId === 'sec-cockfight' || sectionId === 'sec-dice');
+        // Immersive screens (home + game screens) have their own header, so hide the global chrome.
+        const _isImmersive = (sectionId === 'sec-home' || sectionId === 'sec-cockfight' || sectionId === 'sec-dice');
         const _hdr = document.querySelector('.app-header');
         const _fab = document.getElementById('support-widget');
+        const _bnav = document.querySelector('.bottom-nav');
         if (_hdr) _hdr.style.display = _isImmersive ? 'none' : '';
         if (_fab) _fab.style.display = _isImmersive ? 'none' : '';
+        if (_bnav) _bnav.style.display = _isImmersive ? 'none' : '';
         const _main = document.querySelector('.app-main');
         if (_main) _main.classList.toggle('immersive', _isImmersive);
+        // Keep the home category rail in sync with the active section.
+        if (typeof hpSelectCat === 'function') {
+            document.querySelectorAll('.hp-cat').forEach(function(c) { c.classList.remove('active'); });
+            var _railMap = { 'sec-home': 'games', 'sec-cockfight': 'cockfight', 'sec-dice': 'dice' };
+            var _rc = _railMap[sectionId];
+            if (_rc) { var _rt = document.querySelector('.hp-cat[data-cat="' + _rc + '"]'); if (_rt) _rt.classList.add('active'); }
+        }
 
         // Update bottom nav — clear all, then set active if section has a tab
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -4564,6 +4721,7 @@
     let depFile = null;
     let depMethodType = null; // 'qr' or 'bank'
     function openDeposit() {
+        if (!requireLogin()) return;
         document.getElementById('deposit-modal').classList.add('show');
         depGoToStep(1);
         depMethodType = null;
@@ -4717,6 +4875,7 @@
     var wdType = null;
     var wdSpeedType = 'N';
     function openWithdraw() {
+        if (!requireLogin()) return;
         document.getElementById('withdraw-modal').classList.add('show');
         wdSpeedType = 'N';
         setWdSpeed('N');
@@ -5265,6 +5424,7 @@
     }
 
     async function dicePlaceBet(skipConfirm) {
+        if (!requireLogin()) return;
         if (diceBetSubmitting) return; // Fix #4: prevent double-click
         if (diceSelectedNums.length === 0) { showToast('Select at least one number', 'error'); return; }
         if (diceBetAmount <= 0 || diceBetAmount < 10) { showToast('Minimum bet ₹10', 'error'); return; }
@@ -6319,7 +6479,7 @@
     // Load banners from API (if any exist, replace defaults)
     async function loadBanners() {
         try {
-            const res = await fetch(`${API}/base/banners/`, {headers:{'Authorization':`Bearer ${token}`}});
+            const res = await fetch(`${API}/base/banners/`);  // public endpoint (AllowAny)
             if (!res.ok) return;
             const data = await res.json();
             const banners = data.results || data || [];
@@ -6339,10 +6499,12 @@
                         bannerUrl = location.origin + u.pathname;
                     } catch(e) { /* relative URL - use as-is */ }
                 }
-                const bgImg = bannerUrl ? `url(${bannerUrl})` : 'linear-gradient(135deg,#FFFFFF,#2a1f0e)';
+                const bgImg = bannerUrl ? `url(${bannerUrl})` : 'linear-gradient(135deg,#3a1522,#2a1f0e)';
                 const catLabels = {S:'Cockfight',P:'Promotion',D:'Dice Play',W:'Wallet',V:'Videos'};
                 const label = catLabels[b.category] || 'RoosterRun';
-                trackHtml += `<div class="banner-slide" style="background-image:${bgImg};background-size:cover;background-position:center;"><div class="banner-content"><h3>${label}</h3></div></div>`;
+                // If the banner has an uploaded image, let it speak for itself (no redundant text overlay).
+                const overlay = bannerUrl ? '' : `<div class="banner-content"><h3>${label}</h3></div>`;
+                trackHtml += `<div class="banner-slide" style="background-image:${bgImg};background-size:cover;background-position:center;">${overlay}</div>`;
                 dotsHtml += `<div class="banner-dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
             });
             track.innerHTML = trackHtml;
