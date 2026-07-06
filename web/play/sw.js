@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v1';
+const CACHE_NAME = 'roosterrun-v2';
 const STATIC_ASSETS = [
   '/play/',
   '/static/logo.png?v=2',
@@ -36,7 +36,21 @@ self.addEventListener('fetch', event => {
   // API calls — network only (never cache dynamic data)
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/ws/')) return;
 
-  // Static assets and app shell — stale while revalidate
+  // App shell / HTML navigations — network first so the latest UI always wins
+  if (event.request.mode === 'navigate' || url.pathname === '/play/' || url.pathname.endsWith('index.html')) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => caches.match(event.request).then(c => c || caches.match('/play/')))
+    );
+    return;
+  }
+
+  // Other static assets — stale while revalidate
   event.respondWith(
     caches.match(event.request).then(cached => {
       const fetched = fetch(event.request).then(response => {
@@ -46,11 +60,7 @@ self.addEventListener('fetch', event => {
         }
         return response;
       }).catch(() => {
-        // Network failed — return cached or offline page
         if (cached) return cached;
-        if (event.request.mode === 'navigate') {
-          return caches.match('/play/');
-        }
         return new Response('Offline', { status: 503, statusText: 'Offline' });
       });
       return cached || fetched;
