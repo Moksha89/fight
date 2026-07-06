@@ -2173,7 +2173,8 @@
            big 3D game cards, banner carousel, fixed app-download bar)
            ============================================================ */
         #sec-home.hp-root { padding: 0 !important; margin: 0 !important; background: transparent; }
-        .hp-wrap { position: relative; min-height: 100vh; background: linear-gradient(180deg,#2b1533 0%, #271430 42%, #3a1522 100%); color: #fff; padding-bottom: 72px; overflow: hidden; }
+        .hp-wrap { position: relative; min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg,#2b1533 0%, #271430 42%, #3a1522 100%); color: #fff; overflow: hidden; }
+        .hp-wrap .hp-download { margin-top: auto; }
         .hp-wrap::before { content:''; position: absolute; top: 8%; left: 50%; transform: translateX(-50%); width: 340px; height: 340px; background: url('/static/red_roaster.svg') no-repeat center; background-size: contain; opacity: 0.05; filter: grayscale(0.2); pointer-events: none; z-index: 0; }
         .hp-wrap > * { position: relative; z-index: 1; }
 
@@ -2226,7 +2227,7 @@
         .hp-live .live-dot { width: 6px; height: 6px; }
 
         /* ---- fixed app download bar ---- */
-        .hp-download { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: rgba(28,18,26,0.94); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.08); }
+        .hp-download { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; margin-top: 8px; background: rgba(28,18,26,0.94); border-top: 1px solid rgba(255,255,255,0.08); }
         .hp-download .hp-dl-label { font-size: 15px; font-weight: 600; color: #e9e2ee; }
         .hp-download .hp-dl-btn { color: #4aa3ff; font-weight: 800; font-size: 15px; cursor: pointer; background: none; border: none; }
         .hp-copy { text-align: center; padding: 6px 0 20px; color: rgba(255,255,255,0.4); font-size: 11px; }
@@ -2592,7 +2593,7 @@
                     </main>
                 </div>
 
-                <!-- Fixed app download bar (does not hide the game list) -->
+                <!-- App download bar (sits at the bottom of the page, in normal flow) -->
                 <div class="hp-download">
                     <span class="hp-dl-label">App download</span>
                     <button class="hp-dl-btn" onclick="hpDownload()">Download</button>
