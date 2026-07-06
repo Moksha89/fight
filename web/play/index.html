@@ -531,6 +531,51 @@
         .game-card-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
         .game-card-body p { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 
+        /* ===== COLORFUL GAME BANNERS (reference style) ===== */
+        .game-banners { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+        .gbanner {
+            position: relative; border-radius: 16px; overflow: hidden; cursor: pointer;
+            aspect-ratio: 16 / 6.2; min-height: 110px; display: flex; align-items: center;
+            padding: 0 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+            border: 1px solid rgba(255,255,255,0.08); transition: transform .2s, box-shadow .2s;
+        }
+        .gbanner:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.55); }
+        .gbanner::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(120% 140% at 100% 50%, rgba(255,255,255,0.18), transparent 55%);
+            pointer-events: none;
+        }
+        .gbanner-cockfight { background: linear-gradient(115deg, #4a0d0d 0%, #b91c1c 42%, #f59e0b 100%); }
+        .gbanner-dice { background: linear-gradient(115deg, #3b0764 0%, #7c3aed 45%, #2563eb 100%); }
+        .gbanner-color { background: linear-gradient(115deg, #065f46 0%, #10b981 40%, #f43f5e 100%); }
+        .gbanner-default { background: linear-gradient(115deg, #1f2937 0%, #4b5563 50%, #9ca3af 100%); }
+        .gbanner .gb-text { position: relative; z-index: 2; max-width: 62%; }
+        .gbanner .gb-title {
+            font-size: 24px; font-weight: 900; letter-spacing: 0.5px; line-height: 1.02;
+            text-transform: uppercase; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.55);
+        }
+        .gbanner .gb-sub { margin-top: 6px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.92); text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+        .gbanner .gb-play {
+            display: inline-flex; align-items: center; gap: 4px; margin-top: 10px;
+            padding: 7px 16px; border-radius: 20px; background: rgba(255,255,255,0.95);
+            color: #111; font-weight: 800; font-size: 12px;
+        }
+        .gbanner .gb-art {
+            position: absolute; right: 8px; bottom: 0; top: 0; z-index: 1;
+            display: flex; align-items: center; justify-content: flex-end;
+            pointer-events: none; opacity: 0.98;
+        }
+        .gbanner .gb-art img { height: 88%; max-height: 150px; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55)); }
+        .gbanner .gb-art .material-icons { font-size: 96px; color: rgba(255,255,255,0.9); filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55)); }
+        .gbanner .gb-live {
+            position: absolute; top: 12px; right: 14px; z-index: 3;
+            display: inline-flex; align-items: center; gap: 5px;
+            background: #dc2626; color: #fff; font-size: 10px; font-weight: 800;
+            letter-spacing: 0.6px; padding: 4px 10px; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .gbanner .gb-live .live-dot { background: #fff; }
+
         /* ===== LIVE MATCH STRIP ===== */
         .live-strip {
             background: linear-gradient(135deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
@@ -2251,17 +2296,19 @@
                     <span style="font-weight:700;">Live Now</span>
                 </div>
                 <div id="matches-container"></div>
-                <div id="auto-history-container">
-                    <div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches at the moment</p></div>
-                </div>
 
                 <!-- Games Section -->
-                <div class="section-label" style="margin-top:24px;margin-bottom:12px;">
+                <div class="section-label" style="margin-top:20px;margin-bottom:12px;">
                     <span class="material-icons">casino</span>
                     <span style="font-weight:700;">Games</span>
                 </div>
-                <div class="game-cards" id="game-cards-container">
-                    <!-- Game cards loaded dynamically from API -->
+                <div class="game-banners" id="game-cards-container">
+                    <!-- Colorful game banners loaded dynamically from API -->
+                </div>
+
+                <!-- Recent Results -->
+                <div id="auto-history-container">
+                    <div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches at the moment</p></div>
                 </div>
 
                 <!-- Stats Bar -->
@@ -3083,40 +3130,46 @@
             if (!container) return;
             activeGameIds = games.map(g => g.game_id);
             let html = '';
-            games.forEach(g => {
-                let imgContent = '';
-                if (g.game_id === 'cockfight') {
-                    imgContent = '<span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>'
-                        + '<img src="/static/red_roaster.png" alt="Meron Rooster" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
-                        + '<img src="/static/blue_roaster.png" alt="Wala Rooster" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>';
-                } else {
-                    imgContent = '<span class="material-icons" style="font-size:52px;color:rgba(255,255,255,0.7);">' + g.icon + '</span>';
-                }
-                html += '<div class="game-card" onclick="navigate(\'' + g.section_id + '\')">'
-                    + '<div class="game-card-img" style="background:linear-gradient(135deg,' + g.gradient_from + ',' + g.gradient_to + ');display:flex;align-items:center;justify-content:center;position:relative;">'
-                    + imgContent
-                    + '</div>'
-                    + '<div class="game-card-body"><h4>' + g.name + '</h4><p>' + g.description + '</p></div>'
-                    + '</div>';
-            });
+            games.forEach(g => { html += buildGameBanner(g); });
             container.innerHTML = html;
             updateNavVisibility();
         }).catch(e => {
             console.log('Games load error:', e);
             const container = document.getElementById('game-cards-container');
             if (container) {
-                container.innerHTML = '<div class="game-card" onclick="navigate(\'sec-cockfight\')">'
-                    + '<div class="game-card-img" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);display:flex;align-items:center;justify-content:center;position:relative;">'
-                    + '<span class="game-badge" style="background:#ef4444;position:absolute;top:8px;right:8px;z-index:2;"><span class="live-dot" style="margin-right:2px;"></span> LIVE</span>'
-                    + '<img src="/static/red_roaster.png" alt="Meron Rooster" style="width:55px;height:55px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));"/>'
-                    + '<img src="/static/blue_roaster.png" alt="Wala Rooster" style="width:45px;height:45px;filter:brightness(1.5) drop-shadow(0 2px 8px rgba(0,0,0,0.5));margin-left:-8px;"/>'
-                    + '</div><div class="game-card-body"><h4>Cockfight Betting</h4><p>24/7 live matches. Pick Meron or Wala and win big.</p></div></div>'
-                    + '<div class="game-card" onclick="navigate(\'sec-dice\')">'
-                    + '<div class="game-card-img" style="background:linear-gradient(135deg,#312e81,#6d28d9);display:flex;align-items:center;justify-content:center;">'
-                    + '<span class="material-icons" style="font-size:52px;color:#c4b5fd;">casino</span>'
-                    + '</div><div class="game-card-body"><h4>Dice Play (Gundata)</h4><p>Pick a dice face from 1 to 6. Match the roll and multiply your bet!</p></div></div>';
+                container.innerHTML =
+                    buildGameBanner({game_id:'cockfight', section_id:'sec-cockfight', name:'Cockfight Livestream', description:'24/7 live matches. Pick Meron or Wala and win big.'})
+                  + buildGameBanner({game_id:'dice', section_id:'sec-dice', name:'Dice Play (Gundata)', description:'Pick a face from 1 to 6. Match the roll and multiply your bet!'});
             }
         });
+    }
+
+    // Build a colorful full-width game banner (reference style)
+    function buildGameBanner(g) {
+        var gid = (g.game_id || '').toLowerCase();
+        var theme = 'gbanner-default', art = '', live = '';
+        if (gid === 'cockfight') {
+            theme = 'gbanner-cockfight';
+            live = '<span class="gb-live"><span class="live-dot"></span>LIVE</span>';
+            art = '<div class="gb-art">'
+                + '<img src="/static/blue_roaster.png" alt="Wala rooster" style="margin-right:-14px;transform:scaleX(-1);">'
+                + '<img src="/static/red_roaster.png" alt="Meron rooster">'
+                + '</div>';
+        } else if (gid === 'dice' || gid === 'color' || gid === 'colorgame') {
+            theme = (gid === 'color' || gid === 'colorgame') ? 'gbanner-color' : 'gbanner-dice';
+            live = '<span class="gb-live"><span class="live-dot"></span>LIVE</span>';
+            art = '<div class="gb-art"><span class="material-icons">casino</span></div>';
+        } else {
+            art = '<div class="gb-art"><span class="material-icons">' + (g.icon || 'sports_esports') + '</span></div>';
+        }
+        return '<div class="gbanner ' + theme + '" onclick="navigate(\'' + g.section_id + '\')">'
+            + live + art
+            + '<div class="gb-text">'
+            + '<div class="gb-title">' + (g.name || '') + '</div>'
+            + '<div class="gb-sub">' + (g.description || '') + '</div>'
+            + '<span class="gb-play"><span class="material-icons" style="font-size:15px;">play_arrow</span> Play Now</span>'
+            + '</div>'
+            + '</div>';
     }
 
     function updateNavVisibility() {
