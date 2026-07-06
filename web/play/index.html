@@ -2230,6 +2230,8 @@
 
         /* the explicit App-download bar replaces the legacy slide-up install promo */
         #pwa-install-banner { display: none !important; }
+        /* Hero banner: keep it inside the viewport (symmetric inset) and a stable 16/9 on every width */
+        #sec-home .banner-carousel { width: auto; height: auto; aspect-ratio: 16 / 9; margin: 0 14px 14px; box-sizing: border-box; }
         /* keep home full-bleed even on desktop breakpoints */
         @media (min-width: 900px) { .hp-rail { flex: 0 0 96px; } .hp-card { min-height: 150px; } .hp-card-title { font-size: 26px; } }
     </style>
