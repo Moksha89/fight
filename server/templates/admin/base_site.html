@@ -28,11 +28,11 @@
        ==================================================================== */
 
     /* === ACCENT COLOR (buttons, links, active states) === */
-    --accent: #F97316;              /* Primary accent — orange */
-    --accent-dark: #EA580C;         /* Accent hover/pressed */
-    --accent-light: #FB923C;        /* Accent lighter variant */
-    --accent-bg: rgba(249,115,22,0.08);   /* Accent tinted background */
-    --accent-bg-hover: rgba(249,115,22,0.14);
+    --accent: #6ABDA7;              /* Primary accent — mint */
+    --accent-dark: #4FA88F;         /* Accent hover/pressed */
+    --accent-light: #B4DDD1;        /* Accent lighter variant */
+    --accent-bg: rgba(106,189,167,0.10);   /* Accent tinted background */
+    --accent-bg-hover: rgba(106,189,167,0.18);
     --accent-border: var(--accent-border);
     --accent-text: #FFFFFF;         /* Text on accent-colored buttons */
 
@@ -62,8 +62,8 @@
     /* === STATUS COLORS === */
     --success: #22C55E;
     --success-dark: #16a34a;
-    --danger: #EF4444;
-    --danger-dark: #dc2626;
+    --danger: #F8605B;
+    --danger-dark: #e24842;
     --warning: #F59E0B;
     --warning-dark: #d97706;
     --info: #3B82F6;
@@ -1777,7 +1777,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ? '<button onclick="window.history.back()" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;"><i style="font-size:20px;color:var(--text-secondary);">arrow_back</i></button>'
             : '';
         header.innerHTML = '<div style="display:flex;align-items:center;gap:8px;">' +
-            '<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu"><i style="font-size:22px;color:#F5F1E8;line-height:36px;width:36px;height:36px;display:block;text-align:center;">menu</i></button>' +
+            '<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu"><i style="font-size:22px;color:#505050;line-height:36px;width:36px;height:36px;display:block;text-align:center;">menu</i></button>' +
             backBtn +
             '<div class="header-title">' + pageTitle + '</div>' +
             '</div>' +
@@ -1934,7 +1934,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var href = link.getAttribute('href');
         var isDeposit = href.includes('/deposit/');
         var actionType = isDeposit ? 'Deposit' : 'Withdraw';
-        var actionColor = isDeposit ? '#22C55E' : '#D4A843';
+        var actionColor = isDeposit ? '#22C55E' : '#6ABDA7';
         var row = link.closest('tr');
         var phone = row ? (row.querySelector('th a') || row.querySelector('td a') || {}).textContent || 'User' : 'User';
         var balance = '\u20B90.00';
@@ -2144,7 +2144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function flashIndicator() {
         indicator.style.opacity = '1';
-        indicator.style.background = 'rgba(212,168,67,0.9)';
+        indicator.style.background = 'rgba(106,189,167,0.95)';
         setTimeout(function() { indicator.style.background = 'rgba(34,197,94,0.9)'; indicator.style.opacity = '0.85'; }, 400);
     }
 

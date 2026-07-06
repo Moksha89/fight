@@ -9,16 +9,17 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     :root {
-      --primary: #F57C00;
-      --primary-dark: #E65100;
-      --bg-dark: #1a1a2e;
-      --bg-card: #16213e;
-      --bg-surface: #0f3460;
-      --text-primary: #ffffff;
-      --text-secondary: #b0b0b0;
-      --success: #4CAF50;
-      --danger: #f44336;
-      --warning: #FFC107;
+      --primary: #6ABDA7;
+      --primary-dark: #4FA88F;
+      --primary-light: #B4DDD1;
+      --bg-dark: #F7FAFA;
+      --bg-card: #FFFFFF;
+      --bg-surface: #EAF5F1;
+      --text-primary: #1F2528;
+      --text-secondary: #6C7374;
+      --success: #4FA88F;
+      --danger: #F8605B;
+      --warning: #F59E0B;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -36,7 +37,7 @@
       align-items: center;
       min-height: 100vh;
       padding: 20px;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background: linear-gradient(135deg, #EAF5F1 0%, #F7FAFA 50%, #B4DDD1 100%);
     }
     .auth-card {
       background: var(--bg-card);
@@ -55,10 +56,10 @@
     .input-group input {
       width: 100%;
       padding: 14px 16px;
-      background: var(--bg-dark);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: #FFFFFF;
+      border: 1px solid rgba(31,37,40,0.15);
       border-radius: 12px;
-      color: white;
+      color: #1F2528;
       font-size: 16px;
       outline: none;
       transition: border-color 0.2s;
@@ -80,19 +81,19 @@
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
     .error-msg { color: var(--danger); font-size: 13px; margin-top: 10px; }
     .info-msg { color: var(--success); font-size: 13px; margin-top: 10px; }
-    .otp-inputs { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-    .otp-inputs input {
+    .code-inputs { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+    .code-inputs input {
       width: 48px; height: 56px;
       text-align: center;
       font-size: 24px;
       font-weight: 700;
-      background: var(--bg-dark);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: #FFFFFF;
+      border: 1px solid rgba(31,37,40,0.15);
       border-radius: 12px;
-      color: white;
+      color: #1F2528;
       outline: none;
     }
-    .otp-inputs input:focus { border-color: var(--primary); }
+    .code-inputs input:focus { border-color: var(--primary); }
 
     /* App Shell */
     .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
@@ -102,7 +103,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(31,37,40,0.08);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -115,7 +116,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: rgba(245,124,0,0.15);
+      background: rgba(106,189,167,0.15);
       padding: 6px 14px;
       border-radius: 20px;
       font-weight: 600;
@@ -139,7 +140,7 @@
     .bottom-nav {
       display: flex;
       background: var(--bg-card);
-      border-top: 1px solid rgba(255,255,255,0.05);
+      border-top: 1px solid rgba(31,37,40,0.06);
       position: sticky;
       bottom: 0;
       z-index: 100;
@@ -187,7 +188,7 @@
       text-align: center;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(31,37,40,0.06);
     }
     .game-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
     .game-card .material-icons { font-size: 48px; color: var(--primary); margin-bottom: 12px; }
@@ -218,7 +219,7 @@
     .channel-btn {
       padding: 8px 20px;
       border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(31,37,40,0.12);
       background: var(--bg-card);
       color: var(--text-secondary);
       cursor: pointer;
@@ -254,7 +255,7 @@
       flex: 1;
       padding: 16px;
       border-radius: 12px;
-      border: 2px solid rgba(255,255,255,0.1);
+      border: 2px solid rgba(31,37,40,0.12);
       background: var(--bg-dark);
       color: white;
       cursor: pointer;
@@ -275,7 +276,7 @@
     .chip {
       padding: 8px 16px;
       border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(31,37,40,0.12);
       background: var(--bg-dark);
       color: var(--text-secondary);
       cursor: pointer;
@@ -304,7 +305,7 @@
     .dice-btn {
       aspect-ratio: 1;
       border-radius: 16px;
-      border: 2px solid rgba(255,255,255,0.1);
+      border: 2px solid rgba(31,37,40,0.12);
       background: var(--bg-card);
       color: white;
       cursor: pointer;
@@ -314,7 +315,7 @@
       justify-content: center;
       transition: all 0.2s;
     }
-    .dice-btn.selected { border-color: var(--primary); background: rgba(245,124,0,0.15); transform: scale(1.05); }
+    .dice-btn.selected { border-color: var(--primary); background: rgba(106,189,167,0.15); transform: scale(1.05); }
     .dice-faces { font-size: 48px; }
 
     /* History */
@@ -355,7 +356,7 @@
       font-size: 14px;
       transition: background 0.2s;
     }
-    .wallet-action-btn:hover { background: rgba(255,255,255,0.15); }
+    .wallet-action-btn:hover { background: rgba(31,37,40,0.08); }
     .tx-list { list-style: none; }
     .tx-item {
       background: var(--bg-card);
@@ -432,7 +433,7 @@
     /* Loading spinner */
     .spinner {
       width: 40px; height: 40px;
-      border: 4px solid rgba(255,255,255,0.1);
+      border: 4px solid rgba(31,37,40,0.12);
       border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
@@ -489,19 +490,19 @@
         <label style="display:none;">Mobile Number</label>
         <input type="tel" id="email-input" placeholder="9876543210" autocomplete="tel" pattern="[0-9]{10,15}" style="display:none;">
       </div>
-      <button class="btn-primary" id="btn-get-otp">Register / Login</button>
+      <button class="btn-primary" id="btn-get-code">Register / Login</button>
       <div id="email-error" class="error-msg hidden"></div>
       <div id="email-info" class="info-msg hidden"></div>
     </div>
   </div>
 
-  <!-- Auth: OTP Screen -->
-  <div id="screen-otp" class="auth-container hidden">
+  <!-- Auth: verification code Screen -->
+  <div id="screen-code" class="auth-container hidden">
     <div class="auth-card">
       <img src="/static/logo.png" alt="RoosterRun" class="auth-logo">
       <h1 class="auth-title">Continue</h1>
-      <p class="auth-subtitle" id="otp-subtitle">Account created successfully</p>
-      <div class="otp-inputs" id="otp-inputs">
+      <p class="auth-subtitle" id="code-subtitle">Account created successfully</p>
+      <div class="code-inputs" id="code-inputs">
         <input type="text" maxlength="1" data-idx="0">
         <input type="text" maxlength="1" data-idx="1">
         <input type="text" maxlength="1" data-idx="2">
@@ -509,8 +510,8 @@
         <input type="text" maxlength="1" data-idx="4">
         <input type="text" maxlength="1" data-idx="5">
       </div>
-      <button class="btn-primary" id="btn-verify-otp">Verify</button>
-      <div id="otp-error" class="error-msg hidden"></div>
+      <button class="btn-primary" id="btn-verify-code">Verify</button>
+      <div id="code-error" class="error-msg hidden"></div>
     </div>
   </div>
 
@@ -773,13 +774,13 @@
           this.showApp();
         }
         this.setupOtpInputs();
-        document.getElementById('btn-get-otp').addEventListener('click', () => this.getOtp());
-        document.getElementById('btn-verify-otp').addEventListener('click', () => this.verifyOtp());
+        document.getElementById('btn-get-code').addEventListener('click', () => this.getOtp());
+        document.getElementById('btn-verify-code').addEventListener('click', () => this.verifyOtp());
         document.getElementById('email-input').addEventListener('keypress', (e) => { if(e.key==='Enter') this.getOtp(); });
       },
 
       setupOtpInputs() {
-        const inputs = document.querySelectorAll('#otp-inputs input');
+        const inputs = document.querySelectorAll('#code-inputs input');
         inputs.forEach((inp, i) => {
           inp.addEventListener('input', () => {
             if (inp.value && i < inputs.length - 1) inputs[i+1].focus();
@@ -832,17 +833,17 @@
       },
 
       async verifyOtp() {
-        const inputs = document.querySelectorAll('#otp-inputs input');
-        const otp = Array.from(inputs).map(i => i.value).join('');
-        if (otp.length !== 6) return;
-        const btn = document.getElementById('btn-verify-otp');
+        const inputs = document.querySelectorAll('#code-inputs input');
+        const code = Array.from(inputs).map(i => i.value).join('');
+        if (code.length !== 6) return;
+        const btn = document.getElementById('btn-verify-code');
         btn.disabled = true; btn.textContent = 'Verifying...';
-        document.getElementById('otp-error').classList.add('hidden');
+        document.getElementById('code-error').classList.add('hidden');
         try {
-          const res = await fetch(`${BASE_URL}/api/user/verifyotp/`, {
+          const res = await fetch(`${BASE_URL}/api/user/verifycode/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mobile: this._email, otp })
+            body: JSON.stringify({ mobile: this._email, code })
           });
           const data = await res.json();
           if (res.ok && (data.access_token || data.access)) {
@@ -851,19 +852,19 @@
             localStorage.setItem('roosterrun_auth', JSON.stringify({ access: data.access_token || data.access, refresh: data.refresh_token || data.refresh }));
             this.showApp();
           } else {
-            document.getElementById('otp-error').textContent = data.message || data.error || 'Invalid OTP';
-            document.getElementById('otp-error').classList.remove('hidden');
+            document.getElementById('code-error').textContent = data.message || data.error || 'Invalid verification code';
+            document.getElementById('code-error').classList.remove('hidden');
           }
         } catch(e) {
-          document.getElementById('otp-error').textContent = 'Network error';
-          document.getElementById('otp-error').classList.remove('hidden');
+          document.getElementById('code-error').textContent = 'Network error';
+          document.getElementById('code-error').classList.remove('hidden');
         }
         btn.disabled = false; btn.textContent = 'Verify';
       },
 
       async showApp() {
         document.getElementById('screen-email').classList.add('hidden');
-        document.getElementById('screen-otp').classList.add('hidden');
+        document.getElementById('screen-code').classList.add('hidden');
         document.getElementById('screen-app').classList.remove('hidden');
         await this.loadUserInfo();
         this.loadBanners();
@@ -1218,7 +1219,7 @@
         document.getElementById('screen-app').classList.add('hidden');
         document.getElementById('screen-email').classList.remove('hidden');
         document.getElementById('email-input').value = '';
-        document.querySelectorAll('#otp-inputs input').forEach(i => i.value = '');
+        document.querySelectorAll('#code-inputs input').forEach(i => i.value = '');
       },
 
       showToast(msg, type = '') {
