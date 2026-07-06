@@ -651,6 +651,40 @@
             .cf-topbar .cf-title { font-size: 14px; }
         }
 
+        /* ===== COCKFIGHT POPUP MODALS ===== */
+        .cf-modal-overlay { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; justify-content: center; animation: cffade .18s ease; }
+        @keyframes cffade { from { opacity: 0; } to { opacity: 1; } }
+        .cf-modal { width: 100%; max-width: 520px; max-height: 82vh; background: #fff; color: #111; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: cfslide .22s ease; }
+        @keyframes cfslide { from { transform: translateY(30px); } to { transform: translateY(0); } }
+        .cf-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid #eee; font-size: 16px; font-weight: 800; color: #1a1a1a; }
+        .cf-modal-close { background: #f3f4f6; border: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #444; }
+        .cf-modal-body { overflow-y: auto; padding: 12px 16px 22px; }
+        .cf-empty { text-align: center; padding: 36px 16px; color: #888; }
+        .cf-empty .material-icons { font-size: 46px; opacity: 0.4; }
+        .cf-empty p { margin-top: 8px; font-size: 14px; line-height: 1.5; }
+
+        .cf-bh-row { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid #f0f0f0; }
+        .cf-bh-team { min-width: 64px; text-align: center; font-weight: 800; font-size: 13px; padding: 6px 8px; border-radius: 8px; color: #fff; }
+        .cf-bh-team.meron { background: #dc2626; } .cf-bh-team.wala { background: #2563eb; } .cf-bh-team.draw { background: #16a34a; }
+        .cf-bh-mid { flex: 1; font-size: 14px; font-weight: 600; color: #222; }
+        .cf-bh-sub { font-size: 12px; color: #888; font-weight: 500; margin-top: 2px; }
+        .cf-bh-res { text-align: right; font-weight: 800; font-size: 13px; }
+        .cf-bh-res.won { color: #16a34a; } .cf-bh-res.lost { color: #dc2626; } .cf-bh-res.pending { color: #d97706; } .cf-bh-res.cancelled { color: #6b7280; }
+        .cf-bh-payout { font-size: 12px; font-weight: 700; margin-top: 2px; }
+
+        .cf-res-head, .cf-res-row { display: grid; grid-template-columns: 1fr 1.2fr 1.4fr; gap: 8px; padding: 11px 4px; align-items: center; }
+        .cf-res-head { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; border-bottom: 2px solid #eee; }
+        .cf-res-row { border-bottom: 1px solid #f2f2f2; font-size: 14px; }
+        .cf-res-fight { font-weight: 700; color: #333; }
+        .cf-res-win { font-weight: 800; } .cf-res-win.meron { color: #dc2626; } .cf-res-win.wala { color: #2563eb; } .cf-res-win.draw { color: #16a34a; }
+        .cf-res-date { color: #888; font-size: 13px; text-align: right; }
+
+        .cf-wallet-menu { display: flex; flex-direction: column; gap: 12px; padding: 6px 2px; }
+        .cf-wallet-bal { text-align: center; font-size: 15px; color: #555; margin-bottom: 4px; } .cf-wallet-bal b { color: #111; font-size: 18px; }
+        .cf-wallet-btn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 54px; border-radius: 14px; border: none; font-size: 16px; font-weight: 800; cursor: pointer; color: #fff; }
+        .cf-wallet-btn.deposit { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .cf-wallet-btn.withdraw { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
         /* ===== LIVE MATCH STRIP ===== */
         .live-strip {
             background: linear-gradient(135deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
@@ -3524,10 +3558,10 @@
                 <input type="hidden" id="bet-amt-auto" value="">
             </div>
             <div class="cf-actions">
-                <button class="cf-act" onclick="openCfSettings()" aria-label="Settings"><span class="material-icons">settings</span></button>
-                <button class="cf-act" onclick="navigate('sec-statement')" aria-label="Statement"><span class="material-icons">description</span></button>
+                <button class="cf-act" onclick="cfShowResults()" aria-label="Previous results"><span class="material-icons">emoji_events</span></button>
+                <button class="cf-act" onclick="cfShowBetHistory()" aria-label="Bet history"><span class="material-icons">receipt_long</span></button>
                 <button class="cf-bet${isAccepting ? ' ready' : ''}" id="cf-bet-btn" onclick="cfPlaceBet()">${isAccepting ? 'PLACE BET' : 'Please Wait...'}</button>
-                <button class="cf-act" onclick="navigate('sec-wallet')" aria-label="Wallet"><span class="material-icons">account_balance_wallet</span></button>
+                <button class="cf-act" onclick="cfWalletMenu()" aria-label="Wallet"><span class="material-icons">account_balance_wallet</span></button>
             </div>
             <div class="cf-roadmap">
                 <div class="cf-road-legend">
@@ -3603,8 +3637,90 @@
         showToast('Commentary: ' + el.textContent, 'info');
     }
 
-    function openCfSettings() {
-        customConfirm('Stream language and sound can be changed from the controls above the match. More settings coming soon.', {title: 'Settings', icon: '⚙️', okText: 'OK', cancelText: ''});
+    // ===== COCKFIGHT POPUPS (bet history / results / wallet) =====
+    function cfCloseModal() {
+        const ov = document.getElementById('cf-modal-overlay');
+        if (ov) ov.remove();
+    }
+    function cfShowModal(title, bodyHtml) {
+        cfCloseModal();
+        const ov = document.createElement('div');
+        ov.id = 'cf-modal-overlay';
+        ov.className = 'cf-modal-overlay';
+        ov.onclick = function(e) { if (e.target === ov) cfCloseModal(); };
+        ov.innerHTML = `<div class="cf-modal">
+            <div class="cf-modal-head">
+                <span>${title}</span>
+                <button class="cf-modal-close" onclick="cfCloseModal()" aria-label="Close"><span class="material-icons">close</span></button>
+            </div>
+            <div class="cf-modal-body">${bodyHtml}</div>
+        </div>`;
+        document.body.appendChild(ov);
+    }
+
+    function cfShowBetHistory() {
+        const teamNames = {1: 'Meron', 2: 'Wala', 3: 'Draw'};
+        const teamCls = {1: 'meron', 2: 'wala', 3: 'draw'};
+        const bets = (userBets || []).filter(b => b.matchType === 'A');
+        let body;
+        if (!bets.length) {
+            body = '<div class="cf-empty"><span class="material-icons">receipt_long</span><p>No cockfight bets yet.<br>Place a bet to see it here.</p></div>';
+        } else {
+            let rows = '';
+            bets.slice(0, 50).forEach(b => {
+                const team = teamNames[b.betTeam] || '—';
+                const cls = teamCls[b.betTeam] || '';
+                let result = 'Pending', rc = 'pending';
+                if (b.matchWinStatus === 4) { result = 'Cancelled'; rc = 'cancelled'; }
+                else if (b.matchWinStatus === 0) { result = 'Pending'; rc = 'pending'; }
+                else if (b.matchWinStatus === b.betTeam) { result = 'Won'; rc = 'won'; }
+                else if (b.matchWinStatus > 0) { result = 'Lost'; rc = 'lost'; }
+                const fight = b.matchNumber || b.match_number || b.matchId || '';
+                const payout = (result === 'Won') ? ('+₹' + (parseFloat(b.amount) * (1 + parseFloat(b.betRatio||0))).toFixed(0)) : (result === 'Lost' ? ('-₹' + b.amount) : '—');
+                rows += `<div class="cf-bh-row">
+                    <div class="cf-bh-team ${cls}">${team}</div>
+                    <div class="cf-bh-mid"><div>${fight ? 'Fight #' + fight : ''}</div><div class="cf-bh-sub">₹${b.amount} @ ${(1+parseFloat(b.betRatio||0)).toFixed(2)}X</div></div>
+                    <div class="cf-bh-res ${rc}">${result}<div class="cf-bh-payout">${payout}</div></div>
+                </div>`;
+            });
+            body = '<div class="cf-bh-list">' + rows + '</div>';
+        }
+        cfShowModal('My Bet History', body);
+    }
+
+    function cfShowResults() {
+        const teamNames = {1: 'Meron', 2: 'Wala', 3: 'Draw'};
+        const teamCls = {1: 'meron', 2: 'wala', 3: 'draw'};
+        const data = matchHistoryData || [];
+        let body;
+        if (!data.length) {
+            body = '<div class="cf-empty"><span class="material-icons">emoji_events</span><p>No results yet.</p></div>';
+        } else {
+            let rows = '<div class="cf-res-head"><div>Fight</div><div>Winner</div><div>Date</div></div>';
+            data.slice(0, 50).forEach(m => {
+                const winner = teamNames[m.winTeam] || 'Unknown';
+                const cls = teamCls[m.winTeam] || '';
+                const date = m.createdDate ? new Date(m.createdDate).toLocaleString('en-IN', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+                rows += `<div class="cf-res-row">
+                    <div class="cf-res-fight">#${m.matchNumber || m.id}</div>
+                    <div class="cf-res-win ${cls}">${winner}</div>
+                    <div class="cf-res-date">${date}</div>
+                </div>`;
+            });
+            body = '<div class="cf-res-list">' + rows + '</div>';
+        }
+        cfShowModal('Previous Results', body);
+        if (!data.length) loadMatchHistory();
+    }
+
+    function cfWalletMenu() {
+        const bal = (typeof userInfo === 'object' && userInfo) ? (userInfo.wallet_balance || 0) : 0;
+        const body = `<div class="cf-wallet-menu">
+            <div class="cf-wallet-bal">Balance <b>₹${formatCurrencyFull(bal)}</b></div>
+            <button class="cf-wallet-btn deposit" onclick="cfCloseModal(); openDeposit();"><span class="material-icons">add_circle</span> Deposit</button>
+            <button class="cf-wallet-btn withdraw" onclick="cfCloseModal(); openWithdraw();"><span class="material-icons">account_balance</span> Withdraw</button>
+        </div>`;
+        cfShowModal('Wallet', body);
     }
 
     // Bead-plate roadmap from matchHistory (array of 'meron'|'wala'|'draw')
