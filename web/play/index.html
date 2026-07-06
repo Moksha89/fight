@@ -2148,6 +2148,25 @@
         .banner-carousel, .quick-actions, .game-cards, .game-banners, .stats-bar { margin-bottom: 12px !important; }
         .live-strip { margin-bottom: 12px !important; }
         .cf-roadmap { margin: 10px !important; }
+
+        /* ===== Manual / India cockfight match card (White vs Black + breeder names) ===== */
+        #cockfight-container .match-card { margin-bottom: 12px; }
+        .match-teams { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 18px 14px; background: linear-gradient(180deg,#ffffff,#f4faf8); }
+        .match-teams .team { flex: 1 1 0; min-width: 0; text-align: center; }
+        .match-teams .team img { width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.18)); }
+        .match-teams .team-name { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 8px; word-break: break-word; line-height: 1.2; }
+        .match-teams .team-breeder { font-size: 12px; color: var(--text-secondary); margin-top: 3px; word-break: break-word; line-height: 1.2; }
+        .match-teams .team-odds { display: none; }
+        .match-teams .vs-badge { flex: 0 0 auto; align-self: center; }
+        .bet-panel { padding: 14px; border-top: 1px solid var(--border-light); }
+        .bet-buttons { display: flex; gap: 8px; margin-bottom: 12px; }
+        .bet-btn { flex: 1; min-width: 0; text-align: center; padding: 12px 6px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; background: #eef1f0; color: var(--text-primary); border: 2px solid transparent; transition: all .15s; }
+        .bet-btn.selected { background: var(--primary-light); border-color: var(--gold); color: var(--text-primary); }
+        .bet-amount-row { display: flex; gap: 8px; }
+        .bet-amount-row input { flex: 1; min-width: 0; padding: 12px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px; background: #fff; color: var(--text-primary); }
+        .bet-submit { flex: 0 0 auto; padding: 12px 22px; border: none; border-radius: 12px; background: var(--gold); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .match-live { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #22c55e; background: rgba(34,197,94,0.15); padding: 4px 10px; border-radius: 12px; }
+        .match-closed { font-size: 11px; color: var(--text-muted); font-weight: 600; padding: 4px 10px; border-radius: 12px; background: #f1f1f1; }
     </style>
 </head>
 <body>
@@ -3864,32 +3883,35 @@
 
     function renderManualChannel() {
         const container = document.getElementById('cockfight-container');
-        if (!manualMatchData || !Array.isArray(manualMatchData)) {
-            container.innerHTML = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>No matches available</p></div>';
-            return;
-        }
+        const bal = (typeof userInfo === 'object' && userInfo) ? (userInfo.wallet_balance || 0) : 0;
         const zoneId = currentChannel.replace('zone-', '');
-        const zone = manualMatchData.find(z => String(z.id) === String(zoneId));
-        if (!zone || !zone.matches) {
-            container.innerHTML = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>No matches in this zone</p></div>';
-            return;
-        }
+        const zone = (manualMatchData && Array.isArray(manualMatchData))
+            ? manualMatchData.find(z => String(z.id) === String(zoneId)) : null;
+        const zoneName = (zone && zone.name) ? zone.name : 'Cock Fight';
+        // Immersive shell: back + title + wallet, then the category tabs (always present so users can switch back).
+        const shell = (inner) => `
+            <div class="cf-topbar">
+                <button class="cf-back" onclick="navigate('sec-home')" aria-label="Back"><span class="material-icons">arrow_back</span></button>
+                <div class="cf-title">${zoneName.toUpperCase()} COCKFIGHT</div>
+                <span class="cf-wallet" onclick="cfWalletMenu()"><span class="material-icons">account_balance_wallet</span> ₹${formatCurrencyFull(bal)}</span>
+            </div>
+            <div class="cf-controls"><div class="cf-cats">${cfCategoryTabsHtml()}</div></div>
+            ${inner}`;
+        const emptyMsg = (msg) => `<div class="empty-state" style="padding:40px 16px;"><span class="material-icons">sports_mma</span><p>${msg}</p></div>`;
+
+        if (!zone || !zone.matches) { container.innerHTML = shell(emptyMsg('No match scheduled yet. Check back soon.')); return; }
         const matches = zone.matches.results || zone.matches;
-        if (!matches || !matches.length) {
-            container.innerHTML = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>No active matches</p></div>';
-            return;
-        }
-        let html = '<div class="cf-controls" style="border-radius:14px 14px 0 0;"><div class="cf-cats">' + cfCategoryTabsHtml() + '</div></div>';
+        if (!matches || !matches.length) { container.innerHTML = shell(emptyMsg('No match scheduled yet. Check back soon.')); return; }
+
+        let cards = '';
         matches.forEach(match => {
             if (!match.isLive) return;
-            const teamAName = match.teamAName || 'Meron';
-            const teamBName = match.teamBName || 'Wala';
+            const teamAName = match.teamAName || 'White Cock';
+            const teamBName = match.teamBName || 'Black Cock';
+            const teamABreeder = match.teamABreeder || '';
+            const teamBBreeder = match.teamBBreeder || '';
             const teamAIcon = match.teamAIcon ? (match.teamAIcon.startsWith('http') ? match.teamAIcon : `${match.teamAIcon}`) : '';
             const teamBIcon = match.teamBIcon ? (match.teamBIcon.startsWith('http') ? match.teamBIcon : `${match.teamBIcon}`) : '';
-            const minA = match.minThresholdTeamA || '0.75';
-            const maxA = match.maxThresholdTeamA || '0.85';
-            const minB = match.minThresholdTeamB || '0.75';
-            const maxB = match.maxThresholdTeamB || '0.85';
             const ytLink = match.youtubeLiveLink || '';
             const whepKey = match.webrtcStreamKey || '';
             let streamHtml = '';
@@ -3904,24 +3926,24 @@
                 else if (ytLink.includes('v=')) videoId = ytLink.split('v=')[1].split('&')[0];
                 if (videoId) streamHtml = `<div class="stream-container"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0" allowfullscreen></iframe></div>`;
             }
-            html += `
+            cards += `
             <div class="match-card">
                 <div class="match-header">
                     <div class="match-title">${match.title || zone.name}</div>
-                    ${match.isBettingEnabled ? '<span class="match-live">● LIVE</span>' : '<span class="match-closed">Betting Closed</span>'}
+                    ${match.isBettingEnabled ? '<span class="match-live">● BETTING OPEN</span>' : '<span class="match-closed">Betting Closed</span>'}
                 </div>
                 ${streamHtml}
                 <div class="match-teams">
                     <div class="team">
-                        ${teamAIcon ? `<img src="${teamAIcon}" alt="${teamAName}">` : `<img src="/static/red_roaster.png" alt="${teamAName}" style="width:48px;height:48px;object-fit:contain;">`}
+                        <img src="${teamAIcon || '/static/red_roaster.png'}" alt="${teamAName}">
                         <div class="team-name">${teamAName}</div>
-                        <div class="team-odds">${minA}x - ${maxA}x</div>
+                        ${teamABreeder ? `<div class="team-breeder">${teamABreeder}</div>` : ''}
                     </div>
                     <div class="vs-badge">VS</div>
                     <div class="team">
-                        ${teamBIcon ? `<img src="${teamBIcon}" alt="${teamBName}">` : `<img src="/static/blue_roaster.png" alt="${teamBName}" style="width:48px;height:48px;object-fit:contain;">`}
+                        <img src="${teamBIcon || '/static/blue_roaster.png'}" alt="${teamBName}">
                         <div class="team-name">${teamBName}</div>
-                        <div class="team-odds">${minB}x - ${maxB}x</div>
+                        ${teamBBreeder ? `<div class="team-breeder">${teamBBreeder}</div>` : ''}
                     </div>
                 </div>
                 ${match.isBettingEnabled ? `
@@ -3945,8 +3967,8 @@
                 </div>` : ''}
             </div>`;
         });
-        if (!html) html = '<div class="empty-state"><span class="material-icons">sports_mma</span><p>No live matches in this zone</p></div>';
-        container.innerHTML = html;
+        if (!cards) cards = emptyMsg('No live match right now. Check back soon.');
+        container.innerHTML = shell(cards);
         initWhepPlayers();
     }
 
