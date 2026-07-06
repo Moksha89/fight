@@ -2496,15 +2496,10 @@
             <!-- HOME -->
             <div id="sec-home" class="section active hp-root">
               <div class="hp-wrap">
-                <!-- Brand -->
-                <div class="hp-brand">
+                <!-- Brand + Login/Register (logged out) or profile icons (logged in) -->
+                <div class="hp-brand hp-top">
                     <img src="/static/logo.png?v=2" alt="RoosterRun" onerror="this.style.display='none'">
                     <h2>RoosterRun</h2>
-                </div>
-                <!-- Top bar: balance, coins, Login/Register (logged out) or profile (logged in) -->
-                <div class="hp-top">
-                    <div class="hp-bal" onclick="if(token)navigate('sec-wallet')"><span class="material-icons">savings</span> <span id="hp-balance">G0.00</span></div>
-                    <div class="hp-coins"><span class="material-icons">diamond</span> <span id="hp-coins">0</span></div>
                     <div class="hp-auth" id="hp-auth">
                         <button class="hp-btn-login" onclick="showAuthScreen('login')">Login</button>
                         <button class="hp-btn-reg" onclick="showAuthScreen('register')">Register</button>
