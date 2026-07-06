@@ -731,21 +731,22 @@
         }
         .live-strip::before {
             content: ''; position: absolute; top: -50%; right: -10%;
-            width: 200px; height: 200px;
+            width: 200px; height: 200px; max-width: 60%; pointer-events: none;
             background: radial-gradient(circle, rgba(106,189,167,0.08) 0%, transparent 70%);
             border-radius: 50%;
         }
         .live-strip:hover { border-color: var(--gold); box-shadow: 0 4px 20px rgba(106,189,167,0.1); }
-        .live-strip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; position: relative; }
-        .live-strip-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-        .live-strip-status { font-size: 11px; padding: 4px 12px; border-radius: 12px; font-weight: 700; letter-spacing: 0.3px; }
+        .live-strip-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; position: relative; }
+        .live-strip-title { font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .live-strip-title .live-dot { flex: 0 0 auto; }
+        .live-strip-status { font-size: 10.5px; padding: 4px 10px; border-radius: 12px; font-weight: 700; letter-spacing: 0.3px; flex: 0 0 auto; white-space: nowrap; }
         .live-strip-status.open { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
         .live-strip-status.closed { background: rgba(239,68,68,0.12); color: #F8605B; }
-        .live-strip-teams { display: flex; justify-content: space-around; align-items: center; position: relative; }
-        .live-strip-team { text-align: center; }
+        .live-strip-teams { display: flex; justify-content: space-around; align-items: flex-start; gap: 6px; position: relative; }
+        .live-strip-team { text-align: center; min-width: 0; flex: 1 1 0; }
         .live-strip-team img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); }
-        .live-strip-team span { display: block; font-size: 13px; font-weight: 700; margin-top: 6px; letter-spacing: 0.5px; }
-        .live-strip-vs { font-size: 16px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px rgba(106,189,167,0.3); }
+        .live-strip-team span { display: block; font-size: 13px; font-weight: 700; margin-top: 6px; letter-spacing: 0.3px; word-break: break-word; line-height: 1.25; }
+        .live-strip-vs { flex: 0 0 auto; font-size: 16px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px rgba(106,189,167,0.3); }
 
         /* ===== STATS BAR ===== */
         .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
