@@ -636,6 +636,11 @@
         .cf-tz-pct { font-size: clamp(12px, 3.6vw, 18px); font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
         .cf-tzb.disabled .cf-tz-label, .cf-tzb.disabled .cf-tz-pct { opacity: .85; }
         .cf-odd.disabled { opacity: 0.55; cursor: not-allowed; }
+        .cf-tz-stake { margin-top: 4px; background: #FFD37A; color: #3a2a06; font-size: clamp(11px, 3.2vw, 15px); font-weight: 800; padding: 2px 9px; border-radius: 11px; box-shadow: 0 3px 8px rgba(0,0,0,.35); animation: cfStakePop .28s cubic-bezier(.2,.9,.3,1.4); }
+        @keyframes cfStakePop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .chip-fly { position: fixed; z-index: 5000; width: 38px; height: 38px; margin: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #17403a; pointer-events: none;
+            background: radial-gradient(circle at 50% 32%, #B4DDD1, #4FA88F 72%); border: 3px dashed rgba(255,255,255,0.85); box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+            transform: translate(-50%,-50%) scale(1); opacity: 1; transition: transform .58s cubic-bezier(.35,.85,.4,1), opacity .58s ease; }
 
         .cf-chips { position: relative; z-index: 2; display: flex; gap: 6px; justify-content: space-between; overflow-x: auto; margin-top: 16px; padding: 2px 0 6px; -webkit-overflow-scrolling: touch; }
         .cf-chips::-webkit-scrollbar { height: 0; }
@@ -3912,6 +3917,7 @@
 
     function selectChip(el, amount) {
         selectedChipAmount = amount;
+        cfChipDenom['auto'] = amount;
         document.querySelectorAll('.chips-row .chip').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
         const inp = document.getElementById('bet-amt-auto');
@@ -4068,10 +4074,98 @@
 
     function cfSelectCoin(el, amount) {
         selectedChipAmount = amount;
+        cfChipDenom['auto'] = amount;
         document.querySelectorAll('.cf-coin').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
-        const inp = document.getElementById('bet-amt-auto');
-        if (inp) inp.value = amount;
+    }
+
+    // ===== Bet sounds (WebAudio — no asset files, works offline) =====
+    var _sfxCtx = null;
+    function sfxCtx() {
+        try {
+            if (!_sfxCtx) _sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (_sfxCtx.state === 'suspended') _sfxCtx.resume();
+        } catch (e) { return null; }
+        return _sfxCtx;
+    }
+    function sfxTone(ctx, t0, freq, dur, type, peak) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = type || 'sine';
+        o.frequency.setValueAtTime(freq, t0);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(peak || 0.25, t0 + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t0); o.stop(t0 + dur + 0.02);
+    }
+    // Poker-chip clink: quick high blips + a short noise tick.
+    function sfxChip() {
+        var ctx = sfxCtx(); if (!ctx) return;
+        var t = ctx.currentTime;
+        sfxTone(ctx, t, 1250, 0.08, 'triangle', 0.22);
+        sfxTone(ctx, t + 0.04, 1720, 0.07, 'triangle', 0.16);
+        try {
+            var b = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate), d = b.getChannelData(0);
+            for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+            var src = ctx.createBufferSource(), ng = ctx.createGain();
+            src.buffer = b; ng.gain.value = 0.12; src.connect(ng); ng.connect(ctx.destination); src.start(t);
+        } catch (e) {}
+    }
+    // Place-bet confirmation ding.
+    function sfxPlace() {
+        var ctx = sfxCtx(); if (!ctx) return;
+        var t = ctx.currentTime;
+        sfxTone(ctx, t, 660, 0.14, 'sine', 0.28);
+        sfxTone(ctx, t + 0.1, 990, 0.22, 'sine', 0.28);
+    }
+    // Win fanfare: ascending arpeggio.
+    function sfxWin() {
+        var ctx = sfxCtx(); if (!ctx) return;
+        var t = ctx.currentTime, notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach(function(f, i) { sfxTone(ctx, t + i * 0.11, f, 0.35, 'triangle', 0.3); });
+    }
+
+    // Accumulated stake per betting scope (scope = 'auto' or a manual match id).
+    var cfChipDenom = {};  // scope -> selected chip denomination
+    var cfStake = {};       // scope -> { code, amount } for the currently selected outcome
+
+    // Animate a chip flying from the chosen denomination into the tapped odds panel.
+    function cfFlyChip(scope, targetPathEl, amount) {
+        if (!targetPathEl || !targetPathEl.getBoundingClientRect) return;
+        var tr = targetPathEl.getBoundingClientRect();
+        var toX = tr.left + tr.width / 2, toY = tr.top + tr.height / 2;
+        var fromEl = null;
+        if (scope === 'auto') fromEl = document.querySelector('.cf-coin.selected');
+        else fromEl = document.querySelector('.match-card .quick-chips .chip.selected');
+        var fromX, fromY;
+        if (fromEl) { var fr = fromEl.getBoundingClientRect(); fromX = fr.left + fr.width / 2; fromY = fr.top + fr.height / 2; }
+        else { fromX = toX; fromY = toY + 160; }
+        var chip = document.createElement('div');
+        chip.className = 'chip-fly';
+        chip.textContent = amount >= 1000 ? (amount / 1000) + 'K' : ('' + amount);
+        chip.style.left = fromX + 'px';
+        chip.style.top = fromY + 'px';
+        document.body.appendChild(chip);
+        // force reflow, then transition to target
+        void chip.offsetWidth;
+        chip.style.transform = 'translate(-50%,-50%) translate(' + (toX - fromX) + 'px,' + (toY - fromY) + 'px) scale(0.55) rotate(320deg)';
+        chip.style.opacity = '0.15';
+        setTimeout(function(){ if (chip.parentNode) chip.remove(); }, 620);
+    }
+
+    // Show the running staked amount on the selected column; clear the others.
+    function cfUpdateStakeBadge(board, code, amount) {
+        if (!board) return;
+        board.querySelectorAll('.cf-tz-stake').forEach(function(s){ s.remove(); });
+        var cols = board.querySelectorAll('.cf-tz-col');
+        var idx = (String(code) === '1') ? 0 : (String(code) === '3' ? 1 : 2);
+        var col = cols[idx];
+        if (col) {
+            var s = document.createElement('div');
+            s.className = 'cf-tz-stake';
+            s.textContent = '₹' + amount.toLocaleString('en-IN');
+            col.appendChild(s);
+        }
     }
 
     function cfPlaceBet() {
@@ -4233,6 +4327,8 @@
         selectedAutoTeam = null; selectedAutoTeamName = '';
         selectedBets['auto'] = null;
         selectedChipAmount = 0;
+        cfStake['auto'] = null; cfChipDenom['auto'] = 0;
+        document.querySelectorAll('.cf-tz-stake').forEach(function(s){ s.remove(); });
         const inp = document.getElementById('bet-amt-auto');
         if (inp) inp.value = '';
         const row = document.getElementById('auto-ratio-row');
@@ -4328,9 +4424,29 @@
     }
     // Shared outcome picker for the trapezoid board (scope = 'auto' or a manual match id).
     function cfSelectOutcome(evt, scope, code, label) {
+        var prev = selectedBets[scope];
+        var switching = !prev || String(prev.team) !== String(code);
         selectedBets[scope] = { team: code, teamName: label };
-        var board = (evt && evt.currentTarget) ? evt.currentTarget.closest('.cf-tzb') : null;
+        var tgt = (evt && evt.currentTarget) ? evt.currentTarget : null;
+        var board = tgt ? tgt.closest('.cf-tzb') : null;
         if (board) cfHighlightBoard(board, code);
+
+        // Chip toss + accumulate stake when a denomination is selected.
+        var denom = cfChipDenom[scope] || (scope === 'auto' ? selectedChipAmount : 0);
+        if (denom > 0) {
+            var cur = cfStake[scope];
+            if (cur && !switching) cur.amount += denom;
+            else cfStake[scope] = { code: code, amount: denom };
+            var amtId = 'bet-amt-' + (scope === 'auto' ? 'auto' : scope);
+            var amtEl = document.getElementById(amtId);
+            if (amtEl) amtEl.value = cfStake[scope].amount;
+            sfxChip();
+            if (tgt) cfFlyChip(scope, tgt, denom);
+            if (board) cfUpdateStakeBadge(board, code, cfStake[scope].amount);
+        } else if (board) {
+            cfUpdateStakeBadge(board, code, (cfStake[scope] && !switching) ? cfStake[scope].amount : 0);
+        }
+
         if (scope === 'auto') {
             selectedAutoTeam = code; selectedAutoTeamName = label;
             var o = currentOdds || {}, ratio;
@@ -4533,6 +4649,7 @@
             });
             const data = await res.json();
             if (res.ok || res.status === 201) {
+                sfxPlace();
                 const betId = data.id || data.bet_id || '—';
                 const potentialWin = (parseFloat(amount) * ratio).toFixed(2);
                 showBetReceipt({
@@ -4750,7 +4867,28 @@
     }
 
     function setAmount(matchId, amount) {
-        document.getElementById(`bet-amt-${matchId}`).value = amount;
+        cfChipDenom[matchId] = amount;
+        // mark the chosen quick chip within this match card
+        var input = document.getElementById(`bet-amt-${matchId}`);
+        var card = input ? input.closest('.match-card') : null;
+        if (card && event && event.currentTarget) {
+            card.querySelectorAll('.quick-chips .chip').forEach(c => c.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+        // If an outcome is already picked, toss a chip straight in; else prime the input.
+        if (selectedBets[matchId]) {
+            var cur = cfStake[matchId];
+            if (cur && String(cur.code) === String(selectedBets[matchId].team)) cur.amount += amount;
+            else cfStake[matchId] = { code: selectedBets[matchId].team, amount: amount };
+            if (input) input.value = cfStake[matchId].amount;
+            sfxChip();
+            var board = card ? card.querySelector('.cf-tzb') : null;
+            var tgt = board ? board.querySelector('path[data-code="' + selectedBets[matchId].team + '"]') : null;
+            if (tgt) cfFlyChip(matchId, tgt, amount);
+            if (board) cfUpdateStakeBadge(board, selectedBets[matchId].team, cfStake[matchId].amount);
+        } else if (input) {
+            input.value = amount;
+        }
     }
 
     let selectedBets = {};
@@ -4775,6 +4913,8 @@
             });
             const data = await res.json();
             if (res.ok || res.status === 201) {
+                sfxPlace();
+                cfStake[matchId] = null; cfChipDenom[matchId] = 0;
                 const betId = data.id || data.bet_id || '—';
                 showBetReceipt({
                     type: 'Cockfight',
@@ -5837,6 +5977,7 @@
         // Fix #4: Unlock submission
         diceBetSubmitting = false;
         if (success > 0) {
+            sfxPlace();
             showToast(success + ' bet' + (success>1?'s':'') + ' placed!', 'success');
             diceSelectedNums = [];
             loadUserInfo();
@@ -5856,6 +5997,7 @@
         var overlay = document.createElement('div');
         overlay.className = 'dice-result-overlay';
         if (isWin) {
+            sfxWin();
             diceSpawnConfetti();
             overlay.innerHTML = '<div class="dice-result-card win"><div class="dice-result-emoji">🎉</div><div class="dice-result-text" style="color:var(--gold);">YOU WON!</div>' + (amount > 0 ? '<div class="dice-result-amount" style="color:var(--success);">+₹' + amount.toLocaleString('en-IN') + '</div>' : '') + '</div>';
         } else {
@@ -5989,6 +6131,7 @@
                 if (userBet) {
                     if (userBet.betTeam === winTeam) {
                         const won = parseFloat(userBet.amount) + parseFloat(userBet.amount) * parseFloat(userBet.betRatio);
+                        sfxWin();
                         showToast(`You WON ₹${won.toFixed(0)} on Fight #${lastAutoMatchId}!`, 'success');
                     } else {
                         showToast(`You lost ₹${userBet.amount} on Fight #${lastAutoMatchId}`, 'error');
