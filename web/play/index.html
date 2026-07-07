@@ -433,6 +433,7 @@
             margin-top: var(--header-height);
             margin-left: var(--sidebar-width);
             padding: 24px;
+            padding-bottom: 110px;
             min-height: calc(100vh - var(--header-height));
             transition: margin-left 0.3s ease;
         }
@@ -1564,7 +1565,7 @@
             .app-sidebar { transform: translateX(-100%); z-index: 95; width: var(--sidebar-width); }
             .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
             .sidebar-toggle { display: flex; }
-            .app-main { margin-left: 0; padding: 12px; padding-bottom: 72px; }
+            .app-main { margin-left: 0; padding: 12px; padding-bottom: 138px; }
             .bottom-nav { display: flex; }
 
             /* Header compact — hide deposit/withdraw btns on small mobile */
@@ -1776,7 +1777,7 @@
             .app-sidebar { transform: translateX(-100%); z-index: 95; }
             .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
             .sidebar-toggle { display: flex; }
-            .app-main { margin-left: 0; padding: 16px; padding-bottom: 76px; }
+            .app-main { margin-left: 0; padding: 16px; padding-bottom: 138px; }
             .bottom-nav { display: flex; }
 
             .app-header { padding: 0 14px; }
@@ -1846,7 +1847,7 @@
             .app-sidebar:hover .sidebar-item span:not(.material-icons):not(.badge) { display: inline; }
             .app-sidebar:hover .sidebar-item .badge { position: static; margin-left: auto; }
 
-            .app-main { margin-left: var(--sidebar-width); padding: 20px; }
+            .app-main { margin-left: var(--sidebar-width); padding: 20px; padding-bottom: 110px; }
             .bottom-nav { display: none !important; }
 
             .banner-carousel { height: 180px; }
@@ -1879,7 +1880,7 @@
 
             .app-sidebar { width: var(--sidebar-width); }
             .sidebar-toggle { display: none; }
-            .app-main { margin-left: var(--sidebar-width); padding: 24px; max-width: calc(100% - var(--sidebar-width)); }
+            .app-main { margin-left: var(--sidebar-width); padding: 24px; padding-bottom: 110px; max-width: calc(100% - var(--sidebar-width)); }
             .bottom-nav { display: none !important; }
 
             .banner-carousel { height: 200px; }
@@ -4029,8 +4030,7 @@
             <div class="cf-controls">
                 <div class="cf-cats">${cfCategoryTabsHtml()}</div>
                 <div class="cf-sound">
-                    <span class="material-icons active" id="cf-snd-on" onclick="cfSetMute(false)" aria-label="Sound on">volume_up</span>
-                    <span class="material-icons muted" id="cf-snd-off" onclick="cfSetMute(true)" aria-label="Mute">music_off</span>
+                    <span class="material-icons ${cfMuted ? 'muted' : 'active'}" id="cf-snd-toggle" onclick="cfToggleMute()" aria-label="Toggle sound">${cfMuted ? 'volume_off' : 'volume_up'}</span>
                 </div>
             </div>
             <div class="cf-arena">
@@ -4212,12 +4212,15 @@
     var cfMuted = true;
     function cfSetMute(mute) {
         cfMuted = mute;
-        const on = document.getElementById('cf-snd-on');
-        const off = document.getElementById('cf-snd-off');
-        if (on) on.classList.toggle('active', !mute);
-        if (off) off.classList.toggle('muted', mute);
+        const t = document.getElementById('cf-snd-toggle');
+        if (t) {
+            t.textContent = mute ? 'volume_off' : 'volume_up';
+            t.classList.toggle('muted', mute);
+            t.classList.toggle('active', !mute);
+        }
         showToast(mute ? 'Stream muted' : 'Stream unmuted', 'info');
     }
+    function cfToggleMute() { cfSetMute(!cfMuted); }
 
     var cfLangs = ['Telugu', 'Hindi', 'English', 'Tamil'];
     function cfCycleLang(el) {
@@ -5008,9 +5011,7 @@
 
         let html = '';
         pageItems.forEach(t => {
-            const _desc = (t.description || '').toLowerCase();
-            const isCredit = t.type === 'Funds In'
-                || /\b(won|win|winnings|refund|refunded|reversal|reversed|bonus|cashback|credited|deposit(?:ed)?)\b/.test(_desc);
+            const isCredit = txnIsCredit(t);
             html += `
             <div class="txn-item">
                 <div class="txn-icon ${isCredit ? 'credit' : 'debit'}">
@@ -5047,10 +5048,17 @@
         var _protected = { 'sec-cockfight': 1, 'sec-dice': 1, 'sec-wallet': 1, 'sec-profile': 1, 'sec-statement': 1, 'sec-mybets': 1, 'sec-referral': 1, 'sec-notifications': 1 };
         if (!token && _protected[sectionId]) { showAuthScreen('login'); return; }
 
+        // Close any open modals/overlays so they don't linger over the new screen.
+        ['deposit-modal', 'withdraw-modal', 'password-modal', 'provably-fair-modal'].forEach(function (id) {
+            var m = document.getElementById(id); if (m) m.classList.remove('show');
+        });
+        var _cfov = document.getElementById('cf-modal-overlay'); if (_cfov) _cfov.remove();
+
         var sec = document.getElementById(sectionId);
         if (sec && sec.dataset.game && Array.isArray(activeGameIds) && activeGameIds.length && !activeGameIds.includes(sec.dataset.game)) {
             sectionId = 'sec-home'; sec = document.getElementById(sectionId);
         }
+        if (!sec) return;
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         sec.classList.add('active');
 
@@ -5507,15 +5515,24 @@
         } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
+    // Robust credit detection shared by statement, wallet summary, recent txns and CSV export.
+    var TXN_WIN_RE = /\b(won|win|winnings|refund|refunded|reversal|reversed|bonus|cashback)\b/;
+    var TXN_CREDIT_RE = /\b(won|win|winnings|refund|refunded|reversal|reversed|bonus|cashback|credited|deposit(?:ed)?)\b/;
+    function txnIsCredit(t) {
+        var d = ((t && t.description) || '').toLowerCase();
+        return (t && t.type === 'Funds In') || TXN_CREDIT_RE.test(d);
+    }
+
     // ===== WALLET SUMMARY =====
     function updateWalletSummary() {
         let deposited = 0, withdrawn = 0, winnings = 0;
         allTransactions.forEach(t => {
             const desc = (t.description||'').toLowerCase();
             const amt = parseFloat(t.amount) || 0;
-            if (desc.includes('deposit') || (t.type === 'Funds In' && !desc.includes('win') && !desc.includes('refund'))) deposited += amt;
+            const isWin = TXN_WIN_RE.test(desc);
+            if (/\bdeposit(?:ed)?\b/.test(desc) || (t.type === 'Funds In' && !isWin)) deposited += amt;
             else if (desc.includes('withdraw')) withdrawn += amt;
-            else if (desc.includes('win') || desc.includes('refund')) winnings += amt;
+            else if (isWin) winnings += amt;
         });
         document.getElementById('ws-deposited').textContent = '₹' + deposited.toLocaleString();
         document.getElementById('ws-withdrawn').textContent = '₹' + withdrawn.toLocaleString();
@@ -5526,7 +5543,7 @@
         if (recent.length === 0) { container.innerHTML = '<div class="empty-state"><span class="material-icons">receipt_long</span><p>No transactions yet</p></div>'; return; }
         let html = '';
         recent.forEach(t => {
-            const isCredit = t.type === 'Funds In' || (t.description||'').includes('win') || (t.description||'').includes('refund') || (t.description||'').includes('deposit');
+            const isCredit = txnIsCredit(t);
             html += `<div class="txn-item"><div class="txn-icon ${isCredit?'credit':'debit'}"><span class="material-icons">${isCredit?'arrow_downward':'arrow_upward'}</span></div><div class="txn-details"><div class="txn-desc">${t.description}</div><div class="txn-date">${t.date}</div></div><div class="txn-amount ${isCredit?'credit':'debit'}">${isCredit?'+':'-'}₹${t.amount}</div></div>`;
         });
         container.innerHTML = html;
@@ -6527,7 +6544,7 @@
         if (!stmtData || stmtData.length === 0) { showToast('No transactions to export', 'error'); return; }
         var csv = 'Date,Description,Type,Amount,Hash\n';
         stmtData.forEach(function(t) {
-            var isCredit = t.type === 'Funds In' || (t.description && (t.description.includes('win') || t.description.includes('refund') || t.description.includes('deposit')));
+            var isCredit = txnIsCredit(t);
             csv += '"' + (t.date||'') + '","' + (t.description||'').replace(/"/g,'""') + '","' + (isCredit?'Credit':'Debit') + '","' + (isCredit?'+':'-') + t.amount + '","' + (t.hash||'') + '"\n';
         });
         var blob = new Blob([csv], {type:'text/csv'});
