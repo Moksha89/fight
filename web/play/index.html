@@ -4127,20 +4127,19 @@
         const zone = (manualMatchData && Array.isArray(manualMatchData))
             ? manualMatchData.find(z => String(z.id) === String(zoneId)) : null;
         const zoneName = (zone && zone.name) ? zone.name : 'Cock Fight';
-        // Immersive shell: back + title + wallet, then the category tabs (always present so users can switch back).
-        const shell = (inner) => `
+        const topbar = `
             <div class="cf-topbar">
                 <button class="cf-back" onclick="navigate('sec-home')" aria-label="Back"><span class="material-icons">arrow_back</span></button>
                 <div class="cf-title">${zoneName.toUpperCase()} COCKFIGHT</div>
                 <span class="cf-wallet" onclick="cfWalletMenu()"><span class="material-icons">account_balance_wallet</span> ₹${formatCurrencyFull(bal)}</span>
-            </div>
-            <div class="cf-controls"><div class="cf-cats">${cfCategoryTabsHtml()}</div></div>
-            ${inner}`;
+            </div>`;
+        const catsRow = `<div class="cf-controls"><div class="cf-cats">${cfCategoryTabsHtml()}</div></div>`;
         const emptyMsg = (msg) => `<div class="empty-state" style="padding:40px 16px;"><span class="material-icons">sports_mma</span><p>${msg}</p></div>`;
 
-        if (!zone) { container.innerHTML = shell(emptyMsg('No match scheduled yet. Check back soon.')); return; }
+        // Empty zones: keep the category tabs at the top so users can switch away.
+        if (!zone) { container.innerHTML = topbar + catsRow + emptyMsg('No match scheduled yet. Check back soon.'); return; }
         const matches = cfActiveMatches(zone);
-        if (!matches.length) { container.innerHTML = shell(emptyMsg('No match scheduled yet. Check back soon.')); return; }
+        if (!matches.length) { container.innerHTML = topbar + catsRow + emptyMsg('No match scheduled yet. Check back soon.'); return; }
 
         // Live matches first, then scheduled (soonest first).
         matches.sort(function(a, b) {
@@ -4148,45 +4147,58 @@
             return new Date(a.scheduledStart || 0) - new Date(b.scheduledStart || 0);
         });
 
-        let cards = matches.map(function(match) { return cfManualMatchCard(match, zone); }).join('');
-        if (!cards) cards = emptyMsg('No live match right now. Check back soon.');
-        container.innerHTML = shell(cards);
+        // Primary match's video sits on top; category tabs go BELOW the video frame.
+        const primary = matches[0];
+        const heroMedia = cfMatchMedia(primary);
+        const cards = matches.map(function(match, i) { return cfManualMatchCard(match, zone, i === 0); }).join('');
+        container.innerHTML = topbar + heroMedia + catsRow + cards;
         initWhepPlayers();
     }
 
-    // Build one manual-match card: live (with stream + betting when enabled) or scheduled (countdown, betting locked).
-    function cfManualMatchCard(match, zone) {
+    // Video / schedule-hero block for a match (used both as the top video frame and inside cards).
+    function cfMatchMedia(match) {
+        const ytLink = match.youtubeLiveLink || '';
+        const whepKey = match.webrtcStreamKey || '';
+        const live = !!match.isLive;
+        if (live && whepKey) {
+            return `<div class="stream-container" style="position:relative;">
+                <video id="whep-${match.id}" data-whep-key="${whepKey}" autoplay muted playsinline controls style="width:100%;height:100%;background:#000;object-fit:contain;"></video>
+                <span style="position:absolute;top:6px;right:8px;background:rgba(0,0,0,0.6);color:var(--gold);font-size:10px;padding:2px 6px;border-radius:4px;">LOW LATENCY</span>
+            </div>`;
+        }
+        if (live && ytLink) {
+            let videoId = '';
+            if (ytLink.includes('youtu.be/')) videoId = ytLink.split('youtu.be/')[1].split('?')[0];
+            else if (ytLink.includes('v=')) videoId = ytLink.split('v=')[1].split('&')[0];
+            if (videoId) return `<div class="stream-container"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0" allowfullscreen></iframe></div>`;
+        }
+        if (!live) {
+            const sp = cfScheduleParts(match.scheduledStart);
+            return `<div class="cf-sched-hero">
+                <span class="material-icons" style="font-size:30px;opacity:0.6;">event</span>
+                <div class="cf-sched-time">${sp.time}</div>
+                ${sp.cd ? `<div class="cf-sched-cd">${sp.cd}</div>` : ''}
+            </div>`;
+        }
+        // Live but no stream configured — still show a frame so tabs sit below it.
+        return `<div class="cf-sched-hero">
+            <span class="material-icons" style="font-size:32px;opacity:0.5;">videocam_off</span>
+            <div class="cf-sched-cd">Live now — waiting for stream</div>
+        </div>`;
+    }
+
+    // Build one manual-match card. Set skipMedia when the video is rendered separately (as the top frame).
+    function cfManualMatchCard(match, zone, skipMedia) {
         const teamAName = match.teamAName || 'White Cock';
         const teamBName = match.teamBName || 'Black Cock';
         const teamABreeder = match.teamABreeder || '';
         const teamBBreeder = match.teamBBreeder || '';
         const teamAIcon = match.teamAIcon || '';
         const teamBIcon = match.teamBIcon || '';
-        const ytLink = match.youtubeLiveLink || '';
-        const whepKey = match.webrtcStreamKey || '';
         const betting = !!match.isBettingEnabled;
         const live = !!match.isLive;
 
-        let mediaHtml = '';
-        if (live && whepKey) {
-            mediaHtml = `<div class="stream-container" style="position:relative;">
-                <video id="whep-${match.id}" data-whep-key="${whepKey}" autoplay muted playsinline controls style="width:100%;height:100%;background:#000;object-fit:contain;"></video>
-                <span style="position:absolute;top:6px;right:8px;background:rgba(0,0,0,0.6);color:var(--gold);font-size:10px;padding:2px 6px;border-radius:4px;">LOW LATENCY</span>
-            </div>`;
-        } else if (live && ytLink) {
-            let videoId = '';
-            if (ytLink.includes('youtu.be/')) videoId = ytLink.split('youtu.be/')[1].split('?')[0];
-            else if (ytLink.includes('v=')) videoId = ytLink.split('v=')[1].split('&')[0];
-            if (videoId) mediaHtml = `<div class="stream-container"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0" allowfullscreen></iframe></div>`;
-        }
-        if (!mediaHtml && !live) {
-            const sp = cfScheduleParts(match.scheduledStart);
-            mediaHtml = `<div class="cf-sched-hero">
-                <span class="material-icons" style="font-size:30px;opacity:0.6;">event</span>
-                <div class="cf-sched-time">${sp.time}</div>
-                ${sp.cd ? `<div class="cf-sched-cd">${sp.cd}</div>` : ''}
-            </div>`;
-        }
+        const mediaHtml = skipMedia ? '' : cfMatchMedia(match);
 
         let statusBadge;
         if (live && betting) statusBadge = '<span class="match-live">● BETTING OPEN</span>';
