@@ -5654,16 +5654,36 @@
         else style = 'transform:rotateX(' + o[0] + 'deg) rotateY(' + o[1] + 'deg)';
         return '<div class="d3-cubewrap' + (isWin ? ' win' : '') + '"><div class="' + cls + '" style="' + style + '">' + inner + '</div></div>';
     }
-    // Vibrant per-number gradients for the dice board tiles (1-6).
+    // Premium deep casino gradients for the dice board tiles (1-6): glossy top -> deep dark bottom.
     var DICE_TILE_COLORS = {
-        1: ['#e94b4b', '#7a1616'], 2: ['#f2a63c', '#8a4e08'], 3: ['#46c86a', '#166b30'],
-        4: ['#4f7ae6', '#122a72'], 5: ['#a463e0', '#4a1e88'], 6: ['#e85ba0', '#7a1e52']
+        1: ['#f05a5a', '#e23b3b', '#4d0d0d'], // red
+        2: ['#f7b64a', '#f0a020', '#5e3200'], // gold/amber
+        3: ['#5fd0ad', '#2fae86', '#0d4638'], // teal
+        4: ['#5a83ea', '#3763d6', '#0f2560'], // blue
+        5: ['#a969e2', '#8e44d9', '#2c0d52'], // purple
+        6: ['#ec6fae', '#db4b93', '#4a1236']  // magenta
     };
     function diceTileGrads() {
         return [1,2,3,4,5,6].map(function(i){
             var c = DICE_TILE_COLORS[i];
-            return '<linearGradient id="gD' + i + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c[0] + '"/><stop offset="1" stop-color="' + c[1] + '"/></linearGradient>';
+            return '<linearGradient id="gD' + i + '" x1="0" y1="0" x2="0" y2="1">'
+                + '<stop offset="0" stop-color="' + c[0] + '"/>'
+                + '<stop offset="0.45" stop-color="' + c[1] + '"/>'
+                + '<stop offset="1" stop-color="' + c[2] + '"/></linearGradient>';
         }).join('');
+    }
+    // SVG pip circles for a dice-face watermark (n = 1..6) inside a 300x300 box.
+    function diceWMPips(n) {
+        var P = { L:78, R:222, C:150, T:78, B:222, M:150 };
+        var layouts = {
+            1: [[P.C,P.M]],
+            2: [[P.L,P.T],[P.R,P.B]],
+            3: [[P.L,P.T],[P.C,P.M],[P.R,P.B]],
+            4: [[P.L,P.T],[P.R,P.T],[P.L,P.B],[P.R,P.B]],
+            5: [[P.L,P.T],[P.R,P.T],[P.C,P.M],[P.L,P.B],[P.R,P.B]],
+            6: [[P.L,64],[P.R,64],[P.L,P.M],[P.R,P.M],[P.L,236],[P.R,236]]
+        };
+        return (layouts[n] || []).map(function(p){ return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="27" fill="#000"/>'; }).join('');
     }
     function dice3dScene(faces, mode, winners) {
         var cubes = '';
@@ -5826,7 +5846,6 @@
             + '<defs>'
             +   diceTileGrads()
             +   '<filter id="cfSoftShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="8" dy="12" stdDeviation="8" flood-color="#000000" flood-opacity="0.22"/></filter>'
-            +   '<g id="dieWM"><rect x="0" y="0" width="300" height="300" rx="56" fill="#ffffff"/><circle cx="78" cy="78" r="30" fill="#000"/><circle cx="222" cy="78" r="30" fill="#000"/><circle cx="150" cy="150" r="30" fill="#000"/><circle cx="78" cy="222" r="30" fill="#000"/><circle cx="222" cy="222" r="30" fill="#000"/></g>'
             +   [1,2,3,4,5,6].map(function(i){ return '<clipPath id="cD' + i + '"><path d="' + dbtn[i].d + '"/></clipPath>'; }).join('')
             + '</defs>'
             + '<rect x="0" y="0" width="1200" height="880" fill="#f1f1f1"/>'
@@ -5835,7 +5854,9 @@
             var sel = diceSelectedNums.indexOf(i) >= 0;
             var oc = isBettingOpen ? ' onclick="diceToggleNumber(' + i + ')"' : '';
             bowl += '<path class="cf-dbtn' + (sel ? ' selected' : '') + '" style="fill:url(#gD' + i + ')" d="' + dbtn[i].d + '"' + oc + '></path>';
-            bowl += '<use href="#dieWM" transform="translate(' + (dbtn[i].nx - 150) + ',' + (dbtn[i].ny - 150) + ') rotate(-10 150 150)" opacity="0.12" clip-path="url(#cD' + i + ')" pointer-events="none"></use>';
+            bowl += '<g transform="translate(' + (dbtn[i].nx - 150) + ',' + (dbtn[i].ny - 150) + ') rotate(-10 150 150)" opacity="0.12" clip-path="url(#cD' + i + ')" pointer-events="none">'
+                 +   '<rect x="0" y="0" width="300" height="300" rx="56" fill="#ffffff"/>' + diceWMPips(i)
+                 + '</g>';
         }
         for (var i = 1; i <= 6; i++) {
             var sel = diceSelectedNums.indexOf(i) >= 0;
