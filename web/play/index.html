@@ -5854,8 +5854,10 @@
             var sel = diceSelectedNums.indexOf(i) >= 0;
             var oc = isBettingOpen ? ' onclick="diceToggleNumber(' + i + ')"' : '';
             bowl += '<path class="cf-dbtn' + (sel ? ' selected' : '') + '" style="fill:url(#gD' + i + ')" d="' + dbtn[i].d + '"' + oc + '></path>';
-            bowl += '<g transform="translate(' + (dbtn[i].nx - 150) + ',' + (dbtn[i].ny - 150) + ') rotate(-10 150 150)" opacity="0.12" clip-path="url(#cD' + i + ')" pointer-events="none">'
-                 +   '<rect x="0" y="0" width="300" height="300" rx="56" fill="#ffffff"/>' + diceWMPips(i)
+            bowl += '<g clip-path="url(#cD' + i + ')" opacity="0.12" pointer-events="none">'
+                 +   '<g transform="translate(' + (dbtn[i].nx - 150) + ',' + (dbtn[i].ny - 150) + ') rotate(-10 150 150)">'
+                 +     '<rect x="0" y="0" width="300" height="300" rx="56" fill="#ffffff"/>' + diceWMPips(i)
+                 +   '</g>'
                  + '</g>';
         }
         for (var i = 1; i <= 6; i++) {
