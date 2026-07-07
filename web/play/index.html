@@ -4014,9 +4014,12 @@
         } else {
             videoInner = `<div class="cf-vloading"><div style="text-align:center;"><span class="material-icons" style="font-size:40px;opacity:0.5;">videocam_off</span><p style="margin-top:6px;">Waiting for live stream...</p></div></div>`;
         }
-        const meronMult = (1 + parseFloat(currentOdds.meron_max || '0.85')).toFixed(2);
-        const walaMult  = (1 + parseFloat(currentOdds.wala_max  || '0.85')).toFixed(2);
-        const drawMult  = (1 + parseFloat(currentOdds.draw_max  || '5.00')).toFixed(2);
+        // Live parimutuel pool multipliers (full return, e.g. 1.90x). Fall back to an
+        // opening line until the pool forms (ratio is 0 when a side has no bets yet).
+        const oddsMult = (v, fb) => { var r = parseFloat(v); return (isFinite(r) && r > 1) ? r.toFixed(2) : fb; };
+        const meronMult = oddsMult(currentOdds.meron_ratio, '1.85');
+        const walaMult  = oddsMult(currentOdds.wala_ratio, '1.85');
+        const drawMult  = oddsMult(currentOdds.draw_ratio, '6.00');
         const bal = (typeof userInfo === 'object' && userInfo) ? (userInfo.wallet_balance || 0) : 0;
         const coins = [50, 100, 200, 300, 500, 1000, 2500, 5000];
         const coinsHtml = coins.map(c => `<div class="cf-coin" data-amt="${c}" onclick="cfSelectCoin(this, ${c})">${c >= 1000 ? (c/1000)+'K' : c}</div>`).join('');
@@ -4502,7 +4505,8 @@
     function cfManualPcts(match) {
         var po = match.pool_odds;
         if (!po) return { a: '—', d: '—', b: '—' };
-        function pc(r) { var m = 1 + parseFloat(r || 0); return (isNaN(m) ? '—' : (m * 100).toFixed(2) + '%'); }
+        // pool_odds ratios are the full return multiplier (e.g. 1.90 => 1.90x). Show '—' until a side has a pool.
+        function pc(r) { var m = parseFloat(r || 0); return (isNaN(m) || m <= 1) ? '—' : (m * 100).toFixed(2) + '%'; }
         return { a: pc(po.meron_ratio), d: pc(po.draw_ratio), b: pc(po.wala_ratio) };
     }
 
@@ -6198,16 +6202,30 @@
 
     // ===== MATCH HISTORY WITH PROOF =====
     var matchHistoryData = [];
+    var _lastOddsSig = '';
     function loadOdds() {
         fetch(`${API}/cockfight/odds/current/`, {headers:{'Authorization':`Bearer ${token}`}})
         .then(r => r.json())
         .then(data => {
             if (data && data.system) {
                 currentOdds = data;
-                renderAutoMatch();
+                // Only re-render when the live pool odds actually change, so a mid-bet
+                // user isn't interrupted by needless board redraws.
+                var sig = [data.meron_ratio, data.wala_ratio, data.draw_ratio, data.total_pool].join('|');
+                if (sig !== _lastOddsSig) { _lastOddsSig = sig; renderAutoMatch(); }
             }
         }).catch(() => {});
     }
+    // Poll live pool odds while the 24/7 auto board is on screen, so odds fluctuate in real time.
+    setInterval(function () {
+        try {
+            if (!token) return;
+            var sec = document.getElementById('sec-cockfight');
+            if (!sec || sec.classList.contains('hidden')) return;
+            if (typeof currentChannel !== 'undefined' && currentChannel !== 'auto') return;
+            loadOdds();
+        } catch (e) {}
+    }, 8000);
 
     function loadMatchHistory() {
         fetch(`${API}/cockfight/auto-history/`, {headers:{'Authorization':`Bearer ${token}`}})
