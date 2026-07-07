@@ -719,6 +719,10 @@
         .cf-video-result .cf-vr-faces { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
         .cf-video-result .cf-vr-face { width: 34px; height: 34px; background: #fff; border-radius: 7px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,.4); }
         .cf-video-result .cf-vr-face.win { outline: 3px solid #6ABDA7; }
+        .cf-video-result .cf-vr-face.bounce { animation: diceBounceIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+        .cf-video-result .cf-vr-face.win:not(.bounce) { animation: diceWinGlow 1.2s ease-in-out infinite; }
+        .cf-video-result .cf-vr-roll { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .cf-video-result .cf-vr-die { width: 36px; height: 36px; background: linear-gradient(145deg, #ffffff, #d4d4d4); border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,.45); animation: diceRollingBounce .5s ease-in-out infinite; }
         .cf-video-result .cf-vr-label { font-size: 13px; font-weight: 700; }
         .cf-video-result .cf-vr-timer { font-size: 30px; font-weight: 800; color: #6ABDA7; }
 
@@ -5526,6 +5530,7 @@
     let diceBetSubmitting = false; // Fix #4: prevent double-click
     let diceCompletedCache = []; // Fix #2: persistent match history cache
     let diceRevealTimer = null; // D2: track reveal animation timer
+    let diceRevealActive = false; // locks diceAnimState during the roll/reveal sequence so renders don't clobber it
 
     // D2: Render CSS pip pattern for a dice face value (1-6)
     function dicePipHTML(val, size) {
@@ -5667,15 +5672,25 @@
         var phase = liveMatch ? (liveMatch.virtual_phase || 'betting') : 'done';
         var isBettingOpen = liveMatch ? liveMatch.isBettingEnabled : false;
 
-        if (phase === 'betting' && isBettingOpen) diceAnimState = 'betting_open';
-        else if (phase === 'betting_closed' || (phase === 'betting' && !isBettingOpen)) diceAnimState = 'betting_locked';
-        else if (phase === 'shuffling') diceAnimState = 'rolling';
-        else if (phase === 'result') diceAnimState = 'reveal';
-        else if (phase === 'done') diceAnimState = 'idle';
+        // Don't recompute the animation state from the match phase while the WS-driven
+        // roll/reveal/highlight sequence is playing, otherwise the render clobbers it.
+        if (!diceRevealActive) {
+            if (phase === 'betting' && isBettingOpen) diceAnimState = 'betting_open';
+            else if (phase === 'betting_closed' || (phase === 'betting' && !isBettingOpen)) diceAnimState = 'betting_locked';
+            else if (phase === 'shuffling') diceAnimState = 'rolling';
+            else if (phase === 'result') diceAnimState = 'reveal';
+            else if (phase === 'done') diceAnimState = 'idle';
+        }
 
         var lastDone = completedMatches[0];
         var lastFaces = lastDone ? getDiceRolls(lastDone) : [];
         var lastWinners = getDiceWinners(lastFaces);
+        // During the WS reveal sequence the freshest result lives on diceLastResult
+        // (the board data hasn't refreshed yet), so prefer it for the reveal faces.
+        var revealSrc = ((diceAnimState === 'reveal' || diceAnimState === 'highlight') && diceLastResult) ? diceLastResult : lastDone;
+        var revealFaces = revealSrc ? getDiceRolls(revealSrc) : [];
+        var revealWinners = getDiceWinners(revealFaces);
+        var revealRound = revealSrc ? (revealSrc.daily_match_number || revealSrc.id) : '';
 
         window._dicePfData = {};
         var pfSrc = liveMatch || completedMatches[0];
@@ -5705,14 +5720,22 @@
                 + '<button class="cf-video-refresh" onclick="loadDiceGames()" aria-label="Refresh"><span class="material-icons">refresh</span></button>';
         } else {
             var vr = '<div class="cf-video-result">';
-            if (diceAnimState === 'rolling') {
-                vr += '<div class="cf-vr-label">Shaking dice…</div><span class="material-icons" style="font-size:38px;color:#6ABDA7;animation:pulse 1s ease-in-out infinite;">casino</span>';
-            } else if ((diceAnimState === 'reveal' || diceAnimState === 'highlight' || diceAnimState === 'idle') && lastFaces.length === 6) {
-                vr += '<div class="cf-vr-label">Round #' + (lastDone ? (lastDone.daily_match_number || lastDone.id) : '') + ' result</div>';
-                vr += '<div class="cf-vr-faces">';
-                lastFaces.forEach(function(f){ vr += '<div class="cf-vr-face' + (lastWinners.indexOf(f)>=0?' win':'') + '">' + dicePipHTML(f,'sm') + '</div>'; });
+            if (diceAnimState === 'rolling' || diceAnimState === 'betting_locked') {
+                // Dice being shaken — animated tumbling dice inside the cup.
+                vr += '<div class="cf-vr-label">' + (diceAnimState === 'rolling' ? 'Rolling the dice…' : 'Betting closed — rolling…') + '</div>';
+                vr += '<div class="cf-vr-roll">';
+                for (var rr = 0; rr < 6; rr++) vr += '<div class="cf-vr-die" style="animation-delay:' + (rr * 0.07).toFixed(2) + 's">' + dicePipHTML(((rr + Math.floor(Date.now()/120)) % 6) + 1, 'sm') + '</div>';
                 vr += '</div>';
-                vr += '<div class="cf-vr-label">' + (lastWinners.length ? 'Winners: ' + lastWinners.join(', ') : 'No repeated number') + '</div>';
+            } else if ((diceAnimState === 'reveal' || diceAnimState === 'highlight' || diceAnimState === 'idle') && revealFaces.length === 6) {
+                vr += '<div class="cf-vr-label">Round #' + revealRound + ' result</div>';
+                vr += '<div class="cf-vr-faces">';
+                revealFaces.forEach(function(f, i){
+                    var w = revealWinners.indexOf(f) >= 0;
+                    var cls = 'cf-vr-face' + (w ? ' win' : '') + (diceAnimState === 'reveal' ? ' bounce' : '');
+                    vr += '<div class="' + cls + '" style="animation-delay:' + (i * 0.08).toFixed(2) + 's">' + dicePipHTML(f,'sm') + '</div>';
+                });
+                vr += '</div>';
+                vr += '<div class="cf-vr-label">' + (revealWinners.length ? 'Winners: ' + revealWinners.join(', ') : 'No repeated number') + '</div>';
             } else if (isBettingOpen) {
                 vr += '<div class="cf-vr-label">Place your bets</div><div id="dice-timer-value" class="cf-vr-timer">--:--</div>';
             } else if (board.is_virtual) {
@@ -6711,6 +6734,7 @@
                     if (diceRevealTimer) { clearTimeout(diceRevealTimer); diceRevealTimer = null; }
                     // D2: Improved reveal sequence with better timing
                     // Step 1: Rolling (mug shaking, placeholder dice) — 1.8s
+                    diceRevealActive = true;
                     diceAnimState = 'rolling';
                     renderDiceGames();
                     diceRevealTimer = setTimeout(function() {
@@ -6742,6 +6766,7 @@
                                 diceRevealTimer = setTimeout(function() {
                                     // Step 6: Transition to idle, refresh
                                     diceAnimState = 'idle';
+                                    diceRevealActive = false;
                                     diceRevealTimer = null;
                                     loadDiceGames();
                                 }, 2000);
