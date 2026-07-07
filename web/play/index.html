@@ -5008,7 +5008,9 @@
 
         let html = '';
         pageItems.forEach(t => {
-            const isCredit = t.type === 'Funds In' || t.description.includes('win') || t.description.includes('refund') || t.description.includes('deposit');
+            const _desc = (t.description || '').toLowerCase();
+            const isCredit = t.type === 'Funds In'
+                || /\b(won|win|winnings|refund|refunded|reversal|reversed|bonus|cashback|credited|deposit(?:ed)?)\b/.test(_desc);
             html += `
             <div class="txn-item">
                 <div class="txn-icon ${isCredit ? 'credit' : 'debit'}">
