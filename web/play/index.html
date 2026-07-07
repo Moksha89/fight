@@ -624,6 +624,17 @@
         .cf-draw { background: linear-gradient(180deg, #2fbf4f 0%, #14622f 100%); min-height: 150px; }
         .cf-wala { background: linear-gradient(180deg, #1e40af 0%, #0a1f52 100%); }
         .cf-odd.selected { border-color: #B4DDD1; transform: translateY(-3px); box-shadow: 0 0 0 3px rgba(253,224,71,0.55), 0 8px 18px rgba(0,0,0,0.5); }
+        /* ===== Unified trapezoid odds board (all cockfight matches) ===== */
+        .cf-tzb { position: relative; width: 100%; margin: 8px 0 4px; }
+        .cf-tzb svg { display: block; width: 100%; height: auto; }
+        .cf-tzb path { cursor: pointer; transition: stroke .12s, stroke-width .12s; }
+        .cf-tzb.disabled path { cursor: default; }
+        .cf-tz-ov { position: absolute; inset: 0; pointer-events: none; }
+        .cf-tz-col { position: absolute; top: 0; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6% 0 5%; color: #fff; }
+        .cf-tz-label { font-size: clamp(12px, 3.5vw, 18px); font-weight: 800; letter-spacing: .3px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,.6); line-height: 1.02; max-width: 30vw; text-align: center; }
+        .cf-tz-badge { width: clamp(42px, 13vw, 64px); height: clamp(48px, 15vw, 74px); background: #fff; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: clamp(24px, 8vw, 40px); font-weight: 800; color: #1F2528; box-shadow: 0 6px 14px rgba(0,0,0,.35); }
+        .cf-tz-pct { font-size: clamp(12px, 3.6vw, 18px); font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+        .cf-tzb.disabled .cf-tz-label, .cf-tzb.disabled .cf-tz-pct { opacity: .85; }
         .cf-odd.disabled { opacity: 0.55; cursor: not-allowed; }
 
         .cf-chips { position: relative; z-index: 2; display: flex; gap: 6px; justify-content: space-between; overflow-x: auto; margin-top: 16px; padding: 2px 0 6px; -webkit-overflow-scrolling: touch; }
@@ -3884,17 +3895,15 @@
             </div>
             <div class="cf-arena">
                 <div class="cf-match-title">Match ${matchNum}</div>
-                <div class="cf-odds">
-                    <div class="cf-odd cf-meron${clk}" id="cf-odd-1" onclick="${isAccepting ? "selectOddsCard(1,'Meron')" : ''}">
-                        <div class="cf-mult">${meronMult}X</div><div class="cf-team">Meron</div>
-                    </div>
-                    <div class="cf-odd cf-draw${clk}" id="cf-odd-3" onclick="${isAccepting ? "selectOddsCard(3,'Draw')" : ''}">
-                        <div class="cf-mult">${drawMult}X</div><div class="cf-team">Draw</div>
-                    </div>
-                    <div class="cf-odd cf-wala${clk}" id="cf-odd-2" onclick="${isAccepting ? "selectOddsCard(2,'Wala')" : ''}">
-                        <div class="cf-mult">${walaMult}X</div><div class="cf-team">Wala</div>
-                    </div>
-                </div>
+                ${cfOddsBoard({
+                    key: 'auto', scope: 'auto', disabled: !isAccepting,
+                    labelA: 'Meron', labelD: 'Draw', labelB: 'Wala',
+                    codeA: 1, codeD: 3, codeB: 2,
+                    pctA: (meronMult * 100).toFixed(2) + '%',
+                    pctD: (drawMult * 100).toFixed(2) + '%',
+                    pctB: (walaMult * 100).toFixed(2) + '%',
+                    selectedCode: (selectedBets['auto'] || {}).team
+                })}
                 <div class="cf-chips">${coinsHtml}</div>
                 <input type="hidden" id="auto-ratio-slider" value="0.80">
                 <input type="hidden" id="bet-amt-auto" value="">
@@ -3915,10 +3924,10 @@
             </div>
             ${renderBetHistory()}
         </div>`;
-        // Restore selection state after re-render
+        // Restore selection state after re-render (trapezoid board handles its own highlight)
         if (selectedBets['auto']) {
-            const sel = document.getElementById('cf-odd-' + selectedBets['auto'].team);
-            if (sel) sel.classList.add('selected');
+            const board = container.querySelector('.cf-arena .cf-tzb');
+            if (board) cfHighlightBoard(board, selectedBets['auto'].team);
         }
         if (selectedChipAmount) {
             const coinEl = document.querySelector('.cf-coin[data-amt="' + selectedChipAmount + '"]');
@@ -4155,6 +4164,81 @@
         initWhepPlayers();
     }
 
+    // ===== Unified trapezoid odds board (MERON red / TIE teal / WALA blue) =====
+    // Used by every cockfight match: the 24/7 auto feed and all manual matches.
+    var CF_PM = 'M 8 8 L 396 8 L 504 612 L 8 612 Z';
+    var CF_PT = 'M 420 8 L 780 8 L 684 612 L 516 612 Z';
+    var CF_PW = 'M 804 8 L 1192 8 L 1192 612 L 696 612 Z';
+    function cfOddsBoard(cfg) {
+        var k = cfg.key;
+        var sc = cfg.selectedCode;
+        var scopeJs = (cfg.scope === 'auto') ? "'auto'" : cfg.scope;
+        var dis = !!cfg.disabled;
+        function panel(P, grad, clip, code, label, wmX) {
+            var on = (sc != null && String(sc) === String(code));
+            var stroke = on ? '#FFE08A' : '#C98A3A';
+            var sw = on ? 9 : 4;
+            var safe = String(label).replace(/'/g, "\\'");
+            var oc = dis ? '' : ' onclick="cfSelectOutcome(event,' + scopeJs + ',' + code + ',\'' + safe + '\')"';
+            return '<path data-code="' + code + '" d="' + P + '" fill="url(#' + grad + ')" stroke="' + stroke + '" stroke-width="' + sw + '" stroke-linejoin="round"' + oc + '/>'
+                 + '<g clip-path="url(#' + clip + ')" pointer-events="none"><image href="/static/ic_rooster.svg" x="' + wmX + '" y="150" width="320" height="340" opacity="0.13"/></g>';
+        }
+        var defs = ''
+            + '<linearGradient id="gM' + k + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#db3b3b"/><stop offset="1" stop-color="#5c1010"/></linearGradient>'
+            + '<linearGradient id="gT' + k + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ad2c0"/><stop offset="1" stop-color="#3f9c83"/></linearGradient>'
+            + '<linearGradient id="gW' + k + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3763d6"/><stop offset="1" stop-color="#0f2560"/></linearGradient>'
+            + '<clipPath id="cM' + k + '"><path d="' + CF_PM + '"/></clipPath>'
+            + '<clipPath id="cT' + k + '"><path d="' + CF_PT + '"/></clipPath>'
+            + '<clipPath id="cW' + k + '"><path d="' + CF_PW + '"/></clipPath>';
+        var svg = '<svg viewBox="0 0 1200 620" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><defs>' + defs + '</defs>'
+            + panel(CF_PM, 'gM' + k, 'cM' + k, cfg.codeA, cfg.labelA, 60)
+            + panel(CF_PT, 'gT' + k, 'cT' + k, cfg.codeD, cfg.labelD, 440)
+            + panel(CF_PW, 'gW' + k, 'cW' + k, cfg.codeB, cfg.labelB, 830)
+            + '</svg>';
+        function col(leftPct, label, num, pct) {
+            return '<div class="cf-tz-col" style="left:' + leftPct + '%">'
+                + '<div class="cf-tz-label">' + label + '</div>'
+                + '<div class="cf-tz-badge">' + num + '</div>'
+                + '<div class="cf-tz-pct">' + pct + '</div>'
+                + '</div>';
+        }
+        var ov = '<div class="cf-tz-ov">'
+            + col(17.5, cfg.labelA, 1, cfg.pctA)
+            + col(50, cfg.labelD, 2, cfg.pctD)
+            + col(82.5, cfg.labelB, 3, cfg.pctB)
+            + '</div>';
+        return '<div class="cf-tzb' + (dis ? ' disabled' : '') + '">' + svg + ov + '</div>';
+    }
+    function cfHighlightBoard(board, code) {
+        board.querySelectorAll('path[data-code]').forEach(function(p) {
+            var on = String(p.getAttribute('data-code')) === String(code);
+            p.setAttribute('stroke', on ? '#FFE08A' : '#C98A3A');
+            p.setAttribute('stroke-width', on ? '9' : '4');
+        });
+    }
+    // Shared outcome picker for the trapezoid board (scope = 'auto' or a manual match id).
+    function cfSelectOutcome(evt, scope, code, label) {
+        selectedBets[scope] = { team: code, teamName: label };
+        var board = (evt && evt.currentTarget) ? evt.currentTarget.closest('.cf-tzb') : null;
+        if (board) cfHighlightBoard(board, code);
+        if (scope === 'auto') {
+            selectedAutoTeam = code; selectedAutoTeamName = label;
+            var o = currentOdds || {}, ratio;
+            if (code === 3) ratio = generateSeededRatio(parseFloat(o.draw_min || '3.00'), parseFloat(o.draw_max || '10.00'));
+            else if (code === 1) ratio = generateSeededRatio(parseFloat(o.meron_min || '0.50'), parseFloat(o.meron_max || '0.95'));
+            else ratio = generateSeededRatio(parseFloat(o.wala_min || '0.50'), parseFloat(o.wala_max || '0.95'));
+            var slider = document.getElementById('auto-ratio-slider');
+            if (slider) slider.value = ratio.toFixed(2);
+        }
+    }
+    // Payout-percentage labels for a manual match from its live pool odds (— when not yet open).
+    function cfManualPcts(match) {
+        var po = match.pool_odds;
+        if (!po) return { a: '—', d: '—', b: '—' };
+        function pc(r) { var m = 1 + parseFloat(r || 0); return (isNaN(m) ? '—' : (m * 100).toFixed(2) + '%'); }
+        return { a: pc(po.meron_ratio), d: pc(po.draw_ratio), b: pc(po.wala_ratio) };
+    }
+
     // Video / schedule-hero block for a match (used both as the top video frame and inside cards).
     function cfMatchMedia(match) {
         const ytLink = match.youtubeLiveLink || '';
@@ -4206,13 +4290,18 @@
         else if (betting) statusBadge = '<span class="match-live">● PRE-BET OPEN</span>';
         else statusBadge = `<span class="cf-sched"><span class="material-icons">schedule</span>Scheduled</span>`;
 
-        const betPanel = betting ? `
+        const pcts = cfManualPcts(match);
+        const oddsBoard = cfOddsBoard({
+            key: 'm' + match.id, scope: match.id, disabled: !betting,
+            labelA: teamAName, labelD: 'Draw', labelB: teamBName,
+            codeA: 1, codeD: 3, codeB: 2,
+            pctA: pcts.a, pctD: pcts.d, pctB: pcts.b,
+            selectedCode: (selectedBets[match.id] || {}).team
+        });
+        const betPanel = `
             <div class="bet-panel">
-                <div class="bet-buttons">
-                    <div class="bet-btn" onclick="selectBet(this, ${match.id}, 1, '${teamAName}')">${teamAName}</div>
-                    <div class="bet-btn" onclick="selectBet(this, ${match.id}, 2, '${teamBName}')">${teamBName}</div>
-                    <div class="bet-btn" onclick="selectBet(this, ${match.id}, 3, 'Draw')">Draw</div>
-                </div>
+                ${oddsBoard}
+                ${betting ? `
                 <div class="quick-chips">
                     <div class="chip" onclick="setAmount(${match.id}, 100)">₹100</div>
                     <div class="chip" onclick="setAmount(${match.id}, 500)">₹500</div>
@@ -4223,9 +4312,8 @@
                 <div class="bet-amount-row">
                     <input type="number" placeholder="Enter amount" id="bet-amt-${match.id}" min="10">
                     <button class="bet-submit" onclick="placeBet(${match.id})">Place Bet</button>
-                </div>
-            </div>`
-            : `<div class="cf-locked"><span class="material-icons">lock</span> Betting opens when the match goes live</div>`;
+                </div>` : `<div class="cf-locked"><span class="material-icons">lock</span> Betting opens when the match goes live</div>`}
+            </div>`;
 
         return `
         <div class="match-card">
