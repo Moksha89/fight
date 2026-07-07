@@ -2257,6 +2257,17 @@
         .hp-card-soon .hp-card-cta { background: linear-gradient(180deg,#8a8f98,#5b616b); }
         .hp-cat.soon .hp-cat-badge { position: absolute; top: 3px; right: 4px; background: #FFD37A; color: #3a2a06; font-size: 7.5px; font-weight: 800; padding: 1px 4px; border-radius: 6px; letter-spacing: .3px; }
         .hp-cat { position: relative; }
+        .ann-overlay { position: fixed; inset: 0; z-index: 4000; background: rgba(10,6,20,0.72); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 20px; animation: annFade .18s ease; }
+        @keyframes annFade { from { opacity: 0; } to { opacity: 1; } }
+        .ann-card { position: relative; width: 100%; max-width: 360px; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: annPop .22s cubic-bezier(.2,.9,.3,1.2); }
+        @keyframes annPop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .ann-close { position: absolute; top: 8px; right: 8px; z-index: 2; width: 32px; height: 32px; border: none; border-radius: 50%; background: rgba(0,0,0,0.45); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .ann-close .material-icons { font-size: 20px; }
+        .ann-img { width: 100%; display: block; max-height: 240px; object-fit: cover; }
+        .ann-body { padding: 16px 18px 20px; text-align: center; }
+        .ann-title { font-size: 18px; font-weight: 800; color: #1F2528; margin-bottom: 8px; }
+        .ann-msg { font-size: 14px; line-height: 1.5; color: #6C7374; }
+        .ann-cta { display: inline-block; margin-top: 14px; background: #6ABDA7; color: #fff; font-weight: 700; text-decoration: none; padding: 10px 22px; border-radius: 12px; }
 
         /* ---- highlights row ---- */
         #hp-highlights { margin: 2px 0 18px; }
@@ -3237,6 +3248,7 @@
         loadSocialLinks();
         loadGameCards();   // restoreSectionFromHash runs when cards are ready
         loadMatches();
+        loadAnnouncement();
     }
 
     // Reflect auth state in the home top bar (Login/Register vs profile icons + balance).
@@ -3617,6 +3629,65 @@
         showToast((name || 'This game') + ' is coming soon!', 'info');
     }
 
+    // Scrolling promotion text — managed in admin (Base → Settings → "Scrolling Promotion Text").
+    function cfPromoText() {
+        return window._promoText || 'FREE BET FRIDAY : Deposit 500 today and get a 500 free.';
+    }
+    // Re-apply the admin promo text to any marquee already on screen.
+    function applyPromoText() {
+        document.querySelectorAll('.cf-promo-track').forEach(function(el){ el.textContent = cfPromoText(); });
+    }
+
+    // Dice Play intro video — managed in admin (Base → Settings → "Dice Play Intro Video").
+    // Supports YouTube links (embedded, autoplay/muted/loop) and direct mp4 URLs.
+    function diceIntroVideoHtml(url) {
+        if (!url) return '';
+        if (/youtube\.com|youtu\.be/i.test(url)) {
+            var embed = (typeof diceEmbedUrl === 'function') ? diceEmbedUrl(url) : url;
+            var sep = embed.indexOf('?') >= 0 ? '&' : '?';
+            return '<iframe src="' + embed + sep + 'autoplay=1&mute=1&loop=1&controls=0&playsinline=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+        }
+        return '<video src="' + url + '" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>';
+    }
+
+    // Admin-managed home popup / announcement (Base → Announcements / Popups).
+    function loadAnnouncement() {
+        fetch(`${API}/base/announcements/`).then(r => r.json()).then(list => {
+            if (!Array.isArray(list) || !list.length) return;
+            const a = list[0];
+            const seenKey = 'rr_ann_' + a.id + '_' + (a.updated_at || '');
+            if (a.show_once && localStorage.getItem(seenKey)) return;
+            showAnnouncement(a, seenKey);
+        }).catch(e => console.log('Announcement load error:', e));
+    }
+
+    function showAnnouncement(a, seenKey) {
+        if (document.getElementById('ann-overlay')) return;
+        const img = a.image ? `<img class="ann-img" src="${a.image}" alt="">` : '';
+        const msg = a.message ? `<div class="ann-msg">${a.message.replace(/\n/g, '<br>')}</div>` : '';
+        const link = (a.link_url) ? `<a class="ann-cta" href="${a.link_url}" target="_blank" rel="noopener">${a.link_label || 'Learn more'}</a>` : '';
+        const ov = document.createElement('div');
+        ov.id = 'ann-overlay';
+        ov.className = 'ann-overlay';
+        ov.innerHTML = `<div class="ann-card" role="dialog" aria-modal="true">
+                <button class="ann-close" aria-label="Close" onclick="closeAnnouncement()"><span class="material-icons">close</span></button>
+                ${img}
+                <div class="ann-body">
+                    ${a.title ? `<div class="ann-title">${a.title}</div>` : ''}
+                    ${msg}
+                    ${link}
+                </div>
+            </div>`;
+        ov.addEventListener('click', function(e){ if (e.target === ov) closeAnnouncement(); });
+        document.body.appendChild(ov);
+        if (seenKey) { try { localStorage.setItem(seenKey, '1'); } catch (e) {} }
+    }
+
+    function closeAnnouncement() {
+        const ov = document.getElementById('ann-overlay');
+        if (ov) ov.remove();
+    }
+
     // Re-apply per-card banner backgrounds after banners load (cards may render first)
     function renderGameBannerBackgrounds() {
         if (typeof loadGameCards === 'function' && document.getElementById('game-cards-container') && activeGameIds && activeGameIds.length) {
@@ -3638,6 +3709,9 @@
         fetch(`${API}/base/settings/`).then(r => r.json()).then(data => {
             const map = {};
             data.forEach(s => { map[s.action] = s.actionValue; });
+            if (map['O'] && map['O'] !== 'EMPTY') window._promoText = map['O'];
+            if (map['P'] && map['P'] !== 'EMPTY') window._diceIntroVideo = map['P'];
+            applyPromoText();
             const linkMap = {
                 'E': { id: 'social-whatsapp', floatId: 'whatsapp-float' },
                 'F': { id: 'social-telegram' },
@@ -3920,7 +3994,7 @@
                 <div class="cf-title">Cock Fight Live</div>
                 <span class="cf-wallet"><span class="material-icons">account_balance_wallet</span> ₹${formatCurrencyFull(bal)}</span>
             </div>
-            <div class="cf-promo"><div class="cf-promo-track">FREE BET FRIDAY : Deposit 500 today and get a 500 free.</div></div>
+            <div class="cf-promo"><div class="cf-promo-track">${cfPromoText()}</div></div>
             <div class="cf-video">${videoInner}</div>
             <div class="cf-controls">
                 <div class="cf-cats">${cfCategoryTabsHtml()}</div>
@@ -5471,6 +5545,10 @@
             videoInner = '<span class="cf-live-badge">LIVE</span>'
                 + '<button class="cf-video-refresh" onclick="loadDiceGames()" aria-label="Refresh"><span class="material-icons">refresh</span></button>'
                 + '<iframe src="' + liveUrl + '" allowfullscreen></iframe>';
+        } else if (window._diceIntroVideo && !isBettingOpen && diceAnimState === 'idle' && !(lastFaces.length === 6)) {
+            // No live stream / round in progress — play the admin-managed Dice intro video.
+            videoInner = diceIntroVideoHtml(window._diceIntroVideo)
+                + '<button class="cf-video-refresh" onclick="loadDiceGames()" aria-label="Refresh"><span class="material-icons">refresh</span></button>';
         } else {
             var vr = '<div class="cf-video-result">';
             if (diceAnimState === 'rolling') {
@@ -5552,7 +5630,7 @@
             +     '<div class="cf-title">Gundata Live</div>'
             +     '<span class="cf-wallet"><span class="material-icons">account_balance_wallet</span> ₹' + formatCurrencyFull(bal) + '</span>'
             +   '</div>'
-            +   '<div class="cf-promo"><div class="cf-promo-track">FREE BET FRIDAY : Deposit 500 today and get a 500 free.</div></div>'
+            +   '<div class="cf-promo"><div class="cf-promo-track">' + cfPromoText() + '</div></div>'
             +   '<div class="cf-video">' + videoInner + '</div>'
             +   '<div class="cf-regions">' + regionsHtml + '<span style="margin-left:auto;"></span></div>'
             +   bowl
