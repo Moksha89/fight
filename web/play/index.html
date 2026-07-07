@@ -2155,6 +2155,13 @@
         .cf-sched-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 150px; background: linear-gradient(135deg,#f3f6f5,#e7edeb); color: var(--text-secondary); border-radius: 10px; }
         .cf-sched-hero .cf-sched-time { font-size: 20px; font-weight: 800; color: var(--text-main); }
         .cf-sched-hero .cf-sched-cd { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
+        /* Not-started matches: roosters + countdown inside the frame (no separate teams row) */
+        .cf-sched-vs { flex-direction: row; height: auto; min-height: 158px; gap: 4px; padding: 16px 6px; }
+        .cf-sched-vs .cf-sched-team { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .cf-sched-vs .cf-sched-team img { width: 76px; height: 76px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.16)); }
+        .cf-sched-vs .cf-sched-tname { font-size: 14px; font-weight: 700; color: var(--text-main); text-align: center; line-height: 1.1; }
+        .cf-sched-vs .cf-sched-breeder { font-size: 11.5px; color: var(--text-secondary); text-align: center; }
+        .cf-sched-vs .cf-sched-center { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0 4px; }
         .cf-locked { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; background: #f3f6f5; color: var(--text-secondary); border-radius: 10px; font-size: 12.5px; font-weight: 600; margin-top: 10px; }
         .cf-locked .material-icons { font-size: 17px; }
 
@@ -4257,11 +4264,30 @@
             if (videoId) return `<div class="stream-container"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0" allowfullscreen></iframe></div>`;
         }
         if (!live) {
+            // Not started yet — show the roosters inside the frame (with the countdown) so no space is wasted.
             const sp = cfScheduleParts(match.scheduledStart);
-            return `<div class="cf-sched-hero">
-                <span class="material-icons" style="font-size:30px;opacity:0.6;">event</span>
-                <div class="cf-sched-time">${sp.time}</div>
-                ${sp.cd ? `<div class="cf-sched-cd">${sp.cd}</div>` : ''}
+            const aName = match.teamAName || 'White Cock';
+            const bName = match.teamBName || 'Black Cock';
+            const aBr = match.teamABreeder || '';
+            const bBr = match.teamBBreeder || '';
+            const aIcon = match.teamAIcon || '/static/red_roaster.png';
+            const bIcon = match.teamBIcon || '/static/blue_roaster.png';
+            return `<div class="cf-sched-hero cf-sched-vs">
+                <div class="cf-sched-team">
+                    <img src="${aIcon}" alt="${aName}">
+                    <div class="cf-sched-tname">${aName}</div>
+                    ${aBr ? `<div class="cf-sched-breeder">${aBr}</div>` : ''}
+                </div>
+                <div class="cf-sched-center">
+                    <div class="cf-sched-time">${sp.time}</div>
+                    ${sp.cd ? `<div class="cf-sched-cd">${sp.cd}</div>` : ''}
+                    <span class="vs-badge" style="margin-top:2px;">VS</span>
+                </div>
+                <div class="cf-sched-team">
+                    <img src="${bIcon}" alt="${bName}">
+                    <div class="cf-sched-tname">${bName}</div>
+                    ${bBr ? `<div class="cf-sched-breeder">${bBr}</div>` : ''}
+                </div>
             </div>`;
         }
         // Live but no stream configured — still show a frame so tabs sit below it.
@@ -4322,7 +4348,7 @@
                 ${statusBadge}
             </div>
             ${mediaHtml}
-            <div class="match-teams">
+            ${live ? `<div class="match-teams">
                 <div class="team">
                     <img src="${teamAIcon || '/static/red_roaster.png'}" alt="${teamAName}">
                     <div class="team-name">${teamAName}</div>
@@ -4334,7 +4360,7 @@
                     <div class="team-name">${teamBName}</div>
                     ${teamBBreeder ? `<div class="team-breeder">${teamBBreeder}</div>` : ''}
                 </div>
-            </div>
+            </div>` : ''}
             ${betPanel}
         </div>`;
     }
