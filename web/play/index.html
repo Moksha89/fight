@@ -4050,10 +4050,18 @@
             if (board) cfHighlightBoard(board, selectedBets['auto'].team);
         }
         if (selectedChipAmount) {
-            const coinEl = document.querySelector('.cf-coin[data-amt="' + selectedChipAmount + '"]');
+            const coinEl = document.querySelector('.cf-arena .cf-coin[data-amt="' + selectedChipAmount + '"]');
             if (coinEl) coinEl.classList.add('selected');
-            const amtEl = document.getElementById('bet-amt-auto');
-            if (amtEl) amtEl.value = selectedChipAmount;
+        }
+        // Restore the accumulated stake + its badge so a poll refresh doesn't wipe the staged bet.
+        const amtEl = document.getElementById('bet-amt-auto');
+        const st = cfStake['auto'];
+        if (st && st.amount > 0) {
+            if (amtEl) amtEl.value = st.amount;
+            const board = container.querySelector('.cf-arena .cf-tzb');
+            if (board) cfUpdateStakeBadge(board, st.code, st.amount);
+        } else if (selectedChipAmount && amtEl) {
+            amtEl.value = selectedChipAmount;
         }
         renderBeadPlate();
         setTimeout(loadMatchHistory, 100);
@@ -4139,7 +4147,8 @@
         var tr = targetPathEl.getBoundingClientRect();
         var toX = tr.left + tr.width / 2, toY = tr.top + tr.height / 2;
         var fromEl = null;
-        if (scope === 'auto') fromEl = document.querySelector('.cf-coin.selected');
+        if (scope === 'auto') fromEl = document.querySelector('.cf-arena .cf-coin.selected');
+        else if (scope === 'dice') fromEl = document.querySelector('.cf-dice-coins .cf-coin.selected');
         else fromEl = document.querySelector('.match-card .quick-chips .chip.selected');
         var fromX, fromY;
         if (fromEl) { var fr = fromEl.getBoundingClientRect(); fromX = fr.left + fr.width / 2; fromY = fr.top + fr.height / 2; }
@@ -5915,10 +5924,17 @@
 
     function diceToggleNumber(num) {
         var idx = diceSelectedNums.indexOf(num);
+        var added = false;
         if (idx >= 0) { diceSelectedNums.splice(idx, 1); }
-        else if (diceSelectedNums.length < 5) { diceSelectedNums.push(num); }
+        else if (diceSelectedNums.length < 5) { diceSelectedNums.push(num); added = true; }
         else { showToast('Max 5 numbers', 'error'); return; }
         renderDiceGames();
+        // Chip toss + clink into the tapped tile, matching the cockfight board.
+        if (added) {
+            sfxChip();
+            var tile = document.querySelectorAll('.cf-dboard .cf-dbtn')[num - 1];
+            if (tile) cfFlyChip('dice', tile, diceBetAmount);
+        }
     }
 
     function diceRemoveNumber(num) {
