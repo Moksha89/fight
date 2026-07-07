@@ -2253,6 +2253,10 @@
         .hp-card-cta { align-self: flex-start; margin-top: 2px; background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; font-weight: 700; font-size: 12px; padding: 7px 16px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
         .hp-live { position: absolute; z-index: 3; top: 10px; right: 10px; background: #cc3630; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px; display: flex; align-items: center; gap: 4px; letter-spacing: 0.5px; }
         .hp-live .live-dot { width: 6px; height: 6px; }
+        .hp-soon { position: absolute; z-index: 3; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #FFD37A; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px; letter-spacing: 0.5px; border: 1px solid rgba(255,211,122,0.55); display: inline-flex; align-items: center; gap: 4px; }
+        .hp-card-soon .hp-card-cta { background: linear-gradient(180deg,#8a8f98,#5b616b); }
+        .hp-cat.soon .hp-cat-badge { position: absolute; top: 3px; right: 4px; background: #FFD37A; color: #3a2a06; font-size: 7.5px; font-weight: 800; padding: 1px 4px; border-radius: 6px; letter-spacing: .3px; }
+        .hp-cat { position: relative; }
 
         /* ---- highlights row ---- */
         #hp-highlights { margin: 2px 0 18px; }
@@ -2505,6 +2509,10 @@
                 <div class="sidebar-item" data-game="dice" onclick="navigateSidebar('sec-dice')" aria-label="Dice Games">
                     <span class="material-icons">casino</span> Dice Games
                 </div>
+                <div class="sidebar-item" onclick="hpComingSoon('Cricket')" aria-label="Cricket">
+                    <span class="material-icons">sports_cricket</span> Cricket
+                    <span class="badge" style="background:#FFD37A;color:#3a2a06;">SOON</span>
+                </div>
                 <div class="sidebar-item" onclick="navigateSidebar('sec-mybets')" aria-label="My Bets">
                     <span class="material-icons">history</span> My Bets
                 </div>
@@ -2599,6 +2607,10 @@
                         </div>
                         <div class="hp-cat" data-cat="dice" data-game="dice" onclick="hpSelectCat(this,'sec-dice')">
                             <span class="hp-cat-ic"><i class="ic" style="-webkit-mask-image:url(/static/ic_dice.svg);mask-image:url(/static/ic_dice.svg)"></i></span>Dice
+                        </div>
+                        <div class="hp-cat soon" data-cat="cricket" onclick="hpComingSoon('Cricket')">
+                            <span class="hp-cat-badge">SOON</span>
+                            <span class="hp-cat-ic"><span class="material-icons">sports_cricket</span></span>Cricket
                         </div>
                     </aside>
                     <main class="hp-main">
@@ -3527,6 +3539,7 @@
             activeGameIds = games.map(g => g.game_id);
             let html = '';
             games.forEach(g => { html += buildGameBanner(g); });
+            html += buildComingSoonCard();
             container.innerHTML = html;
             updateNavVisibility();
             restoreSectionFromHash();
@@ -3539,7 +3552,7 @@
             ];
             const container = document.getElementById('game-cards-container');
             if (container) {
-                container.innerHTML = window._loadedGames.map(buildGameBanner).join('');
+                container.innerHTML = window._loadedGames.map(buildGameBanner).join('') + buildComingSoonCard();
             }
             restoreSectionFromHash();
         });
@@ -3588,13 +3601,29 @@
             + '</div>';
     }
 
+    // Cricket teaser card — shown as "Coming Soon" (not yet playable).
+    function buildComingSoonCard() {
+        var bg = 'radial-gradient(circle at 78% 40%, #1f7a3d 0%, #0e5024 48%, #05210f 100%)';
+        return '<div class="hp-card hp-card-soon" style="background:' + bg + ';" onclick="hpComingSoon(\'Cricket\')">'
+            + '<span class="hp-soon"><span class="material-icons" style="font-size:12px;">lock_clock</span>COMING SOON</span>'
+            + '<span class="material-icons hp-card-art" style="font-size:92px;color:#bbf7d0;right:16px;bottom:8px;height:auto;">sports_cricket</span>'
+            + '<div class="hp-card-body">'
+            + '<div class="hp-card-title">Cricket<small>Live betting &amp; fantasy</small></div>'
+            + '<span class="hp-card-cta"><span class="material-icons" style="font-size:15px;">lock_clock</span> Coming Soon</span>'
+            + '</div>'
+            + '</div>';
+    }
+    function hpComingSoon(name) {
+        showToast((name || 'This game') + ' is coming soon!', 'info');
+    }
+
     // Re-apply per-card banner backgrounds after banners load (cards may render first)
     function renderGameBannerBackgrounds() {
         if (typeof loadGameCards === 'function' && document.getElementById('game-cards-container') && activeGameIds && activeGameIds.length) {
             var container = document.getElementById('game-cards-container');
             var html = '';
             (window._loadedGames || []).forEach(function(g){ html += buildGameBanner(g); });
-            if (html) container.innerHTML = html;
+            if (html) container.innerHTML = html + buildComingSoonCard();
         }
     }
 

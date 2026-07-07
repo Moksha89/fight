@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v9';
+const CACHE_NAME = 'roosterrun-v10';
 const STATIC_ASSETS = [
   '/play/',
   '/static/logo.png?v=2',
