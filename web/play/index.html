@@ -2134,8 +2134,18 @@
         /* ===== Cockfight match CATEGORY tabs (replaces the old 24/7 + language row) ===== */
         .cf-cats { display: flex; align-items: center; gap: 8px; overflow-x: auto; flex: 1; scrollbar-width: none; }
         .cf-cats::-webkit-scrollbar { height: 0; }
-        .cf-cat { flex: 0 0 auto; background: #eef1f0; color: #4b5563; font-size: 12.5px; font-weight: 600; padding: 6px 15px; border-radius: 16px; cursor: pointer; white-space: nowrap; border: 1.5px solid transparent; transition: all .15s; }
+        .cf-cat { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; background: #eef1f0; color: #4b5563; font-size: 12.5px; font-weight: 600; padding: 6px 15px; border-radius: 16px; cursor: pointer; white-space: nowrap; border: 1.5px solid transparent; transition: all .15s; }
         .cf-cat.active { background: var(--gold); color: #fff; border-color: var(--gold); box-shadow: 0 2px 8px rgba(106,189,167,0.35); }
+        .cf-cat-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 0 rgba(248,96,91,0.6); animation: cfDotPulse 1.5s infinite; }
+        @keyframes cfDotPulse { 0% { box-shadow: 0 0 0 0 rgba(248,96,91,0.55); } 70% { box-shadow: 0 0 0 6px rgba(248,96,91,0); } 100% { box-shadow: 0 0 0 0 rgba(248,96,91,0); } }
+        /* scheduled / locked match states */
+        .cf-sched { background: #fff4e5; color: #b06a00; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px; }
+        .cf-sched .material-icons { font-size: 14px; }
+        .cf-sched-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 150px; background: linear-gradient(135deg,#f3f6f5,#e7edeb); color: var(--text-secondary); border-radius: 10px; }
+        .cf-sched-hero .cf-sched-time { font-size: 20px; font-weight: 800; color: var(--text-main); }
+        .cf-sched-hero .cf-sched-cd { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
+        .cf-locked { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; background: #f3f6f5; color: var(--text-secondary); border-radius: 10px; font-size: 12.5px; font-weight: 600; margin-top: 10px; }
+        .cf-locked .material-icons { font-size: 17px; }
 
         /* ===== Client feedback: lighter typography + tighter spacing ===== */
         .cf-topbar .cf-title { font-weight: 600 !important; }
@@ -2214,17 +2224,33 @@
 
         /* ---- big premium game cards ---- */
         .hp-cards { display: flex; flex-direction: column; gap: 16px; margin-bottom: 18px; }
-        .hp-card { position: relative; border-radius: 16px; overflow: hidden; cursor: pointer; min-height: 118px; border: 2px solid rgba(255,201,92,0.55); box-shadow: 0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.06); background-size: cover; background-position: center; transition: transform .15s; }
+        .hp-card { position: relative; border-radius: 16px; overflow: hidden; cursor: pointer; height: 132px; border: 2px solid rgba(255,201,92,0.55); box-shadow: 0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.06); background-size: cover; background-position: center; transition: transform .15s; }
         .hp-card:active { transform: scale(0.985); }
         .hp-card::after { content:''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.15) 55%, transparent 100%); }
         .hp-card-art { position: absolute; right: -8px; bottom: 0; height: 108%; z-index: 1; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55)); }
         .hp-card-art.two { right: 40%; opacity: 0.92; transform: scaleX(-1); }
-        .hp-card-body { position: absolute; z-index: 2; left: 16px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; max-width: 66%; }
-        .hp-card-title { font-size: 22px; font-weight: 900; line-height: 1.02; text-shadow: 0 2px 8px rgba(0,0,0,0.7); letter-spacing: 0.5px; text-transform: uppercase; }
-        .hp-card-title small { display: block; font-size: 13px; font-weight: 800; color: #FFD37A; letter-spacing: 2px; }
+        .hp-card-body { position: absolute; z-index: 2; left: 16px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; gap: 6px; max-width: 60%; }
+        .hp-card-title { font-size: 20px; font-weight: 900; line-height: 1.06; text-shadow: 0 2px 8px rgba(0,0,0,0.7); letter-spacing: 0.5px; text-transform: uppercase; }
+        .hp-card-title small { display: block; font-size: 11.5px; font-weight: 800; color: #FFD37A; letter-spacing: 1.4px; margin-top: 3px; white-space: nowrap; }
         .hp-card-cta { align-self: flex-start; margin-top: 2px; background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; font-weight: 700; font-size: 12px; padding: 7px 16px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
         .hp-live { position: absolute; z-index: 3; top: 10px; right: 10px; background: #cc3630; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px; display: flex; align-items: center; gap: 4px; letter-spacing: 0.5px; }
         .hp-live .live-dot { width: 6px; height: 6px; }
+
+        /* ---- highlights row ---- */
+        #hp-highlights { margin: 2px 0 18px; }
+        .hl-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .hl-row::-webkit-scrollbar { display: none; }
+        .hl-card { flex: 0 0 168px; border-radius: 14px; overflow: hidden; position: relative; cursor: pointer; background: #1c121a; border: 1px solid rgba(255,201,92,0.35); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+        .hl-card .hl-thumb { width: 100%; height: 100px; object-fit: cover; display: block; background: #000; }
+        .hl-card .hl-play { position: absolute; top: 33px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; color: #fff; }
+        .hl-card .hl-play .material-icons { font-size: 24px; }
+        .hl-card .hl-title { padding: 8px 10px; font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* video modal */
+        #hl-modal { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; }
+        #hl-modal.open { display: flex; }
+        #hl-modal .hl-modal-inner { width: min(94vw, 720px); }
+        #hl-modal video { width: 100%; border-radius: 12px; background: #000; max-height: 80vh; }
+        #hl-modal .hl-close { position: absolute; top: 16px; right: 18px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.12); color: #fff; border: none; font-size: 22px; cursor: pointer; }
 
         /* ---- fixed app download bar ---- */
         .hp-download { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; margin-top: 8px; background: rgba(28,18,26,0.94); border-top: 1px solid rgba(255,255,255,0.08); }
@@ -2238,7 +2264,7 @@
         /* Hero banner: keep it inside the viewport (symmetric inset) and a stable 16/9 on every width */
         #sec-home .banner-carousel { width: auto; height: auto; aspect-ratio: 16 / 9; margin: 0 14px 14px; box-sizing: border-box; }
         /* keep home full-bleed even on desktop breakpoints */
-        @media (min-width: 900px) { .hp-rail { flex: 0 0 96px; } .hp-card { min-height: 150px; } .hp-card-title { font-size: 26px; } }
+        @media (min-width: 900px) { .hp-rail { flex: 0 0 96px; } .hp-card { height: 156px; } .hp-card-title { font-size: 26px; } }
     </style>
 </head>
 <body>
@@ -2561,6 +2587,12 @@
                         <div class="hp-sec">Games</div>
                         <div class="game-banners hp-cards" id="game-cards-container">
                             <!-- Premium 3D game cards loaded dynamically from /api/base/games/ -->
+                        </div>
+
+                        <!-- Highlights (admin-managed via /api/base/highlights/) -->
+                        <div id="hp-highlights" style="display:none;">
+                            <div class="hp-sec" style="font-size:16px;margin:2px 0 10px;">Highlights</div>
+                            <div class="hl-row" id="hl-row"></div>
                         </div>
 
                         <!-- Live Now -->
@@ -3041,6 +3073,14 @@
         </div>
     </div>
 
+    <!-- Highlight Video Modal -->
+    <div id="hl-modal" onclick="if(event.target.id==='hl-modal')closeHighlight()">
+        <button class="hl-close" onclick="closeHighlight()">&times;</button>
+        <div class="hl-modal-inner">
+            <video id="hl-video" controls playsinline></video>
+        </div>
+    </div>
+
     <!-- Provably Fair Modal -->
     <div class="modal-overlay" id="provably-fair-modal">
         <div class="modal-content" style="position:relative;max-width:500px;">
@@ -3162,6 +3202,7 @@
         document.getElementById('app-screen').style.display = 'block';
         updateAuthUI();
         loadBanners();
+        loadHighlights();
         loadThemeFromApi();
         loadSocialLinks();
         loadGameCards();   // restoreSectionFromHash runs when cards are ready
@@ -3441,6 +3482,7 @@
         loadSocialLinks();
         loadThemeFromApi();
         loadBanners();
+        loadHighlights();
         loadGameCards();
         updateAuthUI();
     }
@@ -3463,6 +3505,7 @@
         fetch(`${API}/base/games/`).then(r => r.json()).then(games => {
             const container = document.getElementById('game-cards-container');
             if (!container) return;
+            window._loadedGames = games;
             activeGameIds = games.map(g => g.game_id);
             let html = '';
             games.forEach(g => { html += buildGameBanner(g); });
@@ -3472,44 +3515,69 @@
         }).catch(e => {
             console.log('Games load error:', e);
             activeGameIds = ['cockfight', 'dice'];
+            window._loadedGames = [
+                {game_id:'cockfight', section_id:'sec-cockfight', name:'Cockfight Livestream'},
+                {game_id:'dice', section_id:'sec-dice', name:'Dice Play (Gundata)'}
+            ];
             const container = document.getElementById('game-cards-container');
             if (container) {
-                container.innerHTML =
-                    buildGameBanner({game_id:'cockfight', section_id:'sec-cockfight', name:'Cockfight Livestream', description:'24/7 live matches. Pick Meron or Wala and win big.'})
-                  + buildGameBanner({game_id:'dice', section_id:'sec-dice', name:'Dice Play (Gundata)', description:'Pick a face from 1 to 6. Match the roll and multiply your bet!'});
+                container.innerHTML = window._loadedGames.map(buildGameBanner).join('');
             }
             restoreSectionFromHash();
         });
     }
 
+    // Split a game name into a main title + subtitle from a parenthetical, e.g. "Dice Play (Gundata)"
+    function splitGameName(name) {
+        var m = (name || '').match(/^(.*?)\s*\((.*)\)\s*$/);
+        if (m) return { main: m[1].trim(), sub: m[2].trim() };
+        return { main: name || '', sub: '' };
+    }
     // Build a colorful full-width game banner (reference style)
     function buildGameBanner(g) {
         var gid = (g.game_id || '').toLowerCase();
-        var bg, title, art = '', live = '';
+        var bg, title, art = '', live = '', bgImg = '';
         if (gid === 'cockfight') {
             bg = 'radial-gradient(circle at 75% 40%, #b5321f 0%, #6e150c 45%, #2a0705 100%)';
+            if (gameBanners && gameBanners.F) bgImg = gameBanners.F;
             live = '<span class="hp-live"><span class="live-dot"></span>LIVE</span>';
             title = '<div class="hp-card-title">Cockfight<small>Livestream</small></div>';
             art = '<img class="hp-card-art two" src="/static/blue_roaster.png" alt="">'
                 + '<img class="hp-card-art" src="/static/red_roaster.png" alt="">';
         } else if (gid === 'dice' || gid === 'color' || gid === 'colorgame') {
             bg = 'radial-gradient(circle at 78% 40%, #6d28d9 0%, #3b1466 48%, #170a2e 100%)';
+            if (gameBanners && gameBanners.G) bgImg = gameBanners.G;
             live = '<span class="hp-live"><span class="live-dot"></span>LIVE</span>';
-            title = '<div class="hp-card-title">' + (g.name || 'Color Game') + '<small>Fast Draw & Quick Win</small></div>';
+            var dn = splitGameName(g.name || 'Dice Play');
+            title = '<div class="hp-card-title">' + dn.main + '<small>' + (dn.sub || 'Fast Draw &amp; Win') + '</small></div>';
             art = '<img class="hp-card-art" src="/static/blue_roaster.svg" alt="" style="opacity:0;">'
-                + '<span class="material-icons hp-card-art" style="font-size:96px;color:#c4b5fd;right:14px;bottom:8px;height:auto;">casino</span>';
+                + '<span class="material-icons hp-card-art" style="font-size:92px;color:#c4b5fd;right:16px;bottom:10px;height:auto;">casino</span>';
         } else {
             bg = 'radial-gradient(circle at 78% 40%, #4b5563 0%, #1f2937 60%, #0b0f16 100%)';
             title = '<div class="hp-card-title">' + (g.name || 'Game') + '</div>';
             art = '<span class="material-icons hp-card-art" style="font-size:88px;color:#e5e7eb;right:18px;bottom:10px;height:auto;">' + (g.icon || 'sports_esports') + '</span>';
         }
-        return '<div class="hp-card" style="background:' + bg + ';" onclick="hpSelectCat(null,\'' + g.section_id + '\')">'
-            + live + art
+        // If admin uploaded a game-card banner (placement F/G), use it as the card image and hide the art.
+        var style = bgImg
+            ? 'background-image:url(' + bgImg + ');background-size:cover;background-position:center;'
+            : 'background:' + bg + ';';
+        return '<div class="hp-card" style="' + style + '" onclick="hpSelectCat(null,\'' + g.section_id + '\')">'
+            + live + (bgImg ? '' : art)
             + '<div class="hp-card-body">'
             + title
             + '<span class="hp-card-cta"><span class="material-icons" style="font-size:15px;">play_arrow</span> Play Now</span>'
             + '</div>'
             + '</div>';
+    }
+
+    // Re-apply per-card banner backgrounds after banners load (cards may render first)
+    function renderGameBannerBackgrounds() {
+        if (typeof loadGameCards === 'function' && document.getElementById('game-cards-container') && activeGameIds && activeGameIds.length) {
+            var container = document.getElementById('game-cards-container');
+            var html = '';
+            (window._loadedGames || []).forEach(function(g){ html += buildGameBanner(g); });
+            if (html) container.innerHTML = html;
+        }
     }
 
     function updateNavVisibility() {
@@ -3729,20 +3797,48 @@
         if (inp) inp.value = amount;
     }
 
-    // Build the cockfight match CATEGORY tabs: China "24/7" feed + any live manual zones.
-    // Clicking a category switches the displayed match (via switchChannel).
+    // Active = live OR scheduled (upcoming/betting_open). Used for category tabs + listing.
+    function cfZoneMatches(zone) {
+        var list = (zone && zone.matches && (zone.matches.results || zone.matches)) || [];
+        return Array.isArray(list) ? list : [];
+    }
+    function cfIsActiveMatch(m) {
+        return !!(m && (m.isLive || m.isBettingEnabled || ['upcoming','betting_open','live'].indexOf(m.status) >= 0));
+    }
+    function cfActiveMatches(zone) { return cfZoneMatches(zone).filter(cfIsActiveMatch); }
+    function cfZoneHasActive(zone) { return cfActiveMatches(zone).length > 0; }
+    function cfZoneHasLive(zone) { return cfActiveMatches(zone).some(function(m){ return m.isLive; }); }
+
+    // Build the cockfight match CATEGORY tabs: China "24/7" feed + every zone that has a
+    // live OR scheduled match. Clicking a category switches the displayed match(es).
     function cfCategoryTabsHtml() {
         var html = '<span class="cf-cat' + (currentChannel === 'auto' ? ' active' : '') + '" onclick="switchChannel(\'auto\')">24/7</span>';
         if (manualMatchData && Array.isArray(manualMatchData)) {
             manualMatchData.forEach(function(zone) {
-                var list = (zone.matches && (zone.matches.results || zone.matches)) || [];
-                var hasLive = Array.isArray(list) && list.some(function(m) { return m.isLive; });
-                if (!hasLive) return;
+                if (!cfZoneHasActive(zone)) return;
                 var ch = 'zone-' + zone.id;
-                html += '<span class="cf-cat' + (currentChannel === ch ? ' active' : '') + '" onclick="switchChannel(\'' + ch + '\')">' + (zone.name || ('Zone ' + zone.id)) + '</span>';
+                var dot = cfZoneHasLive(zone) ? '<span class="cf-cat-dot"></span>' : '';
+                html += '<span class="cf-cat' + (currentChannel === ch ? ' active' : '') + '" onclick="switchChannel(\'' + ch + '\')">' + dot + (zone.name || ('Zone ' + zone.id)) + '</span>';
             });
         }
         return html;
+    }
+
+    // Human-friendly schedule label + countdown for a scheduled match.
+    function cfScheduleParts(iso) {
+        if (!iso) return { time: 'Scheduled', cd: '' };
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return { time: 'Scheduled', cd: '' };
+        var time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        var diff = d.getTime() - Date.now();
+        var cd = '';
+        if (diff > 0) {
+            var mins = Math.floor(diff / 60000);
+            if (mins >= 60) cd = 'Starts in ' + Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
+            else if (mins >= 1) cd = 'Starts in ' + mins + 'm';
+            else cd = 'Starting soon';
+        } else { cd = 'Starting soon'; }
+        return { time: time, cd: cd };
     }
 
     function renderAutoMatch() {
@@ -4042,77 +4138,105 @@
             ${inner}`;
         const emptyMsg = (msg) => `<div class="empty-state" style="padding:40px 16px;"><span class="material-icons">sports_mma</span><p>${msg}</p></div>`;
 
-        if (!zone || !zone.matches) { container.innerHTML = shell(emptyMsg('No match scheduled yet. Check back soon.')); return; }
-        const matches = zone.matches.results || zone.matches;
-        if (!matches || !matches.length) { container.innerHTML = shell(emptyMsg('No match scheduled yet. Check back soon.')); return; }
+        if (!zone) { container.innerHTML = shell(emptyMsg('No match scheduled yet. Check back soon.')); return; }
+        const matches = cfActiveMatches(zone);
+        if (!matches.length) { container.innerHTML = shell(emptyMsg('No match scheduled yet. Check back soon.')); return; }
 
-        let cards = '';
-        matches.forEach(match => {
-            if (!match.isLive) return;
-            const teamAName = match.teamAName || 'White Cock';
-            const teamBName = match.teamBName || 'Black Cock';
-            const teamABreeder = match.teamABreeder || '';
-            const teamBBreeder = match.teamBBreeder || '';
-            const teamAIcon = match.teamAIcon ? (match.teamAIcon.startsWith('http') ? match.teamAIcon : `${match.teamAIcon}`) : '';
-            const teamBIcon = match.teamBIcon ? (match.teamBIcon.startsWith('http') ? match.teamBIcon : `${match.teamBIcon}`) : '';
-            const ytLink = match.youtubeLiveLink || '';
-            const whepKey = match.webrtcStreamKey || '';
-            let streamHtml = '';
-            if (whepKey) {
-                streamHtml = `<div class="stream-container" style="position:relative;">
-                    <video id="whep-${match.id}" data-whep-key="${whepKey}" autoplay muted playsinline controls style="width:100%;height:100%;background:#000;object-fit:contain;"></video>
-                    <span style="position:absolute;top:6px;right:8px;background:rgba(0,0,0,0.6);color:var(--gold);font-size:10px;padding:2px 6px;border-radius:4px;">LOW LATENCY</span>
-                </div>`;
-            } else if (ytLink) {
-                let videoId = '';
-                if (ytLink.includes('youtu.be/')) videoId = ytLink.split('youtu.be/')[1].split('?')[0];
-                else if (ytLink.includes('v=')) videoId = ytLink.split('v=')[1].split('&')[0];
-                if (videoId) streamHtml = `<div class="stream-container"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0" allowfullscreen></iframe></div>`;
-            }
-            cards += `
-            <div class="match-card">
-                <div class="match-header">
-                    <div class="match-title">${match.title || zone.name}</div>
-                    ${match.isBettingEnabled ? '<span class="match-live">● BETTING OPEN</span>' : '<span class="match-closed">Betting Closed</span>'}
-                </div>
-                ${streamHtml}
-                <div class="match-teams">
-                    <div class="team">
-                        <img src="${teamAIcon || '/static/red_roaster.png'}" alt="${teamAName}">
-                        <div class="team-name">${teamAName}</div>
-                        ${teamABreeder ? `<div class="team-breeder">${teamABreeder}</div>` : ''}
-                    </div>
-                    <div class="vs-badge">VS</div>
-                    <div class="team">
-                        <img src="${teamBIcon || '/static/blue_roaster.png'}" alt="${teamBName}">
-                        <div class="team-name">${teamBName}</div>
-                        ${teamBBreeder ? `<div class="team-breeder">${teamBBreeder}</div>` : ''}
-                    </div>
-                </div>
-                ${match.isBettingEnabled ? `
-                <div class="bet-panel">
-                    <div class="bet-buttons">
-                        <div class="bet-btn" onclick="selectBet(this, ${match.id}, 1, '${teamAName}')">${teamAName}</div>
-                        <div class="bet-btn" onclick="selectBet(this, ${match.id}, 2, '${teamBName}')">${teamBName}</div>
-                        <div class="bet-btn" onclick="selectBet(this, ${match.id}, 3, 'Draw')">Draw</div>
-                    </div>
-                    <div class="quick-chips">
-                        <div class="chip" onclick="setAmount(${match.id}, 100)">₹100</div>
-                        <div class="chip" onclick="setAmount(${match.id}, 500)">₹500</div>
-                        <div class="chip" onclick="setAmount(${match.id}, 1000)">₹1K</div>
-                        <div class="chip" onclick="setAmount(${match.id}, 5000)">₹5K</div>
-                        <div class="chip" onclick="setAmount(${match.id}, 10000)">₹10K</div>
-                    </div>
-                    <div class="bet-amount-row">
-                        <input type="number" placeholder="Enter amount" id="bet-amt-${match.id}" min="10">
-                        <button class="bet-submit" onclick="placeBet(${match.id})">Place Bet</button>
-                    </div>
-                </div>` : ''}
-            </div>`;
+        // Live matches first, then scheduled (soonest first).
+        matches.sort(function(a, b) {
+            if (!!a.isLive !== !!b.isLive) return a.isLive ? -1 : 1;
+            return new Date(a.scheduledStart || 0) - new Date(b.scheduledStart || 0);
         });
+
+        let cards = matches.map(function(match) { return cfManualMatchCard(match, zone); }).join('');
         if (!cards) cards = emptyMsg('No live match right now. Check back soon.');
         container.innerHTML = shell(cards);
         initWhepPlayers();
+    }
+
+    // Build one manual-match card: live (with stream + betting when enabled) or scheduled (countdown, betting locked).
+    function cfManualMatchCard(match, zone) {
+        const teamAName = match.teamAName || 'White Cock';
+        const teamBName = match.teamBName || 'Black Cock';
+        const teamABreeder = match.teamABreeder || '';
+        const teamBBreeder = match.teamBBreeder || '';
+        const teamAIcon = match.teamAIcon || '';
+        const teamBIcon = match.teamBIcon || '';
+        const ytLink = match.youtubeLiveLink || '';
+        const whepKey = match.webrtcStreamKey || '';
+        const betting = !!match.isBettingEnabled;
+        const live = !!match.isLive;
+
+        let mediaHtml = '';
+        if (live && whepKey) {
+            mediaHtml = `<div class="stream-container" style="position:relative;">
+                <video id="whep-${match.id}" data-whep-key="${whepKey}" autoplay muted playsinline controls style="width:100%;height:100%;background:#000;object-fit:contain;"></video>
+                <span style="position:absolute;top:6px;right:8px;background:rgba(0,0,0,0.6);color:var(--gold);font-size:10px;padding:2px 6px;border-radius:4px;">LOW LATENCY</span>
+            </div>`;
+        } else if (live && ytLink) {
+            let videoId = '';
+            if (ytLink.includes('youtu.be/')) videoId = ytLink.split('youtu.be/')[1].split('?')[0];
+            else if (ytLink.includes('v=')) videoId = ytLink.split('v=')[1].split('&')[0];
+            if (videoId) mediaHtml = `<div class="stream-container"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0" allowfullscreen></iframe></div>`;
+        }
+        if (!mediaHtml && !live) {
+            const sp = cfScheduleParts(match.scheduledStart);
+            mediaHtml = `<div class="cf-sched-hero">
+                <span class="material-icons" style="font-size:30px;opacity:0.6;">event</span>
+                <div class="cf-sched-time">${sp.time}</div>
+                ${sp.cd ? `<div class="cf-sched-cd">${sp.cd}</div>` : ''}
+            </div>`;
+        }
+
+        let statusBadge;
+        if (live && betting) statusBadge = '<span class="match-live">● BETTING OPEN</span>';
+        else if (live) statusBadge = '<span class="match-closed">Live · Betting Closed</span>';
+        else if (betting) statusBadge = '<span class="match-live">● PRE-BET OPEN</span>';
+        else statusBadge = `<span class="cf-sched"><span class="material-icons">schedule</span>Scheduled</span>`;
+
+        const betPanel = betting ? `
+            <div class="bet-panel">
+                <div class="bet-buttons">
+                    <div class="bet-btn" onclick="selectBet(this, ${match.id}, 1, '${teamAName}')">${teamAName}</div>
+                    <div class="bet-btn" onclick="selectBet(this, ${match.id}, 2, '${teamBName}')">${teamBName}</div>
+                    <div class="bet-btn" onclick="selectBet(this, ${match.id}, 3, 'Draw')">Draw</div>
+                </div>
+                <div class="quick-chips">
+                    <div class="chip" onclick="setAmount(${match.id}, 100)">₹100</div>
+                    <div class="chip" onclick="setAmount(${match.id}, 500)">₹500</div>
+                    <div class="chip" onclick="setAmount(${match.id}, 1000)">₹1K</div>
+                    <div class="chip" onclick="setAmount(${match.id}, 5000)">₹5K</div>
+                    <div class="chip" onclick="setAmount(${match.id}, 10000)">₹10K</div>
+                </div>
+                <div class="bet-amount-row">
+                    <input type="number" placeholder="Enter amount" id="bet-amt-${match.id}" min="10">
+                    <button class="bet-submit" onclick="placeBet(${match.id})">Place Bet</button>
+                </div>
+            </div>`
+            : `<div class="cf-locked"><span class="material-icons">lock</span> Betting opens when the match goes live</div>`;
+
+        return `
+        <div class="match-card">
+            <div class="match-header">
+                <div class="match-title">${match.title || zone.name}</div>
+                ${statusBadge}
+            </div>
+            ${mediaHtml}
+            <div class="match-teams">
+                <div class="team">
+                    <img src="${teamAIcon || '/static/red_roaster.png'}" alt="${teamAName}">
+                    <div class="team-name">${teamAName}</div>
+                    ${teamABreeder ? `<div class="team-breeder">${teamABreeder}</div>` : ''}
+                </div>
+                <div class="vs-badge">VS</div>
+                <div class="team">
+                    <img src="${teamBIcon || '/static/blue_roaster.png'}" alt="${teamBName}">
+                    <div class="team-name">${teamBName}</div>
+                    ${teamBBreeder ? `<div class="team-breeder">${teamBBreeder}</div>` : ''}
+                </div>
+            </div>
+            ${betPanel}
+        </div>`;
     }
 
     // ===== LOW-LATENCY WEBRTC (WHEP) PLAYERS =====
@@ -4294,7 +4418,13 @@
             const res = await fetch(`${API}/cockfight/manual-history/`, { headers: {'Authorization': `Bearer ${token}`} });
             if (res.ok) {
                 const data = await res.json();
-                renderMatches(data.results || data);
+                manualMatchData = data.results || data;
+                renderMatches(manualMatchData);
+                // Refresh cockfight category tabs / current channel now that zones are known.
+                if (document.getElementById('cockfight-container') && document.getElementById('sec-cockfight') && !document.getElementById('sec-cockfight').classList.contains('hidden')) {
+                    if (currentChannel !== 'auto') renderManualChannel();
+                    else renderAutoMatch();
+                }
             }
         } catch(e) { console.error('loadMatches error:', e); }
         // Also load auto-match history for results table
@@ -5201,7 +5331,15 @@
             } else if (board.is_virtual) {
                 vr += '<div class="cf-vr-label">Waiting for next round…</div>';
             } else {
-                vr += '<div class="cf-vr-label">No match scheduled yet.<br>Check back soon.</div>';
+                var schedM = matches.find(function(m){ return !m.isWinnerDeclared && !m.isLive; });
+                if (schedM) {
+                    var sp = cfScheduleParts(schedM.liveDate);
+                    vr += '<div class="cf-vr-label">Next match</div>'
+                        + '<div class="cf-vr-timer">' + sp.time + '</div>'
+                        + (sp.cd ? '<div class="cf-vr-label">' + sp.cd + '</div>' : '');
+                } else {
+                    vr += '<div class="cf-vr-label">No match scheduled yet.<br>Check back soon.</div>';
+                }
             }
             vr += '</div>';
             videoInner = vr + '<button class="cf-video-refresh" onclick="loadDiceGames()" aria-label="Refresh"><span class="material-icons">refresh</span></button>';
@@ -6483,12 +6621,34 @@
     function closeProvablyFairModal() { document.getElementById('provably-fair-modal').classList.remove('show'); }
 
     // Load banners from API (if any exist, replace defaults)
+    // per-placement banners: F=cockfight card, G=dice card, D=dice-play screen
+    var gameBanners = { F: null, G: null, D: [] };
+    function normalizeBannerUrl(u) {
+        if (!u) return '';
+        if (!u.startsWith('http')) return location.origin + u;
+        try { return location.origin + (new URL(u)).pathname; } catch(e) { return u; }
+    }
     async function loadBanners() {
         try {
             const res = await fetch(`${API}/base/banners/`);  // public endpoint (AllowAny)
             if (!res.ok) return;
             const data = await res.json();
-            const banners = data.results || data || [];
+            const all = data.results || data || [];
+            // route non-hero placements to their game contexts
+            gameBanners = { F: null, G: null, D: [] };
+            all.forEach(b => {
+                var url = normalizeBannerUrl(b.banner || '');
+                if (b.placement === 'F' && !gameBanners.F) gameBanners.F = url;
+                else if (b.placement === 'G' && !gameBanners.G) gameBanners.G = url;
+                else if (b.placement === 'D') gameBanners.D.push(url);
+            });
+            // re-render game cards so per-card banner backgrounds apply
+            if (typeof loadGameCards === 'function' && document.getElementById('game-cards-container')) {
+                try { renderGameBannerBackgrounds(); } catch(e) {}
+            }
+            // hero carousel: only 'Common' banners (fall back to all if none)
+            let banners = all.filter(b => b.placement === 'C');
+            if (banners.length === 0) banners = all;
             if (banners.length === 0) return;
             const track = document.getElementById('banner-track');
             const dotsC = document.getElementById('banner-dots');
@@ -6517,6 +6677,46 @@
             dotsC.innerHTML = dotsHtml;
             bannerIndex = 0;
         } catch(e) { console.error('Banner load error:', e); }
+    }
+
+    // ===== HIGHLIGHTS (admin-managed cockfight highlight videos) =====
+    async function loadHighlights() {
+        var wrap = document.getElementById('hp-highlights');
+        var row = document.getElementById('hl-row');
+        if (!wrap || !row) return;
+        try {
+            const res = await fetch(`${API}/base/highlights/`);  // public (AllowAny)
+            if (!res.ok) { wrap.style.display = 'none'; return; }
+            const data = await res.json();
+            const list = data.results || data || [];
+            if (!list.length) { wrap.style.display = 'none'; return; }
+            row.innerHTML = list.map(function(h){
+                var thumb = normalizeBannerUrl(h.thumbnail || '');
+                var video = normalizeBannerUrl(h.video || '');
+                var title = (h.title || 'Highlight').replace(/"/g, '&quot;');
+                return '<div class="hl-card" onclick="openHighlight(\'' + video + '\')">'
+                    + (thumb ? '<img class="hl-thumb" src="' + thumb + '" alt="">' : '<div class="hl-thumb"></div>')
+                    + '<div class="hl-play"><span class="material-icons">play_arrow</span></div>'
+                    + '<div class="hl-title">' + title + '</div>'
+                    + '</div>';
+            }).join('');
+            wrap.style.display = '';
+        } catch(e) { wrap.style.display = 'none'; }
+    }
+    function openHighlight(url) {
+        if (!url) return;
+        var m = document.getElementById('hl-modal');
+        var v = document.getElementById('hl-video');
+        v.src = url;
+        m.classList.add('open');
+        try { v.play(); } catch(e) {}
+    }
+    function closeHighlight() {
+        var m = document.getElementById('hl-modal');
+        var v = document.getElementById('hl-video');
+        try { v.pause(); } catch(e) {}
+        v.removeAttribute('src'); v.load();
+        m.classList.remove('open');
     }
 
     // ===== PUSH NOTIFICATIONS =====
