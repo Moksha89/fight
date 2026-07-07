@@ -630,11 +630,15 @@
         .cf-tzb path { cursor: pointer; transition: stroke .12s, stroke-width .12s; }
         .cf-tzb.disabled path { cursor: default; }
         .cf-tz-ov { position: absolute; inset: 0; pointer-events: none; }
-        .cf-tz-col { position: absolute; top: 0; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6% 0 5%; color: #fff; }
-        .cf-tz-label { font-size: clamp(12px, 3.5vw, 18px); font-weight: 800; letter-spacing: .3px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,.6); line-height: 1.02; max-width: 30vw; text-align: center; }
-        .cf-tz-badge { min-width: clamp(58px, 18vw, 86px); height: clamp(40px, 12vw, 58px); padding: 0 clamp(6px, 2vw, 12px); background: #fff; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: clamp(18px, 5.6vw, 30px); font-weight: 800; color: #1F2528; box-shadow: 0 6px 14px rgba(0,0,0,.35); }
-        .cf-tz-pct { font-size: clamp(10px, 3vw, 14px); font-weight: 700; letter-spacing: .5px; text-transform: uppercase; opacity: .9; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
-        .cf-tzb.disabled .cf-tz-label, .cf-tzb.disabled .cf-tz-pct { opacity: .85; }
+        .cf-tz-col { position: absolute; top: 0; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: clamp(8px, 2.6vw, 16px); padding: clamp(14px, 4.5vw, 30px) 0 5%; color: #fff; }
+        .cf-tz-label { font-size: clamp(14px, 4.2vw, 22px); font-weight: 800; letter-spacing: .4px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,.6); line-height: 1.02; max-width: 30vw; text-align: center; }
+        .cf-tz-ribbon { position: relative; font-size: clamp(15px, 4.8vw, 26px); font-weight: 900; letter-spacing: .3px; padding: clamp(5px, 1.6vw, 9px) clamp(16px, 5vw, 26px);
+            color: #4a2f05; background: linear-gradient(160deg, #FFF0BE 0%, #F3CE6E 42%, #D9A63C 100%);
+            clip-path: polygon(12% 0, 88% 0, 100% 50%, 88% 100%, 12% 100%, 0 50%);
+            box-shadow: 0 5px 12px rgba(0,0,0,.42); text-shadow: 0 1px 0 rgba(255,255,255,.45); }
+        .cf-tz-ribbon::after { content: ''; position: absolute; left: 6%; right: 6%; top: 2px; height: 34%; border-radius: 40%; background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,0)); pointer-events: none; }
+        .cf-tzb.disabled .cf-tz-label { opacity: .85; }
+        .cf-tzb.disabled .cf-tz-ribbon { filter: grayscale(.5); opacity: .8; }
         .cf-odd.disabled { opacity: 0.55; cursor: not-allowed; }
         .cf-tz-stake { margin-top: 4px; background: #FFD37A; color: #3a2a06; font-size: clamp(11px, 3.2vw, 15px); font-weight: 800; padding: 2px 9px; border-radius: 11px; box-shadow: 0 3px 8px rgba(0,0,0,.35); animation: cfStakePop .28s cubic-bezier(.2,.9,.3,1.4); }
         @keyframes cfStakePop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -4405,9 +4409,8 @@
             var m = parseFloat(pct) / 100;
             var mult = (isFinite(m) && m > 0) ? m.toFixed(2) + 'x' : '--';
             return '<div class="cf-tz-col" style="left:' + leftPct + '%">'
+                + '<div class="cf-tz-ribbon">' + mult + '</div>'
                 + '<div class="cf-tz-label">' + label + '</div>'
-                + '<div class="cf-tz-badge">' + mult + '</div>'
-                + '<div class="cf-tz-pct">Payout</div>'
                 + '</div>';
         }
         var ov = '<div class="cf-tz-ov">'
