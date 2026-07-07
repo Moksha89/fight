@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoosterRun</title>
+  <link rel="icon" type="image/png" href="/static/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6ABDA7;
+      --primary-dark: #4FA88F;
+      --primary-light: #B4DDD1;
+      --bg-dark: #F7FAFA;
+      --bg-card: #FFFFFF;
+      --bg-surface: #EAF5F1;
+      --text-primary: #1F2528;
+      --text-secondary: #6C7374;
+      --success: #4FA88F;
+      --danger: #F8605B;
+      --warning: #F59E0B;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    .hidden { display: none !important; }
+
+    /* Auth Screens */
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: linear-gradient(135deg, #EAF5F1 0%, #F7FAFA 50%, #B4DDD1 100%);
+    }
+    .auth-card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .auth-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; }
+    .auth-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .auth-subtitle { color: var(--text-secondary); margin-bottom: 30px; font-size: 14px; }
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label { display: block; color: var(--text-secondary); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #FFFFFF;
+      border: 1px solid rgba(31,37,40,0.15);
+      border-radius: 12px;
+      color: #1F2528;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus { border-color: var(--primary); }
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error-msg { color: var(--danger); font-size: 13px; margin-top: 10px; }
+    .info-msg { color: var(--success); font-size: 13px; margin-top: 10px; }
+    .code-inputs { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+    .code-inputs input {
+      width: 48px; height: 56px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      background: #FFFFFF;
+      border: 1px solid rgba(31,37,40,0.15);
+      border-radius: 12px;
+      color: #1F2528;
+      outline: none;
+    }
+    .code-inputs input:focus { border-color: var(--primary); }
+
+    /* App Shell */
+    .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+    .app-header {
+      background: var(--bg-card);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(31,37,40,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-logo { width: 36px; height: 36px; border-radius: 50%; }
+    .header-title { font-size: 18px; font-weight: 700; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .wallet-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(106,189,167,0.15);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 14px;
+    }
+    .header-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 24px;
+      padding: 4px;
+    }
+    .header-btn:hover { color: var(--text-primary); }
+
+    /* Main Content */
+    .app-content { flex: 1; padding: 16px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      display: flex;
+      background: var(--bg-card);
+      border-top: 1px solid rgba(31,37,40,0.06);
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 11px;
+      transition: color 0.2s;
+      border: none;
+      background: none;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item .material-icons { font-size: 24px; margin-bottom: 2px; }
+
+    /* Home */
+    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .banner-area {
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      background: var(--bg-card);
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .banner-area img { width: 100%; height: 100%; object-fit: cover; }
+    .banner-placeholder { color: var(--text-secondary); font-size: 14px; }
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .game-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(31,37,40,0.06);
+    }
+    .game-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+    .game-card .material-icons { font-size: 48px; color: var(--primary); margin-bottom: 12px; }
+    .game-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .game-card p { font-size: 12px; color: var(--text-secondary); }
+    .live-badge {
+      display: inline-block;
+      background: var(--danger);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
+
+    /* Cockfight / Dice Play */
+    .match-container { margin-bottom: 24px; }
+    .channel-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .channel-btn {
+      padding: 8px 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(31,37,40,0.12);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .channel-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .video-area {
+      background: #000;
+      border-radius: 16px;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+    .video-area video, .video-area iframe { width: 100%; height: 100%; border: none; }
+    .video-placeholder { color: var(--text-secondary); text-align: center; }
+    .match-info {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .match-status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .match-id { font-size: 12px; color: var(--text-secondary); }
+    .match-timer { font-size: 20px; font-weight: 700; color: var(--warning); }
+    .teams-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .team-btn {
+      flex: 1;
+      padding: 16px;
+      border-radius: 12px;
+      border: 2px solid rgba(31,37,40,0.12);
+      background: var(--bg-dark);
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+    .team-btn.meron { border-color: var(--danger); }
+    .team-btn.wala { border-color: #2196F3; }
+    .team-btn.selected { transform: scale(1.05); }
+    .team-btn.meron.selected { background: rgba(244,67,54,0.2); }
+    .team-btn.wala.selected { background: rgba(33,150,243,0.2); }
+    .team-name { font-weight: 700; font-size: 16px; display: block; margin-bottom: 4px; }
+    .team-ratio { font-size: 12px; color: var(--text-secondary); }
+    .vs-text { font-weight: 800; color: var(--text-secondary); font-size: 16px; }
+    .bet-controls { margin-top: 16px; }
+    .amount-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(31,37,40,0.12);
+      background: var(--bg-dark);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .place-bet-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .place-bet-btn:hover { background: var(--primary-dark); }
+    .place-bet-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Dice Play */
+    .dice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .dice-btn {
+      aspect-ratio: 1;
+      border-radius: 16px;
+      border: 2px solid rgba(31,37,40,0.12);
+      background: var(--bg-card);
+      color: white;
+      cursor: pointer;
+      font-size: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .dice-btn.selected { border-color: var(--primary); background: rgba(106,189,167,0.15); transform: scale(1.05); }
+    .dice-faces { font-size: 48px; }
+
+    /* History */
+    .history-list { list-style: none; }
+    .history-item {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .history-item .result-won { color: var(--success); font-weight: 700; }
+    .history-item .result-lost { color: var(--danger); font-weight: 700; }
+    .history-item .result-pending { color: var(--warning); font-weight: 700; }
+
+    /* Wallet */
+    .wallet-overview {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .wallet-label { font-size: 14px; opacity: 0.8; margin-bottom: 4px; }
+    .wallet-balance { font-size: 36px; font-weight: 800; }
+    .wallet-actions { display: flex; gap: 12px; margin-top: 20px; }
+    .wallet-action-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .wallet-action-btn:hover { background: rgba(31,37,40,0.08); }
+    .tx-list { list-style: none; }
+    .tx-item {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tx-type { font-size: 13px; color: var(--text-secondary); }
+    .tx-amount.credit { color: var(--success); font-weight: 700; }
+    .tx-amount.debit { color: var(--danger); font-weight: 700; }
+
+    /* Deposit/Withdraw Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Settings */
+    .settings-list { list-style: none; }
+    .settings-item {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .settings-item:hover { background: var(--bg-surface); }
+    .settings-item-left { display: flex; align-items: center; gap: 12px; }
+    .settings-item .material-icons { color: var(--primary); }
+    .logout-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid rgba(31,37,40,0.12);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 40px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-surface);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      z-index: 2000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      animation: slideUp 0.3s;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 20px); } }
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--danger); }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .game-grid { grid-template-columns: repeat(2, 1fr); }
+      .wallet-balance { font-size: 28px; }
+    }
+
+    .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
+    .empty-state .material-icons { font-size: 64px; margin-bottom: 12px; opacity: 0.3; }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 24px;
+      padding: 4px;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth: Email Screen -->
+  <div id="screen-email" class="auth-container">
+    <div class="auth-card">
+      <img src="/static/logo.png" alt="RoosterRun" class="auth-logo">
+      <h1 class="auth-title">Welcome</h1>
+      <p class="auth-subtitle">Join RoosterRun and start betting</p>
+      <div class="input-group">
+        <label style="display:none;">Mobile Number</label>
+        <input type="tel" id="email-input" placeholder="9876543210" autocomplete="tel" pattern="[0-9]{10,15}" style="display:none;">
+      </div>
+      <button class="btn-primary" id="btn-get-code">Register / Login</button>
+      <div id="email-error" class="error-msg hidden"></div>
+      <div id="email-info" class="info-msg hidden"></div>
+    </div>
+  </div>
+
+  <!-- Auth: verification code Screen -->
+  <div id="screen-code" class="auth-container hidden">
+    <div class="auth-card">
+      <img src="/static/logo.png" alt="RoosterRun" class="auth-logo">
+      <h1 class="auth-title">Continue</h1>
+      <p class="auth-subtitle" id="code-subtitle">Account created successfully</p>
+      <div class="code-inputs" id="code-inputs">
+        <input type="text" maxlength="1" data-idx="0">
+        <input type="text" maxlength="1" data-idx="1">
+        <input type="text" maxlength="1" data-idx="2">
+        <input type="text" maxlength="1" data-idx="3">
+        <input type="text" maxlength="1" data-idx="4">
+        <input type="text" maxlength="1" data-idx="5">
+      </div>
+      <button class="btn-primary" id="btn-verify-code">Verify</button>
+      <div id="code-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="screen-app" class="app-shell hidden">
+    <header class="app-header">
+      <div class="header-left">
+        <img src="/static/logo.png" alt="RoosterRun" class="header-logo">
+        <span class="header-title">RoosterRun</span>
+      </div>
+      <div class="header-right">
+        <div class="wallet-badge">
+          <span class="material-icons" style="font-size:18px">account_balance_wallet</span>
+          <span id="header-balance">0.00</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <!-- Home Tab -->
+      <div id="tab-home">
+        <div class="banner-area" id="banner-area">
+          <span class="banner-placeholder">Loading banners...</span>
+        </div>
+        <h2 class="section-title">Games</h2>
+        <div class="game-grid">
+          <div class="game-card" onclick="app.switchTab('cockfight')">
+            <div class="live-badge">LIVE</div>
+            <span class="material-icons">live_tv</span>
+            <h3>Cockfight</h3>
+            <p>Live betting</p>
+          </div>
+          <div class="game-card" onclick="app.switchTab('dice')">
+            <span class="material-icons">casino</span>
+            <h3>Dice Play</h3>
+            <p>Pick your number</p>
+          </div>
+        </div>
+        <h2 class="section-title">Highlights</h2>
+        <div id="highlights-area" class="empty-state">
+          <span class="material-icons">video_library</span>
+          <p>No highlights yet</p>
+        </div>
+      </div>
+
+      <!-- Cockfight Tab -->
+      <div id="tab-cockfight" class="hidden">
+        <div class="channel-bar" id="cf-channels"></div>
+        <div class="video-area" id="cf-video">
+          <div class="video-placeholder">
+            <span class="material-icons" style="font-size:48px">live_tv</span>
+            <p>Live stream will appear here</p>
+          </div>
+        </div>
+        <div class="match-info" id="cf-match-info">
+          <div class="match-status">
+            <span class="match-id" id="cf-match-id">Waiting for match...</span>
+            <span class="match-timer" id="cf-match-timer"></span>
+          </div>
+          <div class="teams-row">
+            <button class="team-btn meron" id="cf-btn-meron" onclick="app.selectTeam('meron')">
+              <span class="team-name">MERON</span>
+              <span class="team-ratio" id="cf-meron-ratio"></span>
+            </button>
+            <span class="vs-text">VS</span>
+            <button class="team-btn wala" id="cf-btn-wala" onclick="app.selectTeam('wala')">
+              <span class="team-name">WALA</span>
+              <span class="team-ratio" id="cf-wala-ratio"></span>
+            </button>
+          </div>
+          <div class="bet-controls">
+            <div class="amount-chips">
+              <button class="chip" onclick="app.setBetAmount(50)">50</button>
+              <button class="chip" onclick="app.setBetAmount(100)">100</button>
+              <button class="chip" onclick="app.setBetAmount(500)">500</button>
+              <button class="chip" onclick="app.setBetAmount(1000)">1K</button>
+              <button class="chip" onclick="app.setBetAmount(5000)">5K</button>
+              <button class="chip" onclick="app.setBetAmount(25000)">25K</button>
+            </div>
+            <button class="place-bet-btn" id="cf-place-bet" onclick="app.placeCockfightBet()" disabled>
+              Place Bet
+            </button>
+          </div>
+        </div>
+        <h3 class="section-title">Recent Results</h3>
+        <ul class="history-list" id="cf-history"></ul>
+      </div>
+
+      <!-- Dice Play Tab -->
+      <div id="tab-dice" class="hidden">
+        <div class="channel-bar" id="dp-boards"></div>
+        <div class="video-area" id="dp-video">
+          <div class="video-placeholder">
+            <span class="material-icons" style="font-size:48px">casino</span>
+            <p>Dice play stream</p>
+          </div>
+        </div>
+        <div class="match-info" id="dp-match-info">
+          <div class="match-status">
+            <span class="match-id" id="dp-match-id">Waiting for match...</span>
+            <span class="match-timer" id="dp-match-timer"></span>
+          </div>
+          <p style="margin-bottom:12px;color:var(--text-secondary);font-size:13px">Select a dice face:</p>
+          <div class="dice-grid">
+            <button class="dice-btn" onclick="app.selectDice(1)"><span class="dice-faces">&#9856;</span></button>
+            <button class="dice-btn" onclick="app.selectDice(2)"><span class="dice-faces">&#9857;</span></button>
+            <button class="dice-btn" onclick="app.selectDice(3)"><span class="dice-faces">&#9858;</span></button>
+            <button class="dice-btn" onclick="app.selectDice(4)"><span class="dice-faces">&#9859;</span></button>
+            <button class="dice-btn" onclick="app.selectDice(5)"><span class="dice-faces">&#9860;</span></button>
+            <button class="dice-btn" onclick="app.selectDice(6)"><span class="dice-faces">&#9861;</span></button>
+          </div>
+          <div class="bet-controls">
+            <div class="amount-chips">
+              <button class="chip" onclick="app.setDiceBetAmount(50)">50</button>
+              <button class="chip" onclick="app.setDiceBetAmount(100)">100</button>
+              <button class="chip" onclick="app.setDiceBetAmount(500)">500</button>
+              <button class="chip" onclick="app.setDiceBetAmount(1000)">1K</button>
+              <button class="chip" onclick="app.setDiceBetAmount(5000)">5K</button>
+            </div>
+            <button class="place-bet-btn" id="dp-place-bet" onclick="app.placeDiceBet()" disabled>
+              Place Bet
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wallet Tab -->
+      <div id="tab-wallet" class="hidden">
+        <div class="wallet-overview">
+          <div class="wallet-label">Available Balance</div>
+          <div class="wallet-balance" id="wallet-balance-display">0.00</div>
+          <div class="wallet-actions">
+            <button class="wallet-action-btn" onclick="app.showDeposit()">Deposit</button>
+            <button class="wallet-action-btn" onclick="app.showWithdraw()">Withdraw</button>
+          </div>
+        </div>
+        <h2 class="section-title">Transactions</h2>
+        <ul class="tx-list" id="tx-list">
+          <li class="empty-state">
+            <span class="material-icons">receipt_long</span>
+            <p>No transactions yet</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="tab-settings" class="hidden">
+        <h2 class="section-title">Settings</h2>
+        <ul class="settings-list">
+          <li class="settings-item" id="settings-profile">
+            <div class="settings-item-left">
+              <span class="material-icons">person</span>
+              <div>
+                <strong id="settings-name">User</strong>
+                <div style="font-size:12px;color:var(--text-secondary)" id="settings-email"></div>
+              </div>
+            </div>
+            <span class="material-icons" style="color:var(--text-secondary)">chevron_right</span>
+          </li>
+          <li class="settings-item" onclick="app.showReferral()">
+            <div class="settings-item-left">
+              <span class="material-icons">share</span>
+              <span>Referral</span>
+            </div>
+            <span class="material-icons" style="color:var(--text-secondary)">chevron_right</span>
+          </li>
+        </ul>
+        <button class="logout-btn" onclick="app.logout()">
+          <span class="material-icons" style="vertical-align:middle;margin-right:8px">exit_to_app</span>
+          Log Out
+        </button>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="app.switchTab('home')" data-tab="home">
+        <span class="material-icons">home</span>
+        Home
+      </button>
+      <button class="nav-item" onclick="app.switchTab('cockfight')" data-tab="cockfight">
+        <span class="material-icons">live_tv</span>
+        Cockfight
+      </button>
+      <button class="nav-item" onclick="app.switchTab('dice')" data-tab="dice">
+        <span class="material-icons">casino</span>
+        Dice
+      </button>
+      <button class="nav-item" onclick="app.switchTab('wallet')" data-tab="wallet">
+        <span class="material-icons">account_balance_wallet</span>
+        Wallet
+      </button>
+      <button class="nav-item" onclick="app.switchTab('settings')" data-tab="settings">
+        <span class="material-icons">settings</span>
+        Settings
+      </button>
+    </nav>
+  </div>
+
+  <!-- Deposit Modal -->
+  <div id="modal-deposit" class="modal-overlay hidden" onclick="if(event.target===this)app.closeModals()">
+    <div class="modal-card" style="position:relative">
+      <button class="modal-close" onclick="app.closeModals()">&times;</button>
+      <h2 class="modal-title">Deposit</h2>
+      <div class="input-group">
+        <label>Amount</label>
+        <input type="number" id="deposit-amount" placeholder="Enter amount" min="1">
+      </div>
+      <div id="deposit-payment-info"></div>
+      <button class="btn-primary" id="btn-deposit-next" onclick="app.processDeposit()">Continue</button>
+      <div id="deposit-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+
+  <!-- Withdraw Modal -->
+  <div id="modal-withdraw" class="modal-overlay hidden" onclick="if(event.target===this)app.closeModals()">
+    <div class="modal-card" style="position:relative">
+      <button class="modal-close" onclick="app.closeModals()">&times;</button>
+      <h2 class="modal-title">Withdraw</h2>
+      <div class="input-group">
+        <label>Amount</label>
+        <input type="number" id="withdraw-amount" placeholder="Enter amount" min="1">
+      </div>
+      <div class="input-group">
+        <label>UPI ID</label>
+        <input type="text" id="withdraw-upi" placeholder="your@upi">
+      </div>
+      <button class="btn-primary" onclick="app.processWithdraw()">Submit Withdrawal</button>
+      <div id="withdraw-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    const BASE_URL = window.location.origin;
+    const WS_URL = BASE_URL.replace('http', 'ws');
+
+    const app = {
+      token: null,
+      refreshToken: null,
+      user: null,
+      walletBalance: 0,
+      currentTab: 'home',
+      selectedTeam: null,
+      betAmount: 0,
+      selectedDice: null,
+      diceBetAmount: 0,
+      activeChannel: 0,
+      matchWs: null,
+      matchHistoryWs: null,
+      diceWs: null,
+      walletWs: null,
+      autoMatchData: null,
+      manualMatchData: null,
+
+      init() {
+        const saved = localStorage.getItem('roosterrun_auth');
+        if (saved) {
+          const auth = JSON.parse(saved);
+          this.token = auth.access;
+          this.refreshToken = auth.refresh;
+          this.showApp();
+        }
+        this.setupOtpInputs();
+        document.getElementById('btn-get-code').addEventListener('click', () => this.getOtp());
+        document.getElementById('btn-verify-code').addEventListener('click', () => this.verifyOtp());
+        document.getElementById('email-input').addEventListener('keypress', (e) => { if(e.key==='Enter') this.getOtp(); });
+      },
+
+      setupOtpInputs() {
+        const inputs = document.querySelectorAll('#code-inputs input');
+        inputs.forEach((inp, i) => {
+          inp.addEventListener('input', () => {
+            if (inp.value && i < inputs.length - 1) inputs[i+1].focus();
+          });
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i-1].focus();
+          });
+        });
+      },
+
+      async apiCall(path, options = {}) {
+        const headers = { 'Content-Type': 'application/json', ...options.headers };
+        if (this.token) headers['Authorization'] = `JWT ${this.token}`;
+        try {
+          const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+          if (res.status === 401 && this.refreshToken) {
+            const refreshed = await this.refreshAccessToken();
+            if (refreshed) {
+              headers['Authorization'] = `JWT ${this.token}`;
+              return fetch(`${BASE_URL}${path}`, { ...options, headers });
+            }
+          }
+          return res;
+        } catch (e) {
+          console.error('API Error:', e);
+          return null;
+        }
+      },
+
+      async refreshAccessToken() {
+        try {
+          const res = await fetch(`${BASE_URL}/auth/jwt/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh: this.refreshToken })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            this.token = data.access_token || data.access;
+            localStorage.setItem('roosterrun_auth', JSON.stringify({ access: this.token, refresh: this.refreshToken }));
+            return true;
+          }
+        } catch(e) {}
+        this.logout();
+        return false;
+      },
+
+      async getOtp() {
+        window.location.href = '/play/';
+      },
+
+      async verifyOtp() {
+        const inputs = document.querySelectorAll('#code-inputs input');
+        const code = Array.from(inputs).map(i => i.value).join('');
+        if (code.length !== 6) return;
+        const btn = document.getElementById('btn-verify-code');
+        btn.disabled = true; btn.textContent = 'Verifying...';
+        document.getElementById('code-error').classList.add('hidden');
+        try {
+          const res = await fetch(`${BASE_URL}/api/user/verifycode/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mobile: this._email, code })
+          });
+          const data = await res.json();
+          if (res.ok && (data.access_token || data.access)) {
+            this.token = data.access_token || data.access;
+            this.refreshToken = data.refresh_token || data.refresh;
+            localStorage.setItem('roosterrun_auth', JSON.stringify({ access: data.access_token || data.access, refresh: data.refresh_token || data.refresh }));
+            this.showApp();
+          } else {
+            document.getElementById('code-error').textContent = data.message || data.error || 'Invalid verification code';
+            document.getElementById('code-error').classList.remove('hidden');
+          }
+        } catch(e) {
+          document.getElementById('code-error').textContent = 'Network error';
+          document.getElementById('code-error').classList.remove('hidden');
+        }
+        btn.disabled = false; btn.textContent = 'Verify';
+      },
+
+      async showApp() {
+        document.getElementById('screen-email').classList.add('hidden');
+        document.getElementById('screen-code').classList.add('hidden');
+        document.getElementById('screen-app').classList.remove('hidden');
+        await this.loadUserInfo();
+        this.loadBanners();
+        this.loadHighlights();
+        this.connectWebSockets();
+      },
+
+      async loadUserInfo() {
+        const res = await this.apiCall('/api/user/me/');
+        if (res && res.ok) {
+          this.user = await res.json();
+          document.getElementById('settings-name').textContent = this.user.name || this.user.email;
+          document.getElementById('settings-email').textContent = this.user.email;
+          if (this.user.wallet_balance !== undefined) {
+            this.walletBalance = parseFloat(this.user.wallet_balance);
+          }
+          this.updateBalanceDisplay();
+        }
+      },
+
+      updateBalanceDisplay() {
+        const formatted = this.walletBalance.toFixed(2);
+        document.getElementById('header-balance').textContent = formatted;
+        document.getElementById('wallet-balance-display').textContent = formatted;
+      },
+
+      async loadBanners() {
+        const res = await this.apiCall('/api/base/banners/');
+        if (res && res.ok) {
+          const banners = await res.json();
+          const area = document.getElementById('banner-area');
+          if (banners.length > 0 && banners[0].image) {
+            area.innerHTML = `<img src="${banners[0].image}" alt="Banner">`;
+          } else {
+            area.innerHTML = '<span class="banner-placeholder">Welcome to RoosterRun</span>';
+          }
+        }
+      },
+
+      async loadHighlights() {
+        const res = await this.apiCall('/api/base/highlights/');
+        if (res && res.ok) {
+          const highlights = await res.json();
+          const area = document.getElementById('highlights-area');
+          if (highlights.length > 0) {
+            area.innerHTML = highlights.map(h =>
+              `<div class="game-card" style="text-align:left;cursor:default">
+                <h3>${h.title || 'Highlight'}</h3>
+                <p style="color:var(--text-secondary)">${h.description || ''}</p>
+              </div>`
+            ).join('');
+          }
+        }
+      },
+
+      connectWebSockets() {
+        this.connectMatchWs();
+        this.connectWalletWs();
+      },
+
+      connectMatchWs() {
+        if (this.matchWs) { this.matchWs.close(); this.matchWs = null; }
+        const url = `${WS_URL}/ws/match-updates/?token=${this.token}`;
+        this.matchWs = new WebSocket(url);
+        this.matchWs.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'accepting_auto_bet_update') {
+              this.autoMatchData = msg.data;
+              this.renderCockfightMatch();
+            } else if (msg.type === 'manual_match_update') {
+              this.manualMatchData = {};
+              const channels = { 0: '24/7' };
+              msg.data.forEach(ch => { channels[ch.id] = ch.name; this.manualMatchData[ch.id] = ch.matches; });
+              this.renderChannels(channels);
+            }
+          } catch(e) { console.error('[WS] parse error', e); }
+        };
+        this.matchWs.onclose = () => {
+          setTimeout(() => { if (this.token) this.connectMatchWs(); }, 2000);
+        };
+      },
+
+      connectWalletWs() {
+        if (this.walletWs) { this.walletWs.close(); this.walletWs = null; }
+        const url = `${WS_URL}/ws/wallet/?token=${this.token}`;
+        this.walletWs = new WebSocket(url);
+        this.walletWs.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.balance !== undefined) {
+              this.walletBalance = parseFloat(msg.balance);
+              this.updateBalanceDisplay();
+            }
+          } catch(e) {}
+        };
+        this.walletWs.onclose = () => {
+          setTimeout(() => { if (this.token) this.connectWalletWs(); }, 2000);
+        };
+      },
+
+      renderChannels(channels) {
+        const bar = document.getElementById('cf-channels');
+        bar.innerHTML = Object.entries(channels).map(([id, name]) =>
+          `<button class="channel-btn ${id == this.activeChannel ? 'active' : ''}"
+                   onclick="app.setChannel(${id})">${name}</button>`
+        ).join('');
+      },
+
+      setChannel(id) {
+        this.activeChannel = id;
+        document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        this.renderCockfightMatch();
+      },
+
+      renderCockfightMatch() {
+        const matchData = this.activeChannel === 0 ? this.autoMatchData : 
+          (this.manualMatchData && this.manualMatchData[this.activeChannel] ? this.manualMatchData[this.activeChannel][0] : null);
+        
+        if (!matchData) {
+          document.getElementById('cf-match-id').textContent = 'No active match';
+          document.getElementById('cf-match-timer').textContent = '';
+          return;
+        }
+
+        const d = this.activeChannel === 0 ? matchData : matchData;
+        document.getElementById('cf-match-id').textContent = `Match #${d.match_number || d.id || ''}`;
+        
+        if (d.bet_ratio && d.bet_ratio.length >= 2) {
+          document.getElementById('cf-meron-ratio').textContent = `x${d.bet_ratio[0]}`;
+          document.getElementById('cf-wala-ratio').textContent = `x${d.bet_ratio[1]}`;
+        }
+
+        const isBettingOpen = d.status === 'accepting_bet' || d.isBettingOpen;
+        document.getElementById('cf-match-timer').textContent = isBettingOpen ? 'OPEN' : (d.status || '');
+        document.getElementById('cf-place-bet').disabled = !isBettingOpen || !this.selectedTeam || !this.betAmount;
+
+        if (d.stream_url) {
+          const video = document.getElementById('cf-video');
+          video.innerHTML = `<iframe src="${d.stream_url}" allowfullscreen></iframe>`;
+        }
+      },
+
+      selectTeam(team) {
+        this.selectedTeam = team;
+        document.getElementById('cf-btn-meron').classList.toggle('selected', team === 'meron');
+        document.getElementById('cf-btn-wala').classList.toggle('selected', team === 'wala');
+        this.updatePlaceBetBtn();
+      },
+
+      setBetAmount(amt) {
+        this.betAmount = amt;
+        document.querySelectorAll('#tab-cockfight .chip').forEach(c => {
+          c.classList.toggle('active', parseInt(c.textContent.replace('K','000')) === amt);
+        });
+        this.updatePlaceBetBtn();
+      },
+
+      updatePlaceBetBtn() {
+        const btn = document.getElementById('cf-place-bet');
+        btn.disabled = !this.selectedTeam || !this.betAmount;
+        btn.textContent = this.betAmount ? `Place Bet - ${this.betAmount}` : 'Place Bet';
+      },
+
+      async placeCockfightBet() {
+        if (!this.selectedTeam || !this.betAmount) return;
+        const btn = document.getElementById('cf-place-bet');
+        btn.disabled = true; btn.textContent = 'Placing...';
+        const matchType = this.activeChannel === 0 ? 'auto' : 'manual';
+        const query = this.activeChannel !== 0 ? `?zone=${this.activeChannel}` : '';
+        const betRatio = this.autoMatchData?.bet_ratio || [];
+        try {
+          const res = await this.apiCall(`/api/cockfight/bets/place-bet/${query}`, {
+            method: 'POST',
+            body: JSON.stringify({
+              matchType, betTeam: this.selectedTeam,
+              amount: this.betAmount, betRatio
+            })
+          });
+          if (res && res.ok) {
+            this.showToast('Bet placed!', 'success');
+            this.selectedTeam = null; this.betAmount = 0;
+            document.querySelectorAll('.team-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('#tab-cockfight .chip').forEach(c => c.classList.remove('active'));
+          } else {
+            const err = res ? await res.json() : {};
+            this.showToast(err.message || err.error || 'Failed to place bet', 'error');
+          }
+        } catch(e) { this.showToast('Network error', 'error'); }
+        btn.disabled = false; btn.textContent = 'Place Bet';
+      },
+
+      selectDice(num) {
+        this.selectedDice = num;
+        document.querySelectorAll('.dice-btn').forEach((b, i) => b.classList.toggle('selected', i+1 === num));
+        this.updateDicePlaceBetBtn();
+      },
+
+      setDiceBetAmount(amt) {
+        this.diceBetAmount = amt;
+        document.querySelectorAll('#tab-dice .chip').forEach(c => {
+          c.classList.toggle('active', parseInt(c.textContent.replace('K','000')) === amt);
+        });
+        this.updateDicePlaceBetBtn();
+      },
+
+      updateDicePlaceBetBtn() {
+        const btn = document.getElementById('dp-place-bet');
+        btn.disabled = !this.selectedDice || !this.diceBetAmount;
+        btn.textContent = this.diceBetAmount ? `Place Bet - ${this.diceBetAmount}` : 'Place Bet';
+      },
+
+      async placeDiceBet() {
+        if (!this.selectedDice || !this.diceBetAmount) return;
+        const btn = document.getElementById('dp-place-bet');
+        btn.disabled = true; btn.textContent = 'Placing...';
+        try {
+          const res = await this.apiCall('/api/diceplay/bets/place-bet/', {
+            method: 'POST',
+            body: JSON.stringify({ betFace: this.selectedDice, amount: this.diceBetAmount })
+          });
+          if (res && res.ok) {
+            this.showToast('Dice bet placed!', 'success');
+            this.selectedDice = null; this.diceBetAmount = 0;
+            document.querySelectorAll('.dice-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('#tab-dice .chip').forEach(c => c.classList.remove('active'));
+          } else {
+            const err = res ? await res.json() : {};
+            this.showToast(err.message || err.error || 'Failed', 'error');
+          }
+        } catch(e) { this.showToast('Network error', 'error'); }
+        btn.disabled = false; btn.textContent = 'Place Bet';
+      },
+
+      switchTab(tab) {
+        this.currentTab = tab;
+        ['home','cockfight','dice','wallet','settings'].forEach(t => {
+          document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+        });
+        document.querySelectorAll('.nav-item').forEach(n => {
+          n.classList.toggle('active', n.dataset.tab === tab);
+        });
+        if (tab === 'wallet') this.loadTransactions();
+      },
+
+      async loadTransactions() {
+        const res = await this.apiCall('/api/wallet/transactions/');
+        if (res && res.ok) {
+          const data = await res.json();
+          const list = document.getElementById('tx-list');
+          const txs = data.results || data;
+          if (txs.length === 0) {
+            list.innerHTML = '<li class="empty-state"><span class="material-icons">receipt_long</span><p>No transactions yet</p></li>';
+            return;
+          }
+          list.innerHTML = txs.map(tx => `
+            <li class="tx-item">
+              <div>
+                <strong>${tx.transaction_type || tx.type || 'Transaction'}</strong>
+                <div class="tx-type">${new Date(tx.created_at || tx.date).toLocaleDateString()}</div>
+              </div>
+              <span class="tx-amount ${parseFloat(tx.amount) >= 0 ? 'credit' : 'debit'}">
+                ${parseFloat(tx.amount) >= 0 ? '+' : ''}${parseFloat(tx.amount).toFixed(2)}
+              </span>
+            </li>
+          `).join('');
+        }
+      },
+
+      showDeposit() { document.getElementById('modal-deposit').classList.remove('hidden'); },
+      showWithdraw() { document.getElementById('modal-withdraw').classList.remove('hidden'); },
+      closeModals() {
+        document.getElementById('modal-deposit').classList.add('hidden');
+        document.getElementById('modal-withdraw').classList.add('hidden');
+      },
+
+      async processDeposit() {
+        const amount = document.getElementById('deposit-amount').value;
+        if (!amount || amount <= 0) return;
+        try {
+          const res = await this.apiCall(`/api/wallet/deposit/payment-options/?amount=${amount}`);
+          if (res && res.ok) {
+            const data = await res.json();
+            const info = document.getElementById('deposit-payment-info');
+            if (data.qr_codes && data.qr_codes.length > 0) {
+              info.innerHTML = `
+                <div style="text-align:center;margin:16px 0">
+                  <p style="color:var(--text-secondary);margin-bottom:12px">Scan QR to pay ${amount}</p>
+                  <img src="${data.qr_codes[0].image}" style="max-width:200px;border-radius:12px">
+                  <p style="color:var(--text-secondary);margin-top:8px;font-size:12px">${data.qr_codes[0].upi_id || ''}</p>
+                </div>`;
+            } else if (data.bank_accounts && data.bank_accounts.length > 0) {
+              const ba = data.bank_accounts[0];
+              info.innerHTML = `
+                <div style="margin:16px 0;padding:16px;background:var(--bg-dark);border-radius:12px">
+                  <p><strong>Bank:</strong> ${ba.bank_name}</p>
+                  <p><strong>A/C:</strong> ${ba.account_number}</p>
+                  <p><strong>IFSC:</strong> ${ba.ifsc_code}</p>
+                </div>`;
+            } else {
+              info.innerHTML = '<p style="color:var(--text-secondary)">No payment options available. Contact admin.</p>';
+            }
+          }
+        } catch(e) {
+          document.getElementById('deposit-error').textContent = 'Error loading payment options';
+          document.getElementById('deposit-error').classList.remove('hidden');
+        }
+      },
+
+      async processWithdraw() {
+        const amount = document.getElementById('withdraw-amount').value;
+        const upi = document.getElementById('withdraw-upi').value;
+        if (!amount || !upi) {
+          document.getElementById('withdraw-error').textContent = 'Please fill all fields';
+          document.getElementById('withdraw-error').classList.remove('hidden');
+          return;
+        }
+        try {
+          const res = await this.apiCall('/api/wallet/withdrawal/', {
+            method: 'POST',
+            body: JSON.stringify({ withdrawal_type: 'upi', withdrawal_amount: amount, upi_id: upi })
+          });
+          if (res && res.ok) {
+            this.showToast('Withdrawal request submitted!', 'success');
+            this.closeModals();
+          } else {
+            const err = res ? await res.json() : {};
+            document.getElementById('withdraw-error').textContent = err.message || err.error || 'Failed';
+            document.getElementById('withdraw-error').classList.remove('hidden');
+          }
+        } catch(e) {
+          document.getElementById('withdraw-error').textContent = 'Network error';
+          document.getElementById('withdraw-error').classList.remove('hidden');
+        }
+      },
+
+      showReferral() {
+        if (this.user && this.user.referral_code) {
+          this.showToast(`Referral code: ${this.user.referral_code}`, 'success');
+        }
+      },
+
+      logout() {
+        this.token = null;
+        this.refreshToken = null;
+        this.user = null;
+        localStorage.removeItem('roosterrun_auth');
+        if (this.matchWs) { this.matchWs.close(); this.matchWs = null; }
+        if (this.walletWs) { this.walletWs.close(); this.walletWs = null; }
+        if (this.diceWs) { this.diceWs.close(); this.diceWs = null; }
+        document.getElementById('screen-app').classList.add('hidden');
+        document.getElementById('screen-email').classList.remove('hidden');
+        document.getElementById('email-input').value = '';
+        document.querySelectorAll('#code-inputs input').forEach(i => i.value = '');
+      },
+
+      showToast(msg, type = '') {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => app.init());
+  </script>
+</body>
+</html>
