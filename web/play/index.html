@@ -433,6 +433,7 @@
             margin-top: var(--header-height);
             margin-left: var(--sidebar-width);
             padding: 24px;
+            padding-bottom: 110px;
             min-height: calc(100vh - var(--header-height));
             transition: margin-left 0.3s ease;
         }
@@ -630,12 +631,21 @@
         .cf-tzb path { cursor: pointer; transition: stroke .12s, stroke-width .12s; }
         .cf-tzb.disabled path { cursor: default; }
         .cf-tz-ov { position: absolute; inset: 0; pointer-events: none; }
-        .cf-tz-col { position: absolute; top: 0; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6% 0 5%; color: #fff; }
-        .cf-tz-label { font-size: clamp(12px, 3.5vw, 18px); font-weight: 800; letter-spacing: .3px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,.6); line-height: 1.02; max-width: 30vw; text-align: center; }
-        .cf-tz-badge { width: clamp(42px, 13vw, 64px); height: clamp(48px, 15vw, 74px); background: #fff; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: clamp(24px, 8vw, 40px); font-weight: 800; color: #1F2528; box-shadow: 0 6px 14px rgba(0,0,0,.35); }
-        .cf-tz-pct { font-size: clamp(12px, 3.6vw, 18px); font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
-        .cf-tzb.disabled .cf-tz-label, .cf-tzb.disabled .cf-tz-pct { opacity: .85; }
+        .cf-tz-col { position: absolute; top: 0; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: clamp(8px, 2.6vw, 16px); padding: clamp(14px, 4.5vw, 30px) 0 5%; color: #fff; }
+        .cf-tz-label { font-size: clamp(14px, 4.2vw, 22px); font-weight: 800; letter-spacing: .4px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,.6); line-height: 1.02; max-width: 30vw; text-align: center; }
+        .cf-tz-ribbon { position: relative; font-size: clamp(15px, 4.8vw, 26px); font-weight: 900; letter-spacing: .3px; padding: clamp(5px, 1.6vw, 9px) clamp(16px, 5vw, 26px);
+            color: #4a2f05; background: linear-gradient(160deg, #FFF0BE 0%, #F3CE6E 42%, #D9A63C 100%);
+            clip-path: polygon(12% 0, 88% 0, 100% 50%, 88% 100%, 12% 100%, 0 50%);
+            box-shadow: 0 5px 12px rgba(0,0,0,.42); text-shadow: 0 1px 0 rgba(255,255,255,.45); }
+        .cf-tz-ribbon::after { content: ''; position: absolute; left: 6%; right: 6%; top: 2px; height: 34%; border-radius: 40%; background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,0)); pointer-events: none; }
+        .cf-tzb.disabled .cf-tz-label { opacity: .85; }
+        .cf-tzb.disabled .cf-tz-ribbon { filter: grayscale(.5); opacity: .8; }
         .cf-odd.disabled { opacity: 0.55; cursor: not-allowed; }
+        .cf-tz-stake { margin-top: 4px; background: #FFD37A; color: #3a2a06; font-size: clamp(11px, 3.2vw, 15px); font-weight: 800; padding: 2px 9px; border-radius: 11px; box-shadow: 0 3px 8px rgba(0,0,0,.35); animation: cfStakePop .28s cubic-bezier(.2,.9,.3,1.4); }
+        @keyframes cfStakePop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .chip-fly { position: fixed; z-index: 5000; width: 38px; height: 38px; margin: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #17403a; pointer-events: none;
+            background: radial-gradient(circle at 50% 32%, #B4DDD1, #4FA88F 72%); border: 3px dashed rgba(255,255,255,0.85); box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+            transform: translate(-50%,-50%) scale(1); opacity: 1; transition: transform .58s cubic-bezier(.35,.85,.4,1), opacity .58s ease; }
 
         .cf-chips { position: relative; z-index: 2; display: flex; gap: 6px; justify-content: space-between; overflow-x: auto; margin-top: 16px; padding: 2px 0 6px; -webkit-overflow-scrolling: touch; }
         .cf-chips::-webkit-scrollbar { height: 0; }
@@ -710,7 +720,27 @@
         .cf-video-result .cf-vr-faces { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
         .cf-video-result .cf-vr-face { width: 34px; height: 34px; background: #fff; border-radius: 7px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,.4); }
         .cf-video-result .cf-vr-face.win { outline: 3px solid #6ABDA7; }
+        .cf-video-result .cf-vr-face.bounce { animation: diceBounceIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+        .cf-video-result .cf-vr-face.win:not(.bounce) { animation: diceWinGlow 1.2s ease-in-out infinite; }
         .cf-video-result .cf-vr-label { font-size: 13px; font-weight: 700; }
+        /* ===== 3D dice (CSS 3D transforms) ===== */
+        .cf-video-result .d3-scene { display: flex; gap: clamp(6px,2.4vw,14px); justify-content: center; align-items: center; perspective: 720px; padding: 8px 0; }
+        .cf-video-result .d3-cubewrap { width: clamp(34px,10vw,46px); height: clamp(34px,10vw,46px); position: relative; }
+        .cf-video-result .d3-cubewrap.win { filter: drop-shadow(0 0 9px rgba(106,189,167,.95)); }
+        .cf-video-result .d3-dice { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; }
+        .cf-video-result .d3-dice.rolling { animation: d3roll .8s linear infinite; }
+        .cf-video-result .d3-dice.settle { animation: d3settle 1s cubic-bezier(.2,.75,.25,1) both; }
+        .cf-video-result .d3-face { position: absolute; width: 100%; height: 100%; border-radius: 20%; background: linear-gradient(145deg, #ffffff, #d8d8d8); box-shadow: inset 0 0 8px rgba(0,0,0,.14); backface-visibility: hidden; display: flex; align-items: center; justify-content: center; }
+        .cf-video-result .d3-cubewrap.win .d3-face { background: linear-gradient(145deg, #FFF8E8, #E6D9B0); }
+        .cf-video-result .d3-f  { transform: translateZ(var(--hz)); }
+        .cf-video-result .d3-bk { transform: rotateY(180deg) translateZ(var(--hz)); }
+        .cf-video-result .d3-r  { transform: rotateY(90deg) translateZ(var(--hz)); }
+        .cf-video-result .d3-l  { transform: rotateY(-90deg) translateZ(var(--hz)); }
+        .cf-video-result .d3-u  { transform: rotateX(90deg) translateZ(var(--hz)); }
+        .cf-video-result .d3-d  { transform: rotateX(-90deg) translateZ(var(--hz)); }
+        .cf-video-result .d3-cubewrap { --hz: clamp(17px,5vw,23px); }
+        @keyframes d3roll { 0% { transform: rotateX(0) rotateY(0); } 100% { transform: rotateX(720deg) rotateY(1080deg); } }
+        @keyframes d3settle { 0% { transform: rotateX(calc(var(--fx) + 900deg)) rotateY(calc(var(--fy) + 1080deg)); } 100% { transform: rotateX(var(--fx)) rotateY(var(--fy)); } }
         .cf-video-result .cf-vr-timer { font-size: 30px; font-weight: 800; color: #6ABDA7; }
 
         .cf-regions { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #e5e7eb; }
@@ -721,12 +751,12 @@
         /* 3D white rounded trapezoid dice board (1-6) */
         .cf-dboard { background: linear-gradient(145deg, #eeeeee, #ffffff); padding: 12px; }
         .cf-dboard svg { width: 100%; height: auto; display: block; }
-        .cf-dbtn { fill: url(#cfBtnGrad); stroke: #ffffff; stroke-width: 12; filter: url(#cfSoftShadow); cursor: pointer; transition: fill .15s; }
-        .cf-dbtn.selected { fill: url(#cfSelGrad); stroke: #6ABDA7; stroke-width: 10; }
+        .cf-dbtn { stroke: #ffffff; stroke-width: 12; filter: url(#cfSoftShadow); cursor: pointer; transition: stroke .15s, stroke-width .15s; }
+        .cf-dbtn.selected { stroke: #FFE08A; stroke-width: 18; }
         .cf-dboard.disabled .cf-dbtn { opacity: 0.55; cursor: not-allowed; }
-        .cf-dnum { fill: #111; font-size: 135px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; pointer-events: none; font-family: Arial, Helvetica, sans-serif; }
-        .cf-dnum.selected { fill: #17403a; }
-        .cf-dstake { fill: #17403a; font-size: 62px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; pointer-events: none; font-family: Arial, Helvetica, sans-serif; }
+        .cf-dnum { fill: #ffffff; stroke: rgba(0,0,0,.42); stroke-width: 5; paint-order: stroke; font-size: 135px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; pointer-events: none; font-family: Arial, Helvetica, sans-serif; }
+        .cf-dnum.selected { fill: #ffffff; }
+        .cf-dstake { fill: #FFD37A; stroke: rgba(0,0,0,.4); stroke-width: 3; paint-order: stroke; font-size: 62px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; pointer-events: none; font-family: Arial, Helvetica, sans-serif; }
         .cf-dice-coins { display: flex; gap: 8px; justify-content: space-between; overflow-x: auto; padding: 12px; background: #fff; -webkit-overflow-scrolling: touch; }
         .cf-dice-coins::-webkit-scrollbar { height: 0; }
         .cf-dice-total { text-align: center; font-size: 13px; color: #6b7280; padding: 0 12px 6px; background: #fff; }
@@ -1423,6 +1453,9 @@
         .txn-icon.credit .material-icons { font-size: 18px; color: var(--success); }
         .txn-icon.debit { background: rgba(239,68,68,0.12); }
         .txn-icon.debit .material-icons { font-size: 18px; color: var(--danger); }
+        .txn-icon.failed { background: rgba(148,163,184,0.15); }
+        .txn-icon.failed .material-icons { font-size: 18px; color: var(--text-muted); }
+        .txn-fail-pill { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 8px; font-size: 9px; font-weight: 700; color: var(--danger); background: rgba(239,68,68,0.12); vertical-align: middle; }
         .txn-details { flex: 1; min-width: 0; }
         .txn-desc { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .txn-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
@@ -1430,6 +1463,7 @@
         .txn-amount { font-size: 14px; font-weight: 700; white-space: nowrap; }
         .txn-amount.credit { color: var(--success); }
         .txn-amount.debit { color: var(--danger); }
+        .txn-amount.failed { color: var(--text-muted); text-decoration: line-through; }
 
         /* ===== PROFILE ===== */
         .profile-card {
@@ -1535,7 +1569,7 @@
             .app-sidebar { transform: translateX(-100%); z-index: 95; width: var(--sidebar-width); }
             .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
             .sidebar-toggle { display: flex; }
-            .app-main { margin-left: 0; padding: 12px; padding-bottom: 72px; }
+            .app-main { margin-left: 0; padding: 12px; padding-bottom: 138px; }
             .bottom-nav { display: flex; }
 
             /* Header compact — hide deposit/withdraw btns on small mobile */
@@ -1747,7 +1781,7 @@
             .app-sidebar { transform: translateX(-100%); z-index: 95; }
             .app-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
             .sidebar-toggle { display: flex; }
-            .app-main { margin-left: 0; padding: 16px; padding-bottom: 76px; }
+            .app-main { margin-left: 0; padding: 16px; padding-bottom: 138px; }
             .bottom-nav { display: flex; }
 
             .app-header { padding: 0 14px; }
@@ -1817,7 +1851,7 @@
             .app-sidebar:hover .sidebar-item span:not(.material-icons):not(.badge) { display: inline; }
             .app-sidebar:hover .sidebar-item .badge { position: static; margin-left: auto; }
 
-            .app-main { margin-left: var(--sidebar-width); padding: 20px; }
+            .app-main { margin-left: var(--sidebar-width); padding: 20px; padding-bottom: 110px; }
             .bottom-nav { display: none !important; }
 
             .banner-carousel { height: 180px; }
@@ -1850,7 +1884,7 @@
 
             .app-sidebar { width: var(--sidebar-width); }
             .sidebar-toggle { display: none; }
-            .app-main { margin-left: var(--sidebar-width); padding: 24px; max-width: calc(100% - var(--sidebar-width)); }
+            .app-main { margin-left: var(--sidebar-width); padding: 24px; padding-bottom: 110px; max-width: calc(100% - var(--sidebar-width)); }
             .bottom-nav { display: none !important; }
 
             .banner-carousel { height: 200px; }
@@ -3912,6 +3946,7 @@
 
     function selectChip(el, amount) {
         selectedChipAmount = amount;
+        cfChipDenom['auto'] = amount;
         document.querySelectorAll('.chips-row .chip').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
         const inp = document.getElementById('bet-amt-auto');
@@ -3979,9 +4014,12 @@
         } else {
             videoInner = `<div class="cf-vloading"><div style="text-align:center;"><span class="material-icons" style="font-size:40px;opacity:0.5;">videocam_off</span><p style="margin-top:6px;">Waiting for live stream...</p></div></div>`;
         }
-        const meronMult = (1 + parseFloat(currentOdds.meron_max || '0.85')).toFixed(2);
-        const walaMult  = (1 + parseFloat(currentOdds.wala_max  || '0.85')).toFixed(2);
-        const drawMult  = (1 + parseFloat(currentOdds.draw_max  || '5.00')).toFixed(2);
+        // Live parimutuel pool multipliers (full return, e.g. 1.90x). Fall back to an
+        // opening line until the pool forms (ratio is 0 when a side has no bets yet).
+        const oddsMult = (v, fb) => { var r = parseFloat(v); return (isFinite(r) && r > 1) ? r.toFixed(2) : fb; };
+        const meronMult = oddsMult(currentOdds.meron_ratio, '1.85');
+        const walaMult  = oddsMult(currentOdds.wala_ratio, '1.85');
+        const drawMult  = oddsMult(currentOdds.draw_ratio, '6.00');
         const bal = (typeof userInfo === 'object' && userInfo) ? (userInfo.wallet_balance || 0) : 0;
         const coins = [50, 100, 200, 300, 500, 1000, 2500, 5000];
         const coinsHtml = coins.map(c => `<div class="cf-coin" data-amt="${c}" onclick="cfSelectCoin(this, ${c})">${c >= 1000 ? (c/1000)+'K' : c}</div>`).join('');
@@ -3999,8 +4037,7 @@
             <div class="cf-controls">
                 <div class="cf-cats">${cfCategoryTabsHtml()}</div>
                 <div class="cf-sound">
-                    <span class="material-icons active" id="cf-snd-on" onclick="cfSetMute(false)" aria-label="Sound on">volume_up</span>
-                    <span class="material-icons muted" id="cf-snd-off" onclick="cfSetMute(true)" aria-label="Mute">music_off</span>
+                    <span class="material-icons ${cfMuted ? 'muted' : 'active'}" id="cf-snd-toggle" onclick="cfToggleMute()" aria-label="Toggle sound">${cfMuted ? 'volume_off' : 'volume_up'}</span>
                 </div>
             </div>
             <div class="cf-arena">
@@ -4040,10 +4077,18 @@
             if (board) cfHighlightBoard(board, selectedBets['auto'].team);
         }
         if (selectedChipAmount) {
-            const coinEl = document.querySelector('.cf-coin[data-amt="' + selectedChipAmount + '"]');
+            const coinEl = document.querySelector('.cf-arena .cf-coin[data-amt="' + selectedChipAmount + '"]');
             if (coinEl) coinEl.classList.add('selected');
-            const amtEl = document.getElementById('bet-amt-auto');
-            if (amtEl) amtEl.value = selectedChipAmount;
+        }
+        // Restore the accumulated stake + its badge so a poll refresh doesn't wipe the staged bet.
+        const amtEl = document.getElementById('bet-amt-auto');
+        const st = cfStake['auto'];
+        if (st && st.amount > 0) {
+            if (amtEl) amtEl.value = st.amount;
+            const board = container.querySelector('.cf-arena .cf-tzb');
+            if (board) cfUpdateStakeBadge(board, st.code, st.amount);
+        } else if (selectedChipAmount && amtEl) {
+            amtEl.value = selectedChipAmount;
         }
         renderBeadPlate();
         setTimeout(loadMatchHistory, 100);
@@ -4068,10 +4113,99 @@
 
     function cfSelectCoin(el, amount) {
         selectedChipAmount = amount;
+        cfChipDenom['auto'] = amount;
         document.querySelectorAll('.cf-coin').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
-        const inp = document.getElementById('bet-amt-auto');
-        if (inp) inp.value = amount;
+    }
+
+    // ===== Bet sounds (WebAudio — no asset files, works offline) =====
+    var _sfxCtx = null;
+    function sfxCtx() {
+        try {
+            if (!_sfxCtx) _sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (_sfxCtx.state === 'suspended') _sfxCtx.resume();
+        } catch (e) { return null; }
+        return _sfxCtx;
+    }
+    function sfxTone(ctx, t0, freq, dur, type, peak) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = type || 'sine';
+        o.frequency.setValueAtTime(freq, t0);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(peak || 0.25, t0 + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t0); o.stop(t0 + dur + 0.02);
+    }
+    // Poker-chip clink: quick high blips + a short noise tick.
+    function sfxChip() {
+        var ctx = sfxCtx(); if (!ctx) return;
+        var t = ctx.currentTime;
+        sfxTone(ctx, t, 1250, 0.08, 'triangle', 0.22);
+        sfxTone(ctx, t + 0.04, 1720, 0.07, 'triangle', 0.16);
+        try {
+            var b = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate), d = b.getChannelData(0);
+            for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+            var src = ctx.createBufferSource(), ng = ctx.createGain();
+            src.buffer = b; ng.gain.value = 0.12; src.connect(ng); ng.connect(ctx.destination); src.start(t);
+        } catch (e) {}
+    }
+    // Place-bet confirmation ding.
+    function sfxPlace() {
+        var ctx = sfxCtx(); if (!ctx) return;
+        var t = ctx.currentTime;
+        sfxTone(ctx, t, 660, 0.14, 'sine', 0.28);
+        sfxTone(ctx, t + 0.1, 990, 0.22, 'sine', 0.28);
+    }
+    // Win fanfare: ascending arpeggio.
+    function sfxWin() {
+        var ctx = sfxCtx(); if (!ctx) return;
+        var t = ctx.currentTime, notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach(function(f, i) { sfxTone(ctx, t + i * 0.11, f, 0.35, 'triangle', 0.3); });
+    }
+
+    // Accumulated stake per betting scope (scope = 'auto' or a manual match id).
+    var cfChipDenom = {};  // scope -> selected chip denomination
+    var cfStake = {};       // scope -> { code, amount } for the currently selected outcome
+
+    // Animate a chip flying from the chosen denomination into the tapped odds panel.
+    function cfFlyChip(scope, targetPathEl, amount) {
+        if (!targetPathEl || !targetPathEl.getBoundingClientRect) return;
+        var tr = targetPathEl.getBoundingClientRect();
+        var toX = tr.left + tr.width / 2, toY = tr.top + tr.height / 2;
+        var fromEl = null;
+        if (scope === 'auto') fromEl = document.querySelector('.cf-arena .cf-coin.selected');
+        else if (scope === 'dice') fromEl = document.querySelector('.cf-dice-coins .cf-coin.selected');
+        else fromEl = document.querySelector('.match-card .quick-chips .chip.selected');
+        var fromX, fromY;
+        if (fromEl) { var fr = fromEl.getBoundingClientRect(); fromX = fr.left + fr.width / 2; fromY = fr.top + fr.height / 2; }
+        else { fromX = toX; fromY = toY + 160; }
+        var chip = document.createElement('div');
+        chip.className = 'chip-fly';
+        chip.textContent = amount >= 1000 ? (amount / 1000) + 'K' : ('' + amount);
+        chip.style.left = fromX + 'px';
+        chip.style.top = fromY + 'px';
+        document.body.appendChild(chip);
+        // force reflow, then transition to target
+        void chip.offsetWidth;
+        chip.style.transform = 'translate(-50%,-50%) translate(' + (toX - fromX) + 'px,' + (toY - fromY) + 'px) scale(0.55) rotate(320deg)';
+        chip.style.opacity = '0.15';
+        setTimeout(function(){ if (chip.parentNode) chip.remove(); }, 620);
+    }
+
+    // Show the running staked amount on the selected column; clear the others.
+    function cfUpdateStakeBadge(board, code, amount) {
+        if (!board) return;
+        board.querySelectorAll('.cf-tz-stake').forEach(function(s){ s.remove(); });
+        var cols = board.querySelectorAll('.cf-tz-col');
+        var idx = (String(code) === '1') ? 0 : (String(code) === '3' ? 1 : 2);
+        var col = cols[idx];
+        if (col) {
+            var s = document.createElement('div');
+            s.className = 'cf-tz-stake';
+            s.textContent = '₹' + amount.toLocaleString('en-IN');
+            col.appendChild(s);
+        }
     }
 
     function cfPlaceBet() {
@@ -4085,12 +4219,15 @@
     var cfMuted = true;
     function cfSetMute(mute) {
         cfMuted = mute;
-        const on = document.getElementById('cf-snd-on');
-        const off = document.getElementById('cf-snd-off');
-        if (on) on.classList.toggle('active', !mute);
-        if (off) off.classList.toggle('muted', mute);
+        const t = document.getElementById('cf-snd-toggle');
+        if (t) {
+            t.textContent = mute ? 'volume_off' : 'volume_up';
+            t.classList.toggle('muted', mute);
+            t.classList.toggle('active', !mute);
+        }
         showToast(mute ? 'Stream muted' : 'Stream unmuted', 'info');
     }
+    function cfToggleMute() { cfSetMute(!cfMuted); }
 
     var cfLangs = ['Telugu', 'Hindi', 'English', 'Tamil'];
     function cfCycleLang(el) {
@@ -4233,6 +4370,8 @@
         selectedAutoTeam = null; selectedAutoTeamName = '';
         selectedBets['auto'] = null;
         selectedChipAmount = 0;
+        cfStake['auto'] = null; cfChipDenom['auto'] = 0;
+        document.querySelectorAll('.cf-tz-stake').forEach(function(s){ s.remove(); });
         const inp = document.getElementById('bet-amt-auto');
         if (inp) inp.value = '';
         const row = document.getElementById('auto-ratio-row');
@@ -4305,17 +4444,18 @@
             + panel(CF_PT, 'gT' + k, 'cT' + k, cfg.codeD, cfg.labelD, 440)
             + panel(CF_PW, 'gW' + k, 'cW' + k, cfg.codeB, cfg.labelB, 830)
             + '</svg>';
-        function col(leftPct, label, num, pct) {
+        function col(leftPct, label, pct) {
+            var m = parseFloat(pct) / 100;
+            var mult = (isFinite(m) && m > 0) ? m.toFixed(2) + 'x' : '--';
             return '<div class="cf-tz-col" style="left:' + leftPct + '%">'
+                + '<div class="cf-tz-ribbon">' + mult + '</div>'
                 + '<div class="cf-tz-label">' + label + '</div>'
-                + '<div class="cf-tz-badge">' + num + '</div>'
-                + '<div class="cf-tz-pct">' + pct + '</div>'
                 + '</div>';
         }
         var ov = '<div class="cf-tz-ov">'
-            + col(17.5, cfg.labelA, 1, cfg.pctA)
-            + col(50, cfg.labelD, 2, cfg.pctD)
-            + col(82.5, cfg.labelB, 3, cfg.pctB)
+            + col(17.5, cfg.labelA, cfg.pctA)
+            + col(50, cfg.labelD, cfg.pctD)
+            + col(82.5, cfg.labelB, cfg.pctB)
             + '</div>';
         return '<div class="cf-tzb' + (dis ? ' disabled' : '') + '">' + svg + ov + '</div>';
     }
@@ -4328,9 +4468,29 @@
     }
     // Shared outcome picker for the trapezoid board (scope = 'auto' or a manual match id).
     function cfSelectOutcome(evt, scope, code, label) {
+        var prev = selectedBets[scope];
+        var switching = !prev || String(prev.team) !== String(code);
         selectedBets[scope] = { team: code, teamName: label };
-        var board = (evt && evt.currentTarget) ? evt.currentTarget.closest('.cf-tzb') : null;
+        var tgt = (evt && evt.currentTarget) ? evt.currentTarget : null;
+        var board = tgt ? tgt.closest('.cf-tzb') : null;
         if (board) cfHighlightBoard(board, code);
+
+        // Chip toss + accumulate stake when a denomination is selected.
+        var denom = cfChipDenom[scope] || (scope === 'auto' ? selectedChipAmount : 0);
+        if (denom > 0) {
+            var cur = cfStake[scope];
+            if (cur && !switching) cur.amount += denom;
+            else cfStake[scope] = { code: code, amount: denom };
+            var amtId = 'bet-amt-' + (scope === 'auto' ? 'auto' : scope);
+            var amtEl = document.getElementById(amtId);
+            if (amtEl) amtEl.value = cfStake[scope].amount;
+            sfxChip();
+            if (tgt) cfFlyChip(scope, tgt, denom);
+            if (board) cfUpdateStakeBadge(board, code, cfStake[scope].amount);
+        } else if (board) {
+            cfUpdateStakeBadge(board, code, (cfStake[scope] && !switching) ? cfStake[scope].amount : 0);
+        }
+
         if (scope === 'auto') {
             selectedAutoTeam = code; selectedAutoTeamName = label;
             var o = currentOdds || {}, ratio;
@@ -4345,7 +4505,8 @@
     function cfManualPcts(match) {
         var po = match.pool_odds;
         if (!po) return { a: '—', d: '—', b: '—' };
-        function pc(r) { var m = 1 + parseFloat(r || 0); return (isNaN(m) ? '—' : (m * 100).toFixed(2) + '%'); }
+        // pool_odds ratios are the full return multiplier (e.g. 1.90 => 1.90x). Show '—' until a side has a pool.
+        function pc(r) { var m = parseFloat(r || 0); return (isNaN(m) || m <= 1) ? '—' : (m * 100).toFixed(2) + '%'; }
         return { a: pc(po.meron_ratio), d: pc(po.draw_ratio), b: pc(po.wala_ratio) };
     }
 
@@ -4533,6 +4694,7 @@
             });
             const data = await res.json();
             if (res.ok || res.status === 201) {
+                sfxPlace();
                 const betId = data.id || data.bet_id || '—';
                 const potentialWin = (parseFloat(amount) * ratio).toFixed(2);
                 showBetReceipt({
@@ -4750,7 +4912,28 @@
     }
 
     function setAmount(matchId, amount) {
-        document.getElementById(`bet-amt-${matchId}`).value = amount;
+        cfChipDenom[matchId] = amount;
+        // mark the chosen quick chip within this match card
+        var input = document.getElementById(`bet-amt-${matchId}`);
+        var card = input ? input.closest('.match-card') : null;
+        if (card && event && event.currentTarget) {
+            card.querySelectorAll('.quick-chips .chip').forEach(c => c.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+        // If an outcome is already picked, toss a chip straight in; else prime the input.
+        if (selectedBets[matchId]) {
+            var cur = cfStake[matchId];
+            if (cur && String(cur.code) === String(selectedBets[matchId].team)) cur.amount += amount;
+            else cfStake[matchId] = { code: selectedBets[matchId].team, amount: amount };
+            if (input) input.value = cfStake[matchId].amount;
+            sfxChip();
+            var board = card ? card.querySelector('.cf-tzb') : null;
+            var tgt = board ? board.querySelector('path[data-code="' + selectedBets[matchId].team + '"]') : null;
+            if (tgt) cfFlyChip(matchId, tgt, amount);
+            if (board) cfUpdateStakeBadge(board, selectedBets[matchId].team, cfStake[matchId].amount);
+        } else if (input) {
+            input.value = amount;
+        }
     }
 
     let selectedBets = {};
@@ -4775,6 +4958,8 @@
             });
             const data = await res.json();
             if (res.ok || res.status === 201) {
+                sfxPlace();
+                cfStake[matchId] = null; cfChipDenom[matchId] = 0;
                 const betId = data.id || data.bet_id || '—';
                 showBetReceipt({
                     type: 'Cockfight',
@@ -4834,19 +5019,23 @@
 
         let html = '';
         pageItems.forEach(t => {
-            const isCredit = t.type === 'Funds In' || t.description.includes('win') || t.description.includes('refund') || t.description.includes('deposit');
+            const failed = txnFailed(t);
+            const isCredit = txnIsCredit(t);
+            const cls = failed ? 'failed' : (isCredit ? 'credit' : 'debit');
+            const icon = failed ? 'block' : (isCredit ? 'arrow_downward' : 'arrow_upward');
+            const amt = Math.abs(parseFloat(t.amount) || 0);
             html += `
             <div class="txn-item">
-                <div class="txn-icon ${isCredit ? 'credit' : 'debit'}">
-                    <span class="material-icons">${isCredit ? 'arrow_downward' : 'arrow_upward'}</span>
+                <div class="txn-icon ${cls}">
+                    <span class="material-icons">${icon}</span>
                 </div>
                 <div class="txn-details">
-                    <div class="txn-desc">${t.description}</div>
+                    <div class="txn-desc">${t.description}${failed ? '<span class="txn-fail-pill">FAILED</span>' : ''}</div>
                     <div class="txn-date">${t.date}</div>
                     ${t.hash ? `<div class="txn-hash">#${t.hash}</div>` : ''}
                 </div>
-                <div class="txn-amount ${isCredit ? 'credit' : 'debit'}">
-                    ${isCredit ? '+' : '-'}₹${t.amount}
+                <div class="txn-amount ${cls}">
+                    ${failed ? '' : (isCredit ? '+' : '-')}₹${failed ? amt : t.amount}
                 </div>
             </div>`;
         });
@@ -4871,10 +5060,17 @@
         var _protected = { 'sec-cockfight': 1, 'sec-dice': 1, 'sec-wallet': 1, 'sec-profile': 1, 'sec-statement': 1, 'sec-mybets': 1, 'sec-referral': 1, 'sec-notifications': 1 };
         if (!token && _protected[sectionId]) { showAuthScreen('login'); return; }
 
+        // Close any open modals/overlays so they don't linger over the new screen.
+        ['deposit-modal', 'withdraw-modal', 'password-modal', 'provably-fair-modal'].forEach(function (id) {
+            var m = document.getElementById(id); if (m) m.classList.remove('show');
+        });
+        var _cfov = document.getElementById('cf-modal-overlay'); if (_cfov) _cfov.remove();
+
         var sec = document.getElementById(sectionId);
         if (sec && sec.dataset.game && Array.isArray(activeGameIds) && activeGameIds.length && !activeGameIds.includes(sec.dataset.game)) {
             sectionId = 'sec-home'; sec = document.getElementById(sectionId);
         }
+        if (!sec) return;
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         sec.classList.add('active');
 
@@ -5331,15 +5527,28 @@
         } catch(e) { showToast('Unable to connect. Check your internet.', 'error'); }
     }
 
+    // Robust credit detection shared by statement, wallet summary, recent txns and CSV export.
+    var TXN_WIN_RE = /\b(won|win|winnings|refund|refunded|reversal|reversed|bonus|cashback)\b/;
+    var TXN_CREDIT_RE = /\b(won|win|winnings|refund|refunded|reversal|reversed|bonus|cashback|credited|deposit(?:ed)?)\b/;
+    function txnIsCredit(t) {
+        var d = ((t && t.description) || '').toLowerCase();
+        return (t && t.type === 'Funds In') || TXN_CREDIT_RE.test(d);
+    }
+    // Only admin-rejected deposits/withdrawals are "failed" (they never moved money net).
+    // NB: normal bet debits also carry success=false, so we must match the "Rejected ..." description.
+    function txnFailed(t) { return !!t && t.success === false && /^\s*rejected\b/i.test((t.description || '')); }
+
     // ===== WALLET SUMMARY =====
     function updateWalletSummary() {
         let deposited = 0, withdrawn = 0, winnings = 0;
         allTransactions.forEach(t => {
+            if (txnFailed(t)) return; // rejected/failed rows never moved money net
             const desc = (t.description||'').toLowerCase();
             const amt = parseFloat(t.amount) || 0;
-            if (desc.includes('deposit') || (t.type === 'Funds In' && !desc.includes('win') && !desc.includes('refund'))) deposited += amt;
+            const isWin = TXN_WIN_RE.test(desc);
+            if (/\bdeposit(?:ed)?\b/.test(desc) || (t.type === 'Funds In' && !isWin)) deposited += amt;
             else if (desc.includes('withdraw')) withdrawn += amt;
-            else if (desc.includes('win') || desc.includes('refund')) winnings += amt;
+            else if (isWin) winnings += amt;
         });
         document.getElementById('ws-deposited').textContent = '₹' + deposited.toLocaleString();
         document.getElementById('ws-withdrawn').textContent = '₹' + withdrawn.toLocaleString();
@@ -5350,8 +5559,12 @@
         if (recent.length === 0) { container.innerHTML = '<div class="empty-state"><span class="material-icons">receipt_long</span><p>No transactions yet</p></div>'; return; }
         let html = '';
         recent.forEach(t => {
-            const isCredit = t.type === 'Funds In' || (t.description||'').includes('win') || (t.description||'').includes('refund') || (t.description||'').includes('deposit');
-            html += `<div class="txn-item"><div class="txn-icon ${isCredit?'credit':'debit'}"><span class="material-icons">${isCredit?'arrow_downward':'arrow_upward'}</span></div><div class="txn-details"><div class="txn-desc">${t.description}</div><div class="txn-date">${t.date}</div></div><div class="txn-amount ${isCredit?'credit':'debit'}">${isCredit?'+':'-'}₹${t.amount}</div></div>`;
+            const failed = txnFailed(t);
+            const isCredit = txnIsCredit(t);
+            const cls = failed ? 'failed' : (isCredit ? 'credit' : 'debit');
+            const icon = failed ? 'block' : (isCredit ? 'arrow_downward' : 'arrow_upward');
+            const amt = Math.abs(parseFloat(t.amount) || 0);
+            html += `<div class="txn-item"><div class="txn-icon ${cls}"><span class="material-icons">${icon}</span></div><div class="txn-details"><div class="txn-desc">${t.description}${failed?'<span class="txn-fail-pill">FAILED</span>':''}</div><div class="txn-date">${t.date}</div></div><div class="txn-amount ${cls}">${failed?'':(isCredit?'+':'-')}₹${failed?amt:t.amount}</div></div>`;
         });
         container.innerHTML = html;
     }
@@ -5372,6 +5585,7 @@
     let diceBetSubmitting = false; // Fix #4: prevent double-click
     let diceCompletedCache = []; // Fix #2: persistent match history cache
     let diceRevealTimer = null; // D2: track reveal animation timer
+    let diceRevealActive = false; // locks diceAnimState during the roll/reveal sequence so renders don't clobber it
 
     // D2: Render CSS pip pattern for a dice face value (1-6)
     function dicePipHTML(val, size) {
@@ -5464,6 +5678,62 @@
         return Object.keys(counts).filter(function(k) { return counts[k] >= 2; }).map(Number);
     }
 
+    // ===== 3D dice cube (CSS 3D transforms — real perspective, no WebGL lib) =====
+    // Rotation that brings each face value to the front of the cube.
+    var DICE3D_ORIENT = { 1:[0,0], 6:[0,180], 3:[0,-90], 4:[0,90], 2:[-90,0], 5:[90,0] };
+    function dice3dCube(value, mode, isWin, idx) {
+        // mode: 'roll' (spinning), 'settle' (spin then land), 'static' (show face, no anim)
+        var faceDefs = [[1,'f'],[6,'bk'],[3,'r'],[4,'l'],[2,'u'],[5,'d']];
+        var inner = faceDefs.map(function(p){ return '<div class="d3-face d3-' + p[1] + '">' + dicePipHTML(p[0], 'sm') + '</div>'; }).join('');
+        var o = DICE3D_ORIENT[value] || [0,0];
+        var cls = 'd3-dice ' + (mode === 'roll' ? 'rolling' : mode === 'settle' ? 'settle' : 'resting');
+        var style;
+        if (mode === 'roll') style = 'animation-delay:' + (idx * 0.05).toFixed(2) + 's';
+        else if (mode === 'settle') style = '--fx:' + o[0] + 'deg;--fy:' + o[1] + 'deg;animation-delay:' + (idx * 0.09).toFixed(2) + 's';
+        else style = 'transform:rotateX(' + o[0] + 'deg) rotateY(' + o[1] + 'deg)';
+        return '<div class="d3-cubewrap' + (isWin ? ' win' : '') + '"><div class="' + cls + '" style="' + style + '">' + inner + '</div></div>';
+    }
+    // Premium deep casino gradients for the dice board tiles (1-6): glossy top -> deep dark bottom.
+    var DICE_TILE_COLORS = {
+        1: ['#f05a5a', '#e23b3b', '#4d0d0d'], // red
+        2: ['#f7b64a', '#f0a020', '#5e3200'], // gold/amber
+        3: ['#5fd0ad', '#2fae86', '#0d4638'], // teal
+        4: ['#5a83ea', '#3763d6', '#0f2560'], // blue
+        5: ['#a969e2', '#8e44d9', '#2c0d52'], // purple
+        6: ['#ec6fae', '#db4b93', '#4a1236']  // magenta
+    };
+    function diceTileGrads() {
+        return [1,2,3,4,5,6].map(function(i){
+            var c = DICE_TILE_COLORS[i];
+            return '<linearGradient id="gD' + i + '" x1="0" y1="0" x2="0" y2="1">'
+                + '<stop offset="0" stop-color="' + c[0] + '"/>'
+                + '<stop offset="0.45" stop-color="' + c[1] + '"/>'
+                + '<stop offset="1" stop-color="' + c[2] + '"/></linearGradient>';
+        }).join('');
+    }
+    // SVG pip circles for a dice-face watermark (n = 1..6) inside a 300x300 box.
+    function diceWMPips(n) {
+        var P = { L:78, R:222, C:150, T:78, B:222, M:150 };
+        var layouts = {
+            1: [[P.C,P.M]],
+            2: [[P.L,P.T],[P.R,P.B]],
+            3: [[P.L,P.T],[P.C,P.M],[P.R,P.B]],
+            4: [[P.L,P.T],[P.R,P.T],[P.L,P.B],[P.R,P.B]],
+            5: [[P.L,P.T],[P.R,P.T],[P.C,P.M],[P.L,P.B],[P.R,P.B]],
+            6: [[P.L,64],[P.R,64],[P.L,P.M],[P.R,P.M],[P.L,236],[P.R,236]]
+        };
+        return (layouts[n] || []).map(function(p){ return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="27" fill="#000"/>'; }).join('');
+    }
+    function dice3dScene(faces, mode, winners) {
+        var cubes = '';
+        for (var i = 0; i < 6; i++) {
+            var v = (mode === 'roll') ? ((i % 6) + 1) : (faces[i] || 1);
+            var win = (mode !== 'roll') && winners && winners.indexOf(v) >= 0;
+            cubes += dice3dCube(v, mode, win, i);
+        }
+        return '<div class="d3-scene">' + cubes + '</div>';
+    }
+
     function formatDiceTimer(secs) {
         if (secs <= 0) return '0:00';
         var m = Math.floor(secs / 60), s = secs % 60;
@@ -5513,15 +5783,25 @@
         var phase = liveMatch ? (liveMatch.virtual_phase || 'betting') : 'done';
         var isBettingOpen = liveMatch ? liveMatch.isBettingEnabled : false;
 
-        if (phase === 'betting' && isBettingOpen) diceAnimState = 'betting_open';
-        else if (phase === 'betting_closed' || (phase === 'betting' && !isBettingOpen)) diceAnimState = 'betting_locked';
-        else if (phase === 'shuffling') diceAnimState = 'rolling';
-        else if (phase === 'result') diceAnimState = 'reveal';
-        else if (phase === 'done') diceAnimState = 'idle';
+        // Don't recompute the animation state from the match phase while the WS-driven
+        // roll/reveal/highlight sequence is playing, otherwise the render clobbers it.
+        if (!diceRevealActive) {
+            if (phase === 'betting' && isBettingOpen) diceAnimState = 'betting_open';
+            else if (phase === 'betting_closed' || (phase === 'betting' && !isBettingOpen)) diceAnimState = 'betting_locked';
+            else if (phase === 'shuffling') diceAnimState = 'rolling';
+            else if (phase === 'result') diceAnimState = 'reveal';
+            else if (phase === 'done') diceAnimState = 'idle';
+        }
 
         var lastDone = completedMatches[0];
         var lastFaces = lastDone ? getDiceRolls(lastDone) : [];
         var lastWinners = getDiceWinners(lastFaces);
+        // During the WS reveal sequence the freshest result lives on diceLastResult
+        // (the board data hasn't refreshed yet), so prefer it for the reveal faces.
+        var revealSrc = ((diceAnimState === 'reveal' || diceAnimState === 'highlight') && diceLastResult) ? diceLastResult : lastDone;
+        var revealFaces = revealSrc ? getDiceRolls(revealSrc) : [];
+        var revealWinners = getDiceWinners(revealFaces);
+        var revealRound = revealSrc ? (revealSrc.daily_match_number || revealSrc.id) : '';
 
         window._dicePfData = {};
         var pfSrc = liveMatch || completedMatches[0];
@@ -5551,14 +5831,15 @@
                 + '<button class="cf-video-refresh" onclick="loadDiceGames()" aria-label="Refresh"><span class="material-icons">refresh</span></button>';
         } else {
             var vr = '<div class="cf-video-result">';
-            if (diceAnimState === 'rolling') {
-                vr += '<div class="cf-vr-label">Shaking dice…</div><span class="material-icons" style="font-size:38px;color:#6ABDA7;animation:pulse 1s ease-in-out infinite;">casino</span>';
-            } else if ((diceAnimState === 'reveal' || diceAnimState === 'highlight' || diceAnimState === 'idle') && lastFaces.length === 6) {
-                vr += '<div class="cf-vr-label">Round #' + (lastDone ? (lastDone.daily_match_number || lastDone.id) : '') + ' result</div>';
-                vr += '<div class="cf-vr-faces">';
-                lastFaces.forEach(function(f){ vr += '<div class="cf-vr-face' + (lastWinners.indexOf(f)>=0?' win':'') + '">' + dicePipHTML(f,'sm') + '</div>'; });
-                vr += '</div>';
-                vr += '<div class="cf-vr-label">' + (lastWinners.length ? 'Winners: ' + lastWinners.join(', ') : 'No repeated number') + '</div>';
+            if (diceAnimState === 'rolling' || diceAnimState === 'betting_locked') {
+                // 3D dice tumbling in perspective.
+                vr += '<div class="cf-vr-label">' + (diceAnimState === 'rolling' ? 'Rolling the dice…' : 'Betting closed — rolling…') + '</div>';
+                vr += dice3dScene(null, 'roll', []);
+            } else if ((diceAnimState === 'reveal' || diceAnimState === 'highlight' || diceAnimState === 'idle') && revealFaces.length === 6) {
+                vr += '<div class="cf-vr-label">Round #' + revealRound + ' result</div>';
+                // Spin-and-land on reveal, then rest showing the result faces.
+                vr += dice3dScene(revealFaces, (diceAnimState === 'reveal' ? 'settle' : 'static'), revealWinners);
+                vr += '<div class="cf-vr-label">' + (revealWinners.length ? 'Winners: ' + revealWinners.join(', ') : 'No repeated number') + '</div>';
             } else if (isBettingOpen) {
                 vr += '<div class="cf-vr-label">Place your bets</div><div id="dice-timer-value" class="cf-vr-timer">--:--</div>';
             } else if (board.is_virtual) {
@@ -5602,16 +5883,21 @@
         var bowl = '<div class="cf-dboard' + (isBettingOpen ? '' : ' disabled') + '">'
             + '<svg viewBox="0 0 1200 880" xmlns="http://www.w3.org/2000/svg">'
             + '<defs>'
-            +   '<linearGradient id="cfBtnGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="45%" stop-color="#f7f7f7"/><stop offset="100%" stop-color="#e2e2e2"/></linearGradient>'
-            +   '<linearGradient id="cfSelGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#B4DDD1"/><stop offset="55%" stop-color="#6ABDA7"/><stop offset="100%" stop-color="#6ABDA7"/></linearGradient>'
+            +   diceTileGrads()
             +   '<filter id="cfSoftShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="8" dy="12" stdDeviation="8" flood-color="#000000" flood-opacity="0.22"/></filter>'
+            +   [1,2,3,4,5,6].map(function(i){ return '<clipPath id="cD' + i + '"><path d="' + dbtn[i].d + '"/></clipPath>'; }).join('')
             + '</defs>'
             + '<rect x="0" y="0" width="1200" height="880" fill="#f1f1f1"/>'
             + '<rect x="0" y="432" width="1200" height="30" fill="#f7f7f7"/>';
         for (var i = 1; i <= 6; i++) {
             var sel = diceSelectedNums.indexOf(i) >= 0;
             var oc = isBettingOpen ? ' onclick="diceToggleNumber(' + i + ')"' : '';
-            bowl += '<path class="cf-dbtn' + (sel ? ' selected' : '') + '" d="' + dbtn[i].d + '"' + oc + '></path>';
+            bowl += '<path class="cf-dbtn' + (sel ? ' selected' : '') + '" style="fill:url(#gD' + i + ')" d="' + dbtn[i].d + '"' + oc + '></path>';
+            bowl += '<g clip-path="url(#cD' + i + ')" opacity="0.12" pointer-events="none">'
+                 +   '<g transform="translate(' + (dbtn[i].nx - 150) + ',' + (dbtn[i].ny - 150) + ') rotate(-10 150 150)">'
+                 +     '<rect x="0" y="0" width="300" height="300" rx="56" fill="#ffffff"/>' + diceWMPips(i)
+                 +   '</g>'
+                 + '</g>';
         }
         for (var i = 1; i <= 6; i++) {
             var sel = diceSelectedNums.indexOf(i) >= 0;
@@ -5770,10 +6056,17 @@
 
     function diceToggleNumber(num) {
         var idx = diceSelectedNums.indexOf(num);
+        var added = false;
         if (idx >= 0) { diceSelectedNums.splice(idx, 1); }
-        else if (diceSelectedNums.length < 5) { diceSelectedNums.push(num); }
+        else if (diceSelectedNums.length < 5) { diceSelectedNums.push(num); added = true; }
         else { showToast('Max 5 numbers', 'error'); return; }
         renderDiceGames();
+        // Chip toss + clink into the tapped tile, matching the cockfight board.
+        if (added) {
+            sfxChip();
+            var tile = document.querySelectorAll('.cf-dboard .cf-dbtn')[num - 1];
+            if (tile) cfFlyChip('dice', tile, diceBetAmount);
+        }
     }
 
     function diceRemoveNumber(num) {
@@ -5837,6 +6130,7 @@
         // Fix #4: Unlock submission
         diceBetSubmitting = false;
         if (success > 0) {
+            sfxPlace();
             showToast(success + ' bet' + (success>1?'s':'') + ' placed!', 'success');
             diceSelectedNums = [];
             loadUserInfo();
@@ -5856,6 +6150,7 @@
         var overlay = document.createElement('div');
         overlay.className = 'dice-result-overlay';
         if (isWin) {
+            sfxWin();
             diceSpawnConfetti();
             overlay.innerHTML = '<div class="dice-result-card win"><div class="dice-result-emoji">🎉</div><div class="dice-result-text" style="color:var(--gold);">YOU WON!</div>' + (amount > 0 ? '<div class="dice-result-amount" style="color:var(--success);">+₹' + amount.toLocaleString('en-IN') + '</div>' : '') + '</div>';
         } else {
@@ -5907,16 +6202,30 @@
 
     // ===== MATCH HISTORY WITH PROOF =====
     var matchHistoryData = [];
+    var _lastOddsSig = '';
     function loadOdds() {
         fetch(`${API}/cockfight/odds/current/`, {headers:{'Authorization':`Bearer ${token}`}})
         .then(r => r.json())
         .then(data => {
             if (data && data.system) {
                 currentOdds = data;
-                renderAutoMatch();
+                // Only re-render when the live pool odds actually change, so a mid-bet
+                // user isn't interrupted by needless board redraws.
+                var sig = [data.meron_ratio, data.wala_ratio, data.draw_ratio, data.total_pool].join('|');
+                if (sig !== _lastOddsSig) { _lastOddsSig = sig; renderAutoMatch(); }
             }
         }).catch(() => {});
     }
+    // Poll live pool odds while the 24/7 auto board is on screen, so odds fluctuate in real time.
+    setInterval(function () {
+        try {
+            if (!token) return;
+            var sec = document.getElementById('sec-cockfight');
+            if (!sec || sec.classList.contains('hidden')) return;
+            if (typeof currentChannel !== 'undefined' && currentChannel !== 'auto') return;
+            loadOdds();
+        } catch (e) {}
+    }, 8000);
 
     function loadMatchHistory() {
         fetch(`${API}/cockfight/auto-history/`, {headers:{'Authorization':`Bearer ${token}`}})
@@ -5989,6 +6298,7 @@
                 if (userBet) {
                     if (userBet.betTeam === winTeam) {
                         const won = parseFloat(userBet.amount) + parseFloat(userBet.amount) * parseFloat(userBet.betRatio);
+                        sfxWin();
                         showToast(`You WON ₹${won.toFixed(0)} on Fight #${lastAutoMatchId}!`, 'success');
                     } else {
                         showToast(`You lost ₹${userBet.amount} on Fight #${lastAutoMatchId}`, 'error');
@@ -6268,8 +6578,11 @@
         if (!stmtData || stmtData.length === 0) { showToast('No transactions to export', 'error'); return; }
         var csv = 'Date,Description,Type,Amount,Hash\n';
         stmtData.forEach(function(t) {
-            var isCredit = t.type === 'Funds In' || (t.description && (t.description.includes('win') || t.description.includes('refund') || t.description.includes('deposit')));
-            csv += '"' + (t.date||'') + '","' + (t.description||'').replace(/"/g,'""') + '","' + (isCredit?'Credit':'Debit') + '","' + (isCredit?'+':'-') + t.amount + '","' + (t.hash||'') + '"\n';
+            var failed = txnFailed(t);
+            var isCredit = txnIsCredit(t);
+            var typeLabel = failed ? 'Failed' : (isCredit ? 'Credit' : 'Debit');
+            var amtStr = failed ? Math.abs(parseFloat(t.amount) || 0) : ((isCredit ? '+' : '-') + t.amount);
+            csv += '"' + (t.date||'') + '","' + (t.description||'').replace(/"/g,'""') + '","' + typeLabel + '","' + amtStr + '","' + (t.hash||'') + '"\n';
         });
         var blob = new Blob([csv], {type:'text/csv'});
         var url = URL.createObjectURL(blob);
@@ -6547,6 +6860,7 @@
                     if (diceRevealTimer) { clearTimeout(diceRevealTimer); diceRevealTimer = null; }
                     // D2: Improved reveal sequence with better timing
                     // Step 1: Rolling (mug shaking, placeholder dice) — 1.8s
+                    diceRevealActive = true;
                     diceAnimState = 'rolling';
                     renderDiceGames();
                     diceRevealTimer = setTimeout(function() {
@@ -6578,6 +6892,7 @@
                                 diceRevealTimer = setTimeout(function() {
                                     // Step 6: Transition to idle, refresh
                                     diceAnimState = 'idle';
+                                    diceRevealActive = false;
                                     diceRevealTimer = null;
                                     loadDiceGames();
                                 }, 2000);
