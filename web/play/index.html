@@ -2389,7 +2389,7 @@
         .rr-odd{ position:relative; border-radius:16px; border:2px solid; padding:14px 8px 16px; text-align:center; cursor:pointer; overflow:hidden; transition:transform .12s, box-shadow .12s, border-color .12s; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:230px; }
         .rr-odd .rr-odd-name{ font-size:19px; font-weight:800; letter-spacing:2px; color:#fff; }
         .rr-odd .rr-odd-img{ height:110px; display:flex; align-items:center; justify-content:center; margin:6px 0; }
-        .rr-odd .rr-odd-img img{ height:110px; width:auto; object-fit:contain; filter:drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
+        .rr-odd .rr-odd-img img{ max-height:118px; max-width:100%; width:auto; height:auto; object-fit:contain; filter:drop-shadow(0 6px 14px rgba(0,0,0,.6)); }
         .rr-odd .rr-odd-img .material-icons{ font-size:96px; color:#38d17a; filter:drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
         .rr-odd .rr-odd-mult{ font-size:30px; font-weight:800; letter-spacing:.5px; }
         .rr-odd.red{ background:radial-gradient(circle at 50% 25%,#3a0f10,#160607); border-color:#c0342f; }
@@ -4165,7 +4165,7 @@
         <div class="rr-cf">
             <div class="rr-head">
                 <div class="rr-brand" onclick="navigate('sec-home')" style="cursor:pointer">
-                    <span class="rr-logo"><img src="./rr_logo.svg" alt="Rooster Live"></span>
+                    <span class="rr-logo"><img src="./rr_logo.webp" alt="Rooster Live"></span>
                     <span class="rr-wordmark"><b>ROOSTER</b><span>LIVE</span></span>
                 </div>
                 <div class="rr-head-right">
@@ -4190,9 +4190,9 @@
             </div>
             <div class="rr-screens">${rrScreenTabs()}</div>
             <div class="rr-odds cf-arena">
-                ${oddCard('red', 1, 'RED', meronMult, `<img src="./rr_red.svg" alt="Red">`)}
-                ${oddCard('tie', 3, 'TIE', drawMult, `<img src="./rr_tie.svg" alt="Tie">`)}
-                ${oddCard('blue', 2, 'BLUE', walaMult, `<img src="./rr_blue.svg" alt="Blue">`)}
+                ${oddCard('red', 1, 'RED', meronMult, `<img src="./rr_red.webp" alt="Red">`)}
+                ${oddCard('tie', 3, 'TIE', drawMult, `<img src="./rr_tie.webp" alt="Tie">`)}
+                ${oddCard('blue', 2, 'BLUE', walaMult, `<img src="./rr_blue.webp" alt="Blue">`)}
                 <input type="hidden" id="auto-ratio-slider" value="0.80">
                 <input type="hidden" id="bet-amt-auto" value="">
             </div>
@@ -4206,9 +4206,9 @@
             </div>
             <div class="rr-recent-wrap">
                 <div class="rr-legend">
-                    <div class="li red" onclick="rrSelectOdds(event,1,'RED')"><img src="./rr_red.svg" alt="">Red</div>
-                    <div class="li blue" onclick="rrSelectOdds(event,2,'BLUE')"><img src="./rr_blue.svg" alt="">Blue</div>
-                    <div class="li tie" onclick="rrSelectOdds(event,3,'TIE')"><img src="./rr_tie.svg" alt="">Tie</div>
+                    <div class="li red" onclick="rrSelectOdds(event,1,'RED')"><img src="./rr_red.webp" alt="">Red</div>
+                    <div class="li blue" onclick="rrSelectOdds(event,2,'BLUE')"><img src="./rr_blue.webp" alt="">Blue</div>
+                    <div class="li tie" onclick="rrSelectOdds(event,3,'TIE')"><img src="./rr_tie.webp" alt="">Tie</div>
                     <div class="li cancel" onclick="cfClearAuto()"><span class="material-icons">cancel</span>Cancel</div>
                 </div>
                 <div class="rr-recent">
@@ -4342,7 +4342,7 @@
     function rrRenderRecentTable() {
         var tbody = document.getElementById('rr-recent-tbody');
         if (!tbody) return;
-        var teamMeta = { 1: { n: 'Red', c: 'red', ic: './rr_red.svg' }, 2: { n: 'Blue', c: 'blue', ic: './rr_blue.svg' }, 3: { n: 'Tie', c: 'tie', ic: './rr_tie.svg' } };
+        var teamMeta = { 1: { n: 'Red', c: 'red', ic: './rr_red.webp' }, 2: { n: 'Blue', c: 'blue', ic: './rr_blue.webp' }, 3: { n: 'Tie', c: 'tie', ic: './rr_tie.webp' } };
         var data = (matchHistoryData || []).slice(0, 8);
         if (!data.length) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8797ad;padding:16px;">No completed matches yet</td></tr>';
