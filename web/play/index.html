@@ -2332,6 +2332,128 @@
         #sec-home .banner-carousel { width: auto; height: auto; aspect-ratio: 16 / 9; margin: 0 14px 14px; box-sizing: border-box; }
         /* keep home full-bleed even on desktop breakpoints */
         @media (min-width: 900px) { .hp-rail { flex: 0 0 96px; } .hp-card { height: 156px; } .hp-card-title { font-size: 26px; } }
+
+        /* ============================================================
+           ROOSTER LIVE — dark premium cockfight board (reference redesign)
+           Scoped under .rr-cf so it ignores the light app theme.
+           ============================================================ */
+        .rr-cf { background:#070b12; color:#fff; min-height:100vh; padding:12px 12px 90px; font-family:'Poppins',system-ui,sans-serif; }
+        .rr-cf *{ box-sizing:border-box; }
+
+        /* Header */
+        .rr-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
+        .rr-brand{ display:flex; align-items:center; gap:9px; }
+        .rr-logo{ width:40px; height:40px; flex:0 0 40px; }
+        .rr-logo img{ display:block; width:40px; height:40px; object-fit:contain; filter:drop-shadow(0 2px 6px rgba(246,192,72,.4)); }
+        .rr-wordmark{ line-height:1; }
+        .rr-wordmark b{ display:block; font-size:19px; font-weight:800; letter-spacing:.5px; color:#fff; }
+        .rr-wordmark span{ display:block; font-size:12px; font-weight:700; letter-spacing:6px; color:#F6C048; margin-top:1px; }
+        .rr-head-right{ display:flex; align-items:center; gap:8px; }
+        .rr-wallet-btn{ display:flex; align-items:center; gap:6px; background:#0e1524; border:1px solid rgba(246,192,72,.35); color:#e9edf5; border-radius:12px; padding:8px 12px; font-size:13px; font-weight:600; cursor:pointer; }
+        .rr-wallet-btn .material-icons{ font-size:18px; color:#F6C048; }
+        .rr-bal{ display:flex; align-items:center; gap:8px; background:#0e1524; border:1px solid rgba(246,192,72,.35); color:#fff; border-radius:12px; padding:6px 6px 6px 12px; font-size:14px; font-weight:700; }
+        .rr-bal .rr-bal-add{ width:26px; height:26px; border-radius:50%; background:linear-gradient(180deg,#2ecb6b,#149a4a); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+        .rr-bal .rr-bal-add .material-icons{ font-size:18px; color:#fff; }
+
+        /* Video frame */
+        .rr-video{ position:relative; width:100%; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#000; border:1px solid rgba(255,255,255,.10); box-shadow:0 8px 30px rgba(0,0,0,.5); }
+        .rr-video iframe,.rr-video video,.rr-video img{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:cover; }
+        .rr-video .rr-vbg{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px; color:#9fb0c9; background:radial-gradient(circle at 50% 30%,#1b2740,#070b12); }
+        .rr-live-badge{ position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:8px; z-index:3; }
+        .rr-live-badge .live{ background:#e23a3a; color:#fff; font-size:12px; font-weight:800; letter-spacing:.5px; padding:4px 10px; border-radius:7px; }
+        .rr-live-badge .views{ display:flex; align-items:center; gap:4px; color:#fff; font-size:13px; font-weight:600; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+        .rr-live-badge .views .material-icons{ font-size:16px; }
+        .rr-fs{ position:absolute; top:12px; right:12px; z-index:3; width:34px; height:34px; border-radius:8px; background:rgba(10,16,26,.7); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+        .rr-fs .material-icons{ font-size:19px; color:#fff; }
+        .rr-vctrl{ position:absolute; left:0; right:0; bottom:0; z-index:3; display:flex; align-items:center; gap:10px; padding:10px 12px; background:linear-gradient(0deg,rgba(0,0,0,.65),transparent); }
+        .rr-vctrl .material-icons{ color:#fff; cursor:pointer; }
+        .rr-vctrl .rr-bar{ flex:1; height:4px; border-radius:3px; background:rgba(255,255,255,.25); position:relative; }
+        .rr-vctrl .rr-bar::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:38%; background:#e23a3a; border-radius:3px; }
+        .rr-vctrl .rr-bar::after{ content:''; position:absolute; left:38%; top:50%; width:11px; height:11px; border-radius:50%; background:#e23a3a; transform:translate(-50%,-50%); }
+        .rr-vctrl .rr-live-txt{ display:flex; align-items:center; gap:5px; color:#fff; font-size:12px; font-weight:700; }
+        .rr-vctrl .rr-live-txt .dot{ width:9px; height:9px; border-radius:50%; background:#e23a3a; }
+
+        /* Screen tabs */
+        .rr-screens{ display:flex; gap:8px; margin:12px 0; overflow-x:auto; padding-bottom:2px; -webkit-overflow-scrolling:touch; }
+        .rr-screens::-webkit-scrollbar{ display:none; }
+        .rr-screen{ flex:0 0 auto; min-width:92px; background:#0e1524; border:1px solid rgba(255,255,255,.10); border-radius:12px; padding:8px 12px; cursor:pointer; transition:.15s; }
+        .rr-screen.active{ border-color:#F6C048; box-shadow:0 0 12px rgba(246,192,72,.35); background:#141d30; }
+        .rr-screen .top{ display:flex; align-items:center; gap:6px; color:#e9edf5; font-size:13px; font-weight:600; }
+        .rr-screen .top .material-icons{ font-size:16px; color:#9fb0c9; }
+        .rr-screen .bot{ display:flex; align-items:center; gap:6px; margin-top:4px; color:#9fb0c9; font-size:12px; }
+        .rr-screen .bot .material-icons{ font-size:13px; }
+        .rr-sdot{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+
+        /* Odds cards */
+        .rr-odds{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:6px 0 14px; }
+        .rr-odd{ position:relative; border-radius:16px; border:2px solid; padding:14px 8px 16px; text-align:center; cursor:pointer; overflow:hidden; transition:transform .12s, box-shadow .12s, border-color .12s; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:230px; }
+        .rr-odd .rr-odd-name{ font-size:19px; font-weight:800; letter-spacing:2px; color:#fff; }
+        .rr-odd .rr-odd-img{ height:110px; display:flex; align-items:center; justify-content:center; margin:6px 0; }
+        .rr-odd .rr-odd-img img{ height:110px; width:auto; object-fit:contain; filter:drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
+        .rr-odd .rr-odd-img .material-icons{ font-size:96px; color:#38d17a; filter:drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
+        .rr-odd .rr-odd-mult{ font-size:30px; font-weight:800; letter-spacing:.5px; }
+        .rr-odd.red{ background:radial-gradient(circle at 50% 25%,#3a0f10,#160607); border-color:#c0342f; }
+        .rr-odd.red .rr-odd-mult{ color:#fff; }
+        .rr-odd.tie{ background:radial-gradient(circle at 50% 25%,#0c2c22,#061410); border-color:#2f9e6f; }
+        .rr-odd.tie .rr-odd-mult{ color:#3ee08a; }
+        .rr-odd.blue{ background:radial-gradient(circle at 50% 25%,#0c2148,#050c1c); border-color:#2f6fd1; }
+        .rr-odd.blue .rr-odd-mult{ color:#63b3ff; }
+        .rr-odd.selected{ border-color:#F6C048 !important; box-shadow:0 0 0 2px rgba(246,192,72,.5),0 0 22px rgba(246,192,72,.4); transform:translateY(-2px); }
+        .rr-odd.disabled{ opacity:.55; cursor:default; }
+        .rr-odd-stake{ position:absolute; top:8px; left:50%; transform:translateX(-50%); background:linear-gradient(180deg,#F6C048,#E0921A); color:#1a1205; font-size:12px; font-weight:800; padding:3px 10px; border-radius:20px; box-shadow:0 2px 8px rgba(0,0,0,.4); z-index:2; }
+
+        /* Chips */
+        .rr-chips-label{ font-size:15px; font-weight:600; color:#c7d2e2; margin:2px 0 8px; }
+        .rr-chips{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }
+        .rr-chips::-webkit-scrollbar{ display:none; }
+        .rr-chip{ flex:0 0 auto; min-width:70px; text-align:center; background:#0b1220; border:1.5px solid rgba(246,192,72,.55); color:#F6C048; border-radius:12px; padding:12px 14px; font-size:15px; font-weight:800; cursor:pointer; transition:.12s; }
+        .rr-chip.selected{ background:linear-gradient(180deg,#F6C048,#E0921A); color:#1a1205; border-color:#F6C048; box-shadow:0 0 14px rgba(246,192,72,.5); }
+
+        /* Action row */
+        .rr-actions{ display:flex; align-items:stretch; gap:10px; margin:14px 0; }
+        .rr-act{ flex:0 0 auto; width:74px; background:#0e1524; border:1px solid rgba(255,255,255,.10); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:10px 4px; cursor:pointer; color:#c7d2e2; font-size:12px; font-weight:600; }
+        .rr-act .material-icons{ font-size:22px; }
+        .rr-act.vip .material-icons{ color:#F6C048; }
+        .rr-act.shield .material-icons{ color:#c98a6a; }
+        .rr-act.hist .material-icons{ color:#c7d2e2; }
+        .rr-bet{ flex:1; background:linear-gradient(180deg,#F6C048,#DE8E17); border:1px solid #F6C048; border-radius:14px; color:#1a1205; font-size:16px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; padding:10px 12px; box-shadow:0 6px 20px rgba(246,192,72,.35); }
+        .rr-bet .rr-bet-check{ width:34px; height:34px; border-radius:50%; border:2px solid #1a1205; display:flex; align-items:center; justify-content:center; }
+        .rr-bet .rr-bet-check .material-icons{ font-size:22px; color:#1a1205; }
+        .rr-bet.closed{ background:#1a2233; border-color:rgba(255,255,255,.12); color:#8797ad; box-shadow:none; }
+        .rr-bet.closed .rr-bet-check{ display:none; }
+
+        /* Recent matches + legend */
+        .rr-recent-wrap{ display:flex; gap:10px; align-items:flex-start; }
+        .rr-legend{ flex:0 0 96px; background:#0b1220; border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:10px 8px; display:flex; flex-direction:column; gap:12px; }
+        .rr-legend .li{ display:flex; align-items:center; gap:8px; font-size:13px; color:#e9edf5; font-weight:600; cursor:pointer; }
+        .rr-legend .li img{ width:22px; height:22px; object-fit:contain; }
+        .rr-legend .li .material-icons{ font-size:20px; }
+        .rr-legend .li.red .material-icons{ color:#e2504a; }
+        .rr-legend .li.blue .material-icons{ color:#63b3ff; }
+        .rr-legend .li.tie .material-icons{ color:#38d17a; }
+        .rr-legend .li.cancel .material-icons{ color:#8797ad; }
+        .rr-recent{ flex:1; min-width:0; overflow-x:auto; }
+        .rr-recent::-webkit-scrollbar{ height:4px; } .rr-recent::-webkit-scrollbar-thumb{ background:rgba(246,192,72,.4); border-radius:4px; }
+        @media (max-width:560px){
+            .rr-recent-wrap{ flex-direction:column; }
+            .rr-legend{ flex:0 0 auto; width:100%; flex-direction:row; flex-wrap:wrap; justify-content:space-around; gap:8px; }
+            .rr-table th, .rr-table td{ padding:8px 5px; font-size:12px; white-space:nowrap; }
+        }
+        .rr-recent-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+        .rr-recent-head h3{ margin:0; font-size:16px; font-weight:700; color:#fff; }
+        .rr-recent-head .va{ color:#F6C048; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:2px; }
+        .rr-table{ width:100%; border-collapse:collapse; font-size:13px; }
+        .rr-table th{ color:#8797ad; font-weight:600; text-align:left; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,.08); font-size:12px; }
+        .rr-table td{ padding:9px 6px; border-bottom:1px solid rgba(255,255,255,.05); color:#d6deea; }
+        .rr-table td .wname{ display:flex; align-items:center; gap:5px; }
+        .rr-table td .wname .ticon{ width:20px; height:20px; object-fit:contain; }
+        .rr-table td .wname .cdot{ width:16px; height:16px; border-radius:50%; display:inline-block; }
+        .rr-table td .wname .cdot.red{ background:#e2504a; } .rr-table td .wname .cdot.blue{ background:#63b3ff; } .rr-table td .wname .cdot.tie{ background:#38d17a; }
+        .rr-table td.won{ color:#38d17a; font-weight:700; } .rr-table td.lost{ color:#e2504a; font-weight:700; }
+        .rr-table td.odds{ color:#F6C048; font-weight:700; } .rr-table td.time{ color:#F6C048; }
+        .rr-cf .rr-promo{ background:linear-gradient(90deg,#1a1205,#2a1d08); border:1px solid rgba(246,192,72,.25); border-radius:10px; overflow:hidden; margin-bottom:10px; }
+        .rr-cf .rr-promo .rr-promo-track{ white-space:nowrap; padding:7px 0; color:#F6C048; font-size:12px; font-weight:700; animation:cfPromo 18s linear infinite; }
+        @keyframes cfPromo{ from{ transform:translateX(100%);} to{ transform:translateX(-100%);} }
     </style>
 </head>
 <body>
@@ -4007,12 +4129,11 @@
         const isAccepting = d.isAcceptingBet;
         const matchNum = d.matchNumber || '?';
         const liveUrl = d.liveUrl || '';
-        let videoInner = '';
+        let videoInner;
         if (liveUrl) {
-            videoInner = `<div class="cf-vloading" id="stream-loading"><span class="material-icons" style="font-size:34px;color:#6ABDA7;animation:pulse 1.5s ease-in-out infinite;">live_tv</span></div>
-                <iframe src="${liveUrl}" allowfullscreen onload="var el=document.getElementById('stream-loading');if(el)el.style.display='none';"></iframe>`;
+            videoInner = `<iframe src="${liveUrl}" allowfullscreen></iframe>`;
         } else {
-            videoInner = `<div class="cf-vloading"><div style="text-align:center;"><span class="material-icons" style="font-size:40px;opacity:0.5;">videocam_off</span><p style="margin-top:6px;">Waiting for live stream...</p></div></div>`;
+            videoInner = `<div class="rr-vbg"><span class="material-icons" style="font-size:40px;opacity:.5;">videocam_off</span><div style="font-size:13px;margin-top:4px;">Waiting for live stream…</div></div>`;
         }
         // Live parimutuel pool multipliers (full return, e.g. 1.90x). Fall back to an
         // opening line until the pool forms (ratio is 0 when a side has no bets yet).
@@ -4021,77 +4142,241 @@
         const walaMult  = oddsMult(currentOdds.wala_ratio, '1.85');
         const drawMult  = oddsMult(currentOdds.draw_ratio, '6.00');
         const bal = (typeof userInfo === 'object' && userInfo) ? (userInfo.wallet_balance || 0) : 0;
-        const coins = [50, 100, 200, 300, 500, 1000, 2500, 5000];
-        const coinsHtml = coins.map(c => `<div class="cf-coin" data-amt="${c}" onclick="cfSelectCoin(this, ${c})">${c >= 1000 ? (c/1000)+'K' : c}</div>`).join('');
-        const clk = isAccepting ? '' : ' disabled';
+        const views = d.viewerCount || '12.5K';
+        const chips = [50, 100, 500, 10000, 50000];
+        const chipsHtml = chips.map(c => `<div class="rr-chip cf-coin" data-amt="${c}" onclick="cfSelectCoin(this, ${c})">₹${c >= 1000 ? (c/1000)+'K' : c}</div>`).join('');
+        const sel = (selectedBets['auto'] || {}).team;
+        const oddCard = (cls, code, name, mult, imgHtml) => {
+            const on = (sel != null && String(sel) === String(code)) ? ' selected' : '';
+            const dis = isAccepting ? '' : ' disabled';
+            const oc = isAccepting ? ` onclick="rrSelectOdds(event, ${code}, '${name}')"` : '';
+            const multTxt = (isAccepting || parseFloat(mult) > 1) ? mult + 'x' : '--';
+            return `<div class="rr-odd ${cls}${on}${dis}" data-code="${code}" id="rr-odd-${code}"${oc}>
+                <div class="rr-odd-name">${name}</div>
+                <div class="rr-odd-img">${imgHtml}</div>
+                <div class="rr-odd-mult">${multTxt}</div>
+            </div>`;
+        };
+        const betBtn = !isAccepting
+            ? `<button class="rr-bet closed" id="cf-bet-btn"><span>Betting Closed — Please Wait</span></button>`
+            : `<button class="rr-bet" id="cf-bet-btn" onclick="cfPlaceBet()"><span class="rr-bet-check"><span class="material-icons">check</span></span><span id="rr-bet-label">PLACE BET</span></button>`;
 
         container.innerHTML = `
-        <div class="cf-screen">
-            <div class="cf-topbar">
-                <button class="cf-back" onclick="navigate('sec-home')" aria-label="Back"><span class="material-icons">arrow_back</span></button>
-                <div class="cf-title">Cock Fight Live</div>
-                <span class="cf-wallet"><span class="material-icons">account_balance_wallet</span> ₹${formatCurrencyFull(bal)}</span>
-            </div>
-            <div class="cf-promo"><div class="cf-promo-track">${cfPromoText()}</div></div>
-            <div class="cf-video">${videoInner}</div>
-            <div class="cf-controls">
-                <div class="cf-cats">${cfCategoryTabsHtml()}</div>
-                <div class="cf-sound">
-                    <span class="material-icons ${cfMuted ? 'muted' : 'active'}" id="cf-snd-toggle" onclick="cfToggleMute()" aria-label="Toggle sound">${cfMuted ? 'volume_off' : 'volume_up'}</span>
+        <div class="rr-cf">
+            <div class="rr-head">
+                <div class="rr-brand" onclick="navigate('sec-home')" style="cursor:pointer">
+                    <span class="rr-logo"><img src="./rr_logo.svg" alt="Rooster Live"></span>
+                    <span class="rr-wordmark"><b>ROOSTER</b><span>LIVE</span></span>
+                </div>
+                <div class="rr-head-right">
+                    <button class="rr-wallet-btn" onclick="navigate('sec-wallet')"><span class="material-icons">account_balance_wallet</span>Wallet</button>
+                    <div class="rr-bal">₹${formatCurrencyFull(bal)}<span class="rr-bal-add" onclick="navigate('sec-deposit')"><span class="material-icons">add</span></span></div>
                 </div>
             </div>
-            <div class="cf-arena">
-                <div class="cf-match-title">Match ${matchNum}</div>
-                ${cfOddsBoard({
-                    key: 'auto', scope: 'auto', disabled: !isAccepting,
-                    labelA: 'Meron', labelD: 'Draw', labelB: 'Wala',
-                    codeA: 1, codeD: 3, codeB: 2,
-                    pctA: (meronMult * 100).toFixed(2) + '%',
-                    pctD: (drawMult * 100).toFixed(2) + '%',
-                    pctB: (walaMult * 100).toFixed(2) + '%',
-                    selectedCode: (selectedBets['auto'] || {}).team
-                })}
-                <div class="cf-chips">${coinsHtml}</div>
+            <div class="rr-promo"><div class="rr-promo-track">${cfPromoText()}</div></div>
+            <div class="rr-video" id="rr-video">
+                ${videoInner}
+                <div class="rr-live-badge">
+                    <span class="live">LIVE</span>
+                    <span class="views"><span class="material-icons">visibility</span>${views}</span>
+                </div>
+                <div class="rr-fs" onclick="cfFullscreen()"><span class="material-icons">fullscreen</span></div>
+                <div class="rr-vctrl">
+                    <span class="material-icons">pause</span>
+                    <div class="rr-bar"></div>
+                    <span class="rr-live-txt">LIVE <span class="dot"></span></span>
+                    <span class="material-icons" id="cf-snd-toggle" onclick="cfToggleMute()">${cfMuted ? 'volume_off' : 'volume_up'}</span>
+                </div>
+            </div>
+            <div class="rr-screens">${rrScreenTabs()}</div>
+            <div class="rr-odds cf-arena">
+                ${oddCard('red', 1, 'RED', meronMult, `<img src="./rr_red.svg" alt="Red">`)}
+                ${oddCard('tie', 3, 'TIE', drawMult, `<img src="./rr_tie.svg" alt="Tie">`)}
+                ${oddCard('blue', 2, 'BLUE', walaMult, `<img src="./rr_blue.svg" alt="Blue">`)}
                 <input type="hidden" id="auto-ratio-slider" value="0.80">
                 <input type="hidden" id="bet-amt-auto" value="">
             </div>
-            <div class="cf-actions">
-                <button class="cf-act" onclick="cfShowResults()" aria-label="Previous results"><span class="material-icons">emoji_events</span></button>
-                <button class="cf-act" onclick="cfShowBetHistory()" aria-label="Bet history"><span class="material-icons">receipt_long</span></button>
-                <button class="cf-bet${isAccepting ? ' ready' : ''}" id="cf-bet-btn" onclick="cfPlaceBet()">${isAccepting ? 'PLACE BET' : 'Please Wait...'}</button>
-                <button class="cf-act" onclick="cfWalletMenu()" aria-label="Wallet"><span class="material-icons">account_balance_wallet</span></button>
+            <div class="rr-chips-label">Select Chips</div>
+            <div class="rr-chips">${chipsHtml}</div>
+            <div class="rr-actions">
+                <div class="rr-act vip" onclick="cfWalletMenu()"><span class="material-icons">workspace_premium</span>VIP</div>
+                <div class="rr-act shield" onclick="cfDisclaimer()"><span class="material-icons">verified_user</span>Disclaimer</div>
+                ${betBtn}
+                <div class="rr-act hist" onclick="cfShowBetHistory()"><span class="material-icons">history</span>History</div>
             </div>
-            <div class="cf-roadmap">
-                <div class="cf-road-legend">
-                    <div class="cf-legend-item"><span class="cf-ldot meron"></span>Meron</div>
-                    <div class="cf-legend-item"><span class="cf-ldot draw"></span>Draw</div>
-                    <div class="cf-legend-item"><span class="cf-ldot wala"></span>Wala</div>
+            <div class="rr-recent-wrap">
+                <div class="rr-legend">
+                    <div class="li red" onclick="rrSelectOdds(event,1,'RED')"><img src="./rr_red.svg" alt="">Red</div>
+                    <div class="li blue" onclick="rrSelectOdds(event,2,'BLUE')"><img src="./rr_blue.svg" alt="">Blue</div>
+                    <div class="li tie" onclick="rrSelectOdds(event,3,'TIE')"><img src="./rr_tie.svg" alt="">Tie</div>
+                    <div class="li cancel" onclick="cfClearAuto()"><span class="material-icons">cancel</span>Cancel</div>
                 </div>
-                <div class="cf-grid" id="cf-roadmap-grid"></div>
+                <div class="rr-recent">
+                    <div class="rr-recent-head"><h3>Recent Matches</h3><span class="va" onclick="cfShowResults()">View All <span class="material-icons" style="font-size:16px;">chevron_right</span></span></div>
+                    <table class="rr-table"><thead><tr><th>#</th><th>Winner</th><th>Your Prediction</th><th>Result</th><th>Odds</th><th>Time</th></tr></thead><tbody id="rr-recent-tbody"><tr><td colspan="6" style="text-align:center;color:#8797ad;padding:16px;">Loading…</td></tr></tbody></table>
+                </div>
             </div>
             ${renderBetHistory()}
         </div>`;
-        // Restore selection state after re-render (trapezoid board handles its own highlight)
-        if (selectedBets['auto']) {
-            const board = container.querySelector('.cf-arena .cf-tzb');
-            if (board) cfHighlightBoard(board, selectedBets['auto'].team);
-        }
+        // Restore chip selection + accumulated stake so a poll refresh doesn't wipe the staged bet.
         if (selectedChipAmount) {
-            const coinEl = document.querySelector('.cf-arena .cf-coin[data-amt="' + selectedChipAmount + '"]');
+            const coinEl = container.querySelector('.rr-chips .cf-coin[data-amt="' + selectedChipAmount + '"]');
             if (coinEl) coinEl.classList.add('selected');
         }
-        // Restore the accumulated stake + its badge so a poll refresh doesn't wipe the staged bet.
+        if (selectedBets['auto']) {
+            const card = document.getElementById('rr-odd-' + selectedBets['auto'].team);
+            if (card) card.classList.add('selected');
+        }
         const amtEl = document.getElementById('bet-amt-auto');
         const st = cfStake['auto'];
         if (st && st.amount > 0) {
             if (amtEl) amtEl.value = st.amount;
-            const board = container.querySelector('.cf-arena .cf-tzb');
-            if (board) cfUpdateStakeBadge(board, st.code, st.amount);
+            rrUpdateStakeBadge(st.code, st.amount);
         } else if (selectedChipAmount && amtEl) {
             amtEl.value = selectedChipAmount;
         }
-        renderBeadPlate();
+        rrRenderRecentTable();
         setTimeout(loadMatchHistory, 100);
+    }
+
+    // ===== ROOSTER LIVE board helpers =====
+    // Screen tabs: 24/7 China feed + every zone with a live/scheduled match, styled as reference "Screen" cards.
+    function rrScreenTabs() {
+        var dots = ['#e23a3a', '#3aa0e2', '#38d17a', '#F6C048', '#b06ff0'];
+        var tabs = [{ ch: 'auto', name: '24/7 Live', live: true, sub: 'LIVE' }];
+        if (manualMatchData && Array.isArray(manualMatchData)) {
+            manualMatchData.forEach(function (zone) {
+                if (!cfZoneHasActive(zone)) return;
+                var live = cfZoneHasLive(zone);
+                var sub = 'LIVE';
+                if (!live) {
+                    var m = cfActiveMatches(zone)[0];
+                    var sp = m ? cfScheduleParts(m.scheduledStart) : { time: '' };
+                    sub = sp.time || 'Soon';
+                }
+                tabs.push({ ch: 'zone-' + zone.id, name: zone.name || ('Zone ' + zone.id), live: live, sub: sub });
+            });
+        }
+        return tabs.map(function (t, i) {
+            var active = (currentChannel === t.ch) ? ' active' : '';
+            var dot = dots[i % dots.length];
+            var statusIc = t.live
+                ? '<span class="material-icons" style="font-size:12px;color:#e23a3a;">circle</span>'
+                : '<span class="material-icons">schedule</span>';
+            return '<div class="rr-screen' + active + '" onclick="switchChannel(\'' + t.ch + '\')">'
+                + '<div class="top"><span class="material-icons">desktop_windows</span>' + t.name + '</div>'
+                + '<div class="bot"><span class="rr-sdot" style="background:' + dot + '"></span>' + statusIc + '<span>' + t.sub + '</span></div>'
+                + '</div>';
+        }).join('');
+    }
+
+    // Select RED(1)/TIE(3)/BLUE(2) on the reference odds cards; reuses chip-toss + stake accumulation.
+    function rrSelectOdds(evt, code, name) {
+        if (!autoMatchData || !autoMatchData.isAcceptingBet) { showToast('Betting is closed. Please wait for the next match.', 'error'); return; }
+        var prev = selectedBets['auto'];
+        var switching = !prev || String(prev.team) !== String(code);
+        selectedBets['auto'] = { team: code, teamName: name };
+        selectedAutoTeam = code; selectedAutoTeamName = name;
+        document.querySelectorAll('.rr-odd').forEach(function (c) { c.classList.remove('selected'); });
+        var card = document.getElementById('rr-odd-' + code);
+        if (card) card.classList.add('selected');
+
+        var denom = selectedChipAmount || 0;
+        if (denom > 0) {
+            var cur = cfStake['auto'];
+            if (cur && !switching) cur.amount += denom;
+            else cfStake['auto'] = { code: code, amount: denom };
+            var amtEl = document.getElementById('bet-amt-auto');
+            if (amtEl) amtEl.value = cfStake['auto'].amount;
+            sfxChip();
+            if (card) cfFlyChip('auto', card, denom);
+            rrUpdateStakeBadge(code, cfStake['auto'].amount);
+        } else {
+            rrUpdateStakeBadge(code, (cfStake['auto'] && !switching) ? cfStake['auto'].amount : 0);
+            showToast('Select a chip amount first', 'info');
+        }
+
+        var o = currentOdds || {}, ratio;
+        if (code === 3) ratio = generateSeededRatio(parseFloat(o.draw_min || '3.00'), parseFloat(o.draw_max || '10.00'));
+        else if (code === 1) ratio = generateSeededRatio(parseFloat(o.meron_min || '0.50'), parseFloat(o.meron_max || '0.95'));
+        else ratio = generateSeededRatio(parseFloat(o.wala_min || '0.50'), parseFloat(o.wala_max || '0.95'));
+        var slider = document.getElementById('auto-ratio-slider');
+        if (slider) slider.value = ratio.toFixed(2);
+    }
+
+    function rrUpdateStakeBadge(code, amount) {
+        document.querySelectorAll('.rr-odd-stake').forEach(function (s) { s.remove(); });
+        if (!amount || amount <= 0) return;
+        var card = document.getElementById('rr-odd-' + code);
+        if (!card) return;
+        var s = document.createElement('div');
+        s.className = 'rr-odd-stake';
+        s.textContent = '₹' + amount.toLocaleString('en-IN');
+        card.appendChild(s);
+    }
+
+    function cfClearAuto() {
+        selectedBets['auto'] = null;
+        selectedAutoTeam = null; selectedAutoTeamName = '';
+        selectedChipAmount = 0;
+        cfStake['auto'] = null; cfChipDenom['auto'] = 0;
+        document.querySelectorAll('.rr-odd').forEach(function (c) { c.classList.remove('selected'); });
+        document.querySelectorAll('.rr-odd-stake').forEach(function (s) { s.remove(); });
+        document.querySelectorAll('.rr-chips .cf-coin').forEach(function (c) { c.classList.remove('selected'); });
+        var amtEl = document.getElementById('bet-amt-auto');
+        if (amtEl) amtEl.value = '';
+    }
+
+    function cfFullscreen() {
+        var v = document.getElementById('rr-video');
+        if (!v) return;
+        if (v.requestFullscreen) v.requestFullscreen();
+        else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen();
+    }
+
+    function cfDisclaimer() {
+        customConfirm('Betting involves financial risk. Only bet what you can afford to lose. Odds are pool-based (parimutuel) and final payouts are settled from the actual betting pool. 18+ only.', { title: 'Disclaimer', icon: '⚠️', okText: 'I Understand' });
+    }
+
+    // Recent Matches table (reference layout): winner, your prediction, result, odds, time.
+    function rrRenderRecentTable() {
+        var tbody = document.getElementById('rr-recent-tbody');
+        if (!tbody) return;
+        var teamMeta = { 1: { n: 'Red', c: 'red', ic: './rr_red.svg' }, 2: { n: 'Blue', c: 'blue', ic: './rr_blue.svg' }, 3: { n: 'Tie', c: 'tie', ic: './rr_tie.svg' } };
+        var data = (matchHistoryData || []).slice(0, 8);
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8797ad;padding:16px;">No completed matches yet</td></tr>';
+            return;
+        }
+        var bets = (typeof userBets !== 'undefined' && Array.isArray(userBets)) ? userBets : [];
+        var html = '';
+        data.forEach(function (m) {
+            var win = teamMeta[m.winTeam];
+            if (!win) return;
+            var num = m.matchNumber || m.id || '';
+            var bet = bets.find(function (b) { return b.matchType === 'A' && String(b.matchId) === String(m.matchId || m.id); });
+            var predHtml = '<span style="color:#8797ad;">—</span>';
+            var resHtml = '<span style="color:#8797ad;">—</span>';
+            var oddsHtml = '<span style="color:#8797ad;">—</span>';
+            if (bet) {
+                var pm = teamMeta[bet.betTeam];
+                if (pm) predHtml = '<span class="wname"><img class="ticon" src="' + pm.ic + '" alt="">' + pm.n + '</span>';
+                var won = String(bet.betTeam) === String(m.winTeam);
+                resHtml = won ? '<span style="color:#38d17a;font-weight:700;">Won</span>' : '<span style="color:#e2504a;font-weight:700;">Lost</span>';
+                var mult = parseFloat(bet.betRatio) || 0;
+                if (mult > 1) oddsHtml = '<span style="color:#F6C048;font-weight:700;">' + mult.toFixed(2) + 'x</span>';
+            }
+            var t = m.createdDate ? new Date(m.createdDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            html += '<tr>'
+                + '<td>' + num + '</td>'
+                + '<td><span class="wname"><img class="ticon" src="' + win.ic + '" alt="">' + win.n + '</span></td>'
+                + '<td>' + predHtml + '</td>'
+                + '<td>' + resHtml + '</td>'
+                + '<td>' + oddsHtml + '</td>'
+                + '<td class="time">' + t + '</td>'
+                + '</tr>';
+        });
+        tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:#8797ad;padding:16px;">No completed matches yet</td></tr>';
     }
 
     // ===== VIDEO-STYLE COCKFIGHT HELPERS =====
@@ -4174,7 +4459,7 @@
         var tr = targetPathEl.getBoundingClientRect();
         var toX = tr.left + tr.width / 2, toY = tr.top + tr.height / 2;
         var fromEl = null;
-        if (scope === 'auto') fromEl = document.querySelector('.cf-arena .cf-coin.selected');
+        if (scope === 'auto') fromEl = document.querySelector('.rr-chips .cf-coin.selected') || document.querySelector('.cf-arena .cf-coin.selected');
         else if (scope === 'dice') fromEl = document.querySelector('.cf-dice-coins .cf-coin.selected');
         else fromEl = document.querySelector('.match-card .quick-chips .chip.selected');
         var fromX, fromY;
@@ -6242,6 +6527,7 @@
             }
             renderMatchHistorySection();
             renderBeadPlate();
+            rrRenderRecentTable();
         }).catch(e => console.log('Match history error:', e));
     }
 
