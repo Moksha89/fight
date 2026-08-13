@@ -2200,63 +2200,118 @@
            REFERENCE-STYLE HOME (dark purple/red/gold, left category rail,
            big 3D game cards, banner carousel, fixed app-download bar)
            ============================================================ */
-        #sec-home.hp-root { padding: 0 !important; margin: 0 !important; background: transparent; }
-        .hp-wrap { position: relative; min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg,#2b1533 0%, #271430 42%, #3a1522 100%); color: #fff; overflow: hidden; }
+        #sec-home.hp-root { padding: 0 !important; margin: 0 !important; background: #04040a; }
+        .hp-wrap { position: relative; min-height: 100vh; display: flex; flex-direction: column; background: #04040a; color: #fff; overflow: hidden; }
         .hp-wrap .hp-download { margin-top: auto; }
-        .hp-wrap::before { content:''; position: absolute; top: 8%; left: 50%; transform: translateX(-50%); width: 340px; height: 340px; background: url('/static/red_roaster.svg') no-repeat center; background-size: contain; opacity: 0.05; filter: grayscale(0.2); pointer-events: none; z-index: 0; }
         .hp-wrap > * { position: relative; z-index: 1; }
 
-        /* ---- top bar ---- */
-        .hp-top { display: flex; align-items: center; gap: 8px; padding: 6px 14px 10px; }
-        .hp-bal { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 16px; color: #fff; cursor: pointer; }
-        .hp-bal .material-icons { color: #F5C542; font-size: 22px; }
-        .hp-coins { display: flex; align-items: center; gap: 5px; background: linear-gradient(90deg,#5a2b12,#7a3d18); border: 1px solid #C98A3A; border-radius: 14px; padding: 3px 12px 3px 7px; font-weight: 700; font-size: 13px; color: #FFD9A0; }
-        .hp-coins .material-icons { color: #FFC24B; font-size: 16px; }
+        /* ============================================================
+           v2 HOME — dark neon (ported from the web/v2 design handoff)
+           ============================================================ */
+        /* ---- logo strip ---- */
+        .v2-logostrip { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px 0; }
+        .v2-logo { height: 46px; width: auto; object-fit: contain; }
+        .v2-logo-meta { text-align: right; line-height: 1.3; }
+        .v2-welcome { color: #fff; font-size: 13px; font-weight: 700; }
+        .v2-vip { color: #1a1200; font-size: 9px; font-weight: 800; letter-spacing: .5px; background: linear-gradient(135deg,#f2c94c,#c9973a); border-radius: 999px; padding: 2px 9px; display: inline-block; margin-top: 2px; }
+
+        /* ---- top bar: wallet pill + account ---- */
+        .v2-topbar { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 10px 12px 8px; }
+        .v2-wallet { display: flex; align-items: center; gap: 10px; border: 1.5px solid #8a6a1e; border-radius: 999px; padding: 5px 12px 5px 6px; background: #0a0806; box-shadow: 0 0 10px rgba(212,160,23,.25); cursor: pointer; }
+        .v2-wallet-coin-group { display: flex; align-items: center; gap: 7px; }
+        .v2-coin { width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #d4a017 55%, #8a6a1e); border: 1px solid #5c4410; display: inline-block; flex: 0 0 auto; }
+        .v2-wallet-amounts { display: flex; flex-direction: column; line-height: 1.15; }
+        .v2-wallet-balance { color: #fff; font-size: 13px; font-weight: 700; }
+        .v2-wallet-label { color: #a09070; font-size: 8px; }
+        .v2-wallet-divider { width: 1px; height: 22px; background: #3a2e12; display: inline-block; }
+        .v2-wallet-points-group { display: flex; align-items: center; gap: 6px; }
+        .v2-gem { width: 16px; height: 16px; display: inline-block; background: linear-gradient(135deg,#ffb536,#e0294a); clip-path: polygon(50% 0, 100% 35%, 50% 100%, 0 35%); }
+        .v2-wallet-points { color: #fff; font-size: 13px; font-weight: 700; }
+        .v2-wallet-add { color: #d4a017; font-size: 13px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid #8a6a1e; display: flex; align-items: center; justify-content: center; line-height: 1; cursor: pointer; }
+        .v2-account { display: flex; align-items: center; gap: 7px; }
+        .v2-bell { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #3a3a4c; background: #0a0a14; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .v2-bell .material-icons { color: #c8c8d8; font-size: 18px; }
+        .v2-bell-dot { position: absolute; top: 2px; right: 3px; width: 7px; height: 7px; border-radius: 50%; background: #e0192d; border: 1px solid #04040a; }
+        .v2-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#ff5b3a,#ff2d78); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(255,45,120,.45); cursor: pointer; }
+
+        /* ---- hero: LIVE GAMES ---- */
+        .v2-hero { position: relative; margin: 6px 10px 10px; border-radius: 14px; border: 1px solid rgba(120,90,255,.5); box-shadow: 0 0 18px rgba(255,45,120,.2), inset 0 0 40px rgba(59,40,120,.35); background: radial-gradient(circle at 20% 15%, rgba(224,41,74,.25), transparent 50%), radial-gradient(circle at 80% 20%, rgba(59,123,255,.25), transparent 55%), #07060f; padding: 14px 12px 10px; overflow: hidden; }
+        .v2-hero-title { text-align: center; font-size: 38px; font-weight: 800; font-style: italic; letter-spacing: 1px; line-height: 1; }
+        .v2-hero-title .live { background: linear-gradient(180deg,#ff8a7a,#e0192d 60%,#8a0f1e); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 18px rgba(224,25,45,.6); }
+        .v2-hero-title .games { background: linear-gradient(180deg,#dce8ff,#5b8ae0 55%,#20315c); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 18px rgba(91,138,224,.6); }
+        .v2-hero-view { overflow: hidden; margin-top: 12px; }
+        .v2-hero .banner-track { height: auto; }
+        .v2-hero .banner-slide { min-width: 100%; height: auto; padding: 0; display: block; background-size: cover; background-position: center; border-radius: 10px; }
+        .v2-hero .banner-slide::before { content: none; }
+        .v2-hero .banner-slide.v2-banner { min-height: 118px; }
+        .v2-hexes { display: flex; gap: 8px; align-items: stretch; }
+        .v2-hex-cat { flex: 1; text-align: center; cursor: pointer; min-width: 0; }
+        .v2-hex { width: 74px; height: 74px; margin: 0 auto; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: linear-gradient(135deg,#f2c94c,#c9973a); display: flex; align-items: center; justify-content: center; }
+        .v2-hex-inner { width: 68px; height: 68px; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: radial-gradient(circle at 40% 30%, #2a1c08, #120c04); display: flex; align-items: center; justify-content: center; }
+        .v2-hex-inner .material-icons { font-size: 30px; color: #f2c94c; }
+        .v2-hex-inner .ic { display: block; width: 30px; height: 30px; background-color: #f2c94c; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; }
+        .v2-hex-cat.accent .v2-hex { background: linear-gradient(135deg,#3b7bff,#ff2d78); }
+        .v2-hex-cat.accent .v2-hex-inner { background: radial-gradient(circle at 40% 30%, #10143a, #08060f); }
+        .v2-hex-cat.accent .v2-hex-inner .material-icons, .v2-hex-cat.accent .v2-hex-inner .ic { color: #9fc0ff; background-color: #9fc0ff; }
+        .v2-hex-name { color: #f2c94c; font-size: 12px; font-weight: 700; letter-spacing: .4px; margin-top: 6px; text-shadow: 0 0 8px rgba(242,201,76,.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .v2-hex-sub { color: #fff; font-size: 10px; font-weight: 600; letter-spacing: 1px; }
+        .v2-hero .banner-dots { position: static; display: flex; gap: 5px; justify-content: center; margin-top: 10px; }
+        .v2-hero .banner-dot { width: 8px; height: 8px; border-radius: 50%; background: #e8e8f0; }
+        .v2-hero .banner-dot.active { background: #23d8f0; width: 8px; border-radius: 50%; }
+
+        /* ---- section headings ---- */
+        .v2-secbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .v2-secbar .hp-sec { margin: 0; }
+        .v2-viewall { font-size: 11px; font-weight: 600; border: 1px solid #3a3a4c; border-radius: 999px; padding: 4px 12px; background: #0a0a14; color: #fff; cursor: pointer; }
+
         .hp-auth { margin-left: auto; display: flex; gap: 8px; }
         .hp-btn-login { background: #1b2130; color: #fff; border: 1px solid rgba(255,255,255,0.28); border-radius: 22px; padding: 9px 20px; font-weight: 700; font-size: 14px; cursor: pointer; }
         .hp-btn-reg { background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; border: none; border-radius: 22px; padding: 10px 22px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(204,54,48,0.45); }
-        .hp-user { margin-left: auto; display: flex; align-items: center; gap: 6px; }
-        .hp-icon-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .hp-icon-btn .material-icons { font-size: 22px; }
-
-        /* ---- carousel ---- */
-        #sec-home .banner-carousel { margin: 0 14px 6px; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 22px rgba(0,0,0,0.4); }
 
         /* ---- body: rail + main ---- */
-        .hp-body { display: flex; align-items: flex-start; gap: 0; padding: 10px 12px 0; }
-        .hp-rail { flex: 0 0 82px; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 8px; }
-        .hp-cat { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 4px; border-radius: 16px; cursor: pointer; color: #d8c6df; font-size: 11px; font-weight: 600; text-align: center; transition: all .15s; }
-        .hp-cat .hp-cat-ic { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
-        .hp-cat .hp-cat-ic .material-icons { font-size: 30px; }
-        .hp-cat .hp-cat-ic img { width: 30px; height: 30px; object-fit: contain; }
-        .hp-cat .hp-cat-ic .ic { display: block; width: 32px; height: 32px; background-color: currentColor; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; }
-        .hp-brand { display: flex; align-items: center; gap: 9px; padding: 12px 14px 2px; }
-        .hp-brand img { width: 30px; height: 30px; border-radius: 7px; object-fit: contain; }
-        .hp-brand h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--gold); letter-spacing: -0.3px; }
-        .hp-cat.active { background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; box-shadow: 0 6px 16px rgba(204,54,48,0.5); }
-        .hp-cat.active .hp-cat-ic .material-icons { color: #fff; }
+        .hp-body { display: flex; align-items: flex-start; gap: 4px; padding: 4px 10px 0 8px; }
+        .hp-rail { flex: 0 0 86px; display: flex; flex-direction: column; gap: 8px; position: sticky; top: 8px; padding-bottom: 16px; }
+        /* v2 category tile: bordered thumbnail block with a neon accent per game */
+        .hp-cat { position: relative; display: block; border: 1.5px solid var(--tile-border, #3a3a4c); border-radius: 12px; padding: 8px 3px; text-align: center; background: #08070f; box-shadow: 0 0 10px var(--tile-glow, transparent), inset 0 0 12px var(--tile-glow, transparent); cursor: pointer; transition: transform .12s; }
+        .hp-cat:active { transform: scale(.97); }
+        .hp-cat.soon { opacity: .55; }
+        .hp-cat .hp-cat-ic { width: 44px; height: 38px; margin: 0 auto 5px; border-radius: 8px; background: var(--tile-fill, #1a1a26); display: flex; align-items: center; justify-content: center; }
+        .hp-cat .hp-cat-ic .material-icons { font-size: 22px; color: #fff; }
+        .hp-cat .hp-cat-ic img { width: 24px; height: 24px; object-fit: contain; }
+        .hp-cat .hp-cat-ic .ic { display: block; width: 24px; height: 24px; background-color: #fff; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; }
+        .hp-cat .hp-cat-label { color: #fff; font-size: 9px; font-weight: 700; letter-spacing: .3px; }
+        .hp-cat .hp-cat-soon { color: #f2c94c; font-size: 7px; font-weight: 800; letter-spacing: .4px; margin-top: 2px; }
+        .hp-cat.active { border-color: #f2c94c; box-shadow: 0 0 14px rgba(242,201,76,.4), inset 0 0 12px rgba(242,201,76,.18); }
+        .hp-cat[data-cat="cockfight"] { --tile-border: #e0192d; --tile-glow: rgba(224,25,45,.25); --tile-fill: linear-gradient(135deg,#3a0a12,#e0192d40); }
+        .hp-cat[data-cat="dice"]      { --tile-border: #f2a93b; --tile-glow: rgba(242,169,59,.28); --tile-fill: linear-gradient(135deg,#332208,#f2a93b40); }
+        .hp-cat[data-cat="cricket"]   { --tile-border: #2eb45a; --tile-glow: rgba(46,180,90,.25); --tile-fill: linear-gradient(135deg,#08301a,#2eb45a40); }
+        .hp-cat[data-cat="casino"]    { --tile-border: #ff2d78; --tile-glow: rgba(255,45,120,.25); --tile-fill: linear-gradient(135deg,#3a0a24,#ff2d7840); }
+        .hp-cat[data-cat="sports"]    { --tile-border: #23d8f0; --tile-glow: rgba(35,216,240,.25); --tile-fill: linear-gradient(135deg,#0a2a30,#23d8f040); }
+        .hp-cat[data-cat="andar"]     { --tile-border: #a05bff; --tile-glow: rgba(160,91,255,.25); --tile-fill: linear-gradient(135deg,#22103a,#a05bff40); }
+        .hp-cat[data-cat="patti"]     { --tile-border: #ffd53d; --tile-glow: rgba(255,213,61,.25); --tile-fill: linear-gradient(135deg,#332a08,#ffd53d40); }
+        .hp-cat[data-cat="products"]  { --tile-border: #ff5b3a; --tile-glow: rgba(255,91,58,.25); --tile-fill: linear-gradient(135deg,#331208,#ff5b3a40); }
+        .hp-cat[data-cat="more"] .hp-cat-ic { width: 38px; height: 24px; border: 1px solid #3a3a4c; border-radius: 999px; background: none; color: #c8c8d8; font-size: 13px; letter-spacing: 2px; }
 
-        .hp-main { flex: 1 1 0; min-width: 0; padding: 2px 2px 0 12px; }
-        .hp-main .hp-sec { font-size: 18px; font-weight: 800; margin: 2px 0 12px; color: #fff; }
+        .hp-main { flex: 1 1 0; min-width: 0; padding: 0 0 0 4px; }
+        .hp-main .hp-sec { font-size: 16px; font-weight: 700; margin: 0 0 8px; color: #fff; }
         .hp-main .section-label { color: #fff; }
 
-        /* ---- big premium game cards ---- */
-        .hp-cards { display: flex; flex-direction: column; gap: 16px; margin-bottom: 18px; }
-        .hp-card { position: relative; border-radius: 16px; overflow: hidden; cursor: pointer; height: 132px; border: 2px solid rgba(255,201,92,0.55); box-shadow: 0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.06); background-size: cover; background-position: center; transition: transform .15s; }
+        /* ---- v2 live game cards ---- */
+        .hp-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+        .hp-card { position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; height: 150px; border: 1.5px solid var(--card-border, rgba(59,123,255,.55)); box-shadow: 0 0 14px var(--card-glow, rgba(59,123,255,.3)); background-size: cover; background-position: center; transition: transform .15s; }
+        .hp-card.dice { --card-border: rgba(242,169,59,.55); --card-glow: rgba(242,169,59,.3); }
+        .hp-card.hp-card-soon { --card-border: rgba(46,180,90,.5); --card-glow: rgba(46,180,90,.22); }
+        .v2-badge-live { position: absolute; z-index: 3; top: 8px; left: 8px; background: #e0192d; color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: .3px; }
+        .v2-card-right { position: absolute; z-index: 3; top: 8px; right: 8px; text-align: right; pointer-events: none; }
+        .v2-badge-4k { background: linear-gradient(135deg,#f2c94c,#c9973a); color: #1a1200; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px; line-height: 1.1; }
+        .v2-badge-4k span { font-size: 6px; letter-spacing: .5px; }
+        .v2-badge-watching { color: #fff; font-size: 9px; margin-top: 4px; background: rgba(0,0,0,.55); padding: 2px 6px; border-radius: 3px; display: inline-block; }
+        .v2-card-foot { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; padding: 20px 10px 8px; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; background: linear-gradient(0deg, rgba(0,0,0,.85), transparent); }
+        .v2-card-name { color: #fff; font-size: 14px; font-weight: 700; line-height: 1.2; }
+        .v2-card-name small { display: block; font-size: 10px; font-weight: 600; color: #d8d5e6; margin-top: 2px; }
+        .v2-card-cta { flex: 0 0 auto; background: linear-gradient(135deg,#ffd53d,#f2a93b); color: #1a1200; font-size: 10px; font-weight: 800; padding: 4px 12px; border-radius: 999px; }
+        .hp-card-soon .v2-card-cta { background: linear-gradient(135deg,#8a8f98,#5b616b); color: #fff; }
         .hp-card:active { transform: scale(0.985); }
-        .hp-card::after { content:''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.15) 55%, transparent 100%); }
-        .hp-card-art { position: absolute; right: -8px; bottom: 0; height: 108%; z-index: 1; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55)); }
-        .hp-card-art.two { right: 40%; opacity: 0.92; transform: scaleX(-1); }
-        .hp-card-body { position: absolute; z-index: 2; left: 16px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; gap: 6px; max-width: 60%; }
-        .hp-card-title { font-size: 20px; font-weight: 900; line-height: 1.06; text-shadow: 0 2px 8px rgba(0,0,0,0.7); letter-spacing: 0.5px; text-transform: uppercase; }
-        .hp-card-title small { display: block; font-size: 11.5px; font-weight: 800; color: #FFD37A; letter-spacing: 1.4px; margin-top: 3px; white-space: nowrap; }
-        .hp-card-cta { align-self: flex-start; margin-top: 2px; background: linear-gradient(180deg,#ec524c,#cc3630); color: #fff; font-weight: 700; font-size: 12px; padding: 7px 16px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
-        .hp-live { position: absolute; z-index: 3; top: 10px; right: 10px; background: #cc3630; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px; display: flex; align-items: center; gap: 4px; letter-spacing: 0.5px; }
-        .hp-live .live-dot { width: 6px; height: 6px; }
-        .hp-soon { position: absolute; z-index: 3; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #FFD37A; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px; letter-spacing: 0.5px; border: 1px solid rgba(255,211,122,0.55); display: inline-flex; align-items: center; gap: 4px; }
-        .hp-card-soon .hp-card-cta { background: linear-gradient(180deg,#8a8f98,#5b616b); }
-        .hp-cat.soon .hp-cat-badge { position: absolute; top: 3px; right: 4px; background: #FFD37A; color: #3a2a06; font-size: 7.5px; font-weight: 800; padding: 1px 4px; border-radius: 6px; letter-spacing: .3px; }
-        .hp-cat { position: relative; }
         .ann-overlay { position: fixed; inset: 0; z-index: 4000; background: rgba(10,6,20,0.72); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 20px; animation: annFade .18s ease; }
         @keyframes annFade { from { opacity: 0; } to { opacity: 1; } }
         .ann-card { position: relative; width: 100%; max-width: 360px; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: annPop .22s cubic-bezier(.2,.9,.3,1.2); }
@@ -2269,15 +2324,19 @@
         .ann-msg { font-size: 14px; line-height: 1.5; color: #6C7374; }
         .ann-cta { display: inline-block; margin-top: 14px; background: #6ABDA7; color: #fff; font-weight: 700; text-decoration: none; padding: 10px 22px; border-radius: 12px; }
 
-        /* ---- highlights row ---- */
+        /* ---- v2 highlights list ---- */
         #hp-highlights { margin: 2px 0 18px; }
-        .hl-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .hl-row::-webkit-scrollbar { display: none; }
-        .hl-card { flex: 0 0 168px; border-radius: 14px; overflow: hidden; position: relative; cursor: pointer; background: #1c121a; border: 1px solid rgba(255,201,92,0.35); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
-        .hl-card .hl-thumb { width: 100%; height: 100px; object-fit: cover; display: block; background: #000; }
-        .hl-card .hl-play { position: absolute; top: 33px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; color: #fff; }
-        .hl-card .hl-play .material-icons { font-size: 24px; }
-        .hl-card .hl-title { padding: 8px 10px; font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hl-row { display: flex; flex-direction: column; gap: 10px; }
+        .hl-card { display: flex; gap: 9px; cursor: pointer; }
+        .hl-card .hl-thumb-wrap { position: relative; width: 132px; height: 88px; flex-shrink: 0; border-radius: 10px; overflow: hidden; background: #0a0913; }
+        .hl-card .hl-thumb { width: 100%; height: 100%; object-fit: cover; display: block; background: #0a0913; }
+        .hl-card .hl-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 30px; height: 30px; border-radius: 50%; background: rgba(20,60,180,.75); border: 1px solid rgba(120,170,255,.7); display: flex; align-items: center; justify-content: center; color: #fff; }
+        .hl-card .hl-play .material-icons { font-size: 18px; }
+        .hl-card .hl-info { min-width: 0; flex: 1; }
+        .hl-card .hl-title { font-size: 13px; font-weight: 700; color: #ffd53d; line-height: 1.3; }
+        .hl-card .hl-source { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+        .hl-card .hl-source-dot { width: 14px; height: 10px; border-radius: 3px; background: #e0192d; display: inline-block; flex: 0 0 auto; }
+        .hl-card .hl-source-text { color: #d8d5e6; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         /* video modal */
         #hl-modal { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; }
         #hl-modal.open { display: flex; }
@@ -2291,13 +2350,13 @@
         .hp-download .hp-dl-btn { color: #4aa3ff; font-weight: 800; font-size: 15px; cursor: pointer; background: none; border: none; }
         .hp-copy { text-align: center; padding: 6px 0 20px; color: rgba(255,255,255,0.4); font-size: 11px; }
         #sec-home .social-links { justify-content: center; gap: 12px; padding: 6px 0 4px; }
+        #sec-home .hp-download { background: rgba(8,7,15,.94); }
 
         /* the explicit App-download bar replaces the legacy slide-up install promo */
         #pwa-install-banner { display: none !important; }
-        /* Hero banner: keep it inside the viewport (symmetric inset) and a stable 16/9 on every width */
-        #sec-home .banner-carousel { width: auto; height: auto; aspect-ratio: 16 / 9; margin: 0 14px 14px; box-sizing: border-box; }
         /* keep home full-bleed even on desktop breakpoints */
-        @media (min-width: 900px) { .hp-rail { flex: 0 0 96px; } .hp-card { height: 156px; } .hp-card-title { font-size: 26px; } }
+        @media (min-width: 900px) { .hp-rail { flex: 0 0 100px; } .hp-card { height: 190px; } .v2-hex { width: 88px; height: 88px; } .v2-hex-inner { width: 81px; height: 81px; } }
+        @media (max-width: 360px) { .v2-hex { width: 62px; height: 62px; } .v2-hex-inner { width: 57px; height: 57px; } .v2-hero-title { font-size: 32px; } .hp-rail { flex: 0 0 76px; } }
     </style>
 </head>
 <body>
@@ -2560,88 +2619,76 @@
             <!-- HOME -->
             <div id="sec-home" class="section active hp-root">
               <div class="hp-wrap">
-                <!-- Brand + Login/Register (logged out) or profile icons (logged in) -->
-                <div class="hp-brand hp-top">
-                    <img src="/static/logo.png?v=2" alt="RoosterRun" onerror="this.style.display='none'">
-                    <h2>RoosterRun</h2>
+                <!-- Logo strip: brand + who's signed in -->
+                <div class="v2-logostrip">
+                    <img class="v2-logo" src="/static/logo.png?v=2" alt="RoosterRun" onerror="this.style.display='none'">
+                    <div class="v2-logo-meta" id="hp-usermeta" style="display:none;">
+                        <div class="v2-welcome" id="hp-welcome">Welcome back</div>
+                        <span class="v2-vip" id="hp-vip" style="display:none;"></span>
+                    </div>
+                </div>
+
+                <!-- Top bar: wallet pill + auth (logged out) / bell + avatar (logged in) -->
+                <div class="v2-topbar">
+                    <div class="v2-wallet" onclick="navigate('sec-wallet')">
+                        <div class="v2-wallet-coin-group">
+                            <span class="v2-coin"></span>
+                            <div class="v2-wallet-amounts">
+                                <span class="v2-wallet-balance" id="hp-balance">₹0.00</span>
+                                <span class="v2-wallet-label">Wallet Balance</span>
+                            </div>
+                        </div>
+                        <span class="v2-wallet-divider"></span>
+                        <div class="v2-wallet-points-group">
+                            <span class="v2-gem"></span>
+                            <span class="v2-wallet-points" id="hp-coins">0</span>
+                            <span class="v2-wallet-add" onclick="event.stopPropagation();openDeposit()" title="Deposit">+</span>
+                        </div>
+                    </div>
                     <div class="hp-auth" id="hp-auth">
                         <button class="hp-btn-login" onclick="showAuthScreen('login')">Login</button>
                         <button class="hp-btn-reg" onclick="showAuthScreen('register')">Register</button>
                     </div>
-                    <div class="hp-user" id="hp-user" style="display:none;">
-                        <button class="hp-icon-btn" onclick="openDeposit()" title="Deposit"><span class="material-icons">add_circle</span></button>
-                        <button class="hp-icon-btn" onclick="navigate('sec-notifications')" title="Notifications"><span class="material-icons">notifications</span></button>
-                        <button class="hp-icon-btn" onclick="navigate('sec-profile')" title="Profile"><span class="material-icons">person</span></button>
+                    <div class="v2-account" id="hp-user" style="display:none;">
+                        <div class="v2-bell" onclick="navigate('sec-notifications')" title="Notifications">
+                            <span class="material-icons">notifications</span>
+                            <span class="v2-bell-dot" id="hp-bell-dot" style="display:none;"></span>
+                        </div>
+                        <div class="v2-avatar" id="hp-avatar" onclick="navigate('sec-profile')" title="Profile">RR</div>
                     </div>
                 </div>
 
-                <!-- Banner Carousel (admin-managed via /api/base/banners/) -->
-                <div class="banner-carousel" id="banner-carousel">
-                    <div class="banner-track" id="banner-track">
-                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #7a1f12 0%, #3a0d0d 50%, #1a0808 100%);">
-                            <div class="banner-content">
-                                <h3><span class="material-icons" style="vertical-align:middle;font-size:24px;margin-right:4px;">sports_mma</span> Live Cockfight Betting</h3>
-                                <p>24/7 live matches from China Market. Bet on Meron or Wala!</p>
-                                <span class="banner-cta" onclick="navigate('sec-cockfight')">Bet Now →</span>
-                            </div>
-                        </div>
-                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #3b1466 0%, #1e1b4b 50%, #0f0a24 100%);">
-                            <div class="banner-content">
-                                <h3><span class="material-icons" style="vertical-align:middle;font-size:24px;margin-right:4px;">casino</span> Dice Play — Gundata</h3>
-                                <p>Pick a face, place your bet. Instant results!</p>
-                                <span class="banner-cta" onclick="navigate('sec-dice')">Play Now →</span>
-                            </div>
-                        </div>
-                        <div class="banner-slide" style="background-image:linear-gradient(135deg, #14532d 0%, #0b3a1e 50%, #05210f 100%);">
-                            <div class="banner-content">
-                                <h3><span class="material-icons" style="vertical-align:middle;font-size:24px;margin-right:4px;">account_balance_wallet</span> Instant Deposits & Withdrawals</h3>
-                                <p>Add funds via UPI or bank. Withdraw winnings anytime.</p>
-                                <span class="banner-cta" onclick="navigate('sec-wallet')">Add Funds →</span>
-                            </div>
+                <!-- Hero: LIVE GAMES category pages + admin banners (/api/base/banners/) -->
+                <div class="v2-hero">
+                    <div class="v2-hero-title"><span class="live">LIVE</span><span class="games"> GAMES</span></div>
+                    <div class="v2-hero-view">
+                        <div class="banner-track" id="banner-track">
+                            <div class="banner-slide v2-hero-slide"><div class="v2-hexes" id="v2-hexes"></div></div>
                         </div>
                     </div>
                     <div class="banner-dots" id="banner-dots">
                         <div class="banner-dot active" onclick="goToSlide(0)"></div>
-                        <div class="banner-dot" onclick="goToSlide(1)"></div>
-                        <div class="banner-dot" onclick="goToSlide(2)"></div>
                     </div>
                 </div>
 
                 <!-- Body: fixed left category rail + main game area -->
                 <div class="hp-body">
-                    <aside class="hp-rail">
-                        <div class="hp-cat active" data-cat="games" onclick="hpSelectCat(this,'sec-home')">
-                            <span class="hp-cat-ic"><i class="ic" style="-webkit-mask-image:url(/static/ic_gamepad.svg);mask-image:url(/static/ic_gamepad.svg)"></i></span>Games
-                        </div>
-                        <div class="hp-cat" data-cat="cockfight" data-game="cockfight" onclick="hpSelectCat(this,'sec-cockfight')">
-                            <span class="hp-cat-ic"><i class="ic" style="-webkit-mask-image:url(/static/ic_rooster.svg);mask-image:url(/static/ic_rooster.svg)"></i></span>Cockfight
-                        </div>
-                        <div class="hp-cat" data-cat="dice" data-game="dice" onclick="hpSelectCat(this,'sec-dice')">
-                            <span class="hp-cat-ic"><i class="ic" style="-webkit-mask-image:url(/static/ic_dice.svg);mask-image:url(/static/ic_dice.svg)"></i></span>Dice
-                        </div>
-                        <div class="hp-cat soon" data-cat="cricket" onclick="hpComingSoon('Cricket')">
-                            <span class="hp-cat-badge">SOON</span>
-                            <span class="hp-cat-ic"><span class="material-icons">sports_cricket</span></span>Cricket
-                        </div>
-                    </aside>
+                    <aside class="hp-rail" id="hp-rail"></aside>
                     <main class="hp-main">
-                        <div class="hp-sec">Games</div>
+                        <div class="hp-sec">Live Games..</div>
                         <div class="game-banners hp-cards" id="game-cards-container">
-                            <!-- Premium 3D game cards loaded dynamically from /api/base/games/ -->
+                            <!-- Live game cards loaded dynamically from /api/base/games/ -->
                         </div>
+                        <div id="matches-container"></div>
 
                         <!-- Highlights (admin-managed via /api/base/highlights/) -->
                         <div id="hp-highlights" style="display:none;">
-                            <div class="hp-sec" style="font-size:16px;margin:2px 0 10px;">Highlights</div>
+                            <div class="v2-secbar">
+                                <div class="hp-sec">Highlights..</div>
+                                <span class="v2-viewall" onclick="hpViewAllHighlights()">View All</span>
+                            </div>
                             <div class="hl-row" id="hl-row"></div>
                         </div>
-
-                        <!-- Live Now -->
-                        <div class="section-label" style="margin-bottom:12px;">
-                            <span class="live-dot"></span>
-                            <span style="font-weight:700;">Live Now</span>
-                        </div>
-                        <div id="matches-container"></div>
 
                 <!-- Social Links -->
                 <div class="social-links" id="social-links">
@@ -3251,14 +3298,38 @@
         loadAnnouncement();
     }
 
-    // Reflect auth state in the home top bar (Login/Register vs profile icons + balance).
+    // Reflect auth state in the home logo strip + top bar
+    // (Login/Register vs welcome line, VIP badge, bell and avatar).
     function updateAuthUI() {
         var authEl = document.getElementById('hp-auth');
         var userEl = document.getElementById('hp-user');
+        var metaEl = document.getElementById('hp-usermeta');
         if (authEl) authEl.style.display = token ? 'none' : 'flex';
         if (userEl) userEl.style.display = token ? 'flex' : 'none';
+        if (metaEl) metaEl.style.display = token ? '' : 'none';
         var bal = document.getElementById('hp-balance');
-        if (bal && !token) bal.textContent = 'G0.00';
+        if (bal && !token) bal.textContent = '₹0.00';
+        var pts = document.getElementById('hp-coins');
+        if (pts && !token) pts.textContent = '0';
+        if (!token) return;
+
+        var name = (userInfo && (userInfo.username || userInfo.name)) || 'Player';
+        var welcome = document.getElementById('hp-welcome');
+        if (welcome) welcome.textContent = 'Welcome back, ' + name;
+        var avatar = document.getElementById('hp-avatar');
+        if (avatar) avatar.textContent = hpInitials(name);
+        var vip = document.getElementById('hp-vip');
+        var level = userInfo && (userInfo.tier || userInfo.level);
+        if (vip) {
+            vip.textContent = level ? ('VIP ' + level) : '';
+            vip.style.display = level ? '' : 'none';
+        }
+    }
+    // "Ravi Kumar" -> "RK", "ravi" -> "RA"
+    function hpInitials(name) {
+        var parts = String(name).trim().split(/\s+/).filter(Boolean);
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return String(name).slice(0, 2).toUpperCase();
     }
 
     // Show the login/register screen (used by home Login/Register buttons + login-gated actions).
@@ -3295,7 +3366,7 @@
         if (el) {
             el.classList.add('active');
         } else {
-            var m = { 'sec-home': 'games', 'sec-cockfight': 'cockfight', 'sec-dice': 'dice' };
+            var m = { 'sec-cockfight': 'cockfight', 'sec-dice': 'dice' };
             var cat = m[sectionId];
             if (cat) { var t = document.querySelector('.hp-cat[data-cat="' + cat + '"]'); if (t) t.classList.add('active'); }
         }
@@ -3553,6 +3624,8 @@
             games.forEach(g => { html += buildGameBanner(g); });
             html += buildComingSoonCard();
             container.innerHTML = html;
+            renderHomeRail();
+            renderHeroSlides();
             updateNavVisibility();
             restoreSectionFromHash();
         }).catch(e => {
@@ -3566,6 +3639,8 @@
             if (container) {
                 container.innerHTML = window._loadedGames.map(buildGameBanner).join('') + buildComingSoonCard();
             }
+            renderHomeRail();
+            renderHeroSlides();
             restoreSectionFromHash();
         });
     }
@@ -3576,54 +3651,149 @@
         if (m) return { main: m[1].trim(), sub: m[2].trim() };
         return { main: name || '', sub: '' };
     }
-    // Build a colorful full-width game banner (reference style)
+    // A live game card: admin banner (or a themed gradient) behind LIVE / 4K / watching badges.
     function buildGameBanner(g) {
         var gid = (g.game_id || '').toLowerCase();
-        var bg, title, art = '', live = '', bgImg = '';
+        var bg, name, sub, bgImg = '', cls = '';
         if (gid === 'cockfight') {
             bg = 'radial-gradient(circle at 75% 40%, #b5321f 0%, #6e150c 45%, #2a0705 100%)';
             if (gameBanners && gameBanners.F) bgImg = gameBanners.F;
-            live = '<span class="hp-live"><span class="live-dot"></span>LIVE</span>';
-            title = '<div class="hp-card-title">Cockfight<small>Livestream</small></div>';
-            art = '<img class="hp-card-art two" src="/static/blue_roaster.png" alt="">'
-                + '<img class="hp-card-art" src="/static/red_roaster.png" alt="">';
+            name = 'Cockfight'; sub = 'Livestream';
         } else if (gid === 'dice' || gid === 'color' || gid === 'colorgame') {
             bg = 'radial-gradient(circle at 78% 40%, #6d28d9 0%, #3b1466 48%, #170a2e 100%)';
             if (gameBanners && gameBanners.G) bgImg = gameBanners.G;
-            live = '<span class="hp-live"><span class="live-dot"></span>LIVE</span>';
+            cls = ' dice';
             var dn = splitGameName(g.name || 'Dice Play');
-            title = '<div class="hp-card-title">' + dn.main + '<small>' + (dn.sub || 'Fast Draw &amp; Win') + '</small></div>';
-            art = '<img class="hp-card-art" src="/static/blue_roaster.svg" alt="" style="opacity:0;">'
-                + '<span class="material-icons hp-card-art" style="font-size:92px;color:#c4b5fd;right:16px;bottom:10px;height:auto;">casino</span>';
+            name = dn.main; sub = dn.sub || 'Fast Draw &amp; Win';
         } else {
             bg = 'radial-gradient(circle at 78% 40%, #4b5563 0%, #1f2937 60%, #0b0f16 100%)';
-            title = '<div class="hp-card-title">' + (g.name || 'Game') + '</div>';
-            art = '<span class="material-icons hp-card-art" style="font-size:88px;color:#e5e7eb;right:18px;bottom:10px;height:auto;">' + (g.icon || 'sports_esports') + '</span>';
+            name = g.name || 'Game'; sub = '';
         }
-        // If admin uploaded a game-card banner (placement F/G), use it as the card image and hide the art.
         var style = bgImg
             ? 'background-image:url(' + bgImg + ');background-size:cover;background-position:center;'
             : 'background:' + bg + ';';
-        return '<div class="hp-card" style="' + style + '" onclick="hpSelectCat(null,\'' + g.section_id + '\')">'
-            + live + (bgImg ? '' : art)
-            + '<div class="hp-card-body">'
-            + title
-            + '<span class="hp-card-cta"><span class="material-icons" style="font-size:15px;">play_arrow</span> Play Now</span>'
+        return '<div class="hp-card' + cls + '" style="' + style + '" onclick="hpSelectCat(null,\'' + g.section_id + '\')">'
+            + '<span class="v2-badge-live">▶ LIVE</span>'
+            + '<div class="v2-card-right">'
+            +   '<div class="v2-badge-4k">4K<br><span>ULTRA HD</span></div>'
+            +   hpWatchers(gid)
+            + '</div>'
+            + '<div class="v2-card-foot">'
+            +   '<div class="v2-card-name">' + name + (sub ? '<small>' + sub + '</small>' : '') + '</div>'
+            +   '<span class="v2-card-cta">Play Now</span>'
             + '</div>'
             + '</div>';
+    }
+
+    // Viewer badge — only rendered when the live feed actually reports a count.
+    function hpWatchers(gid) {
+        var n = (window._liveViewers || {})[gid];
+        if (!n) return '';
+        var label = n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
+        return '<div class="v2-badge-watching">👁 ' + label + ' Watching</div>';
     }
 
     // Cricket teaser card — shown as "Coming Soon" (not yet playable).
     function buildComingSoonCard() {
         var bg = 'radial-gradient(circle at 78% 40%, #1f7a3d 0%, #0e5024 48%, #05210f 100%)';
         return '<div class="hp-card hp-card-soon" style="background:' + bg + ';" onclick="hpComingSoon(\'Cricket\')">'
-            + '<span class="hp-soon"><span class="material-icons" style="font-size:12px;">lock_clock</span>COMING SOON</span>'
-            + '<span class="material-icons hp-card-art" style="font-size:92px;color:#bbf7d0;right:16px;bottom:8px;height:auto;">sports_cricket</span>'
-            + '<div class="hp-card-body">'
-            + '<div class="hp-card-title">Cricket<small>Live betting &amp; fantasy</small></div>'
-            + '<span class="hp-card-cta"><span class="material-icons" style="font-size:15px;">lock_clock</span> Coming Soon</span>'
+            + '<span class="v2-badge-live" style="background:#0e5024;">COMING SOON</span>'
+            + '<div class="v2-card-foot">'
+            +   '<div class="v2-card-name">Cricket<small>Live betting &amp; fantasy</small></div>'
+            +   '<span class="v2-card-cta">Coming Soon</span>'
             + '</div>'
             + '</div>';
+    }
+
+    // ---- v2 home: left category rail + LIVE GAMES hero hexagons ----
+    // Live entries come from the admin games API; the rest are the platform's
+    // announced-but-unreleased categories.
+    var HP_SOON_CATS = [
+        { cat: 'cricket',  label: 'CRICKET',     name: 'Cricket',     icon: 'sports_cricket' },
+        { cat: 'casino',   label: 'CASINO',      name: 'Casino',      icon: 'casino' },
+        { cat: 'sports',   label: 'SPORTS',      name: 'Sports',      icon: 'sports_soccer' },
+        { cat: 'andar',    label: 'ANDAR BAHAR', name: 'Andar Bahar', icon: 'style' },
+        { cat: 'patti',    label: 'PATTI',       name: 'Patti',       icon: 'filter_3' },
+        { cat: 'products', label: 'PRODUCTS',    name: 'Products',    icon: 'redeem' }
+    ];
+    function hpCatIcon(cat, icon) {
+        var mask = { cockfight: '/static/ic_rooster.svg', dice: '/static/ic_dice.svg' }[cat];
+        if (mask) return '<i class="ic" style="-webkit-mask-image:url(' + mask + ');mask-image:url(' + mask + ')"></i>';
+        return '<span class="material-icons">' + icon + '</span>';
+    }
+    // Live games (from admin) first, then the coming-soon categories.
+    function hpCatalogue() {
+        var live = (window._loadedGames || []).map(function(g) {
+            var gid = (g.game_id || '').toLowerCase();
+            var cat = (gid === 'color' || gid === 'colorgame') ? 'dice' : gid;
+            return {
+                cat: cat, live: true, section: g.section_id, game: g.game_id,
+                label: (splitGameName(g.name || cat).main || cat).toUpperCase(),
+                short: (cat === 'cockfight' ? 'COCKFIGHT' : (splitGameName(g.name || cat).main || cat).toUpperCase()),
+                name: splitGameName(g.name || cat).main || cat,
+                icon: g.icon || 'sports_esports'
+            };
+        });
+        return live.concat(HP_SOON_CATS.map(function(s) { return Object.assign({ live: false }, s); }));
+    }
+    function renderHomeRail() {
+        var rail = document.getElementById('hp-rail');
+        if (!rail) return;
+        var html = hpCatalogue().map(function(c) {
+            var on = c.live
+                ? 'hpSelectCat(this,\'' + c.section + '\')'
+                : 'hpComingSoon(\'' + c.name + '\')';
+            return '<div class="hp-cat' + (c.live ? '' : ' soon') + '" data-cat="' + c.cat + '"'
+                + (c.live ? ' data-game="' + c.game + '"' : '')
+                + ' onclick="' + on + '">'
+                + '<div class="hp-cat-ic">' + hpCatIcon(c.cat, c.icon) + '</div>'
+                + '<div class="hp-cat-label">' + c.label + '</div>'
+                + (c.live ? '' : '<div class="hp-cat-soon">COMING SOON</div>')
+                + '</div>';
+        }).join('');
+        html += '<div class="hp-cat" data-cat="more" onclick="hpComingSoon(\'More games\')">'
+              + '<div class="hp-cat-ic">•••</div><div class="hp-cat-label">MORE</div></div>';
+        rail.innerHTML = html;
+        updateNavVisibility();
+    }
+    // Hero hexagons: the same catalogue, three per carousel page.
+    function hpHeroSlides() {
+        var cats = hpCatalogue(), pages = [];
+        for (var i = 0; i < cats.length; i += 3) pages.push(cats.slice(i, i + 3));
+        return pages.map(function(page) {
+            var hexes = page.map(function(c) {
+                var on = c.live ? 'hpSelectCat(null,\'' + c.section + '\')' : 'hpComingSoon(\'' + c.name + '\')';
+                return '<div class="v2-hex-cat' + (c.live ? ' accent' : '') + '" onclick="' + on + '">'
+                    + '<div class="v2-hex"><div class="v2-hex-inner">' + hpCatIcon(c.cat, c.icon) + '</div></div>'
+                    + '<div class="v2-hex-name">' + (c.short || c.label) + '</div>'
+                    + '<div class="v2-hex-sub">GAME</div>'
+                    + '</div>';
+            }).join('');
+            return '<div class="banner-slide v2-hero-slide"><div class="v2-hexes">' + hexes + '</div></div>';
+        });
+    }
+    // Hero carousel = hexagon category pages followed by the admin banner slides,
+    // sharing one dot pager (goToSlide + the existing 4s auto-advance).
+    function renderHeroSlides() {
+        var track = document.getElementById('banner-track');
+        var dots = document.getElementById('banner-dots');
+        if (!track || !dots) return;
+        var slides = hpHeroSlides().concat(
+            (window._heroBanners || []).map(function(url) {
+                return '<div class="banner-slide v2-banner" style="background-image:url(' + url + ');"></div>';
+            })
+        );
+        if (!slides.length) return;
+        track.innerHTML = slides.join('');
+        dots.innerHTML = slides.map(function(_, i) {
+            return '<div class="banner-dot' + (i === 0 ? ' active' : '') + '" onclick="goToSlide(' + i + ')"></div>';
+        }).join('');
+        goToSlide(0);
+    }
+
+    function hpViewAllHighlights() {
+        window._hlShowAll = !window._hlShowAll;
+        renderHighlights();
     }
     function hpComingSoon(name) {
         showToast((name || 'This game') + ' is coming soon!', 'info');
@@ -4564,9 +4734,10 @@
                 const bonus = parseFloat(data.wallet_balance || 0) - parseFloat(data.available_balance || 0) - exposure;
                 // Home top-bar balance + coins (diamond = bonus)
                 var _hb = document.getElementById('hp-balance');
-                if (_hb) _hb.textContent = 'G' + formatCurrencyFull(data.wallet_balance || 0);
+                if (_hb) _hb.textContent = '₹' + formatCurrencyFull(data.wallet_balance || 0);
                 var _hc = document.getElementById('hp-coins');
                 if (_hc) _hc.textContent = formatCurrencyShort(Math.max(0, bonus));
+                updateAuthUI();
                 const expEl = document.getElementById('wallet-exposure');
                 const bonEl = document.getElementById('wallet-bonus');
                 if (expEl) expEl.textContent = '₹' + formatCurrencyShort(exposure);
@@ -4894,7 +5065,7 @@
         // Keep the home category rail in sync with the active section.
         if (typeof hpSelectCat === 'function') {
             document.querySelectorAll('.hp-cat').forEach(function(c) { c.classList.remove('active'); });
-            var _railMap = { 'sec-home': 'games', 'sec-cockfight': 'cockfight', 'sec-dice': 'dice' };
+            var _railMap = { 'sec-cockfight': 'cockfight', 'sec-dice': 'dice' };
             var _rc = _railMap[sectionId];
             if (_rc) { var _rt = document.querySelector('.hp-cat[data-cat="' + _rc + '"]'); if (_rt) _rt.classList.add('active'); }
         }
@@ -6882,33 +7053,10 @@
             // hero carousel: only 'Common' banners (fall back to all if none)
             let banners = all.filter(b => b.placement === 'C');
             if (banners.length === 0) banners = all;
-            if (banners.length === 0) return;
-            const track = document.getElementById('banner-track');
-            const dotsC = document.getElementById('banner-dots');
-            let trackHtml = '';
-            let dotsHtml = '';
-            banners.forEach((b, i) => {
-                let bannerUrl = b.banner || '';
-                // Fix media URLs to use current host
-                if (bannerUrl && !bannerUrl.startsWith('http')) {
-                    bannerUrl = location.origin + bannerUrl;
-                } else if (bannerUrl) {
-                    try {
-                        const u = new URL(bannerUrl);
-                        bannerUrl = location.origin + u.pathname;
-                    } catch(e) { /* relative URL - use as-is */ }
-                }
-                const bgImg = bannerUrl ? `url(${bannerUrl})` : 'linear-gradient(135deg,#3a1522,#2a1f0e)';
-                const catLabels = {S:'Cockfight',P:'Promotion',D:'Dice Play',W:'Wallet',V:'Videos'};
-                const label = catLabels[b.category] || 'RoosterRun';
-                // If the banner has an uploaded image, let it speak for itself (no redundant text overlay).
-                const overlay = bannerUrl ? '' : `<div class="banner-content"><h3>${label}</h3></div>`;
-                trackHtml += `<div class="banner-slide" style="background-image:${bgImg};background-size:cover;background-position:center;">${overlay}</div>`;
-                dotsHtml += `<div class="banner-dot ${i===0?'active':''}" onclick="goToSlide(${i})"></div>`;
-            });
-            track.innerHTML = trackHtml;
-            dotsC.innerHTML = dotsHtml;
-            bannerIndex = 0;
+            window._heroBanners = banners
+                .map(b => normalizeBannerUrl(b.banner || ''))
+                .filter(Boolean);
+            renderHeroSlides();
         } catch(e) { console.error('Banner load error:', e); }
     }
 
@@ -6921,20 +7069,40 @@
             const res = await fetch(`${API}/base/highlights/`);  // public (AllowAny)
             if (!res.ok) { wrap.style.display = 'none'; return; }
             const data = await res.json();
-            const list = data.results || data || [];
-            if (!list.length) { wrap.style.display = 'none'; return; }
-            row.innerHTML = list.map(function(h){
-                var thumb = normalizeBannerUrl(h.thumbnail || '');
-                var video = normalizeBannerUrl(h.video || '');
-                var title = (h.title || 'Highlight').replace(/"/g, '&quot;');
-                return '<div class="hl-card" onclick="openHighlight(\'' + video + '\')">'
-                    + (thumb ? '<img class="hl-thumb" src="' + thumb + '" alt="">' : '<div class="hl-thumb"></div>')
-                    + '<div class="hl-play"><span class="material-icons">play_arrow</span></div>'
-                    + '<div class="hl-title">' + title + '</div>'
-                    + '</div>';
-            }).join('');
-            wrap.style.display = '';
+            window._highlights = data.results || data || [];
+            renderHighlights();
         } catch(e) { wrap.style.display = 'none'; }
+    }
+
+    // Highlights list — 3 rows by default, all of them after "View All".
+    var HL_PREVIEW_COUNT = 3;
+    function renderHighlights() {
+        var wrap = document.getElementById('hp-highlights');
+        var row = document.getElementById('hl-row');
+        if (!wrap || !row) return;
+        var list = window._highlights || [];
+        if (!list.length) { wrap.style.display = 'none'; return; }
+        var shown = window._hlShowAll ? list : list.slice(0, HL_PREVIEW_COUNT);
+        row.innerHTML = shown.map(function(h) {
+            var thumb = normalizeBannerUrl(h.thumbnail || '');
+            var video = normalizeBannerUrl(h.video || '');
+            var title = (h.title || 'Highlight').replace(/"/g, '&quot;');
+            var source = (h.subtitle || h.description || 'RoosterRun highlights').replace(/"/g, '&quot;');
+            return '<div class="hl-card" onclick="openHighlight(\'' + video + '\')">'
+                + '<div class="hl-thumb-wrap">'
+                +   (thumb ? '<img class="hl-thumb" src="' + thumb + '" alt="">' : '<div class="hl-thumb"></div>')
+                +   '<div class="hl-play"><span class="material-icons">play_arrow</span></div>'
+                + '</div>'
+                + '<div class="hl-info">'
+                +   '<div class="hl-title">' + title + '</div>'
+                +   '<div class="hl-source"><span class="hl-source-dot"></span><span class="hl-source-text">' + source + '</span></div>'
+                + '</div>'
+                + '</div>';
+        }).join('');
+        var btn = document.querySelector('.v2-viewall');
+        if (btn) btn.style.display = list.length > HL_PREVIEW_COUNT ? '' : 'none';
+        if (btn) btn.textContent = window._hlShowAll ? 'Show Less' : 'View All';
+        wrap.style.display = '';
     }
     function openHighlight(url) {
         if (!url) return;

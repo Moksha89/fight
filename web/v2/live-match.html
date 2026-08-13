@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoosterRun — Live Match</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-game">
+  <div class="shell shell--game" data-bet-scope>
+
+    <!-- Top bar -->
+    <div class="game-topbar">
+      <a href="home.html"><img src="assets/logo.png" alt="Roaster Run" class="game-topbar__logo"></a>
+      <div class="game-topbar__right">
+        <span class="chip-wallet">&#128091; Wallet</span>
+        <span class="chip-balance">&#8377; 12,450
+          <span class="chip-balance__add">+</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Live player -->
+    <div class="player">
+      <div class="media" data-placeholder="Live arena feed"><img alt=""></div>
+      <div class="player__badges">
+        <span class="player__live">LIVE</span>
+        <span class="player__viewers">&#128065; 12.5K</span>
+      </div>
+      <div class="player__expand">&#10530;</div>
+      <div class="player__bar">
+        <span class="player__icon">&#10074;&#10074;</span>
+        <div class="player__scrub">
+          <div class="player__scrub-fill" style="width:52%"></div>
+          <span class="player__scrub-knob" style="left:52%"></span>
+        </div>
+        <span class="player__live-text">LIVE <span>&#9679;</span></span>
+        <span class="player__volume">&#128266;</span>
+      </div>
+    </div>
+
+    <!-- Screen tabs -->
+    <div class="screen-tabs">
+      <div class="screen-tab screen-tab--active">
+        <div class="screen-tab__name">&#128421; Screen 1 <span class="screen-tab__dot" style="--dot:#e0192d"></span></div>
+        <div class="screen-tab__time">&#9201; 00:45</div>
+      </div>
+      <div class="screen-tab">
+        <div class="screen-tab__name">&#128421; Screen 2 <span class="screen-tab__dot" style="--dot:#3b7bff"></span></div>
+        <div class="screen-tab__time">&#9201; 01:30</div>
+      </div>
+      <div class="screen-tab">
+        <div class="screen-tab__name">&#128421; Screen 3 <span class="screen-tab__dot" style="--dot:#2eb45a"></span></div>
+        <div class="screen-tab__time">&#9201; 02:15</div>
+      </div>
+      <div class="screen-tab">
+        <div class="screen-tab__name">&#128421; Screen 4 <span class="screen-tab__dot" style="--dot:#f2a93b"></span></div>
+        <div class="screen-tab__time">&#9201; 03:00</div>
+      </div>
+      <div class="screen-tab">
+        <div class="screen-tab__name">&#128421; Screen 5 <span class="screen-tab__dot" style="--dot:#ff2d78"></span></div>
+        <div class="screen-tab__time">&#9201; 03:45</div>
+      </div>
+    </div>
+
+    <!-- Odds cards -->
+    <div class="odds-row">
+      <button type="button" class="odds odds--red" data-pick="RED">
+        <div class="odds__name">RED</div>
+        <div class="odds__emblem"></div>
+        <div class="odds__value">2.45x</div>
+      </button>
+      <button type="button" class="odds odds--tie" data-pick="TIE">
+        <div class="odds__name">TIE</div>
+        <div class="odds__emblem"></div>
+        <div class="odds__value">8.75x</div>
+      </button>
+      <button type="button" class="odds odds--blue" data-pick="BLUE">
+        <div class="odds__name">BLUE</div>
+        <div class="odds__emblem"></div>
+        <div class="odds__value">2.45x</div>
+      </button>
+    </div>
+
+    <!-- Chips -->
+    <div class="chips-label">Select Chips</div>
+    <div class="chips-row">
+      <button type="button" class="chip-btn" data-chip="&#8377;50">&#8377;50</button>
+      <button type="button" class="chip-btn" data-chip="&#8377;100">&#8377;100</button>
+      <button type="button" class="chip-btn" data-chip="&#8377;500">&#8377;500</button>
+      <button type="button" class="chip-btn" data-chip="&#8377;10K">&#8377;10K</button>
+      <button type="button" class="chip-btn" data-chip="&#8377;50K">&#8377;50K</button>
+    </div>
+
+    <!-- Action row -->
+    <div class="action-row">
+      <div class="action-tile action-tile--vip">
+        <div class="action-tile__icon">&#9819;</div>
+        <div class="action-tile__label">VIP</div>
+      </div>
+      <div class="action-tile action-tile--wide">
+        <div class="action-tile__icon">&#128737;</div>
+        <div class="action-tile__label">Disclaimer</div>
+      </div>
+      <button type="button" class="place-btn" data-place
+              data-empty-label="Pick a side &amp; chip"
+              data-place-label="Place Prediction — {chip} on {pick}">Pick a side &amp; chip</button>
+      <div class="placed-card" data-placed hidden>
+        <span class="placed-card__tick">&#10003;</span>
+        <span class="placed-card__text">Prediction Placed Successfully!</span>
+      </div>
+      <div class="action-tile">
+        <div class="action-tile__icon">&#8634;</div>
+        <div class="action-tile__label">History</div>
+      </div>
+    </div>
+
+    <!-- Legend + recent matches -->
+    <div class="recent-row">
+      <div class="legend">
+        <div class="legend__item">
+          <span class="legend__swatch legend__swatch--red"></span>
+          <span class="legend__name">Red</span>
+        </div>
+        <div class="legend__item">
+          <span class="legend__swatch legend__swatch--blue"></span>
+          <span class="legend__name">Blue</span>
+        </div>
+        <div class="legend__item">
+          <span class="legend__swatch legend__swatch--tie"></span>
+          <span class="legend__name">Tie</span>
+        </div>
+        <div class="legend__cancel">
+          <span class="legend__x">&#10005;</span>
+          <span class="legend__name">Cancel</span>
+        </div>
+      </div>
+
+      <div class="recent">
+        <div class="recent__head">
+          <div class="recent__title">Recent Matches</div>
+          <a href="#" class="recent__view-all">View All &#8250;</a>
+        </div>
+        <div class="recent__table">
+          <div class="recent__row recent__row--head">
+            <span>#</span>
+            <span>Winner</span>
+            <span>Prediction</span>
+            <span>Result</span>
+            <span>Odds</span>
+            <span>Time</span>
+            <span></span>
+          </div>
+
+          <div class="recent__row">
+            <span class="recent__num">40</span>
+            <span class="recent__side"><span class="recent__dot-lg fill-blue"></span><span>Blue</span></span>
+            <span class="recent__side"><span class="recent__dot-sm fill-blue"></span><span>Blue</span></span>
+            <span class="recent__result recent__result--won">Won</span>
+            <span class="recent__odds">2.45x</span>
+            <span class="recent__time">10:42 AM</span>
+            <span class="recent__chevron">&#8250;</span>
+          </div>
+          <div class="recent__row">
+            <span class="recent__num">39</span>
+            <span class="recent__side"><span class="recent__dot-lg fill-red"></span><span>Red</span></span>
+            <span class="recent__side"><span class="recent__dot-sm fill-tie"></span><span>Tie</span></span>
+            <span class="recent__result recent__result--lost">Lost</span>
+            <span class="recent__odds">8.75x</span>
+            <span class="recent__time">10:28 AM</span>
+            <span class="recent__chevron">&#8250;</span>
+          </div>
+          <div class="recent__row">
+            <span class="recent__num">38</span>
+            <span class="recent__side"><span class="recent__dot-lg fill-tie"></span><span>Tie</span></span>
+            <span class="recent__side"><span class="recent__dot-sm fill-tie"></span><span>Tie</span></span>
+            <span class="recent__result recent__result--won">Won</span>
+            <span class="recent__odds">8.75x</span>
+            <span class="recent__time">10:15 AM</span>
+            <span class="recent__chevron">&#8250;</span>
+          </div>
+          <div class="recent__row">
+            <span class="recent__num">37</span>
+            <span class="recent__side"><span class="recent__dot-lg fill-red"></span><span>Red</span></span>
+            <span class="recent__side"><span class="recent__dot-sm fill-red"></span><span>Red</span></span>
+            <span class="recent__result recent__result--won">Won</span>
+            <span class="recent__odds">2.45x</span>
+            <span class="recent__time">10:01 AM</span>
+            <span class="recent__chevron">&#8250;</span>
+          </div>
+          <div class="recent__row">
+            <span class="recent__num">36</span>
+            <span class="recent__side"><span class="recent__dot-lg fill-blue"></span><span>Blue</span></span>
+            <span class="recent__side"><span class="recent__dot-sm fill-red"></span><span>Red</span></span>
+            <span class="recent__result recent__result--lost">Lost</span>
+            <span class="recent__odds">2.45x</span>
+            <span class="recent__time">09:48 AM</span>
+            <span class="recent__chevron">&#8250;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom nav -->
+    <div class="bottom-nav">
+      <a href="home.html">
+        <div class="bottom-nav__icon">&#8962;</div>
+        <div class="bottom-nav__label">Home</div>
+      </a>
+      <a href="dice.html">
+        <div class="bottom-nav__icon">&#127922;</div>
+        <div class="bottom-nav__label">Dice Play</div>
+      </a>
+      <a href="#">
+        <div class="bottom-nav__icon">&#128202;</div>
+        <div class="bottom-nav__label">Stats</div>
+      </a>
+      <a href="#">
+        <div class="bottom-nav__icon">&#128100;</div>
+        <div class="bottom-nav__label">Profile</div>
+      </a>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
