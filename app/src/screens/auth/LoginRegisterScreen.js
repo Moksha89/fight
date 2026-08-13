@@ -302,6 +302,14 @@ const LoginRegisterScreen = ({navigation}) => {
                     </AppText>
                   )}
                 </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.forgotLink}
+                  onPress={() => navigation.navigate('ForgotPasswordScreen')}>
+                  <AppText
+                    style={[styles.forgotLinkText, {color: colors.gold}]}>
+                    Forgot Password?
+                  </AppText>
+                </TouchableOpacity>
               </View>
             )}
 
@@ -484,6 +492,14 @@ const styles = StyleSheet.create({
   },
   authBtnText: {
     fontSize: fp(1.7),
+    fontWeight: '600',
+  },
+  forgotLink: {
+    alignItems: 'center',
+    marginTop: hp(1.5),
+  },
+  forgotLinkText: {
+    fontSize: fp(1.5),
     fontWeight: '600',
   },
 });

@@ -1135,6 +1135,48 @@
                     </div>
                 </div>
                 <button class="auth-btn" id="login-btn" onclick="handleLogin()">Send OTP & Login</button>
+                <div style="text-align:center;margin-top:12px;">
+                    <a href="#" onclick="showForgotPassword();return false;" style="color:var(--gold);font-size:14px;font-weight:600;text-decoration:none;">Forgot Password?</a>
+                </div>
+            </div>
+            <div id="forgot-password-form" class="hidden">
+                <div id="fp-step-mobile">
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="text" id="fp-mobile" placeholder="10-digit mobile number">
+                    </div>
+                    <button class="auth-btn" onclick="fpRequestOtp()">Send OTP</button>
+                </div>
+                <div id="fp-step-otp" class="hidden">
+                    <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;">Enter OTP</label>
+                    <div class="otp-row">
+                        <input class="fp-otp-input" type="text" maxlength="1" data-idx="0">
+                        <input class="fp-otp-input" type="text" maxlength="1" data-idx="1">
+                        <input class="fp-otp-input" type="text" maxlength="1" data-idx="2">
+                        <input class="fp-otp-input" type="text" maxlength="1" data-idx="3">
+                        <input class="fp-otp-input" type="text" maxlength="1" data-idx="4">
+                        <input class="fp-otp-input" type="text" maxlength="1" data-idx="5">
+                    </div>
+                    <button class="auth-btn" style="margin-top:12px;" onclick="fpVerifyOtp()">Verify OTP</button>
+                </div>
+                <div id="fp-step-reset" class="hidden">
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="fp-new-password" placeholder="Min 6 characters">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="fp-confirm-password" placeholder="Re-enter password">
+                    </div>
+                    <button class="auth-btn" onclick="fpResetPassword()">Reset Password</button>
+                </div>
+                <div id="fp-step-success" class="hidden" style="text-align:center;">
+                    <p style="color:#22c55e;font-size:15px;font-weight:600;margin-bottom:16px;">Password reset successful!</p>
+                    <button class="auth-btn" onclick="fpBackToLogin()">Back to Login</button>
+                </div>
+                <div style="text-align:center;margin-top:12px;" id="fp-back-link">
+                    <a href="#" onclick="fpBackToLogin();return false;" style="color:var(--text-secondary);font-size:13px;text-decoration:underline;">Back to Login</a>
+                </div>
             </div>
             <div id="register-form" class="hidden">
                 <div class="form-group">
@@ -1871,6 +1913,7 @@
         event.target.classList.add('active');
         document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
         document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+        document.getElementById('forgot-password-form').classList.add('hidden');
         document.getElementById('auth-subtitle').textContent = tab === 'login' ? 'Welcome back' : 'Create your account';
         hideError();
         loginStep = 'credentials';
@@ -1980,6 +2023,118 @@
             } catch(e) { showError('Network error'); }
         }
     }
+
+    // ===== Forgot Password Flow =====
+    let fpResetToken = '';
+    let fpMobile = '';
+
+    function showForgotPassword() {
+        document.getElementById('login-form').classList.add('hidden');
+        document.getElementById('register-form').classList.add('hidden');
+        document.getElementById('forgot-password-form').classList.remove('hidden');
+        document.getElementById('fp-step-mobile').classList.remove('hidden');
+        document.getElementById('fp-step-otp').classList.add('hidden');
+        document.getElementById('fp-step-reset').classList.add('hidden');
+        document.getElementById('fp-step-success').classList.add('hidden');
+        document.getElementById('fp-back-link').style.display = '';
+        document.getElementById('auth-subtitle').textContent = 'Reset your password';
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        hideError();
+        fpResetToken = '';
+        fpMobile = '';
+    }
+
+    function fpBackToLogin() {
+        document.getElementById('forgot-password-form').classList.add('hidden');
+        document.getElementById('login-form').classList.remove('hidden');
+        document.querySelectorAll('.auth-tab')[0].classList.add('active');
+        document.getElementById('auth-subtitle').textContent = 'Welcome back';
+        loginStep = 'credentials';
+        document.getElementById('login-otp-section').classList.add('hidden');
+        document.getElementById('login-btn').textContent = 'Send OTP & Login';
+        hideError();
+    }
+
+    async function fpRequestOtp() {
+        const mobile = document.getElementById('fp-mobile').value.trim();
+        if (!mobile) { showError('Please enter your mobile number'); return; }
+        if (!/^\d{10}$/.test(mobile)) { showError('Enter a valid 10-digit mobile number'); return; }
+        hideError();
+        try {
+            const res = await fetch(`${API}/user/forgot-password/request-otp/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mobile})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                fpMobile = mobile;
+                document.getElementById('fp-step-mobile').classList.add('hidden');
+                document.getElementById('fp-step-otp').classList.remove('hidden');
+                showToast(data.message || 'OTP sent', 'success');
+            } else {
+                showError(extractErrorMessage(data));
+            }
+        } catch(e) { showError('Network error. Try again.'); }
+    }
+
+    async function fpVerifyOtp() {
+        const otpInputs = document.querySelectorAll('.fp-otp-input');
+        const otp = Array.from(otpInputs).map(i => i.value).join('');
+        if (otp.length !== 6) { showError('Enter the 6-digit OTP'); return; }
+        hideError();
+        try {
+            const res = await fetch(`${API}/user/forgot-password/verify-otp/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mobile: fpMobile, otp})
+            });
+            const data = await res.json();
+            if (res.ok && data.reset_token) {
+                fpResetToken = data.reset_token;
+                document.getElementById('fp-step-otp').classList.add('hidden');
+                document.getElementById('fp-step-reset').classList.remove('hidden');
+                showToast('OTP verified! Set your new password.', 'success');
+            } else {
+                showError(extractErrorMessage(data));
+            }
+        } catch(e) { showError('Network error. Try again.'); }
+    }
+
+    async function fpResetPassword() {
+        const newPwd = document.getElementById('fp-new-password').value;
+        const confirmPwd = document.getElementById('fp-confirm-password').value;
+        if (!newPwd || !confirmPwd) { showError('Please fill in both password fields'); return; }
+        if (newPwd.length < 6) { showError('Password must be at least 6 characters'); return; }
+        if (newPwd !== confirmPwd) { showError('Passwords do not match'); return; }
+        hideError();
+        try {
+            const res = await fetch(`${API}/user/forgot-password/reset/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({reset_token: fpResetToken, new_password: newPwd, confirm_password: confirmPwd})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('fp-step-reset').classList.add('hidden');
+                document.getElementById('fp-step-success').classList.remove('hidden');
+                document.getElementById('fp-back-link').style.display = 'none';
+                showToast('Password reset successful!', 'success');
+            } else {
+                showError(extractErrorMessage(data));
+            }
+        } catch(e) { showError('Network error. Try again.'); }
+    }
+
+    // Setup OTP auto-advance for forgot password inputs
+    document.querySelectorAll('.fp-otp-input').forEach((inp, i, all) => {
+        inp.addEventListener('input', () => {
+            if (inp.value && i < all.length - 1) all[i + 1].focus();
+        });
+        inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !inp.value && i > 0) all[i - 1].focus();
+        });
+    });
 
     // ===== WebSocket for live match updates =====
     var matchWs = null;

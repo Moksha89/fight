@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Debug-only network security config.
+    Allows cleartext (HTTP) traffic to the internal dev/staging server only.
+    Release builds do NOT include this file; they block all cleartext traffic.
+-->
+<network-security-config>
+    <!-- Allow cleartext only for the internal dev/staging server IP -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">155.117.46.249</domain>
+    </domain-config>
+    <!-- All other traffic must use HTTPS (default) -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

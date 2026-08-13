@@ -2,7 +2,10 @@ from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 import hashlib
+import secrets
 import time
+
+from django.utils import timezone
 
 from wallet.models import Wallet
 
@@ -143,3 +146,74 @@ class SettlementHistory(models.Model):
 
     def __str__(self):
         return f"{self.get_transaction_type_display()} of {self.amount} by {self.settlementBox}"
+
+
+# =================================================================
+#                    Password Reset Token                         ||
+# =================================================================
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="password_reset_tokens",
+    )
+    token_hash = models.CharField(max_length=64, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=200, blank=True, default="")
+
+    EXPIRY_MINUTES = 15
+
+    class Meta:
+        verbose_name = "Password Reset Token"
+        verbose_name_plural = "5. Password Reset Tokens"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Reset token for {self.user} ({'used' if self.used_at else 'active'})"
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
+
+    @property
+    def is_used(self):
+        return self.used_at is not None
+
+    @property
+    def is_valid(self):
+        return not self.is_expired and not self.is_used
+
+    @classmethod
+    def create_for_user(cls, user, ip_address=None, user_agent=""):
+        raw_token = secrets.token_urlsafe(48)
+        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+        expires_at = timezone.now() + timezone.timedelta(minutes=cls.EXPIRY_MINUTES)
+        obj = cls.objects.create(
+            user=user,
+            token_hash=token_hash,
+            expires_at=expires_at,
+            ip_address=ip_address,
+            user_agent=user_agent[:200],
+        )
+        return obj, raw_token
+
+    @classmethod
+    def validate_token(cls, raw_token):
+        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+        try:
+            obj = cls.objects.select_related("user").get(token_hash=token_hash)
+        except cls.DoesNotExist:
+            return None, "Invalid reset token."
+        if obj.is_used:
+            return None, "Reset token has already been used."
+        if obj.is_expired:
+            return None, "Reset token has expired."
+        return obj, None
+
+    def mark_used(self):
+        self.used_at = timezone.now()
+        self.save(update_fields=["used_at"])

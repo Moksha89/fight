@@ -45,6 +45,26 @@ class VerifyOtpSerializer(serializers.Serializer):
     otp = serializers.CharField(max_length=6)
 
 
+class ForgotPasswordRequestOtpSerializer(serializers.Serializer):
+    mobile = serializers.CharField(max_length=15)
+
+
+class ForgotPasswordVerifyOtpSerializer(serializers.Serializer):
+    mobile = serializers.CharField(max_length=15)
+    otp = serializers.CharField(max_length=6)
+
+
+class ForgotPasswordResetSerializer(serializers.Serializer):
+    reset_token = serializers.CharField()
+    new_password = serializers.CharField(min_length=6)
+    confirm_password = serializers.CharField(min_length=6)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match"})
+        return data
+
+
 class UserInfoSerializer(serializers.ModelSerializer):
     wallet_balance = serializers.SerializerMethodField()
     exposure = serializers.SerializerMethodField()

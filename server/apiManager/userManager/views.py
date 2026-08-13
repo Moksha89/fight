@@ -8,10 +8,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from userManager.models import User, OtpStack
+from userManager.models import User, OtpStack, PasswordResetToken
 from .serializers import (
     GetOtpSerializer, VerifyOtpSerializer, UserInfoSerializer,
-    RegisterSerializer, LoginSerializer, ChangePasswordSerializer
+    RegisterSerializer, LoginSerializer, ChangePasswordSerializer,
+    ForgotPasswordRequestOtpSerializer, ForgotPasswordVerifyOtpSerializer,
+    ForgotPasswordResetSerializer,
 )
 
 from django.utils import timezone
@@ -123,12 +125,21 @@ class UserViewSet(viewsets.GenericViewSet):
             return LoginSerializer
         elif self.action == "change_password":
             return ChangePasswordSerializer
+        elif self.action == "forgot_password_request_otp":
+            return ForgotPasswordRequestOtpSerializer
+        elif self.action == "forgot_password_verify_otp":
+            return ForgotPasswordVerifyOtpSerializer
+        elif self.action == "forgot_password_reset":
+            return ForgotPasswordResetSerializer
         elif self.action == "me":
             return UserInfoSerializer
         return serializers.Serializer
 
     def get_permissions(self):
-        if self.action in ["getotp", "verifyotp", "register", "login"]:
+        if self.action in ["getotp", "verifyotp", "register", "login",
+                           "forgot_password_request_otp",
+                           "forgot_password_verify_otp",
+                           "forgot_password_reset"]:
             permission_classes = [AllowAny]
         elif self.action in ["me", "change_password", "statement"]:
             permission_classes = [IsAuthenticated]
@@ -370,6 +381,171 @@ class UserViewSet(viewsets.GenericViewSet):
         user.save()
         log_auth_event(user, "password_changed", request)
         return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
+
+    # ── Forgot Password Flow ────────────────────────────────────────
+
+    @action(detail=False, methods=["post"], url_path="forgot-password/request-otp")
+    def forgot_password_request_otp(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        mobile = serializer.validated_data["mobile"]
+        ip = get_client_ip(request)
+
+        # Rate limit: max 5 per 10 min per mobile, 10 per 10 min per IP
+        allowed, msg, retry_after = check_otp_rate_limit(mobile, ip)
+        if not allowed:
+            logger.warning("Forgot-password OTP rate limit: mobile=%s ip=%s", mobile, ip)
+            return Response(
+                {"error": msg},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+                headers={"Retry-After": str(retry_after)} if retry_after else {},
+            )
+
+        # Rate limit reset requests per IP: max 5 per 15 min
+        ip_allowed, _, ip_retry = RateLimiter.check(
+            f"forgot_pwd:{ip}", max_attempts=5, window_seconds=900
+        )
+        if not ip_allowed:
+            return Response(
+                {"error": f"Too many reset requests. Try again in {ip_retry}s."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        user = User.objects.filter(phoneNumber=mobile).first()
+
+        # Generic response to avoid revealing account existence
+        masked = mobile[:2] + "****" + mobile[-2:] if len(mobile) > 4 else mobile
+
+        if not user:
+            return Response(
+                {"message": f"If this number is registered, an OTP has been sent to {masked}"},
+                status=status.HTTP_200_OK,
+            )
+
+        if not user.is_active:
+            # Don't reveal the account is suspended
+            return Response(
+                {"message": f"If this number is registered, an OTP has been sent to {masked}"},
+                status=status.HTTP_200_OK,
+            )
+
+        otp = _generate_otp()
+        OtpStack.objects.update_or_create(
+            mobile=mobile,
+            defaults={"otp": otp},
+        )
+
+        from utility.sms import send_otp_sms
+        sms_ok, sms_err = send_otp_sms(mobile, otp)
+
+        log_auth_event(user, "forgot_password_otp_requested", request, {"mobile": mobile, "sms_sent": sms_ok})
+
+        if sms_ok:
+            return Response({"message": f"OTP sent to {masked}"}, status=status.HTTP_200_OK)
+
+        from utility.sms import _get_sms_config
+        cfg = _get_sms_config()
+        if cfg["provider"] == "none" or not cfg["is_enabled"]:
+            return Response({"message": f"OTP generated for {masked}"}, status=status.HTTP_200_OK)
+
+        return Response(
+            {"error": "Unable to send OTP right now. Please try again."},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+    @action(detail=False, methods=["post"], url_path="forgot-password/verify-otp")
+    def forgot_password_verify_otp(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        mobile = serializer.validated_data["mobile"]
+        otp = serializer.validated_data["otp"]
+        ip = get_client_ip(request)
+
+        # Rate limit OTP verification: max 5 per 5 min per mobile+IP
+        allowed, _, retry_after = RateLimiter.check(
+            f"forgot_verify:{mobile}:{ip}", max_attempts=5, window_seconds=300
+        )
+        if not allowed:
+            return Response(
+                {"error": f"Too many verification attempts. Try again in {retry_after}s."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        is_valid = OtpStack.objects.filter(mobile=mobile, otp=otp).exists()
+        if not is_valid:
+            return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.filter(phoneNumber=mobile).first()
+        if not user:
+            return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.is_active:
+            return Response(
+                {"error": "This account is suspended. Password reset is not allowed."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # OTP verified — clean up and issue reset token
+        OtpStack.objects.filter(mobile=mobile).delete()
+
+        ua = request.META.get("HTTP_USER_AGENT", "")[:200]
+        token_obj, raw_token = PasswordResetToken.create_for_user(user, ip_address=ip, user_agent=ua)
+
+        log_auth_event(user, "forgot_password_otp_verified", request, {"mobile": mobile})
+
+        return Response({
+            "message": "OTP verified. Use the reset token to set a new password.",
+            "reset_token": raw_token,
+        }, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"], url_path="forgot-password/reset")
+    def forgot_password_reset(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ip = get_client_ip(request)
+
+        # Rate limit reset attempts: max 5 per 15 min per IP
+        allowed, _, retry_after = RateLimiter.check(
+            f"pwd_reset:{ip}", max_attempts=5, window_seconds=900
+        )
+        if not allowed:
+            return Response(
+                {"error": f"Too many reset attempts. Try again in {retry_after}s."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        raw_token = serializer.validated_data["reset_token"]
+        new_password = serializer.validated_data["new_password"]
+
+        token_obj, error_msg = PasswordResetToken.validate_token(raw_token)
+        if token_obj is None:
+            return Response({"error": error_msg}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = token_obj.user
+
+        if not user.is_active:
+            return Response(
+                {"error": "This account is suspended. Password reset is not allowed."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        user.set_password(new_password)
+        user.save()
+
+        token_obj.mark_used()
+
+        # Invalidate all other unused reset tokens for this user
+        PasswordResetToken.objects.filter(
+            user=user, used_at__isnull=True
+        ).exclude(pk=token_obj.pk).update(used_at=timezone.now())
+
+        log_auth_event(user, "password_reset_completed", request)
+
+        # Reset rate limiters for this user's login
+        RateLimiter.reset(f"login_ident:{user.phoneNumber}")
+        RateLimiter.reset(f"login_ident:{user.username}")
+
+        return Response({"message": "Password reset successful. You can now login with your new password."}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"])
     def statement(self, request):
