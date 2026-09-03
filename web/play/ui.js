@@ -40,7 +40,7 @@ export function statusBadge(status = 'scheduled') {
     live: ['Live now', 'danger'], betting_open: ['Betting open', 'success'],
     betting_closed: ['Betting closed', 'warning'], scheduled: ['Scheduled', 'neutral'],
     awaiting_result: ['Awaiting result', 'warning'], settled: ['Settled', 'success'],
-    cancelled: ['Cancelled', 'neutral'], preview: ['Preview data', 'info'],
+    cancelled: ['Cancelled', 'neutral'], preview: ['Preview data', 'info'], active: ['Active account', 'success'],
   };
   const [label, tone] = map[status] || [String(status).replaceAll('_', ' '), 'neutral'];
   return `<span class="status status--${tone}">${status === 'live' ? '<i></i>' : ''}${escapeHtml(label)}</span>`;

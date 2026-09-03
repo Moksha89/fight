@@ -17,11 +17,11 @@ export const previewMatch = {
 };
 
 export const previewResults = [
-  { id: 40, winner: 'Wala', tone: 'blue', result: 'Settled', endedAt: new Date(now - 9 * 60 * 1000).toISOString() },
-  { id: 39, winner: 'Meron', tone: 'red', result: 'Settled', endedAt: new Date(now - 21 * 60 * 1000).toISOString() },
-  { id: 38, winner: 'Draw', tone: 'gold', result: 'Settled', endedAt: new Date(now - 34 * 60 * 1000).toISOString() },
-  { id: 37, winner: 'Meron', tone: 'red', result: 'Settled', endedAt: new Date(now - 48 * 60 * 1000).toISOString() },
-  { id: 36, winner: 'Wala', tone: 'blue', result: 'Settled', endedAt: new Date(now - 61 * 60 * 1000).toISOString() },
+  { id: 40, gameId: 40, winner: 'Wala', tone: 'blue', result: 'Settled', endedAt: new Date(now - 9 * 60 * 1000).toISOString() },
+  { id: 39, gameId: 39, winner: 'Meron', tone: 'red', result: 'Settled', endedAt: new Date(now - 21 * 60 * 1000).toISOString() },
+  { id: 38, gameId: 38, winner: 'Draw', tone: 'gold', result: 'Settled', endedAt: new Date(now - 34 * 60 * 1000).toISOString() },
+  { id: 37, gameId: 37, winner: 'Meron', tone: 'red', result: 'Settled', endedAt: new Date(now - 48 * 60 * 1000).toISOString() },
+  { id: 36, gameId: 36, winner: 'Wala', tone: 'blue', result: 'Settled', endedAt: new Date(now - 61 * 60 * 1000).toISOString() },
 ];
 
 export const previewUser = {
@@ -29,6 +29,6 @@ export const previewUser = {
 };
 
 export const previewBets = [
-  { id: 'B-2941', match: 'Match 40', pick: 'Wala', stake: 500, odds: 2.45, status: 'won', payout: 1225 },
-  { id: 'B-2939', match: 'Match 39', pick: 'Draw', stake: 250, odds: 8.75, status: 'lost', payout: 0 },
+  { id: 'B-2941', matchId: 40, match: 'Match 40', pick: 'Wala', stake: 500, odds: 2.45, status: 'won', payout: 1225 },
+  { id: 'B-2939', matchId: 39, match: 'Match 39', pick: 'Draw', stake: 250, odds: 8.75, status: 'lost', payout: 0 },
 ];

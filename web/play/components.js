@@ -154,13 +154,14 @@ export function arenaOutcomeCard({ side, label, odds, selected, disabled }) {
 }
 
 export function recentMatchTable(results = [], bets = []) {
-  const rows = results.slice(0,5).map((result,index)=>{
-    const bet = bets[index];
-    const label = value => ({Meron:'Red',Wala:'Blue',Draw:'Tie'}[value] || value);
-    const prediction = label(bet?.pick) || ['Blue','Tie','Tie','Red','Red'][index] || '—';
-    const winner = label(result.winner);
-    const won = bet ? bet.status === 'won' : index !== 1 && index !== 4;
-    return `<tr><td>${escapeHtml(result.id)}</td><td><span class="table-corner table-corner--${escapeHtml(result.tone)}"></span>${escapeHtml(winner)}</td><td>${escapeHtml(prediction)}</td><td class="${won ? 'is-won' : 'is-lost'}">${won ? 'Won' : 'Lost'}</td><td>${Number(bet?.odds || (result.tone === 'gold' ? 8.75 : 2.45)).toFixed(2)}×</td><td>${formatDate(result.endedAt,{hour:'2-digit',minute:'2-digit'}).split(',').pop()}</td></tr>`;
+  const label = value => ({Meron:'Red',Wala:'Blue',Draw:'Tie'}[value] || value);
+  const rows = results.slice(0,5).map(result=>{
+    const mine = bets.filter(bet=>String(bet.matchId)===String(result.gameId));
+    const bet = mine[0];
+    const won = mine.some(item=>item.status==='won');
+    const outcome = !bet ? '—' : result.result === 'Cancelled' ? 'Refunded' : bet.status === 'pending' ? 'Pending' : won ? 'Won' : 'Lost';
+    const outcomeClass = outcome === 'Won' ? 'is-won' : outcome === 'Lost' ? 'is-lost' : '';
+    return `<tr><td>${escapeHtml(result.id)}</td><td><span class="table-corner table-corner--${escapeHtml(result.tone)}"></span>${escapeHtml(label(result.winner))}</td><td>${escapeHtml(mine.length ? [...new Set(mine.map(item=>label(item.pick)))].join(', ') : '—')}</td><td class="${outcomeClass}">${outcome}</td><td>${bet?.odds ? `${Number(bet.odds).toFixed(2)}×` : '—'}</td><td>${formatDate(result.endedAt,{hour:'2-digit',minute:'2-digit'}).split(',').pop()}</td></tr>`;
   }).join('');
   return `<div class="recent-table-wrap"><table class="recent-table"><thead><tr><th>#</th><th>Winner</th><th>Your Prediction</th><th>Result</th><th>Odds</th><th>Time</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
