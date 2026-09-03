@@ -1,5 +1,5 @@
 import { api, ApiError, clearSession, getToken, setSession } from './api.js?v=55';
-import { appShell, arenaOutcomeCard, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=63';
+import { appShell, arenaOutcomeCard, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=64';
 import { previewBets, previewMatch, previewResults, previewUser } from './data.js';
 import { createStore } from './store.js';
 import { mountStream, normalizeStream, stopStream } from './streaming.js?v=52';

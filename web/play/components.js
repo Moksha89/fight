@@ -258,8 +258,8 @@ function field({ id, label, type = 'text', placeholder = '', autocomplete = '', 
 }
 
 export function authDialog(state) {
-  if (!state.authMode) return ''; // TEMP-TEST-WORKAROUND
-  const mode = state.authMode || 'login';
+  if (!state.authMode) return '';
+  const mode = state.authMode;
   const isLogin = mode === 'login';
   const isRecovery = mode === 'recovery';
   const isOtp = state.authStep === 'otp';
