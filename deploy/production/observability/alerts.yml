@@ -1,0 +1,38 @@
+groups:
+  - name: roosterrun
+    rules:
+      - alert: RoosterRunUnavailable
+        expr: probe_success{job="roosterrun-uptime"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: RoosterRun readiness probe is failing
+          description: The application has failed its readiness probe for more than two minutes.
+      - alert: RoosterRunHighErrorRate
+        expr: sum(rate(roosterrun_http_requests_total{status="5xx"}[5m])) / clamp_min(sum(rate(roosterrun_http_requests_total[5m])), 0.001) > 0.05
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: RoosterRun HTTP error rate is high
+          description: More than five percent of requests are returning server errors.
+      - alert: RoosterRunStreamDegraded
+        expr: roosterrun_stream_degraded > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: A live stream is degraded
+          description: At least one broadcast reports degraded transport health.
+      - alert: RoosterRunNotificationDeliveryFailed
+        expr: roosterrun_delivery_failed > 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: External notifications are failing
+          description: One or more external alert deliveries exhausted their retries.
+      - alert: RoosterRunMetricsMissing
+        expr: absent(up{job="roosterrun"}) or up{job="roosterrun"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: RoosterRun metrics are unavailable
+          description: Prometheus cannot scrape the application metrics endpoint.
