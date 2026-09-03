@@ -4,6 +4,6 @@
   "type": "module",
   "scripts": {
     "preview": "python server/manual_payments_server.py --preview",
-    "test": "python tests/database-compat.py && python tests/delivery-engine.py && node tests/security-static.mjs && node tests/simulator.mjs && node tests/auth-engine.mjs && node tests/manual-payments.mjs && node tests/admin-console.mjs && node tests/cockfight-engine.mjs && node tests/streaming-engine.mjs && node tests/compliance-engine.mjs && node tests/operations-engine.mjs && node tests/support-engine.mjs && node tests/intelligence-engine.mjs && node tests/production-readiness.mjs && node tests/resilience-load.mjs && python tests/approval-demo.py && python tests/china-feed.py"
+    "test": "python tests/database-compat.py && python tests/delivery-engine.py && node tests/security-static.mjs && node tests/simulator.mjs && node tests/auth-engine.mjs && node tests/manual-payments.mjs && node tests/admin-console.mjs && node tests/cockfight-engine.mjs && node tests/streaming-engine.mjs && node tests/compliance-engine.mjs && node tests/operations-engine.mjs && node tests/support-engine.mjs && node tests/intelligence-engine.mjs && node tests/production-readiness.mjs && node tests/resilience-load.mjs && python tests/approval-demo.py && python tests/china-feed.py && python tests/game-categories.py"
   }
 }

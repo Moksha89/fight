@@ -89,6 +89,7 @@ export const api = {
   rotateStreamCredentials:id=>request(`/api/admin/streams/${encodeURIComponent(id)}/credentials/`,{method:'POST',body:{}}),
   stopStreamSession:(id,reason='Administrator ended stream')=>request(`/api/admin/streams/${encodeURIComponent(id)}/stop/`,{method:'POST',body:{reason}}),
   risk:()=>request('/api/admin/risk/'), saveRisk:payload=>request('/api/admin/risk/',{method:'POST',body:payload}),
+  gameCategories:()=>request('/api/admin/game-categories/'), saveGameCategory:(id,payload)=>request(id?`/api/admin/game-categories/${id}/`:'/api/admin/game-categories/',{method:'POST',body:payload}), deleteGameCategory:id=>request(`/api/admin/game-categories/${id}/delete/`,{method:'POST',body:{}}), setGameVisibility:(id,visible)=>request(`/api/admin/games/${id}/visibility/`,{method:'POST',body:{visible}}),
   chinaFeed:()=>request('/api/admin/china-feed/'), saveChinaFeed:payload=>request('/api/admin/china-feed/',{method:'POST',body:payload}), pollChinaFeed:()=>request('/api/admin/china-feed/poll/',{method:'POST',body:{}}), recoverChinaFeed:()=>request('/api/admin/china-feed/recover/',{method:'POST',body:{}}),
   banners:()=>request('/api/admin/banners/'), saveBanner:(id,payload)=>request(id?`/api/admin/banners/${id}/`:'/api/admin/banners/',{method:'POST',body:payload}),
   vip:()=>request('/api/admin/vip/'), saveVip:(id,payload)=>request(id?`/api/admin/vip/${id}/`:'/api/admin/vip/',{method:'POST',body:payload}),

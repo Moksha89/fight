@@ -580,6 +580,20 @@ class CockfightEngine:
                 return False, reason, metrics
         return True, "Risk checks passed.", metrics
 
+    @staticmethod
+    def _game_visible(connection, game) -> bool:
+        if not game["visible"]:
+            return False
+        if not game["category_slug"]:
+            return True
+        category = connection.execute("SELECT kind, visible FROM game_categories WHERE slug=?", (game["category_slug"],)).fetchone()
+        if not category:
+            return True
+        if category["kind"] == "CHINA_FEED":
+            row = connection.execute("SELECT setting_value FROM admin_settings WHERE setting_key='china_feed'").fetchone()
+            return bool(json.loads(row["setting_value"]).get("enabled")) if row else False
+        return bool(category["visible"])
+
     def quote_bet(self, user_id: str, payload: dict) -> dict:
         self.advance_due_matches()
         self.platform.ensure_user(user_id)
@@ -598,6 +612,8 @@ class CockfightEngine:
                 raise LookupError("Match not found.")
             if game["status"] != "BETTING_OPEN":
                 raise ValueError("Betting is not open for this match.")
+            if not self._game_visible(connection, game):
+                raise ValueError("This match is not open to players.")
             odds = connection.execute("SELECT * FROM odds_snapshots WHERE game_id=? ORDER BY version DESC LIMIT 1", (game_id,)).fetchone()
             if not odds or odds["market_status"] != "OPEN":
                 raise ValueError("This market is temporarily suspended.")

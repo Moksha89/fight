@@ -23,6 +23,7 @@ from cockfight_engine import OUTCOME_ALIASES, utc_now
 UTC = timezone.utc
 SETTING_KEY = "china_feed"
 SOURCE = "CHINA_FEED"
+CATEGORY_SLUG = "china-24-7"
 DEFAULT_INFO_URL = "https://api.cockfightbet.xyz/api/cf/game/info?gameId=10001"
 DEFAULT_HISTORY_URL = "https://api.cockfightbet.cc/api/cf/game/task/history?pageNum=1&pageSize=10"
 DEFAULT_SETTINGS = {
@@ -416,13 +417,13 @@ class ChinaFeedEngine:
                     connection.execute("UPDATE admin_games SET featured=0 WHERE featured=1")
                 cursor = connection.execute(
                     """INSERT INTO admin_games(title,arena,status,betting_opens_at,scheduled_at,betting_closes_at,team_a_name,team_a_odds,draw_odds,team_b_name,team_b_odds,
-                    stream_type,stream_url,thumbnail_url,result,featured,source,external_ref,match_number,created_at,updated_at)
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    stream_type,stream_url,thumbnail_url,result,featured,source,external_ref,match_number,category_slug,visible,created_at,updated_at)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     (
                         title, settings["arena"], "SCHEDULED", now, far, far,
                         settings["team_a_name"], settings["team_a_odds"], settings["draw_odds"], settings["team_b_name"], settings["team_b_odds"],
                         "IFRAME", self._playback_url(settings, live_url), settings["thumbnail_url"], "",
-                        1 if settings["feature_current_match"] else 0, SOURCE, ref_id, match_number, now, now,
+                        1 if settings["feature_current_match"] else 0, SOURCE, ref_id, match_number, CATEGORY_SLUG, 1, now, now,
                     ),
                 )
                 game_id = int(cursor.lastrowid)

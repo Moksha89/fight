@@ -135,9 +135,9 @@ class ComplianceEngine:
             defaults = {
                 "operating_mode": self.operating_mode,
                 "minimum_age": 18,
-                "kyc_required_for_betting": True,
-                "kyc_required_for_deposit": True,
-                "kyc_required_for_withdrawal": True,
+                "kyc_required_for_betting": False,
+                "kyc_required_for_deposit": False,
+                "kyc_required_for_withdrawal": False,
                 "limit_increase_delay_hours": 24,
                 "document_retention_days": 365,
                 "blocked_state_codes": [],

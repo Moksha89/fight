@@ -64,6 +64,7 @@ USER_SESSION_COOKIE = "rr_user_session"
 USER_CSRF_COOKIE = "rr_user_csrf"
 ADMIN_SESSION_COOKIE = "rr_admin_session"
 ADMIN_CSRF_COOKIE = "rr_admin_csrf"
+CHINA_CATEGORY_SLUG = "china-24-7"
 OPERATING_MODES = {"SOCIAL_PREVIEW", "APPROVAL_DEMO", "REAL_MONEY"}
 OPERATING_MODE_LABELS = {
     "SOCIAL_PREVIEW": "Social preview",
@@ -123,7 +124,7 @@ class PaymentService:
     def __init__(self, data_dir: Path, preview_mode: bool = False):
         self.data_dir = data_dir.resolve()
         self.preview_mode = preview_mode
-        requested_mode = os.environ.get("ROOSTERRUN_OPERATING_MODE", "SOCIAL_PREVIEW").strip().upper()
+        requested_mode = os.environ.get("ROOSTERRUN_OPERATING_MODE", "REAL_MONEY").strip().upper()
         if requested_mode not in OPERATING_MODES:
             raise RuntimeError("ROOSTERRUN_OPERATING_MODE must be SOCIAL_PREVIEW, APPROVAL_DEMO, or REAL_MONEY.")
         self.operating_mode = "SOCIAL_PREVIEW" if preview_mode else requested_mode
@@ -290,6 +291,18 @@ class PaymentService:
                     updated_at TEXT NOT NULL
                 );
 
+                CREATE TABLE IF NOT EXISTS game_categories (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    slug TEXT NOT NULL UNIQUE,
+                    name TEXT NOT NULL,
+                    description TEXT NOT NULL DEFAULT '',
+                    kind TEXT NOT NULL DEFAULT 'CUSTOM',
+                    visible INTEGER NOT NULL DEFAULT 1,
+                    sort_order INTEGER NOT NULL DEFAULT 100,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+
                 CREATE TABLE IF NOT EXISTS admin_banners (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     title TEXT NOT NULL,
@@ -384,9 +397,17 @@ class PaymentService:
                 "source": "TEXT NOT NULL DEFAULT 'MANUAL'",
                 "external_ref": "TEXT NOT NULL DEFAULT ''",
                 "match_number": "TEXT NOT NULL DEFAULT ''",
+                "category_slug": "TEXT NOT NULL DEFAULT ''",
+                "visible": "INTEGER NOT NULL DEFAULT 1",
             }.items():
                 if column not in game_columns:
                     connection.execute(f"ALTER TABLE admin_games ADD COLUMN {column} {definition}")
+            connection.execute(
+                """INSERT OR IGNORE INTO game_categories(slug,name,description,kind,visible,sort_order,created_at,updated_at)
+                VALUES(?,?,?,?,?,?,?,?)""",
+                (CHINA_CATEGORY_SLUG, "China 24/7", "Continuous automatic matches mirrored from the upstream China arena.", "CHINA_FEED", 0, 0, utc_now(), utc_now()),
+            )
+            connection.execute("UPDATE admin_games SET category_slug=? WHERE source='CHINA_FEED' AND category_slug=''", (CHINA_CATEGORY_SLUG,))
             banner_columns = {row["name"] for row in connection.execute("PRAGMA table_info(admin_banners)").fetchall()}
             for column, definition in {
                 "media_url": "TEXT NOT NULL DEFAULT ''",
@@ -936,6 +957,7 @@ class PaymentService:
             "featured": bool(row["featured"]), "actual_start_at": row["actual_start_at"], "result_declared_at": row["result_declared_at"],
             "settled_at": row["settled_at"], "state_version": row["state_version"], "created_at": row["created_at"], "updated_at": row["updated_at"],
             "source": row["source"], "external_ref": row["external_ref"], "match_number": row["match_number"],
+            "category_slug": row["category_slug"], "visible": bool(row["visible"]),
         }
 
     @staticmethod
@@ -1033,8 +1055,16 @@ class PaymentService:
                 "title": "New cockfight", "arena": "Main Arena", "status": "DRAFT", "scheduled_at": now,
                 "betting_opens_at": now, "betting_closes_at": now, "team_a_name": "Red", "team_a_odds": 2.45, "draw_odds": 8.75,
                 "team_b_name": "Blue", "team_b_odds": 2.45, "stream_type": "OFFLINE", "stream_url": "", "thumbnail_url": "",
-                "result": "", "featured": 0,
+                "result": "", "featured": 0, "category_slug": "", "visible": 1,
             }
+            category_slug = str(payload.get("category_slug", current["category_slug"]) or "").strip().lower()
+            if category_slug:
+                category = connection.execute("SELECT kind FROM game_categories WHERE slug=?", (category_slug,)).fetchone()
+                if not category:
+                    raise ValueError("Choose an existing game category.")
+                if category["kind"] == "CHINA_FEED" and current.get("source", "MANUAL") != "CHINA_FEED":
+                    raise ValueError("China 24/7 matches are created automatically by the feed.")
+            visible = 1 if payload.get("visible", current["visible"]) else 0
             title = clean_text(payload.get("title", current["title"]), "Game title", 3, 90)
             arena = clean_text(payload.get("arena", current["arena"]), "Arena", 2, 60)
             status = str(payload.get("status", current["status"])).upper()
@@ -1086,16 +1116,16 @@ class PaymentService:
                 connection.execute("UPDATE admin_games SET featured=0 WHERE id<>?", (game_id or 0,))
             if existing:
                 connection.execute(
-                    """UPDATE admin_games SET title=?,arena=?,status=?,betting_opens_at=?,scheduled_at=?,betting_closes_at=?,team_a_name=?,team_a_odds=?,draw_odds=?,team_b_name=?,team_b_odds=?,stream_type=?,stream_url=?,thumbnail_url=?,result=?,featured=?,updated_at=? WHERE id=?""",
-                    (*values, now, game_id),
+                    """UPDATE admin_games SET title=?,arena=?,status=?,betting_opens_at=?,scheduled_at=?,betting_closes_at=?,team_a_name=?,team_a_odds=?,draw_odds=?,team_b_name=?,team_b_odds=?,stream_type=?,stream_url=?,thumbnail_url=?,result=?,featured=?,category_slug=?,visible=?,updated_at=? WHERE id=?""",
+                    (*values, category_slug, visible, now, game_id),
                 )
                 saved_id = game_id
                 action = "Game updated"
             else:
                 cursor = connection.execute(
-                    """INSERT INTO admin_games(title,arena,status,betting_opens_at,scheduled_at,betting_closes_at,team_a_name,team_a_odds,draw_odds,team_b_name,team_b_odds,stream_type,stream_url,thumbnail_url,result,featured,created_at,updated_at)
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                    (*values, now, now),
+                    """INSERT INTO admin_games(title,arena,status,betting_opens_at,scheduled_at,betting_closes_at,team_a_name,team_a_odds,draw_odds,team_b_name,team_b_odds,stream_type,stream_url,thumbnail_url,result,featured,category_slug,visible,created_at,updated_at)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (*values, category_slug, visible, now, now),
                 )
                 saved_id = cursor.lastrowid
                 action = "Game created"
@@ -1105,6 +1135,89 @@ class PaymentService:
         with self.connect() as connection:
             row = connection.execute("SELECT * FROM admin_games WHERE id=?", (saved_id,)).fetchone()
         return self.game_to_dict(row)
+
+    @staticmethod
+    def category_to_dict(row: sqlite3.Row) -> dict:
+        return {
+            "id": row["id"], "slug": row["slug"], "name": row["name"], "description": row["description"],
+            "kind": row["kind"], "builtin": row["kind"] == "CHINA_FEED", "visible": bool(row["visible"]),
+            "sort_order": row["sort_order"], "created_at": row["created_at"], "updated_at": row["updated_at"],
+        }
+
+    def admin_game_categories(self) -> list[dict]:
+        with self.connect() as connection:
+            rows = connection.execute("SELECT * FROM game_categories ORDER BY sort_order ASC, name ASC").fetchall()
+            counts = {row["category_slug"]: row["total"] for row in connection.execute("SELECT category_slug, COUNT(*) AS total FROM admin_games GROUP BY category_slug").fetchall()}
+        feed_enabled = bool(self.china_feed.settings()["enabled"])
+        categories = []
+        for row in rows:
+            item = self.category_to_dict(row)
+            if item["builtin"]:
+                item["visible"] = feed_enabled
+            item["game_count"] = int(counts.get(item["slug"], 0))
+            categories.append(item)
+        return categories
+
+    def admin_save_game_category(self, payload: dict, category_id: int | None = None, actor: str = "ADMIN") -> dict:
+        now = utc_now()
+        with self.connect() as connection:
+            existing = connection.execute("SELECT * FROM game_categories WHERE id=?", (category_id,)).fetchone() if category_id else None
+            if category_id and not existing:
+                raise LookupError("Category not found.")
+            name = clean_text(payload.get("name", existing["name"] if existing else ""), "Category name", 2, 60)
+            description = str(payload.get("description", existing["description"] if existing else "") or "").strip()[:240]
+            try:
+                sort_order = int(payload.get("sort_order", existing["sort_order"] if existing else 100))
+            except (TypeError, ValueError):
+                raise ValueError("Sort order must be a whole number.") from None
+            visible = 1 if payload.get("visible", existing["visible"] if existing else 1) else 0
+            if existing and existing["kind"] == "CHINA_FEED":
+                connection.execute("UPDATE game_categories SET name=?,description=?,sort_order=?,updated_at=? WHERE id=?", (name, description, sort_order, now, category_id))
+                self._audit(connection, "Games", "Category updated", name, "Built-in China 24/7 category")
+                saved_id = category_id
+            elif existing:
+                connection.execute("UPDATE game_categories SET name=?,description=?,visible=?,sort_order=?,updated_at=? WHERE id=?", (name, description, visible, sort_order, now, category_id))
+                self._audit(connection, "Games", "Category updated", name, f"Visible {bool(visible)}")
+                saved_id = category_id
+            else:
+                slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or f"category-{secrets.token_hex(3)}"
+                if connection.execute("SELECT 1 FROM game_categories WHERE slug=?", (slug,)).fetchone():
+                    raise ValueError("A category with this name already exists.")
+                cursor = connection.execute(
+                    "INSERT INTO game_categories(slug,name,description,kind,visible,sort_order,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)",
+                    (slug, name, description, "CUSTOM", visible, sort_order, now, now),
+                )
+                saved_id = cursor.lastrowid
+                self._audit(connection, "Games", "Category created", name, f"Visible {bool(visible)}")
+        if existing and existing["kind"] == "CHINA_FEED" and "visible" in payload:
+            self.china_feed.update_settings({"enabled": bool(payload.get("visible"))}, actor=actor)
+        return next(item for item in self.admin_game_categories() if item["id"] == saved_id)
+
+    def admin_delete_game_category(self, category_id: int) -> None:
+        with self.connect() as connection:
+            existing = connection.execute("SELECT * FROM game_categories WHERE id=?", (category_id,)).fetchone()
+            if not existing:
+                raise LookupError("Category not found.")
+            if existing["kind"] == "CHINA_FEED":
+                raise ValueError("The China 24/7 category is built in. Switch it off instead of deleting it.")
+            connection.execute("UPDATE admin_games SET category_slug='' WHERE category_slug=?", (existing["slug"],))
+            connection.execute("DELETE FROM game_categories WHERE id=?", (category_id,))
+            self._audit(connection, "Games", "Category deleted", existing["name"], "Games moved to uncategorised")
+
+    def admin_set_game_visibility(self, game_id: int, visible: bool) -> dict:
+        with self.connect() as connection:
+            row = connection.execute("SELECT * FROM admin_games WHERE id=?", (game_id,)).fetchone()
+            if not row:
+                raise LookupError("Game not found.")
+            connection.execute("UPDATE admin_games SET visible=?,updated_at=? WHERE id=?", (1 if visible else 0, utc_now(), game_id))
+            self._audit(connection, "Games", "Game visibility", row["title"], "Shown to players" if visible else "Hidden from players")
+            row = connection.execute("SELECT * FROM admin_games WHERE id=?", (game_id,)).fetchone()
+        return self.game_to_dict(row)
+
+    def player_visible_games(self, games: list[dict] | None = None) -> list[dict]:
+        games = self.admin_games() if games is None else games
+        hidden_categories = {item["slug"] for item in self.admin_game_categories() if not item["visible"]}
+        return [game for game in games if game["visible"] and game["category_slug"] not in hidden_categories]
 
     def admin_banners(self, active_only: bool = False) -> list[dict]:
         query = "SELECT * FROM admin_banners"
@@ -1270,8 +1383,9 @@ class PaymentService:
 
     def public_site_config(self) -> dict:
         config = self.admin_config()
-        games = self.admin_games()
+        games = self.player_visible_games()
         featured_game = next((game for game in games if game["featured"]), games[0] if games else None)
+        categories = [item for item in self.admin_game_categories() if item["visible"]]
         compliance = self.compliance.policy()
         return {
             "brand": config.get("brand", {}), "theme": config.get("theme", {}),
@@ -1279,10 +1393,12 @@ class PaymentService:
             "banners": self.admin_banners(True), "vip_tiers": self.admin_vip_tiers(True),
             "featured_game": featured_game,
             "games": [game for game in games if game["status"] not in {"DRAFT", "CANCELLED"}],
+            "categories": [{"slug": item["slug"], "name": item["name"], "description": item["description"], "builtin": item["builtin"]} for item in categories],
             "stream": self.streaming.current_stream(featured_game["id"]) if featured_game else {"status": "OFFLINE", "playback_url": ""},
             "china_feed": self.china_feed.current(),
             "operating_mode": compliance.get("operating_mode", "SOCIAL_PREVIEW"),
             "legal_notice": compliance.get("legal_notice", ""),
+            "identity_review_required": any(compliance.get(key) for key in ("kyc_required_for_betting", "kyc_required_for_deposit", "kyc_required_for_withdrawal")),
         }
 
     def readiness(self, server: "RoosterRunServer | None" = None) -> dict:
@@ -1599,7 +1715,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return "payments"
         if path.startswith("/api/admin/users"):
             return "users"
-        if path.startswith("/api/admin/games") or path.startswith("/api/admin/streams") or path in {"/api/admin/risk/", "/api/admin/china-feed/", "/api/admin/china-feed/poll/", "/api/admin/china-feed/recover/"}:
+        if path.startswith("/api/admin/games") or path.startswith("/api/admin/game-categories") or path.startswith("/api/admin/streams") or path in {"/api/admin/risk/", "/api/admin/china-feed/", "/api/admin/china-feed/poll/", "/api/admin/china-feed/recover/"}:
             return "games"
         if path.startswith("/api/admin/banners"):
             return "banners"
@@ -1747,6 +1863,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     return self.send_json(HTTPStatus.OK, self.server.payments.cockfight.risk_policy())
                 if path == "/api/admin/china-feed/":
                     return self.send_json(HTTPStatus.OK, self.server.payments.china_feed.admin_view())
+                if path == "/api/admin/game-categories/":
+                    return self.send_json(HTTPStatus.OK, {"results": self.server.payments.admin_game_categories()})
                 if path == "/api/admin/streams/":
                     game_value = (query.get("game_id") or [""])[0]
                     return self.send_json(HTTPStatus.OK, {"results": self.server.payments.streaming.list_sessions(int(game_value) if game_value else None)})
@@ -1965,6 +2083,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                     return self.send_json(HTTPStatus.OK, self.server.payments.china_feed.poll_once(force=True))
                 if path == "/api/admin/china-feed/recover/":
                     return self.send_json(HTTPStatus.OK, {"recovered": self.server.payments.china_feed.recover()})
+                if path == "/api/admin/game-categories/":
+                    return self.send_json(HTTPStatus.CREATED, self.server.payments.admin_save_game_category(payload))
+                category = re.fullmatch(r"/api/admin/game-categories/(\d+)/", path)
+                if category:
+                    return self.send_json(HTTPStatus.OK, self.server.payments.admin_save_game_category(payload, int(category.group(1))))
+                category_delete = re.fullmatch(r"/api/admin/game-categories/(\d+)/delete/", path)
+                if category_delete:
+                    self.server.payments.admin_delete_game_category(int(category_delete.group(1)))
+                    return self.send_json(HTTPStatus.OK, {"deleted": True})
+                game_visibility = re.fullmatch(r"/api/admin/games/(\d+)/visibility/", path)
+                if game_visibility:
+                    return self.send_json(HTTPStatus.OK, self.server.payments.admin_set_game_visibility(int(game_visibility.group(1)), bool(payload.get("visible"))))
                 broadcast_create = re.fullmatch(r"/api/admin/games/(\d+)/broadcast/session/", path)
                 if broadcast_create:
                     return self.send_json(HTTPStatus.CREATED, self.server.payments.streaming.create_session(int(broadcast_create.group(1)), payload))

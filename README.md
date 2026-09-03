@@ -151,7 +151,7 @@ when the provider requires it, `ROOSTERRUN_SMS_WEBHOOK_TOKEN`. Never enable
 
 ## Operating modes
 
-Set `ROOSTERRUN_OPERATING_MODE=REAL_MONEY` for the live platform: wallets, deposits, withdrawals, betting, and settlement all move real funds and new users start at ₹0.
+`REAL_MONEY` is the default operating mode: wallets, deposits, withdrawals, betting, and settlement all move real funds and new users start at ₹0. Player identity (KYC) review is disabled by default; administrators can require it per action from the compliance policy.
 
 Set `ROOSTERRUN_OPERATING_MODE=APPROVAL_DEMO` on an authenticated deployment to present registration, identity review, demo betting, settlement, manual deposit review, and manual withdrawal review end to end. New users receive the amount configured by `ROOSTERRUN_DEMO_STARTING_BALANCE` as non-cash demo credits.
 

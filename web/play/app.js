@@ -272,8 +272,7 @@ function walletView(state) {
 function profileView(state) {
   const user = state.user || previewUser;
   const initials = (user.username||'P').split(/\s+/).map(part=>part[0]).join('').slice(0,2).toUpperCase();
-  const complianceStatus=String(state.compliance?.status||'NOT_SUBMITTED').replace(/_/g,' ').toLowerCase();
-  return `<section class="workspace-page">${pageTitle('Account','Profile and safety','Personal details, verification, limits, and account security.')}<div class="profile-grid"><section class="profile-card"><div class="profile-identity"><span class="profile-avatar">${escapeHtml(initials)}</span><div><h2>${escapeHtml(user.username)}</h2><p>${escapeHtml(user.mobile||'Mobile verification pending')}</p>${statusBadge(state.previewMode?'preview':'scheduled')}</div></div><dl class="detail-list"><div><dt>Account level</dt><dd>${escapeHtml(user.tier||'Standard')}</dd></div><div><dt>Mobile status</dt><dd>${user.mobile?'Verified':'Not connected'}</dd></div><div><dt>Identity status</dt><dd class="text-capitalize">${escapeHtml(complianceStatus)}</dd></div><div><dt>Referral code</dt><dd>${escapeHtml(user.referralCode||'Not available')}</dd></div></dl></section><section class="settings-card"><button type="button" data-action="profile-verification"><span>${icon('check',19)}</span><div><strong>Identity and age</strong><small>Private document review · ${escapeHtml(complianceStatus)}</small></div>${icon('chevron',18)}</button><button type="button" data-action="profile-security"><span>${icon('lock',19)}</span><div><strong>Password and security</strong><small>Update password and recovery settings</small></div>${icon('chevron',18)}</button><button type="button" data-action="show-notifications"><span>${icon('bell',19)}</span><div><strong>Notifications</strong><small>${Number(state.notificationUnread||0)} unread account and match updates</small></div>${icon('chevron',18)}</button><button type="button" data-action="profile-limits"><span>${icon('shield',19)}</span><div><strong>Responsible play limits</strong><small>Control deposits, stakes, cooling-off, and self-exclusion</small></div>${icon('chevron',18)}</button><button type="button" data-action="show-support"><span>${icon('users',19)}</span><div><strong>Help and support</strong><small>Open and track account, payment, bet, or stream cases</small></div>${icon('chevron',18)}</button><button class="settings-card__danger" type="button" data-action="logout"><span>${icon('logout',19)}</span><div><strong>${state.previewMode?'Reset preview':'Sign out'}</strong><small>Reset the local demo account</small></div>${icon('chevron',18)}</button></section></div></section>`;
+  return `<section class="workspace-page">${pageTitle('Account','Profile and safety','Personal details, limits, and account security.')}<div class="profile-grid"><section class="profile-card"><div class="profile-identity"><span class="profile-avatar">${escapeHtml(initials)}</span><div><h2>${escapeHtml(user.username)}</h2><p>${escapeHtml(user.mobile||'Mobile verification pending')}</p>${statusBadge(state.previewMode?'preview':'scheduled')}</div></div><dl class="detail-list"><div><dt>Account level</dt><dd>${escapeHtml(user.tier||'Standard')}</dd></div><div><dt>Mobile status</dt><dd>${user.mobile?'Verified':'Not connected'}</dd></div></dl></section><section class="settings-card">${state.siteConfig?.identity_review_required?`<button type="button" data-action="profile-verification"><span>${icon('check',19)}</span><div><strong>Identity and age</strong><small>Required by the operator · ${escapeHtml(String(state.compliance?.status||'NOT_SUBMITTED').replace(/_/g,' ').toLowerCase())}</small></div>${icon('chevron',18)}</button>`:''}<button type="button" data-action="profile-security"><span>${icon('lock',19)}</span><div><strong>Password and security</strong><small>Update password and recovery settings</small></div>${icon('chevron',18)}</button><button type="button" data-action="show-notifications"><span>${icon('bell',19)}</span><div><strong>Notifications</strong><small>${Number(state.notificationUnread||0)} unread account and match updates</small></div>${icon('chevron',18)}</button><button type="button" data-action="profile-limits"><span>${icon('shield',19)}</span><div><strong>Responsible play limits</strong><small>Control deposits, stakes, cooling-off, and self-exclusion</small></div>${icon('chevron',18)}</button><button type="button" data-action="show-support"><span>${icon('users',19)}</span><div><strong>Help and support</strong><small>Open and track account, payment, bet, or stream cases</small></div>${icon('chevron',18)}</button><button class="settings-card__danger" type="button" data-action="logout"><span>${icon('logout',19)}</span><div><strong>${state.previewMode?'Reset preview':'Sign out'}</strong><small>${state.previewMode?'Reset the local preview account':'Sign out of this device'}</small></div>${icon('chevron',18)}</button></section></div></section>`;
 }
 
 function viewForRoute(state) {
@@ -357,6 +356,7 @@ function render() {
   else if (mountedMedia && `${streamElement.dataset.streamType}|${streamElement.dataset.streamUrl}` === previousKey) streamElement.replaceChildren(...mountedMedia);
   else mountStream(streamElement, state.match.stream);
   if (state.route === 'wallet' && !state.paymentsLoaded && !state.paymentsLoading) queueMicrotask(hydratePayments);
+  if (state.route === 'wallet' && state.paymentsLoaded && !state.paymentsLoading && Date.now() - paymentsRefreshedAt > 10000) queueMicrotask(hydratePayments);
 }
 
 function scheduleRender() {
@@ -635,9 +635,11 @@ async function submitRestriction(form) {
   catch(error){store.setState({safetyBusy:false});showToast(error.message||'Restriction could not be activated.','error');}
 }
 
+let paymentsRefreshedAt = 0;
 async function hydratePayments() {
   const current = store.getState();
   if (current.paymentsLoading) return;
+  paymentsRefreshedAt = Date.now();
   store.setState({paymentsLoading:true});
   try {
     const [accountsData,walletData,requestsData,ledgerData] = await Promise.all([api.paymentAccounts(),api.paymentWallet(),api.paymentRequests(),api.paymentLedger()]);
@@ -768,7 +770,7 @@ document.addEventListener('click',event=>{
   else if(action==='close-dialog')store.setState({dialog:null});
   else if(action==='show-how')store.setState({dialog:{icon:'shield',title:'How RoosterRun works',message:'Watch the arena, choose an outcome, request a short-lived server quote, confirm the ticket, and follow the audited result through settlement.'}});
   else if(action==='show-rules')store.setState({dialog:{icon:'shield',title:'Match rules',message:'Betting closes on server time. Meron is the red corner, Wala is the blue corner, and Draw is settled only when officially declared.'}});
-  else if(action==='show-terms')store.setState(current=>({...current,dialog:{icon:'alert',title:'Terms and eligibility',message:current.siteConfig?.legal_notice||'This build uses demo credits only. Identity, age, location, and responsible-play controls are enforced by the server.'}}));
+  else if(action==='show-terms')store.setState(current=>({...current,dialog:{icon:'alert',title:'Terms and eligibility',message:current.siteConfig?.legal_notice||'Players must be 18+. Betting involves financial risk; play responsibly and only with funds you can afford to lose.'}}));
   else if(action==='show-support')openSupport();
   else if(action==='close-support')store.setState({supportOpen:false,supportLoading:false,supportBusy:false});
   else if(action==='new-support')store.setState({supportCompose:true,supportSelected:null});
@@ -778,8 +780,8 @@ document.addEventListener('click',event=>{
   else if(action==='read-notification')readNotification(Number(control.dataset.id));
   else if(action==='read-all-notifications')readAllNotifications();
   else if(action==='forgot-password')store.setState({authMode:'recovery',authStep:'credentials',authContext:null,authError:'',authPreviewOtp:''});
-  else if(action==='profile-security')store.setState(current=>current.previewMode?{...current,dialog:{icon:'lock',title:'Password and security',message:'Password changes are available after signing in to a registered player account.'}}:{...current,securityFlow:true,securityError:'',dialog:null});
   else if(action==='profile-verification')store.setState({safetyFlow:'identity',dialog:null});
+  else if(action==='profile-security')store.setState(current=>current.previewMode?{...current,dialog:{icon:'lock',title:'Password and security',message:'Password changes are available after signing in to a registered player account.'}}:{...current,securityFlow:true,securityError:'',dialog:null});
   else if(action==='profile-limits')store.setState({safetyFlow:'limits',dialog:null});
 });
 
