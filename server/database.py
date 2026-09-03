@@ -158,13 +158,14 @@ class PostgresCursor:
         statement = translate_postgres_sql(sql)
         insert_match = re.match(r"^INSERT\s+INTO\s+([A-Za-z_][A-Za-z0-9_]*)\b", statement, re.IGNORECASE)
         serial_tables = {
-            "payment_accounts", "payment_requests", "wallet_ledger", "admin_games", "admin_banners",
+            "payment_accounts", "payment_requests", "wallet_ledger", "wallet_holds", "admin_games", "admin_banners",
             "admin_vip_tiers", "admin_social_links", "admin_roles", "admin_audit_log", "admin_accounts",
-            "auth_challenges", "auth_sessions", "admin_mfa_recovery_codes", "engine_match_events",
+            "admin_mfa_recovery_codes", "engine_match_events", "game_categories", "china_feed_matches",
             "odds_snapshots", "cockfight_bets", "account_ledger", "risk_decisions", "engine_events",
             "compliance_documents", "responsible_events", "stream_health_samples", "notifications",
-            "reconciliation_runs", "reconciliation_findings", "operations_incidents", "backup_records",
-            "support_tickets", "support_messages", "support_events", "intelligence_scans", "intelligence_alerts",
+            "notification_deliveries", "reconciliation_runs", "reconciliation_findings", "operations_incidents",
+            "backup_records", "support_tickets", "support_messages", "support_events", "intelligence_scans",
+            "intelligence_alerts",
         }
         returns_identity = bool(
             insert_match
