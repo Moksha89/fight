@@ -313,8 +313,9 @@ function captureFormDrafts(root) {
   const focused = document.activeElement;
   const drafts = new Map();
   root.querySelectorAll('input,textarea,select').forEach(field => {
-    if (!(field.name||field.id) || field.type === 'file' || field.type === 'hidden' || field.type === 'submit' || field.type === 'button') return;
+    if (!(field.name||field.id) || field.type === 'hidden' || field.type === 'submit' || field.type === 'button') return;
     const key = fieldKey(field);
+    if (field.type === 'file') { if (field.files?.length) drafts.set(key, { files: Array.from(field.files) }); return; }
     if (field.type === 'checkbox' || field.type === 'radio') drafts.set(key, { checked: field.checked, value: field.value });
     else drafts.set(key, { value: field.value, selection: field === focused && typeof field.selectionStart === 'number' ? [field.selectionStart, field.selectionEnd] : null });
   });
@@ -327,7 +328,11 @@ function restoreFormDrafts(root, draft) {
     const saved = draft.drafts.get(fieldKey(field));
     if (!saved) return;
     if (field.type === 'checkbox' || field.type === 'radio') { if (saved.value === field.value) field.checked = saved.checked; return; }
-    if (field.type === 'file') return;
+    if (field.type === 'file') {
+      if (!saved.files || typeof DataTransfer === 'undefined') return;
+      try { const transfer = new DataTransfer(); saved.files.forEach(file => transfer.items.add(file)); field.files = transfer.files; } catch { /* browser refuses programmatic file assignment */ }
+      return;
+    }
     field.value = saved.value;
     if (draft.focusKey === fieldKey(field)) {
       field.focus({ preventScroll: true });
