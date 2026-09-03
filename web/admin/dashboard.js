@@ -259,5 +259,6 @@ async function submitAdminForm(form){
   finally{state.busy=false;}
 }
 document.addEventListener('submit',event=>{event.preventDefault();submitAdminForm(event.target);});
-window.addEventListener('hashchange',()=>{state.route=routeFromHash();state.modal=null;state.mobileOpen=false;render();});
+const routeModules={overview:['overview'],operations:['operations'],intelligence:['intelligence'],support:['support'],users:['users'],games:['games','chinaFeed','streams','risk'],payments:['payments'],compliance:['compliance'],banners:['banners'],vip:['vip'],appearance:['config'],social:['config'],settings:['config'],team:['team'],audit:['audit']};
+window.addEventListener('hashchange',()=>{state.route=routeFromHash();state.modal=null;state.mobileOpen=false;render();if(state.admin)refreshModules(...(routeModules[state.route]||[])).then(render).catch(()=>{});});
 refreshAll();

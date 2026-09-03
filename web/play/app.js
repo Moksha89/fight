@@ -1,8 +1,8 @@
 import { api, ApiError, clearSession, getToken, setSession } from './api.js?v=55';
-import { appShell, arenaOutcomeCard, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=62';
+import { appShell, arenaOutcomeCard, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=63';
 import { previewBets, previewMatch, previewResults, previewUser } from './data.js';
 import { createStore } from './store.js';
-import { mountStream, normalizeStream, stopStream } from './streaming.js?v=51';
+import { mountStream, normalizeStream, stopStream } from './streaming.js?v=52';
 import { button, emptyState, escapeHtml, formatDate, icon, money, sectionHeading, statusBadge } from './ui.js';
 
 const app = document.getElementById('app');
@@ -151,6 +151,7 @@ function applySiteConfig() {
 
 function matchFromGame(game,current,liveStream={}) {
   if(!game)return current;
+  if(!liveStream.playback_url||!['LIVE','DEGRADED'].includes(String(liveStream.status||'').toUpperCase()))liveStream={};
   return {
     ...current,id:game.id,title:game.title,arena:game.arena,isPreview:false,
     status:String(game.status||current.status).toLowerCase(),scheduledAt:game.scheduled_at||current.scheduledAt,
@@ -298,20 +299,58 @@ function renderOverlay(state) {
   const mobileMenu = state.mobileMenuOpen ? `<div class="mobile-menu-backdrop" data-action="close-menu"><nav class="mobile-menu" aria-label="Mobile menu" data-modal-panel><div>${brand('home')}<button class="icon-button" type="button" data-action="close-menu" aria-label="Close menu">${icon('close',20)}</button></div><button data-action="navigate" data-route="home">${icon('home',18)} Home</button><button data-action="navigate" data-route="live">${icon('live',18)} Live arena</button><button data-action="navigate" data-route="results">${icon('trophy',18)} Results</button><hr>${button({label:'Sign in',action:'open-login',variant:'secondary',iconName:'login'})}${button({label:'Create account',action:'open-register',variant:'primary',iconName:'user'})}</nav></div>` : '';
   // Authentication remains available in deployed environments, but it must
   // never cover the localhost preview—even if old UI state says otherwise.
+  const draft = captureFormDrafts(overlayRoot);
   overlayRoot.innerHTML = `${isLocalPreview ? '' : authDialog(state)}${paymentFlowDialog(state)}${safetyDialog(state)}${securityDialog(state)}${notificationDialog(state)}${supportDialog(state)}${homeMediaDialog(state)}${infoDialog(state)}${mobileMenu}`;
+  restoreFormDrafts(overlayRoot, draft);
+}
+
+function fieldKey(field) {
+  const form = field.closest('form');
+  return `${form?.id||form?.dataset.form||form?.className||''}::${field.name||field.id}`;
+}
+
+function captureFormDrafts(root) {
+  const focused = document.activeElement;
+  const drafts = new Map();
+  root.querySelectorAll('input,textarea,select').forEach(field => {
+    if (!(field.name||field.id) || field.type === 'file' || field.type === 'hidden' || field.type === 'submit' || field.type === 'button') return;
+    const key = fieldKey(field);
+    if (field.type === 'checkbox' || field.type === 'radio') drafts.set(key, { checked: field.checked, value: field.value });
+    else drafts.set(key, { value: field.value, selection: field === focused && typeof field.selectionStart === 'number' ? [field.selectionStart, field.selectionEnd] : null });
+  });
+  return { drafts, focusKey: focused && root.contains(focused) && (focused.name||focused.id) ? fieldKey(focused) : '' };
+}
+
+function restoreFormDrafts(root, draft) {
+  if (!draft?.drafts.size) return;
+  root.querySelectorAll('input,textarea,select').forEach(field => {
+    const saved = draft.drafts.get(fieldKey(field));
+    if (!saved) return;
+    if (field.type === 'checkbox' || field.type === 'radio') { if (saved.value === field.value) field.checked = saved.checked; return; }
+    if (field.type === 'file') return;
+    field.value = saved.value;
+    if (draft.focusKey === fieldKey(field)) {
+      field.focus({ preventScroll: true });
+      if (saved.selection) { try { field.setSelectionRange(...saved.selection); } catch { /* not a text field */ } }
+    }
+  });
 }
 
 function render() {
   const state = store.getState();
   const inWorkspace = (state.authenticated || state.previewMode) && state.route !== 'home';
   const publicHome = !inWorkspace && state.route === 'home';
+  const previousStream = document.getElementById('stream-player');
+  const previousKey = previousStream ? `${previousStream.dataset.streamType}|${previousStream.dataset.streamUrl}` : '';
+  const mountedMedia = previousStream && !previousStream.querySelector('.arena-player__placeholder') ? Array.from(previousStream.childNodes) : null;
   app.innerHTML = publicHome ? appShell({...state,route:'dashboard'},dashboardView(state)) : inWorkspace ? appShell(state, viewForRoute(state)) : publicPage(state);
   renderOverlay(state);
   applySiteConfig();
   updateCountdown();
   const streamElement = document.getElementById('stream-player');
-  if (streamElement) mountStream(streamElement, state.match.stream);
-  else stopStream();
+  if (!streamElement) stopStream();
+  else if (mountedMedia && `${streamElement.dataset.streamType}|${streamElement.dataset.streamUrl}` === previousKey) streamElement.replaceChildren(...mountedMedia);
+  else mountStream(streamElement, state.match.stream);
   if (state.route === 'wallet' && !state.paymentsLoaded && !state.paymentsLoading) queueMicrotask(hydratePayments);
 }
 
