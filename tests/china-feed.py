@@ -67,7 +67,6 @@ user = "china-player"
 service.ensure_user(user)
 with service.connect() as connection:
     connection.execute("UPDATE user_wallets SET balance_paise=100000 WHERE user_id=?", (user,))
-    connection.execute("UPDATE admin_settings SET setting_value=json_set(setting_value,'$.kyc_required_for_betting',0) WHERE setting_key='compliance'")
 quote = service.cockfight.quote_bet(user, {"game_id": game["id"], "outcome": "RED", "stake": 500})
 bet = service.cockfight.place_bet(user, {"quote_id": quote["quote_id"]})
 assert bet["status"] == "pending", bet

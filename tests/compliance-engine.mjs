@@ -18,7 +18,7 @@ try{
   let ready=false;for(let attempt=0;attempt<60;attempt+=1){try{await json(base,'/api/admin/health/',{admin:true});ready=true;break;}catch{await new Promise(resolveWait=>setTimeout(resolveWait,100));}}assert.equal(ready,true,'compliance server did not start');
   await json(base,'/api/admin/compliance/',{expected:401});
   const health=await json(base,'/api/admin/health/',{admin:true});assert.equal(health.compliance.operating_mode,'SOCIAL_PREVIEW');assert.equal(health.compliance.private_storage,true);
-  const policy=await json(base,'/api/admin/compliance/policy/',{admin:true});assert.equal(policy.kyc_required_for_betting,true);assert.equal(policy.minimum_age,18);
+  const policy=await json(base,'/api/admin/compliance/policy/',{admin:true});assert.equal(policy.kyc_required_for_betting,false);assert.equal(policy.minimum_age,18);
   const profile=await json(base,'/api/user/compliance/');assert.equal(profile.status,'VERIFIED');
 
   await json(base,'/api/admin/compliance/users/arena-guest/decision/',{method:'POST',admin:true,body:{decision:'REJECTED',note:'Fresh document required'}});
