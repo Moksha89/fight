@@ -1,14 +1,14 @@
 {
   "name": "RoosterRun - Live Cockfight Betting",
   "short_name": "RoosterRun",
-  "description": "Live cockfight betting, dice games, and instant wallet. Play anytime, anywhere.",
+  "description": "Live cockfight streaming, match markets, results, and wallet access.",
   "start_url": "/play/",
-  "scope": "/",
+  "scope": "/play/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0D0D0D",
-  "theme_color": "#D4A843",
-  "categories": ["games", "entertainment"],
+  "background_color": "#090B0F",
+  "theme_color": "#090B0F",
+  "categories": ["entertainment", "sports"],
   "lang": "en",
   "dir": "ltr",
   "icons": [
@@ -78,7 +78,7 @@
     {
       "name": "Cockfight Live",
       "short_name": "Live",
-      "url": "/play/#cockfight",
+      "url": "/play/#live",
       "icons": [{"src": "/static/pwa/icon-96x96.png", "sizes": "96x96"}]
     },
     {

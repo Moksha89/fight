@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08090d">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Secure RoosterRun mobile and arena camera broadcasting studio.">
+  <title>RoosterRun · Broadcast Studio</title>
+  <link rel="icon" href="/static/pwa/icon-192x192.png">
+  <link rel="stylesheet" href="/broadcast/styles.css?v=2">
+</head>
+<body>
+  <main class="studio">
+    <header class="topbar">
+      <a class="brand" href="/admin/#games"><img src="/static/ic_rooster.svg" alt=""><span><strong>ROOSTER<span>RUN</span></strong><small>BROADCAST STUDIO</small></span></a>
+      <div class="secure"><i></i><span>Encrypted staff publishing</span></div>
+    </header>
+    <div class="layout">
+      <section class="preview" aria-label="Camera preview">
+        <video id="preview" autoplay muted playsinline></video>
+        <div id="empty" class="empty"><img src="/static/ic_rooster.svg" alt=""><strong>Camera preview</strong><span>Pair this device, then allow camera and microphone access.</span></div>
+        <div id="live" class="live-badge">LIVE</div>
+        <div class="preview-status"><span id="resolution">—</span><i></i><span id="network">Offline</span></div>
+      </section>
+      <aside class="panel">
+        <div class="panel-heading"><span>ARENA SOURCE</span><h1>Match broadcast</h1><p id="session-label">Authorize this device before preparing the camera.</p></div>
+        <form id="pair-form" class="pair-card">
+          <label><span>Session ID</span><input id="session-id" name="session_id" autocomplete="off" required></label>
+          <label><span>One-time pairing code</span><input id="pairing-code" name="pairing_code" autocomplete="one-time-code" maxlength="12" required></label>
+          <button class="btn primary" type="submit">Pair this device</button>
+          <p>Get the session and pairing code from Games & Live in the admin console.</p>
+        </form>
+        <div id="controls" hidden>
+          <div class="field"><label for="camera">Camera</label><select id="camera"><option value="">Default camera</option></select></div>
+          <div class="field"><label for="quality">Video quality</label><select id="quality"><option value="720">720p · recommended</option><option value="1080">1080p</option><option value="480">480p · weak network</option></select></div>
+          <div class="field"><label for="audio">Audio</label><select id="audio"><option value="true">Microphone on</option><option value="false">Muted</option></select></div>
+          <div id="status" class="status"><span class="dot"></span><span id="status-text">Session authorized</span></div>
+          <div class="actions">
+            <button id="prepare" class="btn secondary" type="button">Preview</button>
+            <button id="start" class="btn primary" type="button" disabled>Go live</button>
+            <button id="flip" class="btn secondary" type="button" disabled>Flip camera</button>
+            <button id="stop" class="btn danger" type="button" disabled>End stream</button>
+          </div>
+          <div class="quality">
+            <div class="metric"><b id="bitrate">—</b><span>bitrate</span></div>
+            <div class="metric"><b id="latency">—</b><span>round trip</span></div>
+            <div class="metric"><b id="duration">00:00</b><span>live time</span></div>
+          </div>
+          <div class="note">The publishing credential is short-lived and never appears on screen. If the connection disappears, the admin console marks the stream degraded automatically.</div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <script src="/play/srs.sdk.js?v=41"></script>
+  <script src="/broadcast/broadcast.js?v=2" defer></script>
+</body>
+</html>

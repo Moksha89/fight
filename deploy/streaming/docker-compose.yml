@@ -1,0 +1,20 @@
+services:
+  srs:
+    image: ossrs/srs:6
+    command: ./objs/srs -c conf/roosterrun.conf
+    restart: unless-stopped
+    environment:
+      CANDIDATE: ${CANDIDATE}
+      ROOSTERRUN_SRS_HOOK_SECRET: ${ROOSTERRUN_SRS_HOOK_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:1985:1985"
+      - "127.0.0.1:8080:8080"
+      - "8000:8000/udp"
+    volumes:
+      - ./srs.conf:/usr/local/srs/conf/roosterrun.conf:ro
+      - srs-data:/usr/local/srs/objs/nginx/html
+
+volumes:
+  srs-data:

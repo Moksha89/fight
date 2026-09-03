@@ -1,0 +1,214 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${ROOSTERRUN_DATABASE_NAME:-roosterrun}
+      POSTGRES_USER: ${ROOSTERRUN_DATABASE_USER:-roosterrun}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets: [postgres_password]
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [roosterrun]
+    profiles: ["local-database"]
+
+  app:
+    build:
+      context: ../..
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ROOSTERRUN_DATABASE_URL_FILE: /run/secrets/database_url
+      ROOSTERRUN_SRS_HOOK_SECRET_FILE: /run/secrets/srs_hook_secret
+      ROOSTERRUN_SRS_HOOK_SECRET_PREVIOUS_FILE: /run/secrets/srs_hook_secret_previous
+      ROOSTERRUN_INTERNAL_ALERT_TOKEN_FILE: /run/secrets/internal_alert_token
+      ROOSTERRUN_SRS_API_URL: http://srs:1985/api/v1/versions
+      ROOSTERRUN_SECRET_ROTATION_MANIFEST: /run/secrets/rotation_manifest
+    secrets:
+      - postgres_password
+      - database_url
+      - srs_hook_secret
+      - srs_hook_secret_previous
+      - internal_alert_token
+      - bootstrap_admin_password
+      - sms_webhook_token
+      - smtp_password
+      - alert_webhook_token
+      - rotation_manifest
+    command: ["python", "server/manual_payments_server.py", "--host", "0.0.0.0", "--port", "8765", "--data-dir", "/data"]
+    volumes:
+      - roosterrun-data:/data
+      - restore-state:/restore-state:ro
+    read_only: true
+    tmpfs: [/tmp:size=64m,mode=1777]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health/ready/', timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks: [roosterrun]
+
+  srs:
+    image: ossrs/srs:6
+    restart: unless-stopped
+    command: ["sh", "-c", "export ROOSTERRUN_SRS_HOOK_SECRET=$$(cat /run/secrets/srs_hook_secret); exec ./objs/srs -c conf/roosterrun.conf"]
+    environment:
+      CANDIDATE: ${CANDIDATE}
+    secrets: [srs_hook_secret]
+    volumes:
+      - ./srs.conf:/usr/local/srs/conf/roosterrun.conf:ro
+      - srs-data:/usr/local/srs/objs/nginx/html
+    ports: ["8000:8000/udp"]
+    networks: [roosterrun]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      ROOSTERRUN_DOMAIN: ${ROOSTERRUN_DOMAIN}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    cap_drop: ["ALL"]
+    cap_add: ["NET_BIND_SERVICE"]
+    security_opt: ["no-new-privileges:true"]
+    networks: [roosterrun]
+
+  backup:
+    build: ./backup
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ROOSTERRUN_DATABASE_URL_FILE: /run/secrets/database_url
+      RESTIC_PASSWORD_FILE: /run/secrets/backup_repository_password
+      AWS_ACCESS_KEY_ID_FILE: /run/secrets/aws_access_key_id
+      AWS_SECRET_ACCESS_KEY_FILE: /run/secrets/aws_secret_access_key
+      ROOSTERRUN_RESTORE_TEST_DATABASE_URL_FILE: /run/secrets/restore_database_url
+    secrets: [database_url, restore_database_url, backup_repository_password, aws_access_key_id, aws_secret_access_key]
+    volumes:
+      - roosterrun-data:/data:ro
+      - srs-data:/media-data:ro
+      - backup-cache:/root/.cache/restic
+      - restore-state:/restore-state
+    networks: [roosterrun]
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time=30d"]
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    depends_on: [app, alertmanager, blackbox]
+    networks: [roosterrun]
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    restart: unless-stopped
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml", "--storage.path=/alertmanager"]
+    volumes:
+      - ./observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    secrets: [internal_alert_token]
+    networks: [roosterrun]
+
+  blackbox:
+    image: prom/blackbox-exporter:v0.27.0
+    restart: unless-stopped
+    volumes: [./observability/blackbox.yml:/config/blackbox.yml:ro]
+    command: ["--config.file=/config/blackbox.yml"]
+    networks: [roosterrun]
+
+  loki:
+    image: grafana/loki:3.5.3
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    volumes: [loki-data:/loki]
+    networks: [roosterrun]
+
+  promtail:
+    image: grafana/promtail:3.5.3
+    restart: unless-stopped
+    command: ["-config.file=/etc/promtail/config.yml"]
+    volumes:
+      - ./observability/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on: [loki]
+    networks: [roosterrun]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    secrets: [grafana_admin_password]
+    volumes:
+      - ./observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - grafana-data:/var/lib/grafana
+    depends_on: [prometheus, loki]
+    ports: ["127.0.0.1:3000:3000"]
+    networks: [roosterrun]
+
+networks:
+  roosterrun:
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password
+  database_url:
+    file: ./secrets/database_url
+  restore_database_url:
+    file: ./secrets/restore_database_url
+  srs_hook_secret:
+    file: ./secrets/srs_hook_secret
+  srs_hook_secret_previous:
+    file: ./secrets/srs_hook_secret_previous
+  backup_repository_password:
+    file: ./secrets/backup_repository_password
+  grafana_admin_password:
+    file: ./secrets/grafana_admin_password
+  internal_alert_token:
+    file: ./secrets/internal_alert_token
+  bootstrap_admin_password:
+    file: ./secrets/bootstrap_admin_password
+  sms_webhook_token:
+    file: ./secrets/sms_webhook_token
+  smtp_password:
+    file: ./secrets/smtp_password
+  alert_webhook_token:
+    file: ./secrets/alert_webhook_token
+  aws_access_key_id:
+    file: ./secrets/aws_access_key_id
+  aws_secret_access_key:
+    file: ./secrets/aws_secret_access_key
+  rotation_manifest:
+    file: ./secrets/rotation-manifest.json
+
+volumes:
+  roosterrun-data:
+  postgres-data:
+  srs-data:
+  caddy-data:
+  caddy-config:
+  backup-cache:
+  prometheus-data:
+  alertmanager-data:
+  loki-data:
+  grafana-data:
+  restore-state:

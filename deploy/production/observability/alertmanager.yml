@@ -1,0 +1,16 @@
+route:
+  receiver: roosterrun-operations
+  group_by: [alertname]
+  group_wait: 20s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: roosterrun-operations
+    webhook_configs:
+      - url: http://app:8765/api/internal/monitoring/alerts/
+        send_resolved: true
+        http_config:
+          authorization:
+            type: Bearer
+            credentials_file: /run/secrets/internal_alert_token

@@ -1,11 +1,30 @@
-const CACHE_NAME = 'roosterrun-v33';
+const CACHE_NAME = 'roosterrun-v58-gold-register';
 const STATIC_ASSETS = [
   '/play/',
-  '/static/logo.png?v=2',
+  '/play/manifest.json',
+  '/play/styles.css',
+  '/play/app.js',
+  '/play/api.js',
+  '/play/components.js',
+  '/play/data.js',
+  '/play/icons.js',
+  '/play/simulator.js',
+  '/play/store.js',
+  '/play/streaming.js',
+  '/play/ui.js',
+  '/play/srs.sdk.js',
+  '/static/ic_rooster.svg',
+  '/static/arena-poster-v2.png',
+  '/static/cockfight-home-hero-v1.png',
+  '/static/cockfight-live-card-v1.png',
+  '/static/cockfight-highlights-v1.png',
+  '/static/home-live-games-banner-v3.png',
+  '/static/home-cockfight-livestream-v2.png',
+  '/static/home-short-video-v2.png',
+  '/static/home-youtube-highlight-v2.png',
   '/static/pwa/icon-192x192.png',
-  '/static/pwa/icon-512x512.png',
-  'https://fonts.googleapis.com/icon?family=Material+Icons',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+  '/static/pwa/icon-96x96.png',
+  '/static/pwa/icon-512x512.png'
 ];
 
 // Install — cache static assets
@@ -68,7 +87,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Push notifications (future-ready)
+// Display notifications supplied by a supported browser push provider.
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : { title: 'RoosterRun', body: 'New update available' };
   event.waitUntil(

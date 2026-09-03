@@ -1,0 +1,7 @@
+var/manual_payments*/
+.tmp-*/
+__pycache__/
+*.pyc
+deploy/streaming/.env
+deploy/production/.env
+deploy/production/secrets/

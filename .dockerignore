@@ -1,0 +1,11 @@
+.git
+.env
+var
+work
+app-source-changes
+server_backup
+deploy/**/.env
+**/__pycache__
+**/*.pyc
+tests
+docs
