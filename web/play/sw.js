@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v61-simulated-viewers';
+const CACHE_NAME = 'roosterrun-v62-public-viewer-poll';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',

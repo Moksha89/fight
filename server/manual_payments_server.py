@@ -1506,7 +1506,7 @@ class LivePresence:
         self._seen: dict[str, float] = {}
         low = int(os.environ.get("ROOSTERRUN_VIEWERS_MIN", "8000") or 0)
         high = int(os.environ.get("ROOSTERRUN_VIEWERS_MAX", "15000") or 0)
-        self._low, self._high = min(low, high), max(low, high)
+        self._low, self._high = max(0, min(low, high)), max(0, max(low, high))
         self._simulated = float(random.randint(self._low, self._high)) if self._high else 0.0
         self._target = self._simulated
         self._last_step = time.monotonic()
