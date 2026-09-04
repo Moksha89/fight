@@ -1409,7 +1409,10 @@ class PaymentService:
         china.update({"live_url": "", "match": None, "feed_match": None})
         return {
             **payload,
-            "banners": [item for item in payload.get("banners", []) if item.get("placement") == "HOME_HERO"],
+            "banners": [
+                {key: item.get(key) for key in ("id", "placement", "title", "image_url", "active")}
+                for item in payload.get("banners", []) if item.get("placement") == "HOME_HERO" and item.get("image_url")
+            ],
             "featured_game": None,
             "games": [],
             "stream": {"status": "OFFLINE", "playback_url": ""},
@@ -1911,6 +1914,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if path == "/api/cockfight/engine/health/":
                     return self.send_json(HTTPStatus.OK, self.server.payments.cockfight.health())
+                if path == "/api/cockfight/stream/health/":
+                    return self.send_json(HTTPStatus.OK, self.server.payments.streaming.health())
+                if not self.signed_in():
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "Sign in is required."})
                 if path == "/api/cockfight/odds/current/":
                     game_value = (query.get("game_id") or [""])[0]
                     return self.send_json(HTTPStatus.OK, self.server.payments.cockfight.current_odds(int(game_value) if game_value else None))
@@ -1926,8 +1933,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if path == "/api/cockfight/stream/current/":
                     game_value = (query.get("game_id") or [""])[0]
                     return self.send_json(HTTPStatus.OK, self.server.payments.streaming.current_stream(int(game_value) if game_value else None))
-                if path == "/api/cockfight/stream/health/":
-                    return self.send_json(HTTPStatus.OK, self.server.payments.streaming.health())
                 if path == "/api/cockfight/china/current/":
                     return self.send_json(HTTPStatus.OK, self.server.payments.china_feed.current())
                 return self.send_json(HTTPStatus.NOT_FOUND, {"detail": "Cockfight endpoint not found."})
