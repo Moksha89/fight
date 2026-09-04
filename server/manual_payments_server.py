@@ -1404,15 +1404,12 @@ class PaymentService:
 
     @staticmethod
     def guest_site_config(payload: dict) -> dict:
-        """Strip every stream and media source so signed-out visitors only see branding."""
+        """Strip every stream and playable media source; guests keep card thumbnails and titles only."""
         china = dict(payload.get("china_feed") or {})
         china.update({"live_url": "", "match": None, "feed_match": None})
         return {
             **payload,
-            "banners": [
-                {key: item.get(key) for key in ("id", "placement", "title", "image_url", "active")}
-                for item in payload.get("banners", []) if item.get("placement") == "HOME_HERO" and item.get("image_url")
-            ],
+            "banners": [{**item, "media_url": ""} for item in payload.get("banners", [])],
             "featured_game": None,
             "games": [],
             "stream": {"status": "OFFLINE", "playback_url": ""},
