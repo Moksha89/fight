@@ -614,7 +614,7 @@ async function submitSecurity(form) {
   store.setState({securityBusy:true,securityError:''});
   try{
     await api.changePassword({current_password,new_password,confirm_password});
-    clearSession();stopLiveServices();
+    clearSession();startPublicViewerPoll();
     store.setState({authenticated:false,user:null,securityFlow:false,securityBusy:false,route:'home',authMode:'login',authStep:'credentials',authError:''});
     window.history.replaceState(null,'','#home');
     showToast('Password changed. Sign in again with your new password.','success');
@@ -708,6 +708,7 @@ function connectLiveServices() {
   if(current.authenticated)liveServiceTimers.push(window.setInterval(()=>{hydrateAccount();hydrateSiteConfig();},15000));
 }
 
+function startPublicViewerPoll(){stopLiveServices();liveServiceTimers.push(window.setInterval(pollEngine,5000));}
 function stopLiveServices(){liveServiceTimers.forEach(timer=>window.clearInterval(timer));liveServiceTimers=[];}
 
 let lastEngineEvent=0;
@@ -733,7 +734,7 @@ async function logout(withToast = true) {
     return;
   }
   try{if(getToken())await api.logout();}catch{/* Local state is still cleared if the session already expired. */}
-  clearSession(); stopLiveServices(); stopStream();
+  clearSession(); startPublicViewerPoll(); stopStream();
   store.setState({authenticated:false,previewMode:false,user:null,route:'home',bets:[],transactions:[],selectedOutcome:null,quote:null,sidebarOpen:false});
   window.history.pushState(null,'','#home');
   if (withToast) showToast('You have signed out.','success');
@@ -813,6 +814,7 @@ window.setInterval(updateCountdown,1000);
 render();
 hydrateSiteConfig();
 if(store.getState().authenticated){if(store.getState().route==='home')navigate('dashboard');hydrateAccount();connectLiveServices();}
+else if(!store.getState().previewMode)startPublicViewerPoll();
 else if(store.getState().previewMode){if(window.location.hash!=='#'+store.getState().route)window.history.replaceState(null,'',`#${store.getState().route}`);hydrateAccount();connectLiveServices();}
 else{const requested=store.getState().route;(async()=>{try{const data=await api.me();setSession({authenticated:true,user:data});const user=normalizeUser(data);const route=protectedRoutes.has(requested)?requested:requested==='home'?'dashboard':requested;store.setState({authenticated:true,previewMode:false,user,route});window.history.replaceState(null,'',`#${route}`);hydrateAccount();connectLiveServices();}catch{clearSession();if(protectedRoutes.has(requested))store.setState({route:'home',authMode:'login',pendingRoute:requested});}})();}
 if('serviceWorker'in navigator&&!isLocalPreview&&window.location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('/play/sw.js').catch(()=>{}));
