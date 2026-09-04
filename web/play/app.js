@@ -1,5 +1,5 @@
 import { api, ApiError, clearSession, getToken, setSession } from './api.js?v=55';
-import { appShell, arenaOutcomeCard, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=65';
+import { appShell, arenaOutcomeCard, categoryGames, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=65';
 import { previewBets, previewMatch, previewResults, previewUser } from './data.js';
 import { createStore } from './store.js';
 import { mountStream, normalizeStream, stopStream } from './streaming.js?v=52';
@@ -53,7 +53,6 @@ const store = createStore({
   bets: localAutoPreview ? [...previewBets] : [],
   transactions: [],
   selectedOutcome: null,
-  selectedScreen: 1,
   selectedGameId: null,
   stake: 500,
   quote: null,
@@ -175,8 +174,9 @@ async function hydrateSiteConfig() {
     const isFeatured=!selectedGame||String(selectedGame.id)===String(featured?.id);
     const game=selectedGame||featured;
     const match=matchFromGame(game,current.match,isFeatured?(siteConfig.stream||{}):{});
+    if(typeof siteConfig.viewers==='number')match.viewers=siteConfig.viewers;
     const patch={siteConfig,match};
-    if(current.selectedGameId!=null&&!selectedGame){patch.selectedGameId=null;patch.selectedScreen=1;patch.quote=null;patch.selectedOutcome=null;}
+    if(current.selectedGameId!=null&&!selectedGame){patch.selectedGameId=null;patch.quote=null;patch.selectedOutcome=null;}
     store.setState(patch);
   }
   catch { /* The legacy backend may not expose brand configuration yet. */ }
@@ -194,7 +194,7 @@ function arenaHomeView(state, { publicMode = false } = {}) {
     : `<button class="prediction-button" type="button" data-action="request-quote" ${!outcome||!bettingOpen||state.quoteBusy?'disabled':''}><span>${icon('shield',27)}</span><strong>${state.quoteBusy?'Checking…':outcome?'Review bet':'Choose a side'}</strong><small>${outcome?`${money(state.stake)} · server quote`:'Red, tie, or blue'}</small></button>`;
   const body = `<section class="arena-home" aria-label="Cockfight live arena">
     ${streamFrame(match,false,true)}
-    ${screenSelector(state.selectedScreen,state.siteConfig?.games||[])}
+    ${screenSelector(state.match?.id,state.siteConfig?.games||[],state.siteConfig?.categories||[])}
     <div class="arena-market" aria-label="Match outcomes">${arenaOutcomeCard({side:1,label:'Red',odds:match.teamA.odds,selected:selected===1,disabled:!bettingOpen})}${arenaOutcomeCard({side:3,label:'Tie',odds:match.draw.odds,selected:selected===3,disabled:!bettingOpen})}${arenaOutcomeCard({side:2,label:'Blue',odds:match.teamB.odds,selected:selected===2,disabled:!bettingOpen})}</div>
     <section class="chip-section" aria-labelledby="chip-title"><div class="chip-section__head"><span id="chip-title">Select Chips</span></div><div class="arena-chips">${chips.map(amount=>`<button class="${state.stake===amount?'is-active':''}" type="button" data-action="set-stake" data-amount="${amount}">${amount>=1000?`₹${amount/1000}K`:`₹${amount}`}</button>`).join('')}</div></section>
     <div class="arena-actions"><button type="button" data-action="show-terms">${icon('crown',23)}<span>VIP</span></button><button type="button" data-action="show-rules">${icon('shield',23)}<span>Disclaimer</span></button>${mainAction}<button type="button" data-action="navigate" data-route="bets">${icon('history',23)}<span>History</span></button></div>
@@ -718,6 +718,7 @@ async function pollEngine(){
   try{
     const data=await api.engineEvents(lastEngineEvent);
     const events=data.results||[];
+    if(typeof data.viewers==='number'){const live=store.getState().match;if(live&&live.viewers!==data.viewers)store.setState({match:{...live,viewers:data.viewers}});}
     if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateAccount()]);}
   }catch{/* The next poll retries automatically. */}
   finally{enginePollBusy=false;}
@@ -755,7 +756,7 @@ document.addEventListener('click',event=>{
   else if(action==='toggle-sidebar')store.setState(current=>({...current,sidebarOpen:!current.sidebarOpen}));
   else if(action==='close-sidebar')store.setState({sidebarOpen:false});
   else if(action==='select-outcome')store.setState({selectedOutcome:Number(control.dataset.side),quote:null});
-  else if(action==='select-screen'){const current=store.getState();const game=(current.siteConfig?.games||[]).find(item=>String(item.id)===String(control.dataset.gameId));store.setState({selectedScreen:Number(control.dataset.screen),selectedGameId:game?.id??null,match:matchFromGame(game,current.match),quote:null,selectedOutcome:null});showToast(`${game?.title||`Match ${control.dataset.screen}`} selected.`,'success');}
+  else if(action==='select-screen'||action==='select-category'){const current=store.getState();const games=current.siteConfig?.games||[];let game;if(action==='select-category'){const list=categoryGames(games,control.dataset.category);game=list.find(item=>item.status==='BETTING_OPEN')||list.find(item=>item.status==='LIVE')||list[0];}else game=games.find(item=>String(item.id)===String(control.dataset.gameId));if(!game){showToast('No match is running in this category right now.','info');return;}store.setState({selectedGameId:game.id,match:matchFromGame(game,current.match),quote:null,selectedOutcome:null});showToast(`${game.title} selected.`,'success');}
   else if(action==='toggle-stream'){const video=document.querySelector('#stream-player video');if(video){if(video.paused){video.play().catch(()=>{});control.innerHTML=icon('pause',22);control.setAttribute('aria-label','Pause stream');}else{video.pause();control.innerHTML=icon('play',22);control.setAttribute('aria-label','Play stream');}}else showToast('The arena feed is standing by.','info');}
   else if(action==='toggle-sound'){const video=document.querySelector('#stream-player video');if(video){video.muted=!video.muted;showToast(video.muted?'Stream muted.':'Stream sound on.','success');}else showToast('The arena feed is standing by.','info');}
   else if(action==='fullscreen-stream'){const frame=control.closest('.arena-player');const video=frame?.querySelector('video');if(frame?.requestFullscreen)frame.requestFullscreen().catch(()=>{});else if(video?.webkitEnterFullscreen)video.webkitEnterFullscreen();}

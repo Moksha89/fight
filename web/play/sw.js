@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v59-keep-selected-arena';
+const CACHE_NAME = 'roosterrun-v60-category-tabs';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',

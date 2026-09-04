@@ -1383,7 +1383,7 @@ class PaymentService:
 
     def public_site_config(self) -> dict:
         config = self.admin_config()
-        games = self.player_visible_games()
+        games = [game for game in self.player_visible_games() if game["status"] not in {"DRAFT", "CANCELLED", "SETTLED"}]
         featured_game = next((game for game in games if game["featured"]), games[0] if games else None)
         categories = [item for item in self.admin_game_categories() if item["visible"]]
         compliance = self.compliance.policy()
@@ -1392,7 +1392,7 @@ class PaymentService:
             "social": [link for link in config.get("social", []) if link["active"] and link["url"]],
             "banners": self.admin_banners(True), "vip_tiers": self.admin_vip_tiers(True),
             "featured_game": featured_game,
-            "games": [game for game in games if game["status"] not in {"DRAFT", "CANCELLED"}],
+            "games": games,
             "categories": [{"slug": item["slug"], "name": item["name"], "description": item["description"], "builtin": item["builtin"]} for item in categories],
             "stream": self.streaming.current_stream(featured_game["id"]) if featured_game else {"status": "OFFLINE", "playback_url": ""},
             "china_feed": self.china_feed.current(),
@@ -1494,6 +1494,30 @@ class PaymentService:
         }
 
 
+class LivePresence:
+    """Counts distinct clients that polled the live arena recently (real concurrent viewers)."""
+
+    WINDOW_SECONDS = 30
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._seen: dict[str, float] = {}
+
+    def touch(self, client_key: str) -> int:
+        now = time.monotonic()
+        with self._lock:
+            self._seen[client_key] = now
+            cutoff = now - self.WINDOW_SECONDS
+            for key in [key for key, stamp in self._seen.items() if stamp < cutoff]:
+                del self._seen[key]
+            return len(self._seen)
+
+    def count(self) -> int:
+        cutoff = time.monotonic() - self.WINDOW_SECONDS
+        with self._lock:
+            return sum(1 for stamp in self._seen.values() if stamp >= cutoff)
+
+
 class RoosterRunServer(ThreadingHTTPServer):
     daemon_threads = True
     allow_reuse_address = True
@@ -1506,6 +1530,7 @@ class RoosterRunServer(ThreadingHTTPServer):
         secure_default = "0" if preview_mode else "1"
         self.secure_cookies = os.environ.get("ROOSTERRUN_SECURE_COOKIES", secure_default).strip().lower() not in {"0", "false", "no"}
         self.trust_proxy = os.environ.get("ROOSTERRUN_TRUST_PROXY", "0").strip().lower() in {"1", "true", "yes"}
+        self.presence = LivePresence()
         try:
             max_requests = int(os.environ.get("ROOSTERRUN_MAX_CONCURRENT_REQUESTS", "64"))
         except ValueError:
@@ -1652,6 +1677,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 pass
         return peer
 
+    def presence_key(self) -> str:
+        session = self.cookie(USER_SESSION_COOKIE)
+        raw = session or f"{self.client_ip()}|{self.headers.get('User-Agent', '')}"
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:24]
+
     def request_context(self, actor_id: object, actor_role: object) -> None:
         AUDIT_CONTEXT.set(
             {
@@ -1793,7 +1823,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/site/config/":
             try:
-                return self.send_json(HTTPStatus.OK, self.server.payments.public_site_config())
+                payload = self.server.payments.public_site_config()
+                payload["viewers"] = self.server.presence.count()
+                return self.send_json(HTTPStatus.OK, payload)
             except Exception as error:
                 return self.handle_api_error(error)
         if path.startswith("/api/user/"):
@@ -1827,7 +1859,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     return self.send_json(HTTPStatus.OK, {"results": self.server.payments.cockfight.history(limit)})
                 if path == "/api/cockfight/events/":
                     after = int((query.get("after") or ["0"])[0])
-                    return self.send_json(HTTPStatus.OK, {"results": self.server.payments.cockfight.events(after)})
+                    viewers = self.server.presence.touch(self.presence_key())
+                    return self.send_json(HTTPStatus.OK, {"results": self.server.payments.cockfight.events(after), "viewers": viewers})
                 if path == "/api/cockfight/stream/current/":
                     game_value = (query.get("game_id") or [""])[0]
                     return self.send_json(HTTPStatus.OK, self.server.payments.streaming.current_stream(int(game_value) if game_value else None))

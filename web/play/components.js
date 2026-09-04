@@ -136,15 +136,40 @@ export function streamFrame(match, compact = false, reference = false) {
     <div class="arena-player__media" id="stream-player" data-stream-type="${escapeHtml(stream.type || 'offline')}" data-stream-url="${escapeHtml(stream.url || '')}">
       <div class="arena-player__placeholder"><img class="arena-player__poster" src="${escapeHtml(poster)}" alt="Two roosters facing in the arena"><span class="arena-player__shade"></span><span class="arena-player__standby">${stream.url ? 'Connecting to secure playback…' : 'Arena preview · feed standing by'}</span></div>
     </div>
-    <div class="arena-player__top">${reference ? '<span class="status status--live">LIVE</span>' : statusBadge(match.isPreview ? 'preview' : match.status)}${match.liveFeed ? `<span class="arena-label">${icon('live',14)} China 24/7 · Match #${escapeHtml(match.matchNumber || match.id)} · Betting ${match.status === 'betting_open' ? 'open' : 'closed'}</span>` : ''}<span class="arena-label">${icon('eye',14)} ${match.viewers ? `${(Number(match.viewers)/1000).toFixed(1)}K` : '12.5K'}</span>${reference ? `<button class="arena-player__fullscreen" type="button" data-action="fullscreen-stream" aria-label="View stream fullscreen">${icon('maximize',19)}</button>` : ''}</div>
+    <div class="arena-player__top">${reference ? '<span class="status status--live">LIVE</span>' : statusBadge(match.isPreview ? 'preview' : match.status)}${match.liveFeed ? `<span class="arena-label">${icon('live',14)} China 24/7 · Match #${escapeHtml(match.matchNumber || match.id)} · Betting ${match.status === 'betting_open' ? 'open' : 'closed'}</span>` : ''}<span class="arena-label">${icon('eye',14)} ${formatViewers(match.viewers)}</span>${reference ? `<button class="arena-player__fullscreen" type="button" data-action="fullscreen-stream" aria-label="View stream fullscreen">${icon('maximize',19)}</button>` : ''}</div>
     <div class="arena-player__controls"><button type="button" data-action="toggle-stream" aria-label="Play or pause stream">${icon('pause',22)}</button><span class="arena-player__track"><i></i></span><span class="arena-player__live-label">LIVE <i></i></span><button type="button" data-action="toggle-sound" aria-label="Mute or unmute stream">${icon('volume',20)}</button></div>
   </div>`;
 }
 
-export function screenSelector(selected = 1, games = []) {
-  const screens = games.slice(0,5);
-  if (screens.length < 2) return '';
-  return `<div class="screen-selector" aria-label="Scheduled arena matches">${screens.map((game,index)=>{const date=new Date(game.scheduled_at);const time=Number.isNaN(date.getTime())?'Scheduled':date.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});return `<button class="${selected === index + 1 ? 'is-active' : ''}" type="button" data-action="select-screen" data-screen="${index + 1}" data-game-id="${escapeHtml(game.id)}"><span>${icon('live',16)} Match ${escapeHtml(game.match_number || game.id)}</span><small>${icon('clock',14)} ${escapeHtml(time)}</small><i></i></button>`;}).join('')}</div>`;
+export function formatViewers(value) {
+  const count = Math.max(0, Number(value) || 0);
+  return count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+}
+
+const GAME_STATUS_LABEL = { BETTING_OPEN: 'Betting open', LIVE: 'Live', SCHEDULED: 'Upcoming', BETTING_CLOSED: 'Closed' };
+
+export function categoryGames(games = [], slug = '') {
+  return games.filter(game => String(game.category_slug || '') === String(slug || ''));
+}
+
+export function screenSelector(activeGameId, games = [], categories = []) {
+  const tabs = categories.filter(category => categoryGames(games, category.slug).length || category.builtin);
+  const uncategorised = categoryGames(games, '');
+  if (uncategorised.length) tabs.push({ slug: '', name: 'Arena', builtin: false });
+  if (!tabs.length) return '';
+  const activeGame = games.find(game => String(game.id) === String(activeGameId));
+  const activeSlug = activeGame ? String(activeGame.category_slug || '') : String(tabs[0].slug);
+  const siblings = categoryGames(games, activeSlug);
+  const tabsHtml = tabs.map(category => {
+    const list = categoryGames(games, category.slug);
+    const live = list.some(game => ['LIVE', 'BETTING_OPEN'].includes(game.status));
+    const status = list.length ? (live ? 'Live now' : `${list.length} upcoming`) : 'Offline';
+    return `<button class="${String(category.slug) === activeSlug ? 'is-active' : ''}" type="button" data-action="select-category" data-category="${escapeHtml(category.slug)}" ${list.length ? '' : 'disabled'}><span>${icon('live',16)} ${escapeHtml(category.name)}</span><small>${icon('clock',14)} ${escapeHtml(status)}</small><i></i></button>`;
+  }).join('');
+  const gamesHtml = siblings.length > 1
+    ? `<div class="screen-games" aria-label="Matches in this category">${siblings.slice(0, 8).map(game => `<button class="${String(game.id) === String(activeGameId) ? 'is-active' : ''}" type="button" data-action="select-screen" data-game-id="${escapeHtml(game.id)}">${escapeHtml(game.title)} · ${escapeHtml(GAME_STATUS_LABEL[game.status] || game.status)}</button>`).join('')}</div>`
+    : '';
+  return `<div class="screen-selector screen-selector--count-${Math.min(tabs.length,5)}" aria-label="Game categories">${tabsHtml}</div>${gamesHtml}`;
 }
 
 export function arenaOutcomeCard({ side, label, odds, selected, disabled }) {
