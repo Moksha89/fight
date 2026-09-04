@@ -818,7 +818,6 @@ window.setInterval(updateCountdown,1000);
 render();
 hydrateSiteConfig();
 if(store.getState().authenticated){if(store.getState().route==='home')navigate('dashboard');hydrateAccount();connectLiveServices();}
-else if(!store.getState().previewMode)startPublicViewerPoll();
 else if(store.getState().previewMode){if(window.location.hash!=='#'+store.getState().route)window.history.replaceState(null,'',`#${store.getState().route}`);hydrateAccount();connectLiveServices();}
-else{const requested=store.getState().route;(async()=>{try{const data=await api.me();setSession({authenticated:true,user:data});const user=normalizeUser(data);const route=protectedRoutes.has(requested)?requested:requested==='home'?'dashboard':requested;store.setState({authenticated:true,previewMode:false,user,route});window.history.replaceState(null,'',`#${route}`);hydrateAccount();connectLiveServices();}catch{clearSession();if(protectedRoutes.has(requested))store.setState({route:'home',authMode:'login',pendingRoute:requested});}})();}
+else{startPublicViewerPoll();const requested=store.getState().route;(async()=>{try{const data=await api.me();setSession({authenticated:true,user:data});const user=normalizeUser(data);const route=protectedRoutes.has(requested)?requested:requested==='home'?'dashboard':requested;store.setState({authenticated:true,previewMode:false,user,route});window.history.replaceState(null,'',`#${route}`);hydrateAccount();connectLiveServices();}catch{clearSession();if(protectedRoutes.has(requested))store.setState({route:'home',authMode:'login',pendingRoute:requested});}})();}
 if('serviceWorker'in navigator&&!isLocalPreview&&window.location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('/play/sw.js').catch(()=>{}));
