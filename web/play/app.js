@@ -1,5 +1,5 @@
 import { api, ApiError, clearSession, getToken, setSession } from './api.js?v=55';
-import { appShell, arenaOutcomeCard, categoryGames, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=66';
+import { appShell, arenaOutcomeCard, categoryGames, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=67';
 import { previewBets, previewMatch, previewResults, previewUser } from './data.js';
 const guestUser = { ...previewUser, username: 'Guest', walletBalance: 0, exposure: 0, bonus: 0, points: 0 };
 import { createStore } from './store.js';
@@ -766,13 +766,26 @@ async function hydrateHistory(){
   catch{/* retried on the next tick */}
 }
 
+async function hydrateBetting(){
+  if(!store.getState().authenticated&&!store.getState().previewMode)return hydrateHistory();
+  const results=await Promise.allSettled([api.me(),api.bets(),api.statement(),api.autoHistory(20)]);
+  const updates={servicesOnline:results.some(result=>result.status==='fulfilled')};
+  if(results[0].status==='fulfilled')updates.user=normalizeUser(results[0].value);
+  else if(results[0].reason instanceof ApiError&&results[0].reason.status===401)return logout(false);
+  if(results[1].status==='fulfilled')updates.bets=(results[1].value.results||results[1].value||[]).map(normalizeBet);
+  if(results[2].status==='fulfilled')updates.transactions=results[2].value.results||results[2].value||[];
+  if(results[3].status==='fulfilled')updates.results=(results[3].value.results||results[3].value||[]).map(normalizeResult);
+  store.setState(updates);
+}
+
 function connectLiveServices() {
   stopLiveServices();
   const current=store.getState();
   if(!current.authenticated&&!current.previewMode)return;
   pollEngine();
   liveServiceTimers.push(window.setInterval(pollEngine,2500));
-  liveServiceTimers.push(window.setInterval(()=>{if(current.authenticated)hydrateAccount();hydrateSiteConfig();hydrateHistory();},15000));
+  liveServiceTimers.push(window.setInterval(()=>{hydrateSiteConfig();if(current.authenticated)hydrateBetting();else hydrateHistory();},15000));
+  liveServiceTimers.push(window.setInterval(()=>{if(current.authenticated)hydrateAccount();},60000));
 }
 
 function startPublicViewerPoll(){
@@ -799,7 +812,7 @@ async function pollEngine(){
     const data=await api.engineEvents(lastEngineEvent);
     const events=data.results||[];
     if(typeof data.viewers==='number'){const live=store.getState().match;if(live&&live.viewers!==data.viewers)store.setState({match:{...live,viewers:data.viewers}});}
-    if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateAccount(),hydrateHistory()]);}
+    if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateBetting()]);}
   }catch{/* The next poll retries automatically. */}
   finally{enginePollBusy=false;}
 }

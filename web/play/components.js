@@ -192,7 +192,7 @@ export function recentMatchTable(results = [], bets = [], categorySlug = '') {
     const outcomeClass = outcome === 'Won' ? 'is-won' : outcome === 'Lost' ? 'is-lost' : '';
     return `<tr><td>${escapeHtml(result.id)}</td><td><span class="table-corner table-corner--${escapeHtml(result.tone)}"></span>${escapeHtml(label(result.winner))}</td><td>${escapeHtml(mine.length ? [...new Set(mine.map(item=>label(item.pick)))].join(', ') : '—')}</td><td class="${outcomeClass}">${outcome}</td><td>${bet?.odds ? `${Number(bet.odds).toFixed(2)}×` : '—'}</td><td>${formatDate(result.endedAt,{hour:'2-digit',minute:'2-digit'}).split(',').pop()}</td></tr>`;
   }).join('');
-  return `<div class="recent-table-wrap"><table class="recent-table"><thead><tr><th>#</th><th>Winner</th><th>Your Prediction</th><th>Result</th><th>Odds</th><th>Time</th></tr></thead><tbody>${rows||`<tr><td colspan="6" class="recent-table__empty">No completed matches in this category yet.</td></tr>`}</tbody></table></div>`;
+  return `<div class="recent-table-wrap"><table class="recent-table"><thead><tr><th>#</th><th>Winner</th><th>Your Pick</th><th>Result</th><th>Odds</th><th>Time</th></tr></thead><tbody>${rows||`<tr><td colspan="6" class="recent-table__empty">No completed matches in this category yet.</td></tr>`}</tbody></table></div>`;
 }
 
 export function outcomeCard({ side, label, corner, odds, selected, disabled }) {

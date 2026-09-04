@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v74-history-labels';
+const CACHE_NAME = 'roosterrun-v75-light-polling';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',
