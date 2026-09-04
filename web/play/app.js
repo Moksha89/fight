@@ -783,15 +783,16 @@ function connectLiveServices() {
 
 function startPublicViewerPoll(){
   stopLiveServices();
-  hydrateHistory();
-  liveServiceTimers.push(window.setInterval(pollEngine,5000));
-  liveServiceTimers.push(window.setInterval(()=>{hydrateSiteConfig();hydrateHistory();},15000));
+  liveServiceTimers.push(window.setInterval(hydrateSiteConfig,60000));
 }
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState!=='visible')return;
   enginePollBusy=false;
-  pollEngine();hydrateSiteConfig();hydrateHistory();
-  if(store.getState().authenticated)hydrateAccount();
+  const {authenticated,previewMode}=store.getState();
+  hydrateSiteConfig();
+  if(!authenticated&&!previewMode)return;
+  pollEngine();hydrateHistory();
+  if(authenticated)hydrateAccount();
 });
 function stopLiveServices(){liveServiceTimers.forEach(timer=>window.clearInterval(timer));liveServiceTimers=[];}
 
@@ -818,9 +819,10 @@ async function logout(withToast = true) {
     return;
   }
   try{if(getToken())await api.logout();}catch{/* Local state is still cleared if the session already expired. */}
-  clearSession(); startPublicViewerPoll(); stopStream();
-  store.setState({authenticated:false,previewMode:false,user:null,route:'home',bets:[],transactions:[],selectedOutcome:null,quote:null,sidebarOpen:false});
+  clearSession(); stopStream();
+  store.setState({authenticated:false,previewMode:false,user:null,route:'home',bets:[],transactions:[],results:[],siteConfig:null,match:{...store.getState().match,id:null,liveFeed:false,matchNumber:'',stream:{type:'offline',url:'',fallbackUrl:'',startedAt:'',asLive:false,autoplay:false}},selectedGameId:null,homeMedia:null,dialog:null,selectedOutcome:null,quote:null,sidebarOpen:false});
   window.history.pushState(null,'','#home');
+  startPublicViewerPoll(); hydrateSiteConfig();
   if (withToast) showToast('You have signed out.','success');
 }
 
