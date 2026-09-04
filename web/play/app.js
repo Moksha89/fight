@@ -175,8 +175,10 @@ async function hydrateSiteConfig() {
     const keptSlug=String(selectedGame?.category_slug??current.match?.categorySlug??'');
     // A finished auto-feed match hands over to the next open match in its category.
     if(selectedGame&&!open(selectedGame)&&selectedGame.source==='CHINA_FEED'&&games.some(item=>String(item.category_slug||'')===keptSlug&&open(item)))selectedGame=null;
-    const sameCategory=selectedGame?null:games.find(item=>String(item.category_slug||'')===keptSlug&&open(item))||games.find(item=>String(item.category_slug||'')===keptSlug);
-    const rollingOver=!selectedGame&&!sameCategory&&Boolean(keptSlug)&&!current.match?.isPreview&&(siteConfig.categories||[]).some(item=>String(item.slug)===keptSlug);
+    // Only an explicit selection or the China auto-feed (whose matches hand over with a gap) keeps its category; everyone else follows featured_game.
+    const sticky=current.selectedGameId!=null||Boolean(current.match?.liveFeed);
+    const sameCategory=selectedGame||!sticky?null:games.find(item=>String(item.category_slug||'')===keptSlug&&open(item))||games.find(item=>String(item.category_slug||'')===keptSlug);
+    const rollingOver=!selectedGame&&!sameCategory&&Boolean(keptSlug)&&Boolean(current.match?.liveFeed)&&!current.match?.isPreview&&(siteConfig.categories||[]).some(item=>String(item.slug)===keptSlug);
     const featured=rollingOver?null:siteConfig.featured_game;
     const game=selectedGame||sameCategory||featured;
     const isFeatured=Boolean(game)&&String(game.id)===String(siteConfig.featured_game?.id);
@@ -357,6 +359,13 @@ function restoreFormDrafts(root, draft) {
 
 // Patch the live DOM in place instead of replacing innerHTML so the mounted stream element
 // (iframe/video) is never detached - moving an iframe in the DOM reloads it.
+// Index path from root to node, e.g. "0/2/1"; the morph is positional, so it is only safe when the stream sits at the same path in both trees.
+function domPath(node, root) {
+  const path = [];
+  for (let current = node; current && current !== root; current = current.parentNode)
+    path.unshift(Array.prototype.indexOf.call(current.parentNode.childNodes, current));
+  return path.join('/');
+}
 function morphChildren(oldParent, newParent, keep) {
   const oldNodes = Array.from(oldParent.childNodes);
   const newNodes = Array.from(newParent.childNodes);
@@ -399,7 +408,11 @@ function render() {
   const template = document.createElement('template');
   template.innerHTML = html;
   const nextStream = template.content.getElementById('stream-player');
-  const keepStream = streamMounted && nextStream && `${nextStream.dataset.streamType}|${nextStream.dataset.streamUrl}` === previousKey;
+    const keepStream =
+    streamMounted &&
+    nextStream &&
+    `${nextStream.dataset.streamType}|${nextStream.dataset.streamUrl}` === previousKey &&
+    domPath(previousStream, app) === domPath(nextStream, template.content);
   if (keepStream) morphChildren(app, template.content, previousStream);
   else app.innerHTML = html;
   renderOverlay(state);
