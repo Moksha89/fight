@@ -154,7 +154,7 @@ function matchFromGame(game,current,liveStream={}) {
   if(!game)return current;
   if(!liveStream.playback_url||!['LIVE','DEGRADED'].includes(String(liveStream.status||'').toUpperCase()))liveStream={};
   return {
-    ...current,id:game.id,title:game.title,arena:game.arena,categorySlug:game.category_slug||'',isPreview:false,
+    ...current,id:game.id,title:game.title,arena:game.arena,categorySlug:game.category_slug||'',isPreview:false,rollingOver:false,
     status:String(game.status||current.status).toLowerCase(),scheduledAt:game.scheduled_at||current.scheduledAt,
     bettingClosesAt:game.betting_closes_at||current.bettingClosesAt,thumbnailUrl:game.thumbnail_url||current.thumbnailUrl,
     liveFeed:game.source==='CHINA_FEED',matchNumber:game.match_number||'',
@@ -170,17 +170,22 @@ async function hydrateSiteConfig() {
     const siteConfig=await api.siteConfig();
     const current=store.getState();
     const games=siteConfig.games||[];
-    const selectedGame=current.selectedGameId==null?null:games.find(item=>String(item.id)===String(current.selectedGameId));
-    const keptSlug=String(current.match?.categorySlug||'');
-    const sameCategory=selectedGame?null:games.find(item=>String(item.category_slug||'')===keptSlug&&['BETTING_OPEN','LIVE'].includes(item.status))||games.find(item=>String(item.category_slug||'')===keptSlug);
+    const open=item=>['BETTING_OPEN','LIVE'].includes(item.status);
+    let selectedGame=current.selectedGameId==null?null:games.find(item=>String(item.id)===String(current.selectedGameId));
+    const keptSlug=String(selectedGame?.category_slug??current.match?.categorySlug??'');
+    // A finished auto-feed match hands over to the next open match in its category.
+    if(selectedGame&&!open(selectedGame)&&selectedGame.source==='CHINA_FEED'&&games.some(item=>String(item.category_slug||'')===keptSlug&&open(item)))selectedGame=null;
+    const sameCategory=selectedGame?null:games.find(item=>String(item.category_slug||'')===keptSlug&&open(item))||games.find(item=>String(item.category_slug||'')===keptSlug);
     const rollingOver=!selectedGame&&!sameCategory&&Boolean(keptSlug)&&!current.match?.isPreview&&(siteConfig.categories||[]).some(item=>String(item.slug)===keptSlug);
     const featured=rollingOver?null:siteConfig.featured_game;
     const game=selectedGame||sameCategory||featured;
     const isFeatured=Boolean(game)&&String(game.id)===String(siteConfig.featured_game?.id);
     const match=matchFromGame(game,current.match,isFeatured?(siteConfig.stream||{}):{});
+    if(rollingOver&&!match.rollingOver)Object.assign(match,{rollingOver:true,status:'closed'});
     if(typeof siteConfig.viewers==='number')match.viewers=siteConfig.viewers;
     const patch={siteConfig,match};
-    if(current.selectedGameId!=null&&!selectedGame){patch.selectedGameId=null;patch.quote=null;patch.selectedOutcome=null;}
+    const nextSelected=selectedGame?selectedGame.id:null;
+    if(current.selectedGameId!=null&&String(nextSelected)!==String(current.selectedGameId)){patch.selectedGameId=nextSelected;patch.quote=null;patch.selectedOutcome=null;}
     store.setState(patch);
   }
   catch { /* The legacy backend may not expose brand configuration yet. */ }
@@ -299,7 +304,7 @@ function publicPage(state) {
   const previewNotice = state.match.isPreview
     ? `<div class="data-notice" role="status">${icon('alert',18)} <span>This is interface preview data. Live match details, odds, and results appear only after the backend connects.</span></div>`
     : '';
-  if (state.route === 'live') content = `<main id="main-content" class="page"><div class="container">${previewNotice}${liveView(state)}</div></main>`;
+  if (state.route === 'live') content = landingView(state);
   if (state.route === 'results') content = `<main id="main-content" class="page"><div class="container">${previewNotice}${resultsView(state,true)}</div></main>`;
   return `${publicHeader(state.route,state.previewMode ? (state.user || previewUser) : state.authenticated ? state.user : null)}${content}${publicFooter()}${publicMobileNav(state)}`;
 }
@@ -350,21 +355,59 @@ function restoreFormDrafts(root, draft) {
   });
 }
 
+// Patch the live DOM in place instead of replacing innerHTML so the mounted stream element
+// (iframe/video) is never detached - moving an iframe in the DOM reloads it.
+function morphChildren(oldParent, newParent, keep) {
+  const oldNodes = Array.from(oldParent.childNodes);
+  const newNodes = Array.from(newParent.childNodes);
+  const max = Math.max(oldNodes.length, newNodes.length);
+  for (let index = 0; index < max; index += 1) {
+    const oldNode = oldNodes[index];
+    const newNode = newNodes[index];
+    if (!newNode) { oldNode.remove(); continue; }
+    if (!oldNode) { oldParent.appendChild(newNode); continue; }
+    morphNode(oldNode, newNode, keep);
+  }
+}
+function morphNode(oldNode, newNode, keep) {
+  if (oldNode === keep) { const stale = newNode.getAttribute && newNode.id === 'stream-player'; if (!stale) oldNode.replaceWith(newNode); return; }
+  if (oldNode.nodeType !== newNode.nodeType || (oldNode.nodeType === Node.ELEMENT_NODE && oldNode.tagName !== newNode.tagName)) {
+    if (oldNode.contains && oldNode.contains(keep)) { morphChildren(oldNode, newNode, keep); return; }
+    oldNode.replaceWith(newNode);
+    return;
+  }
+  if (oldNode.nodeType !== Node.ELEMENT_NODE) { if (oldNode.nodeValue !== newNode.nodeValue) oldNode.nodeValue = newNode.nodeValue; return; }
+  for (const attr of Array.from(oldNode.attributes)) if (!newNode.hasAttribute(attr.name)) oldNode.removeAttribute(attr.name);
+  for (const attr of Array.from(newNode.attributes)) if (oldNode.getAttribute(attr.name) !== attr.value) oldNode.setAttribute(attr.name, attr.value);
+  if (oldNode.tagName === 'INPUT' || oldNode.tagName === 'TEXTAREA' || oldNode.tagName === 'SELECT') {
+    if (document.activeElement !== oldNode && oldNode.value !== newNode.value) oldNode.value = newNode.value;
+    if (oldNode.type === 'checkbox' || oldNode.type === 'radio') oldNode.checked = newNode.checked;
+    return;
+  }
+  if (oldNode.tagName === 'IFRAME' || oldNode.tagName === 'VIDEO') return;
+  morphChildren(oldNode, newNode, keep);
+}
+
 function render() {
   const state = store.getState();
   const inWorkspace = (state.authenticated || state.previewMode) && state.route !== 'home';
   const publicHome = !inWorkspace && state.route === 'home';
   const previousStream = document.getElementById('stream-player');
   const previousKey = previousStream ? `${previousStream.dataset.streamType}|${previousStream.dataset.streamUrl}` : '';
-  const mountedMedia = previousStream && !previousStream.querySelector('.arena-player__placeholder') ? Array.from(previousStream.childNodes) : null;
-  app.innerHTML = publicHome ? appShell({...state,route:'dashboard'},dashboardView(state)) : inWorkspace ? appShell(state, viewForRoute(state)) : publicPage(state);
+  const streamMounted = Boolean(previousStream && !previousStream.querySelector('.arena-player__placeholder'));
+  const html = publicHome ? appShell({...state,route:'dashboard'},dashboardView(state)) : inWorkspace ? appShell(state, viewForRoute(state)) : publicPage(state);
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  const nextStream = template.content.getElementById('stream-player');
+  const keepStream = streamMounted && nextStream && `${nextStream.dataset.streamType}|${nextStream.dataset.streamUrl}` === previousKey;
+  if (keepStream) morphChildren(app, template.content, previousStream);
+  else app.innerHTML = html;
   renderOverlay(state);
   applySiteConfig();
   updateCountdown();
   const streamElement = document.getElementById('stream-player');
   if (!streamElement) stopStream();
-  else if (mountedMedia && `${streamElement.dataset.streamType}|${streamElement.dataset.streamUrl}` === previousKey) streamElement.replaceChildren(...mountedMedia);
-  else mountStream(streamElement, state.match.stream);
+  else if (!keepStream || streamElement.querySelector('.arena-player__placeholder')) mountStream(streamElement, state.match.stream);
   if (state.route === 'wallet' && !state.paymentsLoaded && !state.paymentsLoading) queueMicrotask(hydratePayments);
   if (state.route === 'wallet' && state.paymentsLoaded && !state.paymentsLoading && Date.now() - paymentsRefreshedAt > 10000) queueMicrotask(hydratePayments);
 }
@@ -703,16 +746,32 @@ async function submitPaymentRequest(form) {
   }
 }
 
+async function hydrateHistory(){
+  try{const data=await api.autoHistory(20);store.setState({results:(data.results||data||[]).map(normalizeResult)});}
+  catch{/* retried on the next tick */}
+}
+
 function connectLiveServices() {
   stopLiveServices();
   const current=store.getState();
   if(!current.authenticated&&!current.previewMode)return;
   pollEngine();
   liveServiceTimers.push(window.setInterval(pollEngine,2500));
-  if(current.authenticated)liveServiceTimers.push(window.setInterval(()=>{hydrateAccount();hydrateSiteConfig();},15000));
+  liveServiceTimers.push(window.setInterval(()=>{if(current.authenticated)hydrateAccount();hydrateSiteConfig();hydrateHistory();},15000));
 }
 
-function startPublicViewerPoll(){stopLiveServices();liveServiceTimers.push(window.setInterval(pollEngine,5000));}
+function startPublicViewerPoll(){
+  stopLiveServices();
+  hydrateHistory();
+  liveServiceTimers.push(window.setInterval(pollEngine,5000));
+  liveServiceTimers.push(window.setInterval(()=>{hydrateSiteConfig();hydrateHistory();},15000));
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible')return;
+  enginePollBusy=false;
+  pollEngine();hydrateSiteConfig();hydrateHistory();
+  if(store.getState().authenticated)hydrateAccount();
+});
 function stopLiveServices(){liveServiceTimers.forEach(timer=>window.clearInterval(timer));liveServiceTimers=[];}
 
 let lastEngineEvent=0;
@@ -724,7 +783,7 @@ async function pollEngine(){
     const data=await api.engineEvents(lastEngineEvent);
     const events=data.results||[];
     if(typeof data.viewers==='number'){const live=store.getState().match;if(live&&live.viewers!==data.viewers)store.setState({match:{...live,viewers:data.viewers}});}
-    if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateAccount()]);}
+    if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateAccount(),hydrateHistory()]);}
   }catch{/* The next poll retries automatically. */}
   finally{enginePollBusy=false;}
 }
@@ -762,7 +821,6 @@ document.addEventListener('click',event=>{
   else if(action==='close-sidebar')store.setState({sidebarOpen:false});
   else if(action==='select-outcome')store.setState({selectedOutcome:Number(control.dataset.side),quote:null});
   else if(action==='select-screen'||action==='select-category'){const current=store.getState();const games=current.siteConfig?.games||[];let game;if(action==='select-category'){const list=categoryGames(games,control.dataset.category);game=list.find(item=>item.status==='BETTING_OPEN')||list.find(item=>item.status==='LIVE')||list[0];}else game=games.find(item=>String(item.id)===String(control.dataset.gameId));if(!game){showToast('No match is running in this category right now.','info');return;}store.setState({selectedGameId:game.id,match:matchFromGame(game,current.match),quote:null,selectedOutcome:null});showToast(`${game.title} selected.`,'success');}
-  else if(action==='toggle-stream'){const video=document.querySelector('#stream-player video');if(video){if(video.paused){video.play().catch(()=>{});control.innerHTML=icon('pause',22);control.setAttribute('aria-label','Pause stream');}else{video.pause();control.innerHTML=icon('play',22);control.setAttribute('aria-label','Play stream');}}else showToast('The arena feed is standing by.','info');}
   else if(action==='toggle-sound'){const video=document.querySelector('#stream-player video');if(video){video.muted=!video.muted;showToast(video.muted?'Stream muted.':'Stream sound on.','success');}else showToast('The arena feed is standing by.','info');}
   else if(action==='fullscreen-stream'){const frame=control.closest('.arena-player');const video=frame?.querySelector('video');if(frame?.requestFullscreen)frame.requestFullscreen().catch(()=>{});else if(video?.webkitEnterFullscreen)video.webkitEnterFullscreen();}
   else if(action==='set-stake')store.setState({stake:Number(control.dataset.amount),quote:null});
