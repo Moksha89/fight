@@ -217,6 +217,12 @@ function arenaHomeView(state, { publicMode = false } = {}) {
 
 function landingView(state) { return arenaHomeView(state,{publicMode:true}); }
 
+function gateView(state) {
+  const heroBanner = (state.siteConfig?.banners||[]).find(item=>item.placement==='HOME_HERO'&&item.image_url&&item.active!==false);
+  const hero = heroBanner ? heroBanner.image_url : '/static/home-cockfight-livestream-v2.png';
+  return `${publicHeader(state.route,null)}<main id="main-content" class="page"><section class="login-gate"><div class="login-gate__art" style="background-image:url('${escapeHtml(hero)}')"></div><div class="login-gate__panel"><span class="eyebrow">${icon('lock',16)} Members only</span><h1>Sign in to enter the arena</h1><p>Live cockfights, China 24/7, videos and highlights are available to signed-in players only.</p><div class="login-gate__actions">${button({label:'Login',action:'open-login',variant:'primary',iconName:'login'})}${button({label:'Create account',action:'open-register',variant:'secondary',iconName:'user'})}</div></div></section></main>${publicFooter()}`;
+}
+
 function publicFooter() {
   return `<footer class="site-footer"><div class="container site-footer__inner"><span>© 2026 RoosterRun · 18+ only · Play responsibly</span><div class="site-footer__links"><button data-action="show-rules">Rules</button><button data-action="show-support">Support</button><button data-action="show-terms">Terms</button></div></div></footer>`;
 }
@@ -404,7 +410,8 @@ function render() {
   const previousStream = document.getElementById('stream-player');
   const previousKey = previousStream ? `${previousStream.dataset.streamType}|${previousStream.dataset.streamUrl}` : '';
   const streamMounted = Boolean(previousStream && !previousStream.querySelector('.arena-player__placeholder'));
-  const html = publicHome ? appShell({...state,route:'dashboard'},dashboardView(state)) : inWorkspace ? appShell(state, viewForRoute(state)) : publicPage(state);
+  const guest = !state.authenticated && !state.previewMode;
+  const html = guest ? gateView(state) : publicHome ? appShell({...state,route:'dashboard'},dashboardView(state)) : inWorkspace ? appShell(state, viewForRoute(state)) : publicPage(state);
   const template = document.createElement('template');
   template.innerHTML = html;
   const nextStream = template.content.getElementById('stream-player');
@@ -434,7 +441,7 @@ function scheduleRender() {
 function navigate(route) {
   if (!validRoutes.has(route)) route = 'home';
   const state = store.getState();
-  if (protectedRoutes.has(route) && !state.authenticated && !state.previewMode) {
+  if (!state.authenticated && !state.previewMode) {
     store.setState({ authMode:'login', pendingRoute:route, authError:'', sidebarOpen:false, mobileMenuOpen:false });
     return;
   }
@@ -573,6 +580,7 @@ async function submitAuth(form) {
     window.history.pushState(null,'',`#${pendingRoute}`);
     showToast(mode==='login'?'Welcome back.':'Your account has been created.','success');
     hydrateAccount();
+    hydrateSiteConfig();
     connectLiveServices();
   } catch (error) { setAuthBusy(false); setAuthError(error.message||'Authentication failed.'); }
 }
@@ -842,7 +850,7 @@ document.addEventListener('click',event=>{
   else if(action==='close-payment-flow')store.setState({paymentFlow:null,paymentBusy:false});
   else if(action==='close-safety')store.setState({safetyFlow:null,safetyBusy:false});
   else if(action==='close-security')store.setState({securityFlow:false,securityBusy:false,securityError:''});
-  else if(action==='play-home-media'){const item=(store.getState().siteConfig?.banners||[]).find(entry=>String(entry.id)===String(control.dataset.id));if(item)store.setState({homeMedia:item});}
+  else if(action==='play-home-media'){const current=store.getState();if(!current.authenticated&&!current.previewMode){store.setState({authMode:'login',pendingRoute:'dashboard',authError:''});return;}const item=(current.siteConfig?.banners||[]).find(entry=>String(entry.id)===String(control.dataset.id));if(item)store.setState({homeMedia:item});}
   else if(action==='close-home-media')store.setState({homeMedia:null});
   else if(action==='filter-bets')store.setState({betFilter:control.dataset.filter});
   else if(action==='set-withdraw-method')store.setState({withdrawMethod:control.dataset.method});
@@ -890,5 +898,5 @@ render();
 hydrateSiteConfig();
 if(store.getState().authenticated){if(store.getState().route==='home')navigate('dashboard');hydrateAccount();connectLiveServices();}
 else if(store.getState().previewMode){if(window.location.hash!=='#'+store.getState().route)window.history.replaceState(null,'',`#${store.getState().route}`);hydrateAccount();connectLiveServices();}
-else{startPublicViewerPoll();const requested=store.getState().route;(async()=>{try{const data=await api.me();setSession({authenticated:true,user:data});const user=normalizeUser(data);const route=protectedRoutes.has(requested)?requested:requested==='home'?'dashboard':requested;store.setState({authenticated:true,previewMode:false,user,route});window.history.replaceState(null,'',`#${route}`);hydrateAccount();connectLiveServices();}catch{clearSession();if(protectedRoutes.has(requested))store.setState({route:'home',authMode:'login',pendingRoute:requested});}})();}
+else{startPublicViewerPoll();const requested=store.getState().route;(async()=>{try{const data=await api.me();setSession({authenticated:true,user:data});const user=normalizeUser(data);const route=protectedRoutes.has(requested)?requested:requested==='home'?'dashboard':requested;store.setState({authenticated:true,previewMode:false,user,route});window.history.replaceState(null,'',`#${route}`);hydrateAccount();connectLiveServices();}catch{clearSession();store.setState({route:'home',authMode:'login',pendingRoute:requested==='home'?'dashboard':requested});}})();}
 if('serviceWorker'in navigator&&!isLocalPreview&&window.location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('/play/sw.js').catch(()=>{}));

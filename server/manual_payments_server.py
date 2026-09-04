@@ -1402,6 +1402,21 @@ class PaymentService:
             "identity_review_required": any(compliance.get(key) for key in ("kyc_required_for_betting", "kyc_required_for_deposit", "kyc_required_for_withdrawal")),
         }
 
+    @staticmethod
+    def guest_site_config(payload: dict) -> dict:
+        """Strip every stream and media source so signed-out visitors only see branding."""
+        china = dict(payload.get("china_feed") or {})
+        china.update({"live_url": "", "match": None, "feed_match": None})
+        return {
+            **payload,
+            "banners": [item for item in payload.get("banners", []) if item.get("placement") == "HOME_HERO"],
+            "featured_game": None,
+            "games": [],
+            "stream": {"status": "OFFLINE", "playback_url": ""},
+            "china_feed": china,
+            "guest": True,
+        }
+
     def readiness(self, server: "RoosterRunServer | None" = None) -> dict:
         """Return deployment readiness without exposing secrets or user data."""
         checks: dict[str, dict] = {}
@@ -1719,6 +1734,24 @@ class RequestHandler(BaseHTTPRequestHandler):
             }
         )
 
+    def signed_in(self) -> bool:
+        """True when the request carries a valid player or admin session (or is a loopback preview)."""
+        if self.server.preview_mode and self.client_ip() in {"127.0.0.1", "::1"}:
+            return True
+        for cookie_name, kind in ((USER_SESSION_COOKIE, "USER"), (ADMIN_SESSION_COOKIE, "ADMIN")):
+            token = self.cookie(cookie_name)
+            if not token:
+                continue
+            try:
+                if kind == "USER":
+                    self.server.payments.auth.authenticate_user(token)
+                else:
+                    self.server.payments.auth.authenticate_admin(token)
+                return True
+            except Exception:
+                continue
+        return False
+
     def user_identity(self, mutate: bool = False) -> dict:
         session_token = self.cookie(USER_SESSION_COOKIE)
         if not session_token and self.server.preview_mode and self.client_ip() in {"127.0.0.1", "::1"}:
@@ -1852,6 +1885,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 payload = self.server.payments.public_site_config()
                 payload["viewers"] = self.server.presence.count()
+                if not self.signed_in():
+                    payload = self.server.payments.guest_site_config(payload)
                 return self.send_json(HTTPStatus.OK, payload)
             except Exception as error:
                 return self.handle_api_error(error)
@@ -2281,6 +2316,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         elif request_path.startswith("/uploads/"):
             relative = request_path.removeprefix("/uploads/")
             base = self.server.payments.upload_dir
+            if relative.startswith("admin-video-") and not self.signed_in():
+                self.send_error(HTTPStatus.UNAUTHORIZED)
+                return
         else:
             self.send_error(HTTPStatus.NOT_FOUND)
             return
