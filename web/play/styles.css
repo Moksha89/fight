@@ -1512,7 +1512,7 @@ body:has(.app-layout--reference) {
   .arena-home, .app-layout--reference .arena-home { gap: 7px; }
   .arena-home .arena-player, .app-layout--reference .arena-home .arena-player { aspect-ratio: 16 / 9; border-radius: 11px; }
   .arena-player__top { top: 8px; left: 8px; right: 8px; gap: 5px; }
-  .arena-player__top .status, .arena-player__top .arena-label { min-height: 24px; padding: 0 8px; font-size: 11px; }
+  .arena-player__top .status, .arena-player__top .arena-label { min-height: 24px; padding: 0 8px; font-size: 11px; white-space: nowrap; }
   .arena-player__fullscreen { width: 30px; height: 30px; }
   .app-layout--reference .arena-player__controls button, .arena-player__controls button { width: 30px; height: 30px; }
   .arena-player__live-label { font-size: 11px; }
