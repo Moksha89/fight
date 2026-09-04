@@ -9,7 +9,7 @@ export const previewMatch = {
   status: 'betting_open',
   scheduledAt: new Date(now + 12 * 60 * 1000).toISOString(),
   bettingClosesAt: new Date(now + 78 * 1000).toISOString(),
-  viewers: 12500,
+  viewers: 0,
   stream: { type: 'offline', url: '' },
   teamA: { id: 1, name: 'Meron', corner: 'Red corner', odds: 2.45, form: 'W · W · L' },
   draw: { id: 3, name: 'Draw', odds: 8.75 },

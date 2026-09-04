@@ -533,10 +533,15 @@ class ChinaFeedEngine:
         for item in result_data.get("list", []) or []:
             if isinstance(item, dict) and item.get("id"):
                 history[str(item["id"])] = self._win_team(item.get("winTeam"))
+        newest_ref = max((int(ref) for ref in history if ref.isdigit()), default=0)
         recovered = 0
         for row in unresolved:
-            win_team = history.get(row["ref_id"], 0)
-            if win_team and self._apply_result(row["ref_id"], win_team, "HISTORY"):
+            ref_id = str(row["ref_id"])
+            win_team = history.get(ref_id, 0)
+            if not win_team and ref_id.isdigit() and 0 < int(ref_id) < newest_ref and ref_id != self.state().get("current_ref_id"):
+                # Upstream skipped this match entirely (later matches already resolved): void and refund.
+                win_team = 4
+            if win_team and self._apply_result(ref_id, win_team, "HISTORY" if history.get(ref_id) else "VOIDED"):
                 recovered += 1
         return recovered
 

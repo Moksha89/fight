@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v58-gold-register';
+const CACHE_NAME = 'roosterrun-v60-category-tabs';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',
