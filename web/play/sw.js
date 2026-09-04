@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v62-public-viewer-poll';
+const CACHE_NAME = 'roosterrun-v63-session-recovery';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',
