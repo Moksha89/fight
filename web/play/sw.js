@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v73-available-balance';
+const CACHE_NAME = 'roosterrun-v74-history-labels';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',

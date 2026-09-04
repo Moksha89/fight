@@ -672,6 +672,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .result-item > div strong { font-size: 12px; }
 .result-item > div small { overflow: hidden; color: var(--text-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .result-item__status { color: var(--green); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.recent-table__empty { color: #9ea5ae; text-align: center; white-space: normal; }
 .filter-bar { display: flex; gap: 6px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
 .filter-bar button { min-height: 32px; padding: 0 11px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 12px; font-weight: 800; }
 .filter-bar button.is-active { border-color: var(--border); background: var(--surface); color: var(--text); }
@@ -1289,6 +1290,12 @@ body:has(.app-layout--reference) {
 
 @media (max-width: 620px) {
   .app-layout--reference .workspace-content { padding: 8px 8px 102px; }
+  .app-layout--reference .recent-arena__head { padding-left: 12px; }
+  .app-layout--reference .recent-arena__body { grid-template-columns: 1fr; }
+  .app-layout--reference .market-legend { grid-template-columns: repeat(4,1fr); border-right: 0; border-bottom: 1px solid var(--border); }
+  .app-layout--reference .market-legend span { justify-content: center; min-height: 38px; padding: 0 5px; border-bottom: 0; font-size: 12px; }
+  .app-layout--reference .recent-table { min-width: 100%; }
+  .app-layout--reference .recent-table th, .app-layout--reference .recent-table td { padding: 0 6px; font-size: 12px; }
   .reference-home-header { min-height: 62px; padding: 5px 2px; }
   .reference-auth { gap: 5px; }
   .reference-home-logo { gap: 5px; }

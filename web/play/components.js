@@ -181,9 +181,10 @@ export function arenaOutcomeCard({ side, label, odds, selected, disabled }) {
   return `<button class="arena-outcome arena-outcome--${tone} ${selected ? 'is-selected' : ''}" type="button" data-action="select-outcome" data-side="${side}" ${disabled ? 'disabled' : ''}><span class="arena-outcome__label">${escapeHtml(label)}</span><span class="arena-outcome__crest">${crest}</span><strong>${Number(odds || 0).toFixed(2)}×</strong></button>`;
 }
 
-export function recentMatchTable(results = [], bets = []) {
+export function recentMatchTable(results = [], bets = [], categorySlug = '') {
   const label = value => ({Meron:'Red',Wala:'Blue',Draw:'Tie'}[value] || value);
-  const rows = results.slice(0,5).map(result=>{
+  const scoped = categorySlug ? results.filter(result=>String(result.categorySlug||'')===String(categorySlug)) : results;
+  const rows = scoped.slice(0,5).map(result=>{
     const mine = bets.filter(bet=>String(bet.matchId)===String(result.gameId));
     const bet = mine[0];
     const won = mine.some(item=>item.status==='won');
@@ -191,7 +192,7 @@ export function recentMatchTable(results = [], bets = []) {
     const outcomeClass = outcome === 'Won' ? 'is-won' : outcome === 'Lost' ? 'is-lost' : '';
     return `<tr><td>${escapeHtml(result.id)}</td><td><span class="table-corner table-corner--${escapeHtml(result.tone)}"></span>${escapeHtml(label(result.winner))}</td><td>${escapeHtml(mine.length ? [...new Set(mine.map(item=>label(item.pick)))].join(', ') : '—')}</td><td class="${outcomeClass}">${outcome}</td><td>${bet?.odds ? `${Number(bet.odds).toFixed(2)}×` : '—'}</td><td>${formatDate(result.endedAt,{hour:'2-digit',minute:'2-digit'}).split(',').pop()}</td></tr>`;
   }).join('');
-  return `<div class="recent-table-wrap"><table class="recent-table"><thead><tr><th>#</th><th>Winner</th><th>Your Prediction</th><th>Result</th><th>Odds</th><th>Time</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  return `<div class="recent-table-wrap"><table class="recent-table"><thead><tr><th>#</th><th>Winner</th><th>Your Prediction</th><th>Result</th><th>Odds</th><th>Time</th></tr></thead><tbody>${rows||`<tr><td colspan="6" class="recent-table__empty">No completed matches in this category yet.</td></tr>`}</tbody></table></div>`;
 }
 
 export function outcomeCard({ side, label, corner, odds, selected, disabled }) {
@@ -210,7 +211,8 @@ export function metricCard(iconName, label, value, meta = '', tone = '') {
 }
 
 export function resultItem(result) {
-  return `<article class="result-item"><span class="result-number">#${escapeHtml(result.id)}</span><span class="corner-dot corner-dot--${escapeHtml(result.tone || 'gold')}"></span><div><strong>${escapeHtml(result.winner)}</strong><small>${formatDate(result.endedAt)}</small></div><span class="result-item__status">${escapeHtml(result.result || 'Settled')}</span>${icon('chevron',17)}</article>`;
+  const context = result.title || result.categoryName || '';
+  return `<article class="result-item"><span class="result-number">#${escapeHtml(result.id)}</span><span class="corner-dot corner-dot--${escapeHtml(result.tone || 'gold')}"></span><div><strong>${escapeHtml(result.winner)}</strong><small>${context ? `${escapeHtml(context)} · ` : ''}${formatDate(result.endedAt)}</small></div><span class="result-item__status">${escapeHtml(result.result || 'Settled')}</span>${icon('chevron',17)}</article>`;
 }
 
 export function betItem(bet) {
