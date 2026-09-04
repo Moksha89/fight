@@ -1290,12 +1290,6 @@ body:has(.app-layout--reference) {
 
 @media (max-width: 620px) {
   .app-layout--reference .workspace-content { padding: 8px 8px 102px; }
-  .app-layout--reference .recent-arena__head { padding-left: 12px; }
-  .app-layout--reference .recent-arena__body { grid-template-columns: 1fr; }
-  .app-layout--reference .market-legend { grid-template-columns: repeat(4,1fr); border-right: 0; border-bottom: 1px solid var(--border); }
-  .app-layout--reference .market-legend span { justify-content: center; min-height: 38px; padding: 0 5px; border-bottom: 0; font-size: 12px; }
-  .app-layout--reference .recent-table { min-width: 100%; }
-  .app-layout--reference .recent-table th, .app-layout--reference .recent-table td { padding: 0 6px; font-size: 12px; }
   .reference-home-header { min-height: 62px; padding: 5px 2px; }
   .reference-auth { gap: 5px; }
   .reference-home-logo { gap: 5px; }
@@ -1348,15 +1342,16 @@ body:has(.app-layout--reference) {
   .app-layout--reference .prediction-button > span { width: 34px; height: 34px; }
   .app-layout--reference .prediction-button strong,
   .app-layout--reference .prediction-button small { font-size: 12px; }
-  .app-layout--reference .recent-arena__head { padding-left: 98px; }
+  .app-layout--reference .recent-arena__head { padding-left: 12px; }
   .app-layout--reference .recent-arena__head h2,
   .app-layout--reference .recent-arena__head button { font-size: 12px; }
-  .app-layout--reference .recent-arena__body { grid-template-columns: 88px minmax(0,1fr); }
-  .app-layout--reference .market-legend { display: grid; grid-template-columns: 1fr; border-right: 1px solid rgba(255,255,255,.1); border-bottom: 0; }
-  .app-layout--reference .market-legend span { justify-content: flex-start; min-height: 40px; padding: 0 7px; font-size: 12px; }
-  .app-layout--reference .recent-table { min-width: 520px; font-size: 12px; }
+  .app-layout--reference .recent-arena__body { grid-template-columns: 1fr; }
+  .app-layout--reference .market-legend { display: grid; grid-template-columns: repeat(4,1fr); border-right: 0; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .app-layout--reference .market-legend span { justify-content: center; min-height: 36px; padding: 0 4px; border-bottom: 0; font-size: 12px; }
+  .app-layout--reference .recent-table { min-width: 100%; font-size: 12px; }
   .app-layout--reference .recent-table th,
-  .app-layout--reference .recent-table td { height: 40px; padding: 0 7px; }
+  .app-layout--reference .recent-table td { height: 40px; padding: 0 5px; }
+  .app-layout--reference .recent-table th:nth-child(3), .app-layout--reference .recent-table td:nth-child(3) { max-width: 70px; overflow: hidden; text-overflow: ellipsis; }
 }
 
 @media (max-width: 380px) {
