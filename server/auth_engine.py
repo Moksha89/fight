@@ -257,14 +257,16 @@ class AuthenticationEngine:
         )
 
     @staticmethod
-    def _public_user(row: sqlite3.Row, wallet: sqlite3.Row | None = None) -> dict:
+    def _public_user(row: sqlite3.Row, wallet: sqlite3.Row | None = None, held_paise: int = 0) -> dict:
+        balance_paise = int(wallet["balance_paise"] if wallet else 0)
         return {
             "id": row["user_id"],
             "username": row["username"],
             "mobile": row["mobile"],
             "mobile_verified": bool(row["mobile_verified"]),
-            "wallet_balance": round(int(wallet["balance_paise"] if wallet else 0) / 100, 2),
-            "available_balance": round(int(wallet["balance_paise"] if wallet else 0) / 100, 2),
+            "wallet_balance": round(balance_paise / 100, 2),
+            "available_balance": round(max(balance_paise - int(held_paise), 0) / 100, 2),
+            "exposure": round(int(held_paise) / 100, 2),
             "tier": wallet["vip_tier"] if wallet else "Standard",
             "status": wallet["account_status"] if wallet else "ACTIVE",
         }
@@ -559,11 +561,14 @@ class AuthenticationEngine:
                 "SELECT a.*,w.balance_paise,w.vip_tier,w.account_status FROM user_accounts a JOIN user_wallets w ON w.user_id=a.user_id WHERE a.user_id=?",
                 (session["subject_id"],),
             ).fetchone()
+            held = connection.execute(
+                "SELECT COALESCE(SUM(amount_paise),0) AS amount FROM wallet_holds WHERE user_id=? AND status='ACTIVE'", (session["subject_id"],)
+            ).fetchone()["amount"] if row else 0
         if not row:
             raise AuthenticationError("The player account no longer exists.")
         if row["account_status"] != "ACTIVE":
             raise PermissionError("This player account is not active.")
-        return self._public_user(row, row)
+        return self._public_user(row, row, int(held or 0))
 
     def login_admin(self, payload: dict, ip_address: str = "", user_agent: str = "") -> dict:
         username = str(payload.get("username") or "").strip()
