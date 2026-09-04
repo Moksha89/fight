@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v64-guest-header';
+const CACHE_NAME = 'roosterrun-v65-rollover-hold';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',

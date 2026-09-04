@@ -171,9 +171,12 @@ async function hydrateSiteConfig() {
     const current=store.getState();
     const games=siteConfig.games||[];
     const selectedGame=current.selectedGameId==null?null:games.find(item=>String(item.id)===String(current.selectedGameId));
-    const featured=siteConfig.featured_game;
-    const isFeatured=!selectedGame||String(selectedGame.id)===String(featured?.id);
-    const game=selectedGame||featured;
+    const keptSlug=String(current.match?.categorySlug||'');
+    const sameCategory=selectedGame?null:games.find(item=>String(item.category_slug||'')===keptSlug&&['BETTING_OPEN','LIVE'].includes(item.status))||games.find(item=>String(item.category_slug||'')===keptSlug);
+    const rollingOver=!selectedGame&&!sameCategory&&Boolean(keptSlug)&&!current.match?.isPreview&&(siteConfig.categories||[]).some(item=>String(item.slug)===keptSlug);
+    const featured=rollingOver?null:siteConfig.featured_game;
+    const game=selectedGame||sameCategory||featured;
+    const isFeatured=Boolean(game)&&String(game.id)===String(siteConfig.featured_game?.id);
     const match=matchFromGame(game,current.match,isFeatured?(siteConfig.stream||{}):{});
     if(typeof siteConfig.viewers==='number')match.viewers=siteConfig.viewers;
     const patch={siteConfig,match};
@@ -298,7 +301,7 @@ function publicPage(state) {
     : '';
   if (state.route === 'live') content = `<main id="main-content" class="page"><div class="container">${previewNotice}${liveView(state)}</div></main>`;
   if (state.route === 'results') content = `<main id="main-content" class="page"><div class="container">${previewNotice}${resultsView(state,true)}</div></main>`;
-  return `${publicHeader(state.route,state.previewMode ? (state.user || previewUser) : state.user)}${content}${publicFooter()}${publicMobileNav(state)}`;
+  return `${publicHeader(state.route,state.previewMode ? (state.user || previewUser) : state.authenticated ? state.user : null)}${content}${publicFooter()}${publicMobileNav(state)}`;
 }
 
 function renderOverlay(state) {
