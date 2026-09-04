@@ -814,7 +814,7 @@ async function logout(withToast = true) {
   }
   try{if(getToken())await api.logout();}catch{/* Local state is still cleared if the session already expired. */}
   clearSession(); stopStream();
-  store.setState({authenticated:false,previewMode:false,user:null,route:'home',bets:[],transactions:[],results:[],siteConfig:null,match:{...store.getState().match,id:null,liveFeed:false,matchNumber:'',stream:{type:'offline',url:'',fallbackUrl:'',startedAt:'',asLive:false,autoplay:false}},selectedGameId:null,homeMedia:null,dialog:null,selectedOutcome:null,quote:null,sidebarOpen:false});
+  store.setState({authenticated:false,previewMode:false,user:null,route:'home',bets:[],transactions:[],results:[],siteConfig:store.getState().siteConfig?{...store.getState().siteConfig,games:[],featured_game:null,stream:{status:'OFFLINE',playback_url:''},banners:(store.getState().siteConfig.banners||[]).map(item=>({...item,media_url:''}))}:null,match:{...store.getState().match,id:null,liveFeed:false,matchNumber:'',stream:{type:'offline',url:'',fallbackUrl:'',startedAt:'',asLive:false,autoplay:false}},selectedGameId:null,homeMedia:null,dialog:null,selectedOutcome:null,quote:null,sidebarOpen:false});
   window.history.pushState(null,'','#home');
   startPublicViewerPoll(); hydrateSiteConfig();
   if (withToast) showToast('You have signed out.','success');
