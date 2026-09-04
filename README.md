@@ -149,6 +149,10 @@ Production mobile verification also requires `ROOSTERRUN_SMS_WEBHOOK_URL` and,
 when the provider requires it, `ROOSTERRUN_SMS_WEBHOOK_TOKEN`. Never enable
 `ROOSTERRUN_OTP_TEST_MODE` outside isolated automated tests.
 
+The arena viewer badge shows a simulated audience that drifts between
+`ROOSTERRUN_VIEWERS_MIN` and `ROOSTERRUN_VIEWERS_MAX` (default 8000–15000),
+plus the players actually watching. Set both to `0` to show real viewers only.
+
 ## Operating modes
 
 `REAL_MONEY` is the default operating mode: wallets, deposits, withdrawals, betting, and settlement all move real funds and new users start at ₹0. Player identity (KYC) review is disabled by default; administrators can require it per action from the compliance policy.

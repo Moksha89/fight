@@ -19,6 +19,7 @@ import ipaddress
 import json
 import mimetypes
 import os
+import random
 import re
 import secrets
 import signal
@@ -1495,27 +1496,53 @@ class PaymentService:
 
 
 class LivePresence:
-    """Counts distinct clients that polled the live arena recently (real concurrent viewers)."""
+    """Shared viewer counter shown on the arena: a smooth random walk between the configured
+    bounds (same value for every player), plus the clients genuinely polling the live arena."""
 
     WINDOW_SECONDS = 30
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._seen: dict[str, float] = {}
+        low = int(os.environ.get("ROOSTERRUN_VIEWERS_MIN", "8000") or 0)
+        high = int(os.environ.get("ROOSTERRUN_VIEWERS_MAX", "15000") or 0)
+        self._low, self._high = min(low, high), max(low, high)
+        self._simulated = float(random.randint(self._low, self._high)) if self._high else 0.0
+        self._target = self._simulated
+        self._last_step = time.monotonic()
+
+    def _advance(self, now: float) -> None:
+        if not self._high:
+            return
+        elapsed = now - self._last_step
+        if elapsed < 3:
+            return
+        self._last_step = now
+        span = max(self._high - self._low, 1)
+        if abs(self._target - self._simulated) < span * 0.01 or random.random() < 0.08:
+            self._target = random.uniform(self._low, self._high)
+        # Drift a few percent of the gap per tick with a little jitter so the count moves like a crowd.
+        self._simulated += (self._target - self._simulated) * random.uniform(0.04, 0.12) + random.uniform(-span * 0.004, span * 0.004)
+        self._simulated = min(max(self._simulated, self._low), self._high)
+
+    def _real(self, now: float) -> int:
+        cutoff = now - self.WINDOW_SECONDS
+        for key in [key for key, stamp in self._seen.items() if stamp < cutoff]:
+            del self._seen[key]
+        return len(self._seen)
 
     def touch(self, client_key: str) -> int:
         now = time.monotonic()
         with self._lock:
             self._seen[client_key] = now
-            cutoff = now - self.WINDOW_SECONDS
-            for key in [key for key, stamp in self._seen.items() if stamp < cutoff]:
-                del self._seen[key]
-            return len(self._seen)
+            self._advance(now)
+            return int(self._simulated) + self._real(now)
 
     def count(self) -> int:
-        cutoff = time.monotonic() - self.WINDOW_SECONDS
+        now = time.monotonic()
         with self._lock:
-            return sum(1 for stamp in self._seen.values() if stamp >= cutoff)
+            self._advance(now)
+            return int(self._simulated) + self._real(now)
 
 
 class RoosterRunServer(ThreadingHTTPServer):
