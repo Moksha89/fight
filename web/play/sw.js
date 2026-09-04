@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v60-category-tabs';
+const CACHE_NAME = 'roosterrun-v61-simulated-viewers';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',
