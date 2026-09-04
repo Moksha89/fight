@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roosterrun-v63-session-recovery';
+const CACHE_NAME = 'roosterrun-v68-live-compact';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',

@@ -1,6 +1,7 @@
 import { api, ApiError, clearSession, getToken, setSession } from './api.js?v=55';
 import { appShell, arenaOutcomeCard, categoryGames, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=65';
 import { previewBets, previewMatch, previewResults, previewUser } from './data.js';
+const guestUser = { ...previewUser, username: 'Guest', walletBalance: 0, exposure: 0, bonus: 0, points: 0 };
 import { createStore } from './store.js';
 import { mountStream, normalizeStream, stopStream } from './streaming.js?v=52';
 import { button, emptyState, escapeHtml, formatDate, icon, money, sectionHeading, statusBadge } from './ui.js';
@@ -153,7 +154,7 @@ function matchFromGame(game,current,liveStream={}) {
   if(!game)return current;
   if(!liveStream.playback_url||!['LIVE','DEGRADED'].includes(String(liveStream.status||'').toUpperCase()))liveStream={};
   return {
-    ...current,id:game.id,title:game.title,arena:game.arena,isPreview:false,
+    ...current,id:game.id,title:game.title,arena:game.arena,categorySlug:game.category_slug||'',isPreview:false,rollingOver:false,
     status:String(game.status||current.status).toLowerCase(),scheduledAt:game.scheduled_at||current.scheduledAt,
     bettingClosesAt:game.betting_closes_at||current.bettingClosesAt,thumbnailUrl:game.thumbnail_url||current.thumbnailUrl,
     liveFeed:game.source==='CHINA_FEED',matchNumber:game.match_number||'',
@@ -169,14 +170,24 @@ async function hydrateSiteConfig() {
     const siteConfig=await api.siteConfig();
     const current=store.getState();
     const games=siteConfig.games||[];
-    const selectedGame=current.selectedGameId==null?null:games.find(item=>String(item.id)===String(current.selectedGameId));
-    const featured=siteConfig.featured_game;
-    const isFeatured=!selectedGame||String(selectedGame.id)===String(featured?.id);
-    const game=selectedGame||featured;
+    const open=item=>['BETTING_OPEN','LIVE'].includes(item.status);
+    let selectedGame=current.selectedGameId==null?null:games.find(item=>String(item.id)===String(current.selectedGameId));
+    const keptSlug=String(selectedGame?.category_slug??current.match?.categorySlug??'');
+    // A finished auto-feed match hands over to the next open match in its category.
+    if(selectedGame&&!open(selectedGame)&&selectedGame.source==='CHINA_FEED'&&games.some(item=>String(item.category_slug||'')===keptSlug&&open(item)))selectedGame=null;
+    // Only an explicit selection or the China auto-feed (whose matches hand over with a gap) keeps its category; everyone else follows featured_game.
+    const sticky=current.selectedGameId!=null||Boolean(current.match?.liveFeed);
+    const sameCategory=selectedGame||!sticky?null:games.find(item=>String(item.category_slug||'')===keptSlug&&open(item))||games.find(item=>String(item.category_slug||'')===keptSlug);
+    const rollingOver=!selectedGame&&!sameCategory&&Boolean(keptSlug)&&Boolean(current.match?.liveFeed)&&!current.match?.isPreview&&(siteConfig.categories||[]).some(item=>String(item.slug)===keptSlug);
+    const featured=rollingOver?null:siteConfig.featured_game;
+    const game=selectedGame||sameCategory||featured;
+    const isFeatured=Boolean(game)&&String(game.id)===String(siteConfig.featured_game?.id);
     const match=matchFromGame(game,current.match,isFeatured?(siteConfig.stream||{}):{});
+    if(rollingOver&&!match.rollingOver)Object.assign(match,{rollingOver:true,status:'closed'});
     if(typeof siteConfig.viewers==='number')match.viewers=siteConfig.viewers;
     const patch={siteConfig,match};
-    if(current.selectedGameId!=null&&!selectedGame){patch.selectedGameId=null;patch.quote=null;patch.selectedOutcome=null;}
+    const nextSelected=selectedGame?selectedGame.id:null;
+    if(current.selectedGameId!=null&&String(nextSelected)!==String(current.selectedGameId)){patch.selectedGameId=nextSelected;patch.quote=null;patch.selectedOutcome=null;}
     store.setState(patch);
   }
   catch { /* The legacy backend may not expose brand configuration yet. */ }
@@ -184,7 +195,7 @@ async function hydrateSiteConfig() {
 
 function arenaHomeView(state, { publicMode = false } = {}) {
   const match = state.match;
-  const user = state.user || previewUser;
+  const user = state.user || (state.previewMode ? previewUser : guestUser);
   const selected = state.selectedOutcome;
   const outcome = selected === 1 ? match.teamA : selected === 2 ? match.teamB : selected === 3 ? match.draw : null;
   const bettingOpen = match.status === 'betting_open';
@@ -194,7 +205,7 @@ function arenaHomeView(state, { publicMode = false } = {}) {
     : `<button class="prediction-button" type="button" data-action="request-quote" ${!outcome||!bettingOpen||state.quoteBusy?'disabled':''}><span>${icon('shield',27)}</span><strong>${state.quoteBusy?'Checking…':outcome?'Review bet':'Choose a side'}</strong><small>${outcome?`${money(state.stake)} · server quote`:'Red, tie, or blue'}</small></button>`;
   const body = `<section class="arena-home" aria-label="Cockfight live arena">
     ${streamFrame(match,false,true)}
-    ${screenSelector(state.match?.id,state.siteConfig?.games||[],state.siteConfig?.categories||[])}
+    ${screenSelector(state.match?.id,state.siteConfig?.games||[],state.siteConfig?.categories||[],state.match?.categorySlug)}
     <div class="arena-market" aria-label="Match outcomes">${arenaOutcomeCard({side:1,label:'Red',odds:match.teamA.odds,selected:selected===1,disabled:!bettingOpen})}${arenaOutcomeCard({side:3,label:'Tie',odds:match.draw.odds,selected:selected===3,disabled:!bettingOpen})}${arenaOutcomeCard({side:2,label:'Blue',odds:match.teamB.odds,selected:selected===2,disabled:!bettingOpen})}</div>
     <section class="chip-section" aria-labelledby="chip-title"><div class="chip-section__head"><span id="chip-title">Select Chips</span></div><div class="arena-chips">${chips.map(amount=>`<button class="${state.stake===amount?'is-active':''}" type="button" data-action="set-stake" data-amount="${amount}">${amount>=1000?`₹${amount/1000}K`:`₹${amount}`}</button>`).join('')}</div></section>
     <div class="arena-actions"><button type="button" data-action="show-terms">${icon('crown',23)}<span>VIP</span></button><button type="button" data-action="show-rules">${icon('shield',23)}<span>Disclaimer</span></button>${mainAction}<button type="button" data-action="navigate" data-route="bets">${icon('history',23)}<span>History</span></button></div>
@@ -262,7 +273,7 @@ function resultsView(state, publicPage = false) {
 }
 
 function walletView(state) {
-  const user = state.user || previewUser;
+  const user = state.user || (state.previewMode ? previewUser : guestUser);
   const wallet = state.paymentWallet || {balance:user.walletBalance||0,available:user.availableBalance??user.walletBalance??0,pending_withdrawal:0};
   const requests = state.paymentRequests || [];
   const pendingDeposits = requests.filter(request=>request.request_type==='DEPOSIT'&&request.status==='PENDING').reduce((sum,request)=>sum+Number(request.amount||0),0);
@@ -276,7 +287,7 @@ function walletView(state) {
 }
 
 function profileView(state) {
-  const user = state.user || previewUser;
+  const user = state.user || (state.previewMode ? previewUser : guestUser);
   const initials = (user.username||'P').split(/\s+/).map(part=>part[0]).join('').slice(0,2).toUpperCase();
   return `<section class="workspace-page">${pageTitle('Account','Profile and safety','Personal details, limits, and account security.')}<div class="profile-grid"><section class="profile-card"><div class="profile-identity"><span class="profile-avatar">${escapeHtml(initials)}</span><div><h2>${escapeHtml(user.username)}</h2><p>${escapeHtml(user.mobile||'Mobile verification pending')}</p>${statusBadge(state.previewMode?'preview':'active')}</div></div><dl class="detail-list"><div><dt>Account level</dt><dd>${escapeHtml(user.tier||'Standard')}</dd></div><div><dt>Mobile status</dt><dd>${user.mobile?'Verified':'Not connected'}</dd></div></dl></section><section class="settings-card">${state.siteConfig?.identity_review_required?`<button type="button" data-action="profile-verification"><span>${icon('check',19)}</span><div><strong>Identity and age</strong><small>Required by the operator · ${escapeHtml(String(state.compliance?.status||'NOT_SUBMITTED').replace(/_/g,' ').toLowerCase())}</small></div>${icon('chevron',18)}</button>`:''}<button type="button" data-action="profile-security"><span>${icon('lock',19)}</span><div><strong>Password and security</strong><small>Update password and recovery settings</small></div>${icon('chevron',18)}</button><button type="button" data-action="show-notifications"><span>${icon('bell',19)}</span><div><strong>Notifications</strong><small>${Number(state.notificationUnread||0)} unread account and match updates</small></div>${icon('chevron',18)}</button><button type="button" data-action="profile-limits"><span>${icon('shield',19)}</span><div><strong>Responsible play limits</strong><small>Control deposits, stakes, cooling-off, and self-exclusion</small></div>${icon('chevron',18)}</button><button type="button" data-action="show-support"><span>${icon('users',19)}</span><div><strong>Help and support</strong><small>Open and track account, payment, bet, or stream cases</small></div>${icon('chevron',18)}</button><button class="settings-card__danger" type="button" data-action="logout"><span>${icon('logout',19)}</span><div><strong>${state.previewMode?'Reset preview':'Sign out'}</strong><small>${state.previewMode?'Reset the local preview account':'Sign out of this device'}</small></div>${icon('chevron',18)}</button></section></div></section>`;
 }
@@ -295,9 +306,9 @@ function publicPage(state) {
   const previewNotice = state.match.isPreview
     ? `<div class="data-notice" role="status">${icon('alert',18)} <span>This is interface preview data. Live match details, odds, and results appear only after the backend connects.</span></div>`
     : '';
-  if (state.route === 'live') content = `<main id="main-content" class="page"><div class="container">${previewNotice}${liveView(state)}</div></main>`;
+  if (state.route === 'live') content = landingView(state);
   if (state.route === 'results') content = `<main id="main-content" class="page"><div class="container">${previewNotice}${resultsView(state,true)}</div></main>`;
-  return `${publicHeader(state.route,state.user || previewUser)}${content}${publicFooter()}${publicMobileNav(state)}`;
+  return `${publicHeader(state.route,state.previewMode ? (state.user || previewUser) : state.authenticated ? state.user : null)}${content}${publicFooter()}${publicMobileNav(state)}`;
 }
 
 function renderOverlay(state) {
@@ -346,21 +357,70 @@ function restoreFormDrafts(root, draft) {
   });
 }
 
+// Patch the live DOM in place instead of replacing innerHTML so the mounted stream element
+// (iframe/video) is never detached - moving an iframe in the DOM reloads it.
+// Index path from root to node, e.g. "0/2/1"; the morph is positional, so it is only safe when the stream sits at the same path in both trees.
+function domPath(node, root) {
+  const path = [];
+  for (let current = node; current && current !== root; current = current.parentNode)
+    path.unshift(Array.prototype.indexOf.call(current.parentNode.childNodes, current));
+  return path.join('/');
+}
+function morphChildren(oldParent, newParent, keep) {
+  const oldNodes = Array.from(oldParent.childNodes);
+  const newNodes = Array.from(newParent.childNodes);
+  const max = Math.max(oldNodes.length, newNodes.length);
+  for (let index = 0; index < max; index += 1) {
+    const oldNode = oldNodes[index];
+    const newNode = newNodes[index];
+    if (!newNode) { oldNode.remove(); continue; }
+    if (!oldNode) { oldParent.appendChild(newNode); continue; }
+    morphNode(oldNode, newNode, keep);
+  }
+}
+function morphNode(oldNode, newNode, keep) {
+  if (oldNode === keep) { const stale = newNode.getAttribute && newNode.id === 'stream-player'; if (!stale) oldNode.replaceWith(newNode); return; }
+  if (oldNode.nodeType !== newNode.nodeType || (oldNode.nodeType === Node.ELEMENT_NODE && oldNode.tagName !== newNode.tagName)) {
+    if (oldNode.contains && oldNode.contains(keep)) { morphChildren(oldNode, newNode, keep); return; }
+    oldNode.replaceWith(newNode);
+    return;
+  }
+  if (oldNode.nodeType !== Node.ELEMENT_NODE) { if (oldNode.nodeValue !== newNode.nodeValue) oldNode.nodeValue = newNode.nodeValue; return; }
+  for (const attr of Array.from(oldNode.attributes)) if (!newNode.hasAttribute(attr.name)) oldNode.removeAttribute(attr.name);
+  for (const attr of Array.from(newNode.attributes)) if (oldNode.getAttribute(attr.name) !== attr.value) oldNode.setAttribute(attr.name, attr.value);
+  if (oldNode.tagName === 'INPUT' || oldNode.tagName === 'TEXTAREA' || oldNode.tagName === 'SELECT') {
+    if (document.activeElement !== oldNode && oldNode.value !== newNode.value) oldNode.value = newNode.value;
+    if (oldNode.type === 'checkbox' || oldNode.type === 'radio') oldNode.checked = newNode.checked;
+    return;
+  }
+  if (oldNode.tagName === 'IFRAME' || oldNode.tagName === 'VIDEO') return;
+  morphChildren(oldNode, newNode, keep);
+}
+
 function render() {
   const state = store.getState();
   const inWorkspace = (state.authenticated || state.previewMode) && state.route !== 'home';
   const publicHome = !inWorkspace && state.route === 'home';
   const previousStream = document.getElementById('stream-player');
   const previousKey = previousStream ? `${previousStream.dataset.streamType}|${previousStream.dataset.streamUrl}` : '';
-  const mountedMedia = previousStream && !previousStream.querySelector('.arena-player__placeholder') ? Array.from(previousStream.childNodes) : null;
-  app.innerHTML = publicHome ? appShell({...state,route:'dashboard'},dashboardView(state)) : inWorkspace ? appShell(state, viewForRoute(state)) : publicPage(state);
+  const streamMounted = Boolean(previousStream && !previousStream.querySelector('.arena-player__placeholder'));
+  const html = publicHome ? appShell({...state,route:'dashboard'},dashboardView(state)) : inWorkspace ? appShell(state, viewForRoute(state)) : publicPage(state);
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  const nextStream = template.content.getElementById('stream-player');
+    const keepStream =
+    streamMounted &&
+    nextStream &&
+    `${nextStream.dataset.streamType}|${nextStream.dataset.streamUrl}` === previousKey &&
+    domPath(previousStream, app) === domPath(nextStream, template.content);
+  if (keepStream) morphChildren(app, template.content, previousStream);
+  else app.innerHTML = html;
   renderOverlay(state);
   applySiteConfig();
   updateCountdown();
   const streamElement = document.getElementById('stream-player');
   if (!streamElement) stopStream();
-  else if (mountedMedia && `${streamElement.dataset.streamType}|${streamElement.dataset.streamUrl}` === previousKey) streamElement.replaceChildren(...mountedMedia);
-  else mountStream(streamElement, state.match.stream);
+  else if (!keepStream || streamElement.querySelector('.arena-player__placeholder')) mountStream(streamElement, state.match.stream);
   if (state.route === 'wallet' && !state.paymentsLoaded && !state.paymentsLoading) queueMicrotask(hydratePayments);
   if (state.route === 'wallet' && state.paymentsLoaded && !state.paymentsLoading && Date.now() - paymentsRefreshedAt > 10000) queueMicrotask(hydratePayments);
 }
@@ -699,16 +759,32 @@ async function submitPaymentRequest(form) {
   }
 }
 
+async function hydrateHistory(){
+  try{const data=await api.autoHistory(20);store.setState({results:(data.results||data||[]).map(normalizeResult)});}
+  catch{/* retried on the next tick */}
+}
+
 function connectLiveServices() {
   stopLiveServices();
   const current=store.getState();
   if(!current.authenticated&&!current.previewMode)return;
   pollEngine();
   liveServiceTimers.push(window.setInterval(pollEngine,2500));
-  if(current.authenticated)liveServiceTimers.push(window.setInterval(()=>{hydrateAccount();hydrateSiteConfig();},15000));
+  liveServiceTimers.push(window.setInterval(()=>{if(current.authenticated)hydrateAccount();hydrateSiteConfig();hydrateHistory();},15000));
 }
 
-function startPublicViewerPoll(){stopLiveServices();liveServiceTimers.push(window.setInterval(pollEngine,5000));}
+function startPublicViewerPoll(){
+  stopLiveServices();
+  hydrateHistory();
+  liveServiceTimers.push(window.setInterval(pollEngine,5000));
+  liveServiceTimers.push(window.setInterval(()=>{hydrateSiteConfig();hydrateHistory();},15000));
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible')return;
+  enginePollBusy=false;
+  pollEngine();hydrateSiteConfig();hydrateHistory();
+  if(store.getState().authenticated)hydrateAccount();
+});
 function stopLiveServices(){liveServiceTimers.forEach(timer=>window.clearInterval(timer));liveServiceTimers=[];}
 
 let lastEngineEvent=0;
@@ -720,7 +796,7 @@ async function pollEngine(){
     const data=await api.engineEvents(lastEngineEvent);
     const events=data.results||[];
     if(typeof data.viewers==='number'){const live=store.getState().match;if(live&&live.viewers!==data.viewers)store.setState({match:{...live,viewers:data.viewers}});}
-    if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateAccount()]);}
+    if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateAccount(),hydrateHistory()]);}
   }catch{/* The next poll retries automatically. */}
   finally{enginePollBusy=false;}
 }
@@ -758,7 +834,6 @@ document.addEventListener('click',event=>{
   else if(action==='close-sidebar')store.setState({sidebarOpen:false});
   else if(action==='select-outcome')store.setState({selectedOutcome:Number(control.dataset.side),quote:null});
   else if(action==='select-screen'||action==='select-category'){const current=store.getState();const games=current.siteConfig?.games||[];let game;if(action==='select-category'){const list=categoryGames(games,control.dataset.category);game=list.find(item=>item.status==='BETTING_OPEN')||list.find(item=>item.status==='LIVE')||list[0];}else game=games.find(item=>String(item.id)===String(control.dataset.gameId));if(!game){showToast('No match is running in this category right now.','info');return;}store.setState({selectedGameId:game.id,match:matchFromGame(game,current.match),quote:null,selectedOutcome:null});showToast(`${game.title} selected.`,'success');}
-  else if(action==='toggle-stream'){const video=document.querySelector('#stream-player video');if(video){if(video.paused){video.play().catch(()=>{});control.innerHTML=icon('pause',22);control.setAttribute('aria-label','Pause stream');}else{video.pause();control.innerHTML=icon('play',22);control.setAttribute('aria-label','Play stream');}}else showToast('The arena feed is standing by.','info');}
   else if(action==='toggle-sound'){const video=document.querySelector('#stream-player video');if(video){video.muted=!video.muted;showToast(video.muted?'Stream muted.':'Stream sound on.','success');}else showToast('The arena feed is standing by.','info');}
   else if(action==='fullscreen-stream'){const frame=control.closest('.arena-player');const video=frame?.querySelector('video');if(frame?.requestFullscreen)frame.requestFullscreen().catch(()=>{});else if(video?.webkitEnterFullscreen)video.webkitEnterFullscreen();}
   else if(action==='set-stake')store.setState({stake:Number(control.dataset.amount),quote:null});
