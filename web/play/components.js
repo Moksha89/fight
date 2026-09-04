@@ -27,8 +27,9 @@ export function publicHeader(route = 'home', user = {}) {
       ${[['home','Home','home'],['live','Live arena','live'],['results','Results','trophy']].map(([itemRoute,label,iconName]) => `<button class="nav-link ${route === itemRoute ? 'is-active' : ''}" data-action="navigate" data-route="${itemRoute}">${icon(iconName,17)} ${label}</button>`).join('')}
     </nav>
     <div class="topbar__actions">
-      <button class="header-wallet-button" type="button" data-action="open-login">${icon('wallet',18)}<span>Wallet</span></button>
-      <button class="header-balance-button" type="button" data-action="open-login"><span>${money(user.walletBalance || 0)}</span>${icon('plus',17)}</button>
+      ${user
+        ? `<button class="header-wallet-button" type="button" data-action="open-login">${icon('wallet',18)}<span>Wallet</span></button><button class="header-balance-button" type="button" data-action="open-login"><span>${money(user.walletBalance || 0)}</span>${icon('plus',17)}</button>`
+        : `<button class="header-wallet-button" type="button" data-action="open-login">${icon('user',18)}<span>Login</span></button><button class="header-balance-button" type="button" data-action="open-register"><span>Register</span>${icon('plus',17)}</button>`}
       <button class="icon-button mobile-menu-button" type="button" data-action="open-menu" aria-label="Open navigation">${icon('menu',20)}</button>
     </div>
   </div></header>`;
@@ -152,19 +153,20 @@ export function categoryGames(games = [], slug = '') {
   return games.filter(game => String(game.category_slug || '') === String(slug || ''));
 }
 
-export function screenSelector(activeGameId, games = [], categories = []) {
+export function screenSelector(activeGameId, games = [], categories = [], currentCategorySlug = '') {
   const tabs = categories.filter(category => categoryGames(games, category.slug).length || category.builtin);
   const uncategorised = categoryGames(games, '');
   if (uncategorised.length) tabs.push({ slug: '', name: 'Arena', builtin: false });
   if (!tabs.length) return '';
   const activeGame = games.find(game => String(game.id) === String(activeGameId));
-  const activeSlug = activeGame ? String(activeGame.category_slug || '') : String(tabs[0].slug);
+  const activeSlug = activeGame ? String(activeGame.category_slug || '') : (tabs.some(tab => String(tab.slug) === String(currentCategorySlug || '')) ? String(currentCategorySlug || '') : String(tabs[0].slug));
   const siblings = categoryGames(games, activeSlug);
   const tabsHtml = tabs.map(category => {
     const list = categoryGames(games, category.slug);
     const live = list.some(game => ['LIVE', 'BETTING_OPEN'].includes(game.status));
-    const status = list.length ? (live ? 'Live now' : `${list.length} upcoming`) : 'Offline';
-    return `<button class="${String(category.slug) === activeSlug ? 'is-active' : ''}" type="button" data-action="select-category" data-category="${escapeHtml(category.slug)}" ${list.length ? '' : 'disabled'}><span>${icon('live',16)} ${escapeHtml(category.name)}</span><small>${icon('clock',14)} ${escapeHtml(status)}</small><i></i></button>`;
+    const rollingOver = !list.length && String(category.slug) === activeSlug;
+    const status = list.length ? (live ? 'Live now' : `${list.length} upcoming`) : rollingOver ? 'Next match soon' : 'Offline';
+    return `<button class="${String(category.slug) === activeSlug ? 'is-active' : ''}" type="button" data-action="select-category" data-category="${escapeHtml(category.slug)}" ${list.length || rollingOver ? '' : 'disabled'}><span>${icon('live',16)} ${escapeHtml(category.name)}</span><small>${icon('clock',14)} ${escapeHtml(status)}</small><i></i></button>`;
   }).join('');
   const gamesHtml = siblings.length > 1
     ? `<div class="screen-games" aria-label="Matches in this category">${siblings.slice(0, 8).map(game => `<button class="${String(game.id) === String(activeGameId) ? 'is-active' : ''}" type="button" data-action="select-screen" data-game-id="${escapeHtml(game.id)}">${escapeHtml(game.title)} · ${escapeHtml(GAME_STATUS_LABEL[game.status] || game.status)}</button>`).join('')}</div>`

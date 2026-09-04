@@ -1,6 +1,7 @@
 import { api, ApiError, clearSession, getToken, setSession } from './api.js?v=55';
 import { appShell, arenaOutcomeCard, categoryGames, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=65';
 import { previewBets, previewMatch, previewResults, previewUser } from './data.js';
+const guestUser = { ...previewUser, username: 'Guest', walletBalance: 0, exposure: 0, bonus: 0, points: 0 };
 import { createStore } from './store.js';
 import { mountStream, normalizeStream, stopStream } from './streaming.js?v=52';
 import { button, emptyState, escapeHtml, formatDate, icon, money, sectionHeading, statusBadge } from './ui.js';
@@ -153,7 +154,7 @@ function matchFromGame(game,current,liveStream={}) {
   if(!game)return current;
   if(!liveStream.playback_url||!['LIVE','DEGRADED'].includes(String(liveStream.status||'').toUpperCase()))liveStream={};
   return {
-    ...current,id:game.id,title:game.title,arena:game.arena,isPreview:false,
+    ...current,id:game.id,title:game.title,arena:game.arena,categorySlug:game.category_slug||'',isPreview:false,
     status:String(game.status||current.status).toLowerCase(),scheduledAt:game.scheduled_at||current.scheduledAt,
     bettingClosesAt:game.betting_closes_at||current.bettingClosesAt,thumbnailUrl:game.thumbnail_url||current.thumbnailUrl,
     liveFeed:game.source==='CHINA_FEED',matchNumber:game.match_number||'',
@@ -184,7 +185,7 @@ async function hydrateSiteConfig() {
 
 function arenaHomeView(state, { publicMode = false } = {}) {
   const match = state.match;
-  const user = state.user || previewUser;
+  const user = state.user || (state.previewMode ? previewUser : guestUser);
   const selected = state.selectedOutcome;
   const outcome = selected === 1 ? match.teamA : selected === 2 ? match.teamB : selected === 3 ? match.draw : null;
   const bettingOpen = match.status === 'betting_open';
@@ -194,7 +195,7 @@ function arenaHomeView(state, { publicMode = false } = {}) {
     : `<button class="prediction-button" type="button" data-action="request-quote" ${!outcome||!bettingOpen||state.quoteBusy?'disabled':''}><span>${icon('shield',27)}</span><strong>${state.quoteBusy?'Checking…':outcome?'Review bet':'Choose a side'}</strong><small>${outcome?`${money(state.stake)} · server quote`:'Red, tie, or blue'}</small></button>`;
   const body = `<section class="arena-home" aria-label="Cockfight live arena">
     ${streamFrame(match,false,true)}
-    ${screenSelector(state.match?.id,state.siteConfig?.games||[],state.siteConfig?.categories||[])}
+    ${screenSelector(state.match?.id,state.siteConfig?.games||[],state.siteConfig?.categories||[],state.match?.categorySlug)}
     <div class="arena-market" aria-label="Match outcomes">${arenaOutcomeCard({side:1,label:'Red',odds:match.teamA.odds,selected:selected===1,disabled:!bettingOpen})}${arenaOutcomeCard({side:3,label:'Tie',odds:match.draw.odds,selected:selected===3,disabled:!bettingOpen})}${arenaOutcomeCard({side:2,label:'Blue',odds:match.teamB.odds,selected:selected===2,disabled:!bettingOpen})}</div>
     <section class="chip-section" aria-labelledby="chip-title"><div class="chip-section__head"><span id="chip-title">Select Chips</span></div><div class="arena-chips">${chips.map(amount=>`<button class="${state.stake===amount?'is-active':''}" type="button" data-action="set-stake" data-amount="${amount}">${amount>=1000?`₹${amount/1000}K`:`₹${amount}`}</button>`).join('')}</div></section>
     <div class="arena-actions"><button type="button" data-action="show-terms">${icon('crown',23)}<span>VIP</span></button><button type="button" data-action="show-rules">${icon('shield',23)}<span>Disclaimer</span></button>${mainAction}<button type="button" data-action="navigate" data-route="bets">${icon('history',23)}<span>History</span></button></div>
@@ -262,7 +263,7 @@ function resultsView(state, publicPage = false) {
 }
 
 function walletView(state) {
-  const user = state.user || previewUser;
+  const user = state.user || (state.previewMode ? previewUser : guestUser);
   const wallet = state.paymentWallet || {balance:user.walletBalance||0,available:user.availableBalance??user.walletBalance??0,pending_withdrawal:0};
   const requests = state.paymentRequests || [];
   const pendingDeposits = requests.filter(request=>request.request_type==='DEPOSIT'&&request.status==='PENDING').reduce((sum,request)=>sum+Number(request.amount||0),0);
@@ -276,7 +277,7 @@ function walletView(state) {
 }
 
 function profileView(state) {
-  const user = state.user || previewUser;
+  const user = state.user || (state.previewMode ? previewUser : guestUser);
   const initials = (user.username||'P').split(/\s+/).map(part=>part[0]).join('').slice(0,2).toUpperCase();
   return `<section class="workspace-page">${pageTitle('Account','Profile and safety','Personal details, limits, and account security.')}<div class="profile-grid"><section class="profile-card"><div class="profile-identity"><span class="profile-avatar">${escapeHtml(initials)}</span><div><h2>${escapeHtml(user.username)}</h2><p>${escapeHtml(user.mobile||'Mobile verification pending')}</p>${statusBadge(state.previewMode?'preview':'active')}</div></div><dl class="detail-list"><div><dt>Account level</dt><dd>${escapeHtml(user.tier||'Standard')}</dd></div><div><dt>Mobile status</dt><dd>${user.mobile?'Verified':'Not connected'}</dd></div></dl></section><section class="settings-card">${state.siteConfig?.identity_review_required?`<button type="button" data-action="profile-verification"><span>${icon('check',19)}</span><div><strong>Identity and age</strong><small>Required by the operator · ${escapeHtml(String(state.compliance?.status||'NOT_SUBMITTED').replace(/_/g,' ').toLowerCase())}</small></div>${icon('chevron',18)}</button>`:''}<button type="button" data-action="profile-security"><span>${icon('lock',19)}</span><div><strong>Password and security</strong><small>Update password and recovery settings</small></div>${icon('chevron',18)}</button><button type="button" data-action="show-notifications"><span>${icon('bell',19)}</span><div><strong>Notifications</strong><small>${Number(state.notificationUnread||0)} unread account and match updates</small></div>${icon('chevron',18)}</button><button type="button" data-action="profile-limits"><span>${icon('shield',19)}</span><div><strong>Responsible play limits</strong><small>Control deposits, stakes, cooling-off, and self-exclusion</small></div>${icon('chevron',18)}</button><button type="button" data-action="show-support"><span>${icon('users',19)}</span><div><strong>Help and support</strong><small>Open and track account, payment, bet, or stream cases</small></div>${icon('chevron',18)}</button><button class="settings-card__danger" type="button" data-action="logout"><span>${icon('logout',19)}</span><div><strong>${state.previewMode?'Reset preview':'Sign out'}</strong><small>${state.previewMode?'Reset the local preview account':'Sign out of this device'}</small></div>${icon('chevron',18)}</button></section></div></section>`;
 }
@@ -297,7 +298,7 @@ function publicPage(state) {
     : '';
   if (state.route === 'live') content = `<main id="main-content" class="page"><div class="container">${previewNotice}${liveView(state)}</div></main>`;
   if (state.route === 'results') content = `<main id="main-content" class="page"><div class="container">${previewNotice}${resultsView(state,true)}</div></main>`;
-  return `${publicHeader(state.route,state.user || previewUser)}${content}${publicFooter()}${publicMobileNav(state)}`;
+  return `${publicHeader(state.route,state.previewMode ? (state.user || previewUser) : state.user)}${content}${publicFooter()}${publicMobileNav(state)}`;
 }
 
 function renderOverlay(state) {
