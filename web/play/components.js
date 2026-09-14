@@ -44,7 +44,7 @@ export function appHeader(state) {
       <span><strong>RoosterRun</strong><small>LIVE ARENA</small></span>
     </a>
     <div class="reference-auth">${signedIn
-      ? `<button type="button" data-action="navigate" data-route="wallet">${icon('wallet',16)}<span>Wallet</span></button><button class="is-balance" type="button" data-action="navigate" data-route="wallet" aria-label="Wallet balance ${money(user.walletBalance || 0)}"><span>${money(user.walletBalance || 0).replace('.00','')}</span>${icon('plus',17)}</button>`
+      ? `<button type="button" data-action="navigate" data-route="wallet">${icon('wallet',16)}<span>Wallet</span></button><button class="is-balance" type="button" data-action="navigate" data-route="wallet" aria-label="Available balance ${money(user.availableBalance ?? user.walletBalance ?? 0)}"><span>${money(user.availableBalance ?? user.walletBalance ?? 0).replace('.00','')}</span>${icon('plus',17)}</button>`
       : `<button type="button" data-action="open-login">Login</button><button class="reference-register-button" type="button" data-action="open-register">Register</button>`}
     </div>
   </header>`;
@@ -275,7 +275,7 @@ export function paymentFlowDialog(state) {
       <div class="withdraw-method" role="tablist" aria-label="Withdrawal method"><button class="${method==='BANK'?'is-active':''}" type="button" data-action="set-withdraw-method" data-method="BANK">${icon('bank',18)} Bank account</button><button class="${method==='UPI'?'is-active':''}" type="button" data-action="set-withdraw-method" data-method="UPI">${icon('qr',18)} UPI</button></div>
       <input type="hidden" name="method" value="${method}">
       <div class="payment-fields"><label><span>Withdrawal amount</span><span class="money-input"><i>₹</i><input name="amount" type="number" inputmode="decimal" min="500" max="200000" step="1" placeholder="1,000" required></span></label><label><span>Account holder name</span><input name="account_holder" maxlength="100" autocomplete="name" placeholder="Name as registered with the bank" required></label>${method==='UPI'?`<label><span>UPI ID</span><input name="upi_id" maxlength="100" placeholder="name@bank" required></label>`:`<label><span>Bank name</span><input name="bank_name" maxlength="80" placeholder="State Bank of India" required></label><label><span>Account number</span><input name="account_number" inputmode="numeric" maxlength="22" placeholder="Enter account number" required></label><label><span>IFSC code</span><input name="ifsc" maxlength="11" autocapitalize="characters" placeholder="SBIN0001234" required></label>`}</div>
-      <div class="payment-flow-note">${icon('shield',17)} Available balance: <strong>${money(state.paymentWallet?.available ?? state.user?.walletBalance ?? 0)}</strong>. Pending withdrawals remain reserved.</div>
+      <div class="payment-flow-note">${icon('shield',17)} Available balance: <strong>${money(state.paymentWallet?.available ?? state.user?.availableBalance ?? state.user?.walletBalance ?? 0)}</strong>. Pending withdrawals remain reserved.</div>
       ${button({label:state.paymentBusy?'Submitting…':'Submit withdrawal request',action:'submit-payment',type:'submit',variant:'primary',iconName:'bank',disabled:state.paymentBusy})}
     </form>`;
   const demoNotice = approvalDemo ? `<div class="payment-demo-notice">${icon('shield',18)}<div><strong>Approval demonstration</strong><span>Use test account details, test UTRs, and sample screenshots. Do not send real money.</span></div></div>` : '';
