@@ -1,0 +1,383 @@
+/* ============================================================================
+   ROOSTERRUN - PROFESSIONAL RESPONSIVE DESIGN SYSTEM
+   Mobile: 1 column (keep current)
+   Tablet: 2 columns (proper cards)
+   Desktop: 3-4 columns (professional layout)
+   ============================================================================ */
+
+/* ==========================================================================
+   DESKTOP LAYOUTS (≥1061px)
+   ========================================================================== */
+
+@media (min-width: 1061px) {
+  
+  /* Desktop Grid System */
+  .desktop-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .desktop-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .desktop-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  
+  /* Desktop: Dashboard Page */
+  .dashboard-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 380px !important;
+    gap: 24px !important;
+  }
+  
+  /* Desktop: Live Arena Page */
+  .live-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 420px !important;
+    gap: 24px !important;
+  }
+  
+  /* Desktop: Metrics Cards - 4 columns */
+  .metrics-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  .metrics-grid--three {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Desktop: Bet Panel - Sticky sidebar */
+  .bet-panel {
+    position: sticky !important;
+    top: 90px !important;
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Desktop: Match Cards - 3 columns */
+  .match-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  /* Desktop: Results Grid - 2 columns */
+  .result-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 18px !important;
+  }
+  
+  /* Desktop: Wallet Hero - Horizontal layout */
+  .wallet-hero {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    gap: 32px !important;
+    padding: 32px 40px !important;
+  }
+  
+  /* Desktop: Transaction Cards - 2 columns */
+  .transaction-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  /* Desktop: Profile Grid - 2 columns */
+  .profile-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 24px !important;
+  }
+  
+  /* Desktop: Bets List - Table-like layout */
+  .bets-grid {
+    display: grid !important;
+    gap: 12px !important;
+  }
+  
+  .bet-card-desktop {
+    display: grid !important;
+    grid-template-columns: 140px 1fr 120px 140px 100px !important;
+    align-items: center !important;
+    gap: 20px !important;
+    padding: 20px 24px !important;
+  }
+  
+  /* Desktop: Outcome Cards - Horizontal */
+  .outcome-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  /* Desktop: Support Tickets - 2 columns */
+  .support-grid {
+    display: grid !important;
+    grid-template-columns: 340px 1fr !important;
+    gap: 24px !important;
+  }
+  
+  /* Desktop: Content Width Control */
+  .workspace-content {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 40px 48px 80px !important;
+  }
+  
+  /* Desktop: Card Improvements */
+  .dashboard-live,
+  .dashboard-list,
+  .dashboard-results,
+  .match-detail-card,
+  .recent-panel,
+  .bet-panel,
+  .wallet-card,
+  .profile-card {
+    padding: 28px !important;
+    border-radius: 18px !important;
+  }
+  
+  /* Desktop: Section Headings */
+  .section-heading {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 24px !important;
+  }
+  
+  .section-heading h2 {
+    font-size: 28px !important;
+  }
+  
+  /* Desktop: Home Page Special Layout */
+  .cockfight-home {
+    display: grid !important;
+    gap: 24px !important;
+  }
+  
+  .home-hero {
+    min-height: 480px !important;
+  }
+  
+  /* Desktop: Media Grid */
+  .media-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  /* Desktop: Results Hero */
+  .results-hero {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 32px !important;
+    padding: 36px !important;
+    min-height: 280px !important;
+  }
+}
+
+/* ==========================================================================
+   TABLET LAYOUTS (761px - 1060px)
+   ========================================================================== */
+
+@media (min-width: 761px) and (max-width: 1060px) {
+  
+  /* Tablet Grid System */
+  .tablet-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  
+  /* Tablet: Dashboard - 1 column + sidebar hidden */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  
+  /* Tablet: Live Arena - Single column */
+  .live-layout {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  
+  /* Tablet: Metrics - 2 columns */
+  .metrics-grid,
+  .metrics-grid--three {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+  
+  /* Tablet: Match Cards - 2 columns */
+  .match-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  /* Tablet: Results Grid - 2 columns */
+  .result-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  /* Tablet: Wallet Hero - 1 column */
+  .wallet-hero {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 26px !important;
+  }
+  
+  /* Tablet: Transaction Cards - 2 columns */
+  .transaction-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+  
+  /* Tablet: Profile Grid - 1 column */
+  .profile-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  
+  /* Tablet: Outcome Cards - 3 columns (keep horizontal) */
+  .outcome-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+  }
+  
+  /* Tablet: Support Grid - 1 column */
+  .support-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  
+  /* Tablet: Content Width */
+  .workspace-content {
+    width: min(calc(100% - 48px), 1120px) !important;
+    padding: 28px 0 96px !important;
+  }
+  
+  /* Tablet: Media Grid - 3 columns */
+  .media-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  /* Tablet: Results Hero - 1 column */
+  .results-hero {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 28px !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE LAYOUTS (≤760px)
+   Keep current design - 1 column, vertical
+   ========================================================================== */
+
+@media (max-width: 760px) {
+  /* Mobile layouts are already correctly implemented in main styles.css */
+  /* No changes needed - keep vertical single column */
+}
+
+/* ==========================================================================
+   CARD COMPONENT IMPROVEMENTS
+   ========================================================================== */
+
+/* Metric Cards */
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+@media (min-width: 1061px) {
+  .metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Match Cards */
+.match-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+@media (min-width: 1061px) {
+  .match-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-strong);
+  }
+}
+
+/* Result Cards */
+.result-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  transition: background 0.2s;
+}
+
+@media (min-width: 1061px) {
+  .result-card:hover {
+    background: var(--surface-3);
+  }
+}
+
+/* ==========================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+
+/* Responsive Visibility */
+.mobile-only { display: none !important; }
+.tablet-only { display: none !important; }
+.desktop-only { display: block !important; }
+
+@media (max-width: 760px) {
+  .mobile-only { display: block !important; }
+  .tablet-only { display: none !important; }
+  .desktop-only { display: none !important; }
+}
+
+@media (min-width: 761px) and (max-width: 1060px) {
+  .mobile-only { display: none !important; }
+  .tablet-only { display: block !important; }
+  .desktop-only { display: none !important; }
+}
+
+/* Responsive Spacing */
+@media (min-width: 1061px) {
+  .desktop-gap-sm { gap: 12px !important; }
+  .desktop-gap-md { gap: 24px !important; }
+  .desktop-gap-lg { gap: 32px !important; }
+  .desktop-padding-lg { padding: 32px 40px !important; }
+}
+
+/* ==========================================================================
+   LAYOUT HELPERS
+   ========================================================================== */
+
+/* Container Max Widths */
+@media (min-width: 1061px) {
+  .container-narrow { max-width: 1200px; margin: 0 auto; }
+  .container-medium { max-width: 1400px; margin: 0 auto; }
+  .container-wide { max-width: 1600px; margin: 0 auto; }
+}
+
+/* Flex Helpers for Desktop */
+@media (min-width: 1061px) {
+  .desktop-flex { display: flex !important; }
+  .desktop-flex-wrap { flex-wrap: wrap !important; }
+  .desktop-flex-between { justify-content: space-between !important; }
+  .desktop-flex-center { justify-content: center !important; }
+  .desktop-items-center { align-items: center !important; }
+}
