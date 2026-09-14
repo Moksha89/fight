@@ -1074,13 +1074,30 @@ body:has(.app-layout--reference) {
   min-height: 100vh;
   background: var(--bg);
 }
-.app-layout--reference .app-workspace {
-  width: min(100%, 760px);
-  min-height: 100vh;
-  margin: 0 auto;
-  border-inline: 1px solid var(--border);
-  background: var(--bg);
-  box-shadow: 0 0 70px rgba(0,0,0,.8);
+
+/* Mobile/Tablet: Narrow centered layout */
+@media (max-width: 1060px) {
+  .app-layout--reference .app-workspace {
+    width: min(100%, 760px);
+    min-height: 100vh;
+    margin: 0 auto;
+    border-inline: 1px solid var(--border);
+    background: var(--bg);
+    box-shadow: 0 0 70px rgba(0,0,0,.8);
+  }
+}
+
+/* Desktop: Full width with sidebar */
+@media (min-width: 1061px) {
+  .app-layout--reference .app-workspace {
+    width: 100%;
+    min-height: 100vh;
+    margin-left: 246px;
+    margin-right: 0;
+    border-inline: none;
+    background: var(--bg);
+    box-shadow: none;
+  }
 }
 .app-layout--reference .workspace-content {
   width: 100%;
