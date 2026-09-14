@@ -156,6 +156,11 @@ class PaymentService:
         self.support = SupportEngine(self)
         self.intelligence = IntelligenceEngine(self)
         self.china_feed = ChinaFeedEngine(self)
+        # Enable China 24/7 feed by default in preview mode for immediate local testing
+        if self.preview_mode:
+            current_settings = self.china_feed.settings()
+            if not current_settings.get("enabled"):
+                self.china_feed.update_settings({"enabled": True}, actor="PREVIEW_INIT")
 
     def connect(self) -> sqlite3.Connection:
         return self.database.connect()
