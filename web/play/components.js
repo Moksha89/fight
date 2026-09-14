@@ -80,7 +80,8 @@ export function homeHero() {
     <img src="/static/home-cockfight-livestream-v2.png" alt="RoosterRun live cockfight arena">
     <span class="home-hero__shade"></span>
     <span class="home-hero__title"><strong>LIVE</strong> COCKFIGHT</span>
-    <span class="home-hero__labels"><span><strong>RoosterRun</strong><small>Live arena</small></span></span>
+    <span class="home-hero__labels"><span><strong>24/7</strong><small>Non-stop</small></span><span><strong>HD</strong><small>Live stream</small></span><span><strong>Real</strong><small>Verified</small></span></span>
+    <span class="home-hero__dots"><i class="is-active"></i></span>
   </button>`;
 }
 

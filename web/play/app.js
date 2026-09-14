@@ -140,8 +140,30 @@ function applySiteConfig() {
   document.querySelectorAll('.brand__copy strong').forEach(element=>{element.textContent=name;});
   document.querySelectorAll('.brand__copy > span,.reference-home-logo small').forEach(element=>{element.textContent=tagline;});
   document.querySelectorAll('.reference-home-logo strong').forEach(element=>{element.textContent=name;});
-  const heroBanner = (config.banners||[]).find(item=>item.placement==='HOME_HERO'&&item.image_url);
-  if(heroBanner){const hero=document.querySelector('.home-hero>img');if(hero){hero.src=heroBanner.image_url;hero.alt=heroBanner.title||'Live games banner';}}
+  const heroBanners = (config.banners||[]).filter(item=>item.placement==='HOME_HERO'&&item.image_url);
+  const hero = document.querySelector('.home-hero');
+  if (heroBanners.length && hero) {
+    const heroImg = hero.querySelector('img');
+    const heroDots = hero.querySelector('.home-hero__dots');
+    let currentIndex = 0;
+    const updateHero = (index = 0) => {
+      const banner = heroBanners[index];
+      if (heroImg && banner) {
+        heroImg.src = banner.image_url;
+        heroImg.alt = banner.title || 'Live games banner';
+      }
+      if (heroDots && heroBanners.length > 1) {
+        heroDots.innerHTML = heroBanners.map((_, i) => `<i${i === index ? ' class="is-active"' : ''}></i>`).join('');
+      }
+    };
+    updateHero(0);
+    if (heroBanners.length > 1) {
+      setInterval(() => {
+        currentIndex = (currentIndex + 1) % heroBanners.length;
+        updateHero(currentIndex);
+      }, 5000);
+    }
+  }
   const featured = config.featured_game;
   const managedLiveCard = (config.banners || []).some(item => item.placement === 'HOME_LIVE' && item.image_url);
   if(featured?.thumbnail_url && !managedLiveCard){const liveCard=document.querySelector('.home-feed .home-media-card img');if(liveCard)liveCard.src=featured.thumbnail_url;}
