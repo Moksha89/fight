@@ -1,0 +1,33 @@
+/* Shared design tokens — single source of truth for play, admin, and broadcast. */
+:root {
+  color-scheme: dark;
+  --bg: #090b0f;
+  --bg-raised: #0d1016;
+  --surface: #121620;
+  --surface-2: #181d28;
+  --surface-3: #202634;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #f7f8fb;
+  --text-soft: #b8bfcc;
+  --text-muted: #7f8796;
+  --gold: #e8b84c;
+  --gold-bright: #ffd878;
+  --gold-ink: #261900;
+  --red: #ef4e57;
+  --red-soft: rgba(239, 78, 87, 0.14);
+  --blue: #5791ff;
+  --blue-soft: rgba(87, 145, 255, 0.14);
+  --green: #46d18b;
+  --green-soft: rgba(70, 209, 139, 0.14);
+  --warning: #f1a94a;
+  --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.18);
+  --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.45);
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --content: 1180px;
+  --header-height: 72px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+}
