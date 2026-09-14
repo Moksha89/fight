@@ -40,18 +40,16 @@ function routeFromHash() {
 }
 
 const initialRoute = routeFromHash();
-// Localhost is always a zero-login product preview. Ignore any stale token that
-// may have been left behind by an earlier backend test.
-const localAutoPreview = isLocalPreview;
-
+// In localhost, start unauthenticated but allow real registration/login flows
+// for proper testing. Preview/demo mode is opt-in via the "Open player preview" button.
 const store = createStore({
-  route: localAutoPreview && initialRoute === 'home' ? 'dashboard' : initialRoute,
-  authenticated: !localAutoPreview && Boolean(getToken()),
-  previewMode: localAutoPreview,
-  user: localAutoPreview ? { ...previewUser } : savedUser(),
+  route: initialRoute === 'home' ? 'dashboard' : initialRoute,
+  authenticated: Boolean(getToken()),
+  previewMode: false,
+  user: savedUser(),
   match: { ...previewMatch },
   results: [...previewResults],
-  bets: localAutoPreview ? [...previewBets] : [],
+  bets: [],
   transactions: [],
   selectedOutcome: null,
   selectedGameId: null,
@@ -206,7 +204,7 @@ function arenaHomeView(state, { publicMode = false } = {}) {
   const body = `<section class="arena-home" aria-label="Cockfight live arena">
     ${streamFrame(match,false,true)}
     ${screenSelector(state.match?.id,state.siteConfig?.games||[],state.siteConfig?.categories||[],state.match?.categorySlug)}
-    <div class="arena-market" aria-label="Match outcomes">${arenaOutcomeCard({side:1,label:'Red',odds:match.teamA.odds,selected:selected===1,disabled:!bettingOpen})}${arenaOutcomeCard({side:3,label:'Tie',odds:match.draw.odds,selected:selected===3,disabled:!bettingOpen})}${arenaOutcomeCard({side:2,label:'Blue',odds:match.teamB.odds,selected:selected===2,disabled:!bettingOpen})}</div>
+    <div class="arena-market" aria-label="Match outcomes">${arenaOutcomeCard({side:1,label:match.teamA.name,odds:match.teamA.odds,selected:selected===1,disabled:!bettingOpen})}${arenaOutcomeCard({side:3,label:'Draw',odds:match.draw.odds,selected:selected===3,disabled:!bettingOpen})}${arenaOutcomeCard({side:2,label:match.teamB.name,odds:match.teamB.odds,selected:selected===2,disabled:!bettingOpen})}</div>
     <section class="chip-section" aria-labelledby="chip-title"><div class="chip-section__head"><span id="chip-title">Select Chips</span></div><div class="arena-chips">${chips.map(amount=>`<button class="${state.stake===amount?'is-active':''}" type="button" data-action="set-stake" data-amount="${amount}">${amount>=1000?`₹${amount/1000}K`:`₹${amount}`}</button>`).join('')}</div></section>
     <div class="arena-actions"><button type="button" data-action="show-terms">${icon('crown',23)}<span>VIP</span></button><button type="button" data-action="show-rules">${icon('shield',23)}<span>Disclaimer</span></button>${mainAction}<button type="button" data-action="navigate" data-route="bets">${icon('history',23)}<span>History</span></button></div>
     <section class="recent-arena"><div class="recent-arena__head"><h2>Recent Matches</h2><button type="button" data-action="navigate" data-route="results">View All ${icon('chevron',16)}</button></div><div class="recent-arena__body"><aside class="market-legend"><span><i class="table-corner table-corner--red"></i>Red</span><span><i class="table-corner table-corner--blue"></i>Blue</span><span><i class="table-corner table-corner--gold"></i>Tie</span><span><i class="table-corner table-corner--neutral"></i>Cancel</span></aside>${recentMatchTable(state.results,state.bets,state.match?.categorySlug)}</div></section>
@@ -313,10 +311,8 @@ function publicPage(state) {
 
 function renderOverlay(state) {
   const mobileMenu = state.mobileMenuOpen ? `<div class="mobile-menu-backdrop" data-action="close-menu"><nav class="mobile-menu" aria-label="Mobile menu" data-modal-panel><div>${brand('home')}<button class="icon-button" type="button" data-action="close-menu" aria-label="Close menu">${icon('close',20)}</button></div><button data-action="navigate" data-route="home">${icon('home',18)} Home</button><button data-action="navigate" data-route="live">${icon('live',18)} Live arena</button><button data-action="navigate" data-route="results">${icon('trophy',18)} Results</button><hr>${button({label:'Sign in',action:'open-login',variant:'secondary',iconName:'login'})}${button({label:'Create account',action:'open-register',variant:'primary',iconName:'user'})}</nav></div>` : '';
-  // Authentication remains available in deployed environments, but it must
-  // never cover the localhost preview—even if old UI state says otherwise.
   const draft = captureFormDrafts(overlayRoot);
-  overlayRoot.innerHTML = `${isLocalPreview ? '' : authDialog(state)}${paymentFlowDialog(state)}${safetyDialog(state)}${securityDialog(state)}${notificationDialog(state)}${supportDialog(state)}${homeMediaDialog(state)}${infoDialog(state)}${mobileMenu}`;
+  overlayRoot.innerHTML = `${authDialog(state)}${paymentFlowDialog(state)}${safetyDialog(state)}${securityDialog(state)}${notificationDialog(state)}${supportDialog(state)}${homeMediaDialog(state)}${infoDialog(state)}${mobileMenu}`;
   restoreFormDrafts(overlayRoot, draft);
 }
 
@@ -469,6 +465,8 @@ function enterLocalPreview(route = 'dashboard') {
     mobileMenuOpen:false,
   });
   window.history.pushState(null,'',`#${route}`);
+  // Hydrate live siteConfig and China feed immediately so the demo uses live match data
+  hydrateSiteConfig();
   return true;
 }
 
@@ -612,17 +610,19 @@ function normalizeBet(raw = {}) {
 
 function normalizeResult(raw = {}) {
   const winTeam = Number(raw.winTeam??raw.win_team??raw.winner);
-  const winner = ({1:'Red',2:'Blue',3:'Tie',4:'Cancelled'}[winTeam]||raw.winner_name||raw.result||'Awaiting result');
+  const winner = ({1:raw.team_a_name||'Meron',2:raw.team_b_name||'Wala',3:'Draw',4:'Cancelled'}[winTeam]||raw.winner_name||raw.result||'Awaiting result');
   return {id:raw.fightNumber||raw.matchNumber||raw.id||'—',gameId:raw.id??raw.game_id??null,winner,title:String(raw.title||''),categorySlug:String(raw.category_slug||''),categoryName:String(raw.category_name||''),tone:winTeam===1?'red':winTeam===2?'blue':'gold',result:winTeam===4?'Cancelled':'Settled',endedAt:raw.result_declared_at||raw.endedAt||raw.created_at||new Date().toISOString()};
 }
 
 async function hydrateAccount() {
-  if (!store.getState().authenticated&&!store.getState().previewMode) return;
+  const state = store.getState();
+  if (!state.authenticated && !state.previewMode) return;
   store.setState({loadingAccount:true});
   const results = await Promise.allSettled([api.me(),api.bets(),api.statement(),api.autoHistory(20),api.compliance(),api.responsiblePlay(),api.notifications(),api.supportTickets()]);
   const updates = {loadingAccount:false,servicesOnline:results.some(result=>result.status==='fulfilled')};
   if (results[0].status==='fulfilled') updates.user=normalizeUser(results[0].value);
-  else if (results[0].reason instanceof ApiError&&results[0].reason.status===401) return logout(false);
+  // In preview mode, a 401 for /api/user/me/ is expected; don't self-destruct the demo session
+  else if (results[0].reason instanceof ApiError&&results[0].reason.status===401 && !state.previewMode) return logout(false);
   if (results[1].status==='fulfilled') updates.bets=(results[1].value.results||results[1].value||[]).map(normalizeBet);
   if (results[2].status==='fulfilled') updates.transactions=results[2].value.results||results[2].value||[];
   if (results[3].status==='fulfilled') updates.results=(results[3].value.results||results[3].value||[]).map(normalizeResult);
@@ -907,5 +907,6 @@ render();
 hydrateSiteConfig();
 if(store.getState().authenticated){if(store.getState().route==='home')navigate('dashboard');hydrateAccount();connectLiveServices();}
 else if(store.getState().previewMode){if(window.location.hash!=='#'+store.getState().route)window.history.replaceState(null,'',`#${store.getState().route}`);hydrateAccount();connectLiveServices();}
-else{startPublicViewerPoll();const requested=store.getState().route;(async()=>{try{const data=await api.me();setSession({authenticated:true,user:data});const user=normalizeUser(data);const route=protectedRoutes.has(requested)?requested:requested==='home'?'dashboard':requested;store.setState({authenticated:true,previewMode:false,user,route});window.history.replaceState(null,'',`#${route}`);hydrateAccount();connectLiveServices();}catch{clearSession();store.setState(requested==='home'?{route:'home'}:{route:'home',authMode:'login',pendingRoute:requested});window.history.replaceState(null,'','#home');}})();}
+else{startPublicViewerPoll();const requested=store.getState().route;(async()=>{try{const data=await api.me();setSession({authenticated:true,user:data});const user=normalizeUser(data);const route=protectedRoutes.has(requested)?requested:requested==='home'?'dashboard':requested;store.setState({authenticated:true,previewMode:false,user,route});window.history.replaceState(null,'',`#${route}`);hydrateAccount();connectLiveServices();}catch{clearSession();// Only show auth prompt if they tried to access protected content
+if(protectedRoutes.has(requested))store.setState({route:'home',authMode:'login',pendingRoute:requested});else store.setState({route:requested==='home'?'home':'dashboard'});window.history.replaceState(null,'',`#${store.getState().route}`);}})();}
 if('serviceWorker'in navigator&&!isLocalPreview&&window.location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('/play/sw.js').catch(()=>{}));
