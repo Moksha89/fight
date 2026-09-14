@@ -950,11 +950,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 /* Cockfight-only entertainment home */
 .app-layout--home { background:#050608; }
-.app-layout--home .app-workspace { margin-left:0; }
 .app-layout--home .workspace-content { width:min(calc(100% - 28px),980px); padding:18px 0 112px; }
-.app-layout--home .app-topbar__mobile-brand { display:block; }
-.app-layout--home .app-topbar__left > div { display:none; }
 .app-layout--home .app-topbar { border-bottom-color:rgba(255,255,255,.1); }
+
+/* Desktop: Keep sidebar visible even on home */
+@media (min-width: 1061px) {
+  .app-layout--home .app-workspace { margin-left: 246px; }
+  .app-layout--home .app-sidebar { display: flex; }
+  .app-layout--home .workspace-content { width:min(calc(100% - 48px),1120px); }
+}
+
+/* Mobile/Tablet: Hide sidebar on home */
+@media (max-width: 1060px) {
+  .app-layout--home .app-workspace { margin-left:0; }
+  .app-layout--home .app-topbar__mobile-brand { display:block; }
+  .app-layout--home .app-topbar__left > div { display:none; }
+}
 .cockfight-home { display:grid; gap:18px; }
 
 .home-hero {
