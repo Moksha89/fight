@@ -861,7 +861,7 @@ document.addEventListener('click',event=>{
   if(action==='navigate')navigate(control.dataset.route);
   else if(action==='enter-live')navigate('live');
   else if(action==='preview-dashboard')enterLocalPreview('dashboard');
-  else if(action==='open-login'||action==='open-register'){if(!enterLocalPreview('dashboard'))store.setState({authMode:action==='open-login'?'login':'register',authError:'',authStep:'credentials',authContext:null,authPreviewOtp:'',mobileMenuOpen:false});}
+  else if(action==='open-login'||action==='open-register'){store.setState({authMode:action==='open-login'?'login':'register',authError:'',authStep:'credentials',authContext:null,authPreviewOtp:'',mobileMenuOpen:false});}
   else if(action==='close-auth')store.setState({authMode:null,authError:'',authStep:'credentials',authContext:null,authPreviewOtp:'',pendingRoute:null});
   else if(action==='switch-auth')store.setState({authMode:control.dataset.mode,authError:'',authStep:'credentials',authContext:null,authPreviewOtp:''});
   else if(action==='back-to-auth')store.setState({authStep:'credentials',authContext:null,authError:'',authPreviewOtp:''});
