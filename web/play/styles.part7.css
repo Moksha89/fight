@@ -1,0 +1,30 @@
+  .arena-home, .app-layout--reference .arena-home { gap: 7px; }
+  .arena-home .arena-player, .app-layout--reference .arena-home .arena-player { aspect-ratio: 16 / 9; border-radius: 11px; }
+  .arena-player__top { top: 8px; left: 8px; right: 8px; gap: 5px; }
+  .arena-player__top .status, .arena-player__top .arena-label { min-height: 24px; padding: 0 8px; font-size: 11px; white-space: nowrap; }
+  .arena-player__fullscreen { width: 30px; height: 30px; }
+  .app-layout--reference .arena-player__controls button, .arena-player__controls button { width: 30px; height: 30px; }
+  .arena-player__live-label { font-size: 11px; }
+  .arena-home .screen-selector button, .app-layout--reference .screen-selector button { min-height: 26px; padding: 0 9px 0 8px; font-size: 11px; }
+  .arena-home .screen-selector button span, .app-layout--reference .screen-selector button span { font-size: 11px; }
+  .arena-market, .app-layout--reference .arena-market { gap: 5px; }
+  .arena-outcome, .app-layout--reference .arena-outcome { min-height: 118px; padding: 7px 4px 10px; border-radius: 9px; gap: 2px; }
+  .arena-outcome__label, .app-layout--reference .arena-outcome__label { font-size: 11px; letter-spacing: 1px; }
+  .arena-outcome__crest, .app-layout--reference .arena-outcome__crest { width: 42px; height: 42px; }
+  .arena-outcome strong, .app-layout--reference .arena-outcome strong { font-size: 19px; }
+  .chip-section { gap: 4px; }
+  .chip-section__head { font-size: 11px; }
+  .arena-chips, .app-layout--reference .arena-chips { gap: 4px; }
+  .arena-chips button, .app-layout--reference .arena-chips button { min-height: 34px; padding: 0 4px; font-size: 11px; border-radius: 8px; }
+  .arena-actions, .app-layout--reference .arena-actions { gap: 4px; }
+  .arena-actions > button, .app-layout--reference .arena-actions > button { min-height: 54px; gap: 2px; border-radius: 9px; }
+  .arena-actions > button > .icon, .app-layout--reference .arena-actions > button > .icon { width: 18px; height: 18px; }
+  .arena-actions > button > span, .app-layout--reference .arena-actions > button > span { font-size: 11px; }
+  .app-layout--reference .prediction-button, .prediction-button { grid-template-columns: 28px 1fr !important; padding: 4px 6px !important; column-gap: 5px !important; }
+  .app-layout--reference .prediction-button > span, .prediction-button > span { width: 28px; height: 28px; }
+  .prediction-button strong, .prediction-button small, .app-layout--reference .prediction-button strong, .app-layout--reference .prediction-button small { font-size: 11px; }
+  .recent-arena__head h2, .app-layout--reference .recent-arena__head h2 { font-size: 15px; }
+  .recent-arena__head button { font-size: 12px; }
+  .market-legend span { font-size: 11px; }
+  .recent-arena table { font-size: 12px; }
+}
