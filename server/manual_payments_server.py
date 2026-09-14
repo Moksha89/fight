@@ -42,6 +42,8 @@ from compliance_engine import ComplianceEngine
 from database import Database
 from delivery_engine import DeliveryEngine
 from intelligence_engine import IntelligenceEngine
+from moc_engine import MOCEngine
+from moc_feed_engine import MOCFeedEngine
 from operations_engine import OperationsEngine
 from observability import Metrics, StructuredLogger
 from runtime_config import database_url_from_env, load_secret_files, secret_rotation_status, validate_runtime_secrets
@@ -156,11 +158,18 @@ class PaymentService:
         self.support = SupportEngine(self)
         self.intelligence = IntelligenceEngine(self)
         self.china_feed = ChinaFeedEngine(self)
+        self.moc = MOCEngine(self)
+        self.moc_feed = MOCFeedEngine(self)
+        self.moc_feed.moc_engine = self.moc  # Link MOC engine to feed engine
         # Enable China 24/7 feed by default in preview mode for immediate local testing
         if self.preview_mode:
             current_settings = self.china_feed.settings()
             if not current_settings.get("enabled"):
                 self.china_feed.update_settings({"enabled": True}, actor="PREVIEW_INIT")
+            # Also enable MOC feed in preview mode for testing
+            moc_settings = self.moc_feed.settings()
+            if not moc_settings.get("enabled"):
+                self.moc_feed.update_settings({"enabled": True}, actor="PREVIEW_INIT")
 
     def connect(self) -> sqlite3.Connection:
         return self.database.connect()
@@ -1810,7 +1819,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return "payments"
         if path.startswith("/api/admin/users"):
             return "users"
-        if path.startswith("/api/admin/games") or path.startswith("/api/admin/game-categories") or path.startswith("/api/admin/streams") or path in {"/api/admin/risk/", "/api/admin/china-feed/", "/api/admin/china-feed/poll/", "/api/admin/china-feed/recover/"}:
+        if path.startswith("/api/admin/games") or path.startswith("/api/admin/game-categories") or path.startswith("/api/admin/streams") or path in {"/api/admin/risk/", "/api/admin/china-feed/", "/api/admin/china-feed/poll/", "/api/admin/china-feed/recover/", "/api/admin/moc-feed/"}:
             return "games"
         if path.startswith("/api/admin/banners"):
             return "banners"
@@ -1940,6 +1949,113 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return self.send_json(HTTPStatus.NOT_FOUND, {"detail": "Cockfight endpoint not found."})
             except Exception as error:
                 return self.handle_api_error(error)
+        # MOC Feed API - External platform access with API key authentication
+        if path.startswith("/api/moc-feed/"):
+            try:
+                # Extract API key from Authorization header
+                auth_header = self.headers.get("Authorization", "")
+                api_key = None
+                if auth_header.startswith("Bearer "):
+                    api_key = auth_header[7:]
+                
+                if not api_key:
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "API key required. Include 'Authorization: Bearer moc_sk_...' header."})
+                
+                # Verify API key
+                ip_address = self.client_address[0] if self.client_address else None
+                key_info = self.server.payments.moc.verify_api_key(api_key, ip_address)
+                
+                if not key_info:
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "Invalid or rate-limited API key."})
+                
+                # Check read permission
+                if 'read' not in key_info.get('permissions', []):
+                    return self.send_json(HTTPStatus.FORBIDDEN, {"detail": "API key does not have read permission."})
+                
+                # Route to appropriate endpoint
+                start_time = time.monotonic()
+                
+                if path == "/api/moc-feed/current-match/":
+                    result = self.server.payments.moc.feed_current_match()
+                    response_time = int((time.monotonic() - start_time) * 1000)
+                    self.server.payments.moc.log_api_usage(
+                        key_info['key_id'], path, 'GET', 200, response_time, ip_address, self.headers.get("User-Agent")
+                    )
+                    return self.send_json(HTTPStatus.OK, result or {"message": "No active match"})
+                
+                if path == "/api/moc-feed/upcoming/":
+                    limit = int((query.get("limit") or ["10"])[0])
+                    results = self.server.payments.moc.feed_upcoming_matches(limit)
+                    response_time = int((time.monotonic() - start_time) * 1000)
+                    self.server.payments.moc.log_api_usage(
+                        key_info['key_id'], path, 'GET', 200, response_time, ip_address, self.headers.get("User-Agent")
+                    )
+                    return self.send_json(HTTPStatus.OK, {"matches": results})
+                
+                if path == "/api/moc-feed/recent-results/":
+                    limit = int((query.get("limit") or ["20"])[0])
+                    results = self.server.payments.moc.feed_recent_results(limit)
+                    response_time = int((time.monotonic() - start_time) * 1000)
+                    self.server.payments.moc.log_api_usage(
+                        key_info['key_id'], path, 'GET', 200, response_time, ip_address, self.headers.get("User-Agent")
+                    )
+                    return self.send_json(HTTPStatus.OK, {"results": results})
+                
+                return self.send_json(HTTPStatus.NOT_FOUND, {"detail": "MOC feed endpoint not found."})
+            
+            except Exception as error:
+                return self.handle_api_error(error)
+        # MOC Operator API - Operator dashboard access with JWT authentication
+        if path.startswith("/api/moc/"):
+            try:
+                # Public login endpoint (no auth required)
+                if path == "/api/moc/auth/login/":
+                    return self.send_json(HTTPStatus.OK, {"message": "Use POST to login"})
+                
+                # All other endpoints require JWT authentication
+                auth_header = self.headers.get("Authorization", "")
+                token = None
+                if auth_header.startswith("Bearer "):
+                    token = auth_header[7:]
+                
+                if not token:
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "JWT token required."})
+                
+                operator = self.server.payments.moc.verify_operator_token(token)
+                if not operator:
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "Invalid or expired token."})
+                
+                # Route to appropriate endpoint
+                if path == "/api/moc/matches/":
+                    filters = {}
+                    if 'status' in query:
+                        filters['status'] = query['status'][0].split(',')
+                    limit = int((query.get("limit") or ["50"])[0])
+                    matches = self.server.payments.moc.list_matches(filters, limit)
+                    return self.send_json(HTTPStatus.OK, {"matches": matches})
+                
+                match_detail = re.fullmatch(r"/api/moc/matches/(MOC-\d+)/", path)
+                if match_detail:
+                    match_id = match_detail.group(1)
+                    match = self.server.payments.moc.get_match(match_id)
+                    if match:
+                        return self.send_json(HTTPStatus.OK, match)
+                    return self.send_json(HTTPStatus.NOT_FOUND, {"detail": f"Match {match_id} not found."})
+                
+                if path == "/api/moc/audit-log/":
+                    filters = {}
+                    if 'match_id' in query:
+                        filters['match_id'] = query['match_id'][0]
+                    if 'action' in query:
+                        filters['action'] = query['action'][0]
+                    limit = int((query.get("limit") or ["100"])[0])
+                    logs = self.server.payments.moc.get_audit_log(filters, limit)
+                    return self.send_json(HTTPStatus.OK, {"logs": logs})
+                
+                return self.send_json(HTTPStatus.NOT_FOUND, {"detail": "MOC operator endpoint not found."})
+            
+            except Exception as error:
+                return self.handle_api_error(error)
         if path.startswith("/api/admin/"):
             try:
                 if path == "/api/admin/auth/session/":
@@ -1965,6 +2081,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     return self.send_json(HTTPStatus.OK, self.server.payments.cockfight.risk_policy())
                 if path == "/api/admin/china-feed/":
                     return self.send_json(HTTPStatus.OK, self.server.payments.china_feed.admin_view())
+                if path == "/api/admin/moc-feed/":
+                    return self.send_json(HTTPStatus.OK, self.server.payments.moc_feed.settings())
                 if path == "/api/admin/game-categories/":
                     return self.send_json(HTTPStatus.OK, {"results": self.server.payments.admin_game_categories()})
                 if path == "/api/admin/streams/":
@@ -2152,6 +2270,83 @@ class RequestHandler(BaseHTTPRequestHandler):
             broadcast_stop = re.fullmatch(r"/api/cockfight/broadcast/sessions/([^/]+)/stop/", path)
             if broadcast_stop:
                 return self.send_json(HTTPStatus.OK, self.server.payments.streaming.stop_session(broadcast_stop.group(1), "PUBLISHER", self.bearer_token(), str(payload.get("reason") or "")))
+            # MOC Operator API POST routes
+            if path.startswith("/api/moc/"):
+                if path == "/api/moc/auth/login/":
+                    # Public login endpoint
+                    ip_address = self.client_address[0] if self.client_address else None
+                    result = self.server.payments.moc.operator_login(
+                        payload.get("username", ""),
+                        payload.get("password", ""),
+                        ip_address
+                    )
+                    return self.send_json(HTTPStatus.OK if result['success'] else HTTPStatus.UNAUTHORIZED, result)
+                
+                # All other endpoints require JWT auth
+                auth_header = self.headers.get("Authorization", "")
+                token = None
+                if auth_header.startswith("Bearer "):
+                    token = auth_header[7:]
+                
+                if not token:
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "JWT token required."})
+                
+                operator = self.server.payments.moc.verify_operator_token(token)
+                if not operator:
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "Invalid or expired token."})
+                
+                # Create match
+                if path == "/api/moc/matches/":
+                    result = self.server.payments.moc.create_match(
+                        operator['operator_id'],
+                        operator['username'],
+                        payload
+                    )
+                    return self.send_json(HTTPStatus.CREATED if result['success'] else HTTPStatus.BAD_REQUEST, result)
+                
+                # Update match status
+                match_status = re.fullmatch(r"/api/moc/matches/(MOC-\d+)/status/", path)
+                if match_status:
+                    match_id = match_status.group(1)
+                    result = self.server.payments.moc.update_match_status(
+                        operator['operator_id'],
+                        operator['username'],
+                        match_id,
+                        payload.get('status', ''),
+                        payload.get('password_verify')
+                    )
+                    return self.send_json(HTTPStatus.OK if result['success'] else HTTPStatus.BAD_REQUEST, result)
+                
+                # Declare result
+                match_result = re.fullmatch(r"/api/moc/matches/(MOC-\d+)/result/", path)
+                if match_result:
+                    match_id = match_result.group(1)
+                    result = self.server.payments.moc.declare_result(
+                        operator['operator_id'],
+                        operator['username'],
+                        match_id,
+                        payload.get('result', ''),
+                        payload.get('password_verify', '')
+                    )
+                    return self.send_json(HTTPStatus.OK if result['success'] else HTTPStatus.BAD_REQUEST, result)
+                
+                # Create API key (for super admins)
+                if path == "/api/moc/api-keys/":
+                    if operator['role'] != 'super_admin':
+                        return self.send_json(HTTPStatus.FORBIDDEN, {"detail": "Only super admins can create API keys."})
+                    
+                    result = self.server.payments.moc.create_api_key(
+                        operator['operator_id'],
+                        operator['username'],
+                        payload.get('platform_name', ''),
+                        payload.get('platform_url'),
+                        payload.get('contact_email'),
+                        payload.get('permissions', ['read']),
+                        payload.get('rate_limit', 100)
+                    )
+                    return self.send_json(HTTPStatus.CREATED if result['success'] else HTTPStatus.BAD_REQUEST, result)
+                
+                return self.send_json(HTTPStatus.NOT_FOUND, {"detail": "MOC endpoint not found."})
             if path.startswith("/api/admin/"):
                 permission = self.admin_permission(path)
                 if path == "/api/admin/config/" and set(payload).issubset({"brand", "theme"}):
@@ -2185,6 +2380,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     return self.send_json(HTTPStatus.OK, self.server.payments.china_feed.poll_once(force=True))
                 if path == "/api/admin/china-feed/recover/":
                     return self.send_json(HTTPStatus.OK, {"recovered": self.server.payments.china_feed.recover()})
+                if path == "/api/admin/moc-feed/":
+                    return self.send_json(HTTPStatus.OK, self.server.payments.moc_feed.update_settings(payload))
                 if path == "/api/admin/game-categories/":
                     return self.send_json(HTTPStatus.CREATED, self.server.payments.admin_save_game_category(payload))
                 category = re.fullmatch(r"/api/admin/game-categories/(\d+)/", path)
