@@ -443,7 +443,10 @@ class AuthenticationEngine:
             if row["account_status"] != "ACTIVE":
                 raise PermissionError("This player account is not active.")
             connection.execute("UPDATE user_accounts SET failed_login_count=0,locked_until='',last_login_at=?,updated_at=? WHERE user_id=?", (utc_now(), utc_now(), row["user_id"]))
-            public = self._public_user(row, row)
+            held = connection.execute(
+                "SELECT COALESCE(SUM(amount_paise),0) AS amount FROM wallet_holds WHERE user_id=? AND status='ACTIVE'", (row["user_id"],)
+            ).fetchone()["amount"]
+            public = self._public_user(row, row, int(held or 0))
         return {"user": public, **self._create_session("USER", row["user_id"], ip_address, user_agent)}
 
     def request_password_reset(self, mobile_value: object) -> dict:
