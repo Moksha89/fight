@@ -1099,11 +1099,34 @@ body:has(.app-layout--reference) {
     box-shadow: none;
   }
 }
-.app-layout--reference .workspace-content {
-  width: 100%;
-  margin: 0;
-  padding: 10px 16px 112px;
+
+/* Desktop: workspace-content gets proper width and padding */
+@media (min-width: 1061px) {
+  .app-layout--reference .workspace-content {
+    width: min(calc(100% - 96px), 1400px);
+    margin: 0 auto;
+    padding: 40px 48px 112px;
+  }
 }
+
+/* Tablet: workspace-content medium width */
+@media (min-width: 761px) and (max-width: 1060px) {
+  .app-layout--reference .workspace-content {
+    width: min(calc(100% - 48px), 1120px);
+    margin: 0 auto;
+    padding: 28px 32px 112px;
+  }
+}
+
+/* Mobile: workspace-content small width */
+@media (max-width: 760px) {
+  .app-layout--reference .workspace-content {
+    width: 100%;
+    margin: 0;
+    padding: 10px 16px 112px;
+  }
+}
+
 .app-layout--reference .app-mobile-nav {
   position: fixed;
   z-index: 120;
