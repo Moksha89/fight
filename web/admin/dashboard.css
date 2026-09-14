@@ -1,1 +1,4 @@
-@/workspace/dashboard-fixed.css
+/* Brand tokens: see /static/design-tokens.css */
+@import url("./dashboard.part0.css");
+@import url("./dashboard.part1.css");
+@import url("./dashboard.part2.css");
