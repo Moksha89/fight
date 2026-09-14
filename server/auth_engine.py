@@ -257,6 +257,17 @@ class AuthenticationEngine:
         )
 
     @staticmethod
+    def _held_paise(connection: sqlite3.Connection, user_id: str) -> int:
+        """Funds reserved against the wallet: active bet holds plus withdrawals awaiting approval."""
+        bets = connection.execute(
+            "SELECT COALESCE(SUM(amount_paise),0) AS amount FROM wallet_holds WHERE user_id=? AND status='ACTIVE'", (user_id,)
+        ).fetchone()["amount"]
+        withdrawals = connection.execute(
+            "SELECT COALESCE(SUM(amount_paise),0) AS amount FROM payment_requests WHERE user_id=? AND request_type='WITHDRAWAL' AND status='PENDING'", (user_id,)
+        ).fetchone()["amount"]
+        return int(bets or 0) + int(withdrawals or 0)
+
+    @staticmethod
     def _public_user(row: sqlite3.Row, wallet: sqlite3.Row | None = None, held_paise: int = 0) -> dict:
         balance_paise = int(wallet["balance_paise"] if wallet else 0)
         return {
@@ -443,10 +454,7 @@ class AuthenticationEngine:
             if row["account_status"] != "ACTIVE":
                 raise PermissionError("This player account is not active.")
             connection.execute("UPDATE user_accounts SET failed_login_count=0,locked_until='',last_login_at=?,updated_at=? WHERE user_id=?", (utc_now(), utc_now(), row["user_id"]))
-            held = connection.execute(
-                "SELECT COALESCE(SUM(amount_paise),0) AS amount FROM wallet_holds WHERE user_id=? AND status='ACTIVE'", (row["user_id"],)
-            ).fetchone()["amount"]
-            public = self._public_user(row, row, int(held or 0))
+            public = self._public_user(row, row, self._held_paise(connection, row["user_id"]))
         return {"user": public, **self._create_session("USER", row["user_id"], ip_address, user_agent)}
 
     def request_password_reset(self, mobile_value: object) -> dict:
@@ -564,9 +572,7 @@ class AuthenticationEngine:
                 "SELECT a.*,w.balance_paise,w.vip_tier,w.account_status FROM user_accounts a JOIN user_wallets w ON w.user_id=a.user_id WHERE a.user_id=?",
                 (session["subject_id"],),
             ).fetchone()
-            held = connection.execute(
-                "SELECT COALESCE(SUM(amount_paise),0) AS amount FROM wallet_holds WHERE user_id=? AND status='ACTIVE'", (session["subject_id"],)
-            ).fetchone()["amount"] if row else 0
+            held = self._held_paise(connection, session["subject_id"]) if row else 0
         if not row:
             raise AuthenticationError("The player account no longer exists.")
         if row["account_status"] != "ACTIVE":
