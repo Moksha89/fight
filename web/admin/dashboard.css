@@ -1,3 +1,2 @@
-@import url("./dashboard.part0.css");
-@import url("./dashboard.part1.css");
-@import url("./dashboard.part2.css");
+/* Brand tokens: see /static/design-tokens.css — keep only admin-local aliases below */
+:root{--muted:#7f8796;--shadow:0 24px 60px rgba(0,0,0,.34)}
