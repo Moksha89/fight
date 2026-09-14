@@ -1,5 +1,5 @@
 import { api, ApiError, clearSession, getToken, setSession } from './api.js?v=55';
-import { appShell, arenaOutcomeCard, categoryGames, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=65';
+import { appShell, arenaOutcomeCard, categoryGames, authDialog, betItem, brand, homeHero, homeMediaCard, homeMediaDialog, homeSectionHeader, homeShortcutRail, infoDialog, metricCard, notificationDialog, outcomeCard, paymentFlowDialog, paymentRequestCard, publicHeader, recentMatchTable, resultItem, safetyDialog, screenSelector, securityDialog, streamFrame, supportDialog } from './components.js?v=67';
 import { previewBets, previewMatch, previewResults, previewUser } from './data.js';
 const guestUser = { ...previewUser, username: 'Guest', walletBalance: 0, exposure: 0, bonus: 0, points: 0 };
 import { createStore } from './store.js';
@@ -209,7 +209,7 @@ function arenaHomeView(state, { publicMode = false } = {}) {
     <div class="arena-market" aria-label="Match outcomes">${arenaOutcomeCard({side:1,label:'Red',odds:match.teamA.odds,selected:selected===1,disabled:!bettingOpen})}${arenaOutcomeCard({side:3,label:'Tie',odds:match.draw.odds,selected:selected===3,disabled:!bettingOpen})}${arenaOutcomeCard({side:2,label:'Blue',odds:match.teamB.odds,selected:selected===2,disabled:!bettingOpen})}</div>
     <section class="chip-section" aria-labelledby="chip-title"><div class="chip-section__head"><span id="chip-title">Select Chips</span></div><div class="arena-chips">${chips.map(amount=>`<button class="${state.stake===amount?'is-active':''}" type="button" data-action="set-stake" data-amount="${amount}">${amount>=1000?`₹${amount/1000}K`:`₹${amount}`}</button>`).join('')}</div></section>
     <div class="arena-actions"><button type="button" data-action="show-terms">${icon('crown',23)}<span>VIP</span></button><button type="button" data-action="show-rules">${icon('shield',23)}<span>Disclaimer</span></button>${mainAction}<button type="button" data-action="navigate" data-route="bets">${icon('history',23)}<span>History</span></button></div>
-    <section class="recent-arena"><div class="recent-arena__head"><h2>Recent Matches</h2><button type="button" data-action="navigate" data-route="results">View All ${icon('chevron',16)}</button></div><div class="recent-arena__body"><aside class="market-legend"><span><i class="table-corner table-corner--red"></i>Red</span><span><i class="table-corner table-corner--blue"></i>Blue</span><span><i class="table-corner table-corner--gold"></i>Tie</span><span><i class="table-corner table-corner--neutral"></i>Cancel</span></aside>${recentMatchTable(state.results,state.bets)}</div></section>
+    <section class="recent-arena"><div class="recent-arena__head"><h2>Recent Matches</h2><button type="button" data-action="navigate" data-route="results">View All ${icon('chevron',16)}</button></div><div class="recent-arena__body"><aside class="market-legend"><span><i class="table-corner table-corner--red"></i>Red</span><span><i class="table-corner table-corner--blue"></i>Blue</span><span><i class="table-corner table-corner--gold"></i>Tie</span><span><i class="table-corner table-corner--neutral"></i>Cancel</span></aside>${recentMatchTable(state.results,state.bets,state.match?.categorySlug)}</div></section>
     ${publicMode && isLocalPreview ? `<div class="preview-entry">${button({label:'Open player preview',action:'preview-dashboard',variant:'primary',iconName:'play'})}</div>` : ''}
   </section>`;
   return publicMode ? `<main id="main-content" class="page arena-page"><div class="arena-shell">${body}</div></main>` : body;
@@ -269,7 +269,7 @@ function betsView(state) {
 }
 
 function resultsView(state, publicPage = false) {
-  return `<section class="workspace-page ${publicPage?'public-workspace':''}">${pageTitle('Official outcomes','Cockfight results','Clear winner, settlement status, and completion time for each match.')}<div class="results-hero"><div><span class="eyebrow">Latest declared winner</span><span class="winner-mark winner-mark--${escapeHtml(state.results[0]?.tone||'gold')}"><img src="/static/ic_rooster.svg" alt=""></span><h2>${escapeHtml(state.results[0]?.winner||'Awaiting result')}</h2><p>${state.results[0]?`Match #${state.results[0].id} · ${formatDate(state.results[0].endedAt)}`:'No completed matches are available.'}</p></div><div class="results-sequence">${state.results.slice(0,10).map(result=>`<span class="sequence-dot sequence-dot--${escapeHtml(result.tone)}" title="Match ${escapeHtml(result.id)}: ${escapeHtml(result.winner)}">${escapeHtml(String(result.winner).charAt(0))}</span>`).join('')}</div></div><section class="list-card"><div class="result-list">${state.results.length?state.results.map(resultItem).join(''):emptyState('trophy','No results yet','Completed matches will appear after the result is declared.')}</div></section></section>`;
+  return `<section class="workspace-page ${publicPage?'public-workspace':''}">${pageTitle('Official outcomes','Cockfight results','Clear winner, settlement status, and completion time for each match.')}<div class="results-hero"><div><span class="eyebrow">Latest declared winner</span><span class="winner-mark winner-mark--${escapeHtml(state.results[0]?.tone||'gold')}"><img src="/static/ic_rooster.svg" alt=""></span><h2>${escapeHtml(state.results[0]?.winner||'Awaiting result')}</h2><p>${state.results[0]?`${escapeHtml(state.results[0].title||`Match #${state.results[0].id}`)} · ${formatDate(state.results[0].endedAt)}`:'No completed matches are available.'}</p></div><div class="results-sequence">${state.results.slice(0,10).map(result=>`<span class="sequence-dot sequence-dot--${escapeHtml(result.tone)}" title="Match ${escapeHtml(result.id)}: ${escapeHtml(result.winner)}">${escapeHtml(String(result.winner).charAt(0))}</span>`).join('')}</div></div><section class="list-card"><div class="result-list">${state.results.length?state.results.map(resultItem).join(''):emptyState('trophy','No results yet','Completed matches will appear after the result is declared.')}</div></section></section>`;
 }
 
 function walletView(state) {
@@ -612,8 +612,8 @@ function normalizeBet(raw = {}) {
 
 function normalizeResult(raw = {}) {
   const winTeam = Number(raw.winTeam??raw.win_team??raw.winner);
-  const winner = raw.winner_name||({1:'Meron',2:'Wala',3:'Draw',4:'Cancelled'}[winTeam]||raw.result||'Awaiting result');
-  return {id:raw.fightNumber||raw.matchNumber||raw.id||'—',gameId:raw.id??raw.game_id??null,winner,tone:winTeam===1?'red':winTeam===2?'blue':'gold',result:winTeam===4?'Cancelled':'Settled',endedAt:raw.result_declared_at||raw.endedAt||raw.created_at||new Date().toISOString()};
+  const winner = ({1:'Red',2:'Blue',3:'Tie',4:'Cancelled'}[winTeam]||raw.winner_name||raw.result||'Awaiting result');
+  return {id:raw.fightNumber||raw.matchNumber||raw.id||'—',gameId:raw.id??raw.game_id??null,winner,title:String(raw.title||''),categorySlug:String(raw.category_slug||''),categoryName:String(raw.category_name||''),tone:winTeam===1?'red':winTeam===2?'blue':'gold',result:winTeam===4?'Cancelled':'Settled',endedAt:raw.result_declared_at||raw.endedAt||raw.created_at||new Date().toISOString()};
 }
 
 async function hydrateAccount() {
@@ -766,13 +766,26 @@ async function hydrateHistory(){
   catch{/* retried on the next tick */}
 }
 
+async function hydrateBetting(){
+  if(!store.getState().authenticated&&!store.getState().previewMode)return hydrateHistory();
+  const results=await Promise.allSettled([api.me(),api.bets(),api.statement(),api.autoHistory(20)]);
+  const updates={servicesOnline:results.some(result=>result.status==='fulfilled')};
+  if(results[0].status==='fulfilled')updates.user=normalizeUser(results[0].value);
+  else if(results[0].reason instanceof ApiError&&results[0].reason.status===401)return logout(false);
+  if(results[1].status==='fulfilled')updates.bets=(results[1].value.results||results[1].value||[]).map(normalizeBet);
+  if(results[2].status==='fulfilled')updates.transactions=results[2].value.results||results[2].value||[];
+  if(results[3].status==='fulfilled')updates.results=(results[3].value.results||results[3].value||[]).map(normalizeResult);
+  store.setState(updates);
+}
+
 function connectLiveServices() {
   stopLiveServices();
   const current=store.getState();
   if(!current.authenticated&&!current.previewMode)return;
   pollEngine();
   liveServiceTimers.push(window.setInterval(pollEngine,2500));
-  liveServiceTimers.push(window.setInterval(()=>{if(current.authenticated)hydrateAccount();hydrateSiteConfig();hydrateHistory();},15000));
+  liveServiceTimers.push(window.setInterval(()=>{hydrateSiteConfig();if(current.authenticated)hydrateBetting();else hydrateHistory();},15000));
+  liveServiceTimers.push(window.setInterval(()=>{if(current.authenticated)hydrateAccount();},60000));
 }
 
 function startPublicViewerPoll(){
@@ -799,7 +812,7 @@ async function pollEngine(){
     const data=await api.engineEvents(lastEngineEvent);
     const events=data.results||[];
     if(typeof data.viewers==='number'){const live=store.getState().match;if(live&&live.viewers!==data.viewers)store.setState({match:{...live,viewers:data.viewers}});}
-    if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateAccount(),hydrateHistory()]);}
+    if(events.length){lastEngineEvent=events.at(-1).id;await Promise.all([hydrateSiteConfig(),hydrateBetting()]);}
   }catch{/* The next poll retries automatically. */}
   finally{enginePollBusy=false;}
 }

@@ -826,11 +826,13 @@ class CockfightEngine:
         limit = max(1, min(int(limit), 100))
         with self.connect() as connection:
             rows = connection.execute(
-                "SELECT * FROM admin_games WHERE status IN ('SETTLED','CANCELLED') ORDER BY COALESCE(settled_at,result_declared_at,updated_at) DESC,id DESC LIMIT ?",
+                "SELECT g.*, c.name AS category_name FROM admin_games g LEFT JOIN game_categories c ON c.slug=g.category_slug "
+                "WHERE g.status IN ('SETTLED','CANCELLED') ORDER BY COALESCE(g.settled_at,g.result_declared_at,g.updated_at) DESC,g.id DESC LIMIT ?",
                 (limit,),
             ).fetchall()
             return [{
                 "id": row["id"], "fightNumber": row["match_number"] or row["id"], "matchNumber": row["match_number"] or row["id"], "title": row["title"],
+                "category_slug": row["category_slug"] or "", "category_name": row["category_name"] or "",
                 "source": row["source"], "external_ref": row["external_ref"],
                 "result": row["result"], "winTeam": OUTCOME_NUMBERS.get(row["result"], 4), "status": row["status"],
                 "result_declared_at": row["result_declared_at"], "settled_at": row["settled_at"],
