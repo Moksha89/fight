@@ -31,6 +31,7 @@ const TEST_SUITES = {
   
   'Node.js Security & Static': [
     { cmd: 'node', args: ['tests/security-static.mjs'], desc: 'Security static checks' },
+    { cmd: 'node', args: ['tests/frontend-p0-static.mjs'], desc: 'Frontend P0 regression checks' },
   ],
   
   'Node.js Integration Tests': [
