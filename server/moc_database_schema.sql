@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS moc_operators (
     mfa_secret TEXT,
     mfa_enabled INTEGER DEFAULT 0,
     last_login_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT,
+    updated_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_moc_operators_username ON moc_operators(username);
@@ -105,8 +105,8 @@ CREATE TABLE IF NOT EXISTS moc_matches (
     featured INTEGER DEFAULT 0,
     created_by INTEGER NOT NULL,
         -- operator_id who created match
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    created_at TEXT,
+    updated_at TEXT,
     
     FOREIGN KEY (created_by) REFERENCES moc_operators(id),
     FOREIGN KEY (result_declared_by) REFERENCES moc_operators(id)
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS moc_audit_log (
         -- JSON with action-specific details
     ip_address TEXT,
     user_agent TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    created_at TEXT,
     
     FOREIGN KEY (operator_id) REFERENCES moc_operators(id)
 );
@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS moc_api_keys (
     -- Metadata
     created_by INTEGER NOT NULL,
         -- operator_id who created this key
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    created_at TEXT,
     revoked_at TEXT,
     revoked_by INTEGER,
     revoked_reason TEXT,
@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS moc_api_key_usage (
     response_time_ms INTEGER,
     ip_address TEXT,
     user_agent TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    created_at TEXT,
     
     FOREIGN KEY (api_key_id) REFERENCES moc_api_keys(id)
 );
@@ -243,7 +243,7 @@ CREATE TABLE IF NOT EXISTS moc_settings (
     value TEXT NOT NULL,
     description TEXT,
     updated_by INTEGER,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT,
     
     FOREIGN KEY (updated_by) REFERENCES moc_operators(id)
 );

@@ -1,8 +1,14 @@
 # Security policy
 
-## Approval demonstrations
+## Operating modes
 
-`APPROVAL_DEMO` runs the complete product workflow with non-cash demo credits so reviewers can test every feature. It does not authorise real-money collection or payout. The server accepts only `SOCIAL_PREVIEW` and `APPROVAL_DEMO`; any other configured operating mode fails at startup. Approval-demo databases and uploaded evidence must remain isolated from any future licensed production environment.
+RoosterRun supports three operating modes:
+
+- `SOCIAL_PREVIEW`: Social preview build with demo functionality only. Real-money operations are blocked.
+- `APPROVAL_DEMO`: Complete product workflow with non-cash demo credits for reviewers to test every feature. Does not authorise real-money collection or payout.
+- `REAL_MONEY`: Full real-money betting operation. Requires production-grade configuration, including PostgreSQL with TLS, SMS provider, external monitoring, and responsible gambling controls.
+
+The server validates the operating mode at startup. Approval-demo databases and uploaded evidence must remain isolated from any future licensed production environment.
 
 Do not place credentials, signing keys, payment secrets, stream keys, personal
 data, or production database exports in this repository.
@@ -42,8 +48,11 @@ data, or production database exports in this repository.
 - Do not collect Aadhaar images or Aadhaar numbers. A future Aadhaar option must
   implement UIDAI-approved secure offline verification, consent, minimisation,
   and retention controls.
-- `SOCIAL_PREVIEW` is a server-enforced operating mode. Do not add a browser or
-  ordinary administrator toggle that enables real-money deposits or bets.
+- Operating modes are server-enforced by the `ROOSTERRUN_OPERATING_MODE` environment
+  variable. `SOCIAL_PREVIEW` and `APPROVAL_DEMO` block real-money deposits and bets
+  at the API layer. `REAL_MONEY` mode enables full financial operations and enforces
+  additional production safeguards. Do not add a browser or ordinary administrator
+  toggle that bypasses operating mode restrictions.
 - Recovery archives are stored only in the private data tree and require the
   `operations` permission. They contain credential hashes, financial records,
   payment proofs, and identity files; never copy them into `/uploads/` or source

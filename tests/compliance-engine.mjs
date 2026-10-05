@@ -38,7 +38,17 @@ try{
   const games=await json(base,'/api/admin/games/',{admin:true});const game=games.results[0];
   await json(base,'/api/cockfight/bets/quote/',{method:'POST',expected:403,body:{matchId:game.id,betTeam:1,amount:250}});
   const quote=await json(base,'/api/cockfight/bets/quote/',{method:'POST',expected:201,body:{matchId:game.id,betTeam:1,amount:200}});assert.equal(quote.stake,200);
+
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',body:{kind:'COOL_OFF',duration_days:7}});
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',expected:400,body:{kind:'COOL_OFF',duration_days:1}});
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',body:{kind:'COOL_OFF',duration_days:30}});
+
   await json(base,'/api/user/responsible-play/restrict/',{method:'POST',body:{kind:'SELF_EXCLUDE',duration_days:180}});
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',expected:400,body:{kind:'SELF_EXCLUDE',duration_days:180}});
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',body:{kind:'SELF_EXCLUDE',duration_days:365}});
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',body:{kind:'SELF_EXCLUDE',duration_days:0}});
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',expected:400,body:{kind:'SELF_EXCLUDE',duration_days:365}});
+
   await json(base,'/api/cockfight/bets/quote/',{method:'POST',expected:403,body:{matchId:game.id,betTeam:1,amount:10}});
   await json(base,'/api/payments/deposits/',{method:'POST',expected:403,body:{amount:100,account_id:account.id,utr:'SAFEUTR0003',proof_data_url:png}});
   const withdrawal=await json(base,'/api/payments/withdrawals/',{method:'POST',expected:201,body:{amount:500,method:'UPI',account_holder:'Arena Guest',upi_id:'guest@upi'}});assert.equal(withdrawal.status,'PENDING','withdrawals must remain available during self-exclusion');

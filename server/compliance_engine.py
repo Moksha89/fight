@@ -386,11 +386,13 @@ class ComplianceEngine:
             )
         return self.profile(user_id)
 
-    def document(self, document_id: int) -> tuple[Path, str]:
+    def document(self, document_id: int, actor: str = "") -> tuple[Path, str]:
         with self.connect() as connection:
             row = connection.execute("SELECT * FROM compliance_documents WHERE id=?", (document_id,)).fetchone()
-        if not row:
-            raise LookupError("Verification document not found.")
+            if not row:
+                raise LookupError("Verification document not found.")
+            if actor:
+                self.platform._audit(connection, "Compliance", "Document viewed", row["user_id"], f"Document ID {document_id} · {row['document_type']}")
         path = (self.private_dir / row["private_filename"]).resolve()
         if path.parent != self.private_dir or not path.is_file():
             raise LookupError("Verification document file is unavailable.")
@@ -502,9 +504,24 @@ class ComplianceEngine:
         with self.connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             self._ensure_controls(connection, user_id)
+            row = connection.execute("SELECT * FROM responsible_controls WHERE user_id=?", (user_id,)).fetchone()
             if normalized == "COOL_OFF":
+                existing_until = row["cool_off_until"] if row else ""
+                if existing_until and parse_time(existing_until) > now_dt:
+                    requested_until = parse_time(until)
+                    if requested_until < parse_time(existing_until):
+                        raise ValueError("Cannot shorten an active cooling-off period. Restrictions can only become stricter.")
                 connection.execute("UPDATE responsible_controls SET cool_off_until=?,updated_at=? WHERE user_id=?", (until, utc_now(), user_id))
             else:
+                existing_permanent = bool(row["permanent_exclusion"]) if row else False
+                existing_until = row["exclusion_until"] if row else ""
+                if existing_permanent:
+                    raise ValueError("Cannot modify a permanent self-exclusion. Restrictions can only become stricter.")
+                if existing_until and parse_time(existing_until) > now_dt:
+                    if not permanent:
+                        requested_until = parse_time(until)
+                        if requested_until < parse_time(existing_until):
+                            raise ValueError("Cannot shorten an active self-exclusion period. Restrictions can only become stricter.")
                 connection.execute("UPDATE responsible_controls SET exclusion_until=?,permanent_exclusion=?,updated_at=? WHERE user_id=?", (until, permanent, utc_now(), user_id))
             connection.execute(
                 "INSERT INTO responsible_events(user_id,event_type,payload_json,actor,created_at) VALUES(?,?,?,?,?)",

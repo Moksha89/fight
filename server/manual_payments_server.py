@@ -1829,7 +1829,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             return "social"
         if path.startswith("/api/admin/assets"):
             return "assets"
-        if path.startswith("/api/admin/team") or path.startswith("/api/admin/auth/mfa"):
+        if path.startswith("/api/admin/auth/mfa"):
+            return "overview"
+        if path.startswith("/api/admin/team"):
             return "team"
         if path.startswith("/api/admin/audit"):
             return "audit"
@@ -2117,11 +2119,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                     return self.send_private_bytes(self.server.payments.intelligence.export_csv(), "text/csv; charset=utf-8", filename)
                 backup_download = re.fullmatch(r"/api/admin/operations/backups/(\d+)/download/", path)
                 if backup_download:
-                    backup_path = self.server.payments.operations.backup_file(int(backup_download.group(1)))
+                    actor = str(admin_identity.get("display_name") or admin_identity.get("id") or "ADMIN")
+                    backup_path = self.server.payments.operations.backup_file(int(backup_download.group(1)), actor)
                     return self.send_private_file(backup_path, "application/gzip", backup_path.name, attachment=True)
                 document = re.fullmatch(r"/api/admin/compliance/documents/(\d+)/", path)
                 if document:
-                    file_path, content_type = self.server.payments.compliance.document(int(document.group(1)))
+                    actor = str(admin_identity.get("display_name") or admin_identity.get("id") or "ADMIN")
+                    file_path, content_type = self.server.payments.compliance.document(int(document.group(1)), actor)
                     return self.send_private_file(file_path, content_type)
                 return self.send_json(HTTPStatus.NOT_FOUND, {"detail": "Admin endpoint not found."})
             except Exception as error:

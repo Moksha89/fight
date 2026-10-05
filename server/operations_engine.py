@@ -305,7 +305,7 @@ class OperationsEngine:
         reference = f"REC-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(2).upper()}"
         started = utc_now()
         findings: list[dict] = []
-        check_count = 7
+        check_count = 8
         with self.connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
 
@@ -367,6 +367,19 @@ class OperationsEngine:
                     findings.append(self._finding(
                         "NEGATIVE_AVAILABLE_BALANCE", "CRITICAL", "USER", row["user_id"], ">= 0", available,
                         "Wallet holds exceed the player's authoritative balance.",
+                    ))
+
+            for row in connection.execute(
+                """SELECT w.user_id,w.balance_paise,
+                COALESCE((SELECT SUM(amount_paise) FROM wallet_ledger WHERE user_id=w.user_id),0) AS ledger_sum
+                FROM user_wallets w"""
+            ).fetchall():
+                expected = int(row["balance_paise"])
+                actual = int(row["ledger_sum"])
+                if expected != actual:
+                    findings.append(self._finding(
+                        "BALANCE_LEDGER_DRIFT", "CRITICAL", "USER", row["user_id"], expected, actual,
+                        "Wallet balance does not match the sum of wallet ledger entries.",
                     ))
 
             integrity = str(connection.execute("PRAGMA quick_check").fetchone()[0])
@@ -561,11 +574,13 @@ class OperationsEngine:
             raise LookupError("Backup record not found.")
         return self._backup_dict(row)
 
-    def backup_file(self, backup_id: int) -> Path:
+    def backup_file(self, backup_id: int, actor: str = "") -> Path:
         with self.connect() as connection:
             row = connection.execute("SELECT * FROM backup_records WHERE id=? AND status='COMPLETED'", (int(backup_id),)).fetchone()
-        if not row:
-            raise LookupError("Completed backup not found.")
+            if not row:
+                raise LookupError("Completed backup not found.")
+            if actor:
+                self.platform._audit(connection, "Operations", "Backup downloaded", row["reference"], f"Backup ID {backup_id} · {row['size_bytes']} bytes")
         target = (self.backup_dir / row["filename"]).resolve()
         if target.parent != self.backup_dir or not target.is_file():
             raise LookupError("Backup archive is unavailable.")

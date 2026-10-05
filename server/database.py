@@ -76,14 +76,14 @@ def translate_postgres_sql(sql: str) -> str:
         flags=re.IGNORECASE,
     )
     translated = re.sub(r"\s+COLLATE\s+NOCASE\b", "", translated, flags=re.IGNORECASE)
-    ignore_insert = bool(re.match(r"^INSERT\s+OR\s+IGNORE\s+INTO\b", translated, re.IGNORECASE))
+    ignore_insert = bool(re.search(r"\bINSERT\s+OR\s+IGNORE\s+INTO\b", translated, re.IGNORECASE | re.MULTILINE))
     if ignore_insert:
         translated = re.sub(
-            r"^INSERT\s+OR\s+IGNORE\s+INTO\b",
+            r"\bINSERT\s+OR\s+IGNORE\s+INTO\b",
             "INSERT INTO",
             translated,
             count=1,
-            flags=re.IGNORECASE,
+            flags=re.IGNORECASE | re.MULTILINE,
         )
         if not re.search(r"\bON\s+CONFLICT\b", translated, re.IGNORECASE):
             translated = translated.rstrip().rstrip(";") + " ON CONFLICT DO NOTHING"
@@ -165,7 +165,8 @@ class PostgresCursor:
             "compliance_documents", "responsible_events", "stream_health_samples", "notifications",
             "notification_deliveries", "reconciliation_runs", "reconciliation_findings", "operations_incidents",
             "backup_records", "support_tickets", "support_messages", "support_events", "intelligence_scans",
-            "intelligence_alerts",
+            "intelligence_alerts", "saved_beneficiaries", "moc_operators", "moc_matches", "moc_audit_log",
+            "moc_api_keys", "moc_api_key_usage",
         }
         returns_identity = bool(
             insert_match

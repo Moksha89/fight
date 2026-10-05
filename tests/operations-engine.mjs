@@ -29,7 +29,7 @@ try{
   const readAll=await json(base,'/api/user/notifications/read-all/',{method:'POST',body:{}});assert.equal(readAll.updated,1);
   notifications=await json(base,'/api/user/notifications/');assert.equal(notifications.unread,0);
 
-  const reconciliation=await json(base,'/api/admin/operations/reconciliation/run/',{method:'POST',admin:true,expected:201,body:{}});assert.equal(reconciliation.status,'PASS');assert.equal(reconciliation.findings.length,0);assert.equal(reconciliation.check_count,7);
+  const reconciliation=await json(base,'/api/admin/operations/reconciliation/run/',{method:'POST',admin:true,expected:201,body:{}});assert.equal(reconciliation.status,'PASS');assert.equal(reconciliation.findings.length,0);assert.equal(reconciliation.check_count,8);
   const backup=await json(base,'/api/admin/operations/backups/create/',{method:'POST',admin:true,expected:201,body:{}});assert.equal(backup.status,'COMPLETED');assert.equal(backup.sha256.length,64);assert.equal(backup.contents.database_integrity,'ok');assert.equal(backup.contents.restore_exposed_in_ui,false);
   const denied=await fetch(`${base}${backup.download_url}`);assert.equal(denied.status,200,'loopback preview permits direct protected downloads for interface testing');
   assert.equal(denied.headers.get('cache-control'),'no-store, private');assert.match(denied.headers.get('content-disposition'),/^attachment/);const archive=Buffer.from(await denied.arrayBuffer());assert.equal(createHash('sha256').update(archive).digest('hex'),backup.sha256);assert.deepEqual([...archive.subarray(0,2)],[0x1f,0x8b]);
