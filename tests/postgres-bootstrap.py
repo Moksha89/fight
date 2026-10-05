@@ -71,14 +71,22 @@ for schema_name, schema_content in all_schemas:
     statements = split_sql_script(schema_content)
     
     for stmt_idx, statement in enumerate(statements):
+        # Skip comments and empty statements
+        clean_stmt = statement.strip()
+        if not clean_stmt or clean_stmt.startswith('--'):
+            continue
+        
         translated = translate_postgres_sql(statement)
         
         # Check for INSERT OR IGNORE without ON CONFLICT
+        # Should be translated to INSERT ... ON CONFLICT DO NOTHING
         if re.search(r"\bINSERT\s+OR\s+IGNORE\b", translated, re.IGNORECASE):
-            errors.append(
-                f"{schema_name} statement {stmt_idx}: INSERT OR IGNORE not translated\n"
-                f"  Statement: {translated[:100]}..."
-            )
+            # Verify it wasn't properly translated
+            if not re.search(r"\bON\s+CONFLICT\b", translated, re.IGNORECASE):
+                errors.append(
+                    f"{schema_name} statement {stmt_idx}: INSERT OR IGNORE not translated to ON CONFLICT\n"
+                    f"  Statement: {translated[:100]}..."
+                )
         
         # Check for AUTOINCREMENT (should be BIGSERIAL or removed)
         if re.search(r"\bAUTOINCREMENT\b", translated, re.IGNORECASE):

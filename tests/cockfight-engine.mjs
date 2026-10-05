@@ -10,7 +10,7 @@ async function json(base,path,{method='GET',body,admin=false,expected=200,user='
 
 const port=await freePort();
 const dataDir=mkdtempSync(join(tmpdir(),'roosterrun-engine-'));
-const child=spawn('python',[resolve('server/manual_payments_server.py'),'--host','127.0.0.1','--port',String(port),'--data-dir',dataDir,'--preview'],{stdio:['ignore','pipe','pipe']});
+const child=spawn('python3',[resolve('server/manual_payments_server.py'),'--host','127.0.0.1','--port',String(port),'--data-dir',dataDir,'--preview'],{stdio:['ignore','pipe','pipe']});
 const base=`http://127.0.0.1:${port}`;
 
 try{

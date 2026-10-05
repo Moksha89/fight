@@ -22,7 +22,7 @@ function totp(secret){const normalized=secret.toUpperCase().replace(/=+$/,'');co
 
 const port=await freePort();
 const dataDir=mkdtempSync(join(tmpdir(),'roosterrun-auth-'));
-const child=spawn('python',[resolve('server/manual_payments_server.py'),'--host','127.0.0.1','--port',String(port),'--data-dir',dataDir],{stdio:['ignore','pipe','pipe'],env:{...process.env,ROOSTERRUN_BOOTSTRAP_ADMIN_USERNAME:'owner',ROOSTERRUN_BOOTSTRAP_ADMIN_PASSWORD:'OwnerSecure123',ROOSTERRUN_BOOTSTRAP_ADMIN_NAME:'Platform Owner',ROOSTERRUN_SECURE_COOKIES:'0',ROOSTERRUN_OTP_TEST_MODE:'1'}});
+const child=spawn('python3',[resolve('server/manual_payments_server.py'),'--host','127.0.0.1','--port',String(port),'--data-dir',dataDir],{stdio:['ignore','pipe','pipe'],env:{...process.env,ROOSTERRUN_BOOTSTRAP_ADMIN_USERNAME:'owner',ROOSTERRUN_BOOTSTRAP_ADMIN_PASSWORD:'OwnerSecure123',ROOSTERRUN_BOOTSTRAP_ADMIN_NAME:'Platform Owner',ROOSTERRUN_SECURE_COOKIES:'0',ROOSTERRUN_OTP_TEST_MODE:'1'}});
 const base=`http://127.0.0.1:${port}`;
 
 try{
