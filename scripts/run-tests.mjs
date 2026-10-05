@@ -28,6 +28,7 @@ const TEST_SUITES = {
     { cmd: 'python3', args: ['tests/china-feed.py'], desc: 'China feed' },
     { cmd: 'python3', args: ['tests/game-categories.py'], desc: 'Game categories' },
     { cmd: 'python3', args: ['tests/moc-integration.py'], desc: 'MOC integration' },
+    { cmd: 'python3', args: ['tests/moc-security.py'], desc: 'MOC security' },
   ],
   
   'Node.js Security & Static': [
