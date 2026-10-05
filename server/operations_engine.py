@@ -380,16 +380,19 @@ class OperationsEngine:
                 expected_balance = int(row["wallet_ledger_sum"]) + int(row["account_ledger_sum"])
                 actual_balance = int(row["balance_paise"])
                 
-                # Handle demo/seeded accounts: if wallet is very new and has positive balance with no ledger entries,
-                # it's likely a demo grant not tracked through ledgers. Only flag as drift if there ARE ledger entries.
+                # Flag drift in two cases:
+                # 1. Balance doesn't match ledger sum when there IS ledger activity
+                # 2. Positive balance with NO ledger entries (synthetic/injected balance)
                 has_ledger_activity = (int(row["wallet_ledger_sum"]) != 0 or int(row["account_ledger_sum"]) != 0)
                 
-                if has_ledger_activity and expected_balance != actual_balance:
-                    findings.append(self._finding(
-                        "BALANCE_LEDGER_DRIFT", "CRITICAL", "USER", row["user_id"],
-                        expected_balance, actual_balance,
-                        "Wallet balance does not match the sum of wallet_ledger and account_ledger entries.",
-                    ))
+                if expected_balance != actual_balance:
+                    if has_ledger_activity or actual_balance > 0:
+                        # Either mismatch with activity, or positive balance without any ledger trail
+                        findings.append(self._finding(
+                            "BALANCE_LEDGER_MISMATCH", "CRITICAL", "USER", row["user_id"],
+                            expected_balance, actual_balance,
+                            "Wallet balance does not match the sum of wallet_ledger and account_ledger entries.",
+                        ))
 
             integrity = str(connection.execute("PRAGMA quick_check").fetchone()[0])
             if integrity.lower() != "ok":

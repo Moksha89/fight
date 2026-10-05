@@ -511,30 +511,36 @@ class ComplianceEngine:
             # A-01 fix: Ensure restrictions only become stricter, never weaker
             current = connection.execute("SELECT * FROM responsible_controls WHERE user_id=?", (user_id,)).fetchone()
             if normalized == "COOL_OFF":
-                # Keep the maximum cool-off period
+                # Reject attempts to downgrade to a shorter cool-off period
                 existing_until = current["cool_off_until"]
                 if existing_until:
                     try:
                         existing_dt = datetime.fromisoformat(existing_until.replace("Z", "+00:00"))
                         new_dt = datetime.fromisoformat(until.replace("Z", "+00:00"))
-                        if existing_dt > new_dt:
-                            until = existing_until
-                    except (ValueError, AttributeError):
-                        pass
+                        # Only allow if expired or longer
+                        if existing_dt > datetime.now(UTC) and existing_dt > new_dt:
+                            raise ValueError("Cannot downgrade an active cooling-off period to a shorter duration.")
+                    except (ValueError, AttributeError) as e:
+                        if "downgrade" in str(e).lower():
+                            raise
+                        # If parsing failed, proceed with update
                 connection.execute("UPDATE responsible_controls SET cool_off_until=?,updated_at=? WHERE user_id=?", (until, utc_now(), user_id))
             else:
-                # Never downgrade from permanent; keep the longer exclusion
+                # Never downgrade from permanent; reject shorter exclusions
                 if current["permanent_exclusion"]:
-                    raise ValueError("Cannot shorten or override a permanent self-exclusion from the player path.")
+                    raise ValueError("Cannot downgrade a permanent self-exclusion.")
                 existing_until = current["exclusion_until"]
                 if existing_until and not permanent:
                     try:
                         existing_dt = datetime.fromisoformat(existing_until.replace("Z", "+00:00"))
                         new_dt = datetime.fromisoformat(until.replace("Z", "+00:00"))
-                        if existing_dt > new_dt:
-                            until = existing_until
-                    except (ValueError, AttributeError):
-                        pass
+                        # Only allow if expired or longer
+                        if existing_dt > datetime.now(UTC) and existing_dt > new_dt:
+                            raise ValueError("Cannot downgrade an active self-exclusion to a shorter duration.")
+                    except (ValueError, AttributeError) as e:
+                        if "downgrade" in str(e).lower():
+                            raise
+                        # If parsing failed, proceed with update
                 connection.execute("UPDATE responsible_controls SET exclusion_until=?,permanent_exclusion=?,updated_at=? WHERE user_id=?", (until, permanent, utc_now(), user_id))
             connection.execute(
                 "INSERT INTO responsible_events(user_id,event_type,payload_json,actor,created_at) VALUES(?,?,?,?,?)",
