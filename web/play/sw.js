@@ -1,18 +1,10 @@
-const CACHE_NAME = 'roosterrun-v75-light-polling';
+const CACHE_NAME = 'roosterrun-v76-tight-cache';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',
-  '/play/styles.css',
-  '/play/app.js?v=55',
-  '/play/api.js?v=55',
-  '/play/components.js?v=67',
-  '/play/data.js',
-  '/play/icons.js',
-  '/play/simulator.js',
-  '/play/store.js',
-  '/play/streaming.js?v=52',
-  '/play/ui.js?v=50',
-  '/play/srs.sdk.js',
+  '/play/styles.css?v=65',
+  '/static/design-tokens.css?v=1',
+  '/play/srs.sdk.js?v=41',
   '/static/ic_rooster.svg',
   '/static/arena-poster-v2.png',
   '/static/cockfight-home-hero-v1.png',

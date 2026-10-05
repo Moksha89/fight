@@ -439,7 +439,14 @@ function render() {
   updateCountdown();
   const streamElement = document.getElementById('stream-player');
   if (!streamElement) stopStream();
-  else if (!keepStream || streamElement.querySelector('.arena-player__placeholder')) mountStream(streamElement, state.match.stream);
+  else {
+    const hasPlaceholder = streamElement.querySelector('.arena-player__placeholder');
+    const hasUnavailable = streamElement.querySelector('.arena-player__unavailable');
+    const video = streamElement.querySelector('video');
+    const videoDead = video && (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE);
+    const shouldRemount = !keepStream || hasPlaceholder || hasUnavailable || videoDead;
+    if (shouldRemount) mountStream(streamElement, state.match.stream);
+  }
   if (state.route === 'wallet' && !state.paymentsLoaded && !state.paymentsLoading) queueMicrotask(hydratePayments);
   if (state.route === 'wallet' && state.paymentsLoaded && !state.paymentsLoading && Date.now() - paymentsRefreshedAt > 10000) queueMicrotask(hydratePayments);
 }
