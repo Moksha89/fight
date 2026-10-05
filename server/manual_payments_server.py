@@ -389,6 +389,14 @@ class PaymentService:
                 ON admin_audit_log(created_at DESC);
                 """
             )
+            
+            migrations_path = '/workspace/server/schema_migrations.sql'
+            try:
+                with open(migrations_path, 'r') as f:
+                    connection.executescript(f.read())
+            except FileNotFoundError:
+                pass
+            
             wallet_columns = {row["name"] for row in connection.execute("PRAGMA table_info(user_wallets)").fetchall()}
             for column, definition in {
                 "display_name": "TEXT NOT NULL DEFAULT ''",

@@ -66,6 +66,7 @@ class MOCEngine:
     def _init_database(self):
         """Initialize MOC database tables"""
         schema_path = '/workspace/server/moc_database_schema.sql'
+        migrations_path = '/workspace/server/schema_migrations.sql'
         try:
             with open(schema_path, 'r') as f:
                 schema_sql = f.read()
@@ -75,10 +76,16 @@ class MOCEngine:
                 conn.executescript(schema_sql)
                 conn.commit()
                 logger.info("MOC database schema initialized")
+                
+                with open(migrations_path, 'r') as f:
+                    migrations_sql = f.read()
+                conn.executescript(migrations_sql)
+                conn.commit()
+                logger.info("Schema migrations table initialized")
             finally:
                 conn.close()
-        except FileNotFoundError:
-            logger.error(f"MOC schema file not found: {schema_path}")
+        except FileNotFoundError as e:
+            logger.error(f"Schema file not found: {e}")
         except Exception as e:
             logger.error(f"Error initializing MOC database: {e}")
     
