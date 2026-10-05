@@ -48,7 +48,7 @@ const store = createStore({
   previewMode: false,
   user: savedUser(),
   match: { ...previewMatch },
-  results: [...previewResults],
+  results: [],
   bets: [],
   transactions: [],
   selectedOutcome: null,
