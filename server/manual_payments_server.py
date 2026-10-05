@@ -59,6 +59,7 @@ MAX_IMAGE_BYTES = 2_500_000
 MAX_MEDIA_IMAGE_BYTES = 5 * 1024 * 1024
 MAX_MEDIA_VIDEO_BYTES = 250 * 1024 * 1024
 USER_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_.@-]{3,80}$")
+IDEMPOTENCY_KEY_PATTERN = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 UTR_PATTERN = re.compile(r"^[A-Za-z0-9-]{6,35}$")
 IFSC_PATTERN = re.compile(r"^[A-Z]{4}0[A-Z0-9]{6}$")
 UPI_PATTERN = re.compile(r"^[A-Za-z0-9._-]{2,}@[A-Za-z0-9.-]{2,}$")
@@ -92,6 +93,29 @@ def money_to_paise(value: object, minimum: int, maximum: int) -> int:
     paise = int(amount * 100)
     if paise < minimum * 100 or paise > maximum * 100:
         raise ValueError(f"Amount must be between ₹{minimum:,} and ₹{maximum:,}.")
+    return paise
+
+
+class ConflictError(ValueError):
+    """Raised when an idempotent request conflicts with a prior different use of the same key."""
+
+
+def adjustment_amount_to_paise(value: object) -> int:
+    """Parse a signed wallet adjustment in rupees into integer paise without rounding."""
+    if value is None or isinstance(value, bool):
+        raise ValueError("Enter a valid adjustment amount.")
+    try:
+        amount = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError, TypeError, AttributeError):
+        raise ValueError("Enter a valid adjustment amount.") from None
+    if not amount.is_finite():
+        raise ValueError("Enter a valid adjustment amount.")
+    as_paise = amount * 100
+    if as_paise != as_paise.to_integral_value():
+        raise ValueError("Amount may have at most 2 decimal places.")
+    paise = int(as_paise)
+    if paise == 0:
+        raise ValueError("Adjustment amount cannot be zero.")
     return paise
 
 
@@ -1045,6 +1069,12 @@ class PaymentService:
     def admin_update_user(self, user_id: str, payload: dict) -> dict:
         if not USER_ID_PATTERN.fullmatch(user_id):
             raise ValueError("Invalid user identity.")
+        stray = [key for key in payload if str(key).startswith("wallet_adjustment")]
+        if stray:
+            raise ValueError(
+                "Wallet adjustments are not accepted on this endpoint. "
+                "Use POST /api/admin/users/<id>/wallet/."
+            )
         status = str(payload.get("status") or "ACTIVE").upper()
         if status not in {"ACTIVE", "SUSPENDED", "BLOCKED"}:
             raise ValueError("Choose active, suspended, or blocked.")
@@ -1065,99 +1095,154 @@ class PaymentService:
         """Admin credit or debit to user wallet with audit trail and safety checks."""
         if not USER_ID_PATTERN.fullmatch(user_id):
             raise ValueError("Invalid user identity.")
-        
-        # Parse and validate amount
-        try:
-            amount_rupees = float(payload.get("amount", 0))
-        except (TypeError, ValueError):
-            raise ValueError("Enter a valid adjustment amount.") from None
-        
-        if amount_rupees == 0:
-            raise ValueError("Adjustment amount cannot be zero.")
-        
-        amount_paise = int(round(amount_rupees * 100))
+
+        amount_paise = adjustment_amount_to_paise(payload.get("amount"))
+        amount_rupees = float(Decimal(amount_paise) / Decimal(100))
         is_credit = amount_paise > 0
         abs_amount = abs(amount_paise)
-        
-        # Check optional per-adjustment maximum
+
+        # Optional per-adjustment maximum (invalid env value = no cap).
+        max_paise = None
         max_adjustment_env = os.environ.get("ROOSTERRUN_MAX_WALLET_ADJUSTMENT_PAISE")
         if max_adjustment_env:
             try:
                 max_paise = int(max_adjustment_env)
-                if abs_amount > max_paise:
-                    max_rupees = round(max_paise / 100, 2)
-                    raise ValueError(f"Adjustment amount exceeds maximum of ₹{max_rupees:,.2f}. Configure ROOSTERRUN_MAX_WALLET_ADJUSTMENT_PAISE to change this limit.")
-            except ValueError as e:
-                if "exceeds maximum" in str(e):
-                    raise
-                # Invalid env var value - ignore and proceed without limit
-        
-        # Require reason
+            except ValueError:
+                max_paise = None
+        if max_paise is not None and abs_amount > max_paise:
+            max_rupees = round(max_paise / 100, 2)
+            raise ValueError(
+                f"Adjustment amount exceeds maximum of ₹{max_rupees:,.2f}. "
+                "Configure ROOSTERRUN_MAX_WALLET_ADJUSTMENT_PAISE to change this limit."
+            )
+
         reason = str(payload.get("reason", "")).strip()
         if len(reason) < 3:
             raise ValueError("Enter a reason for this wallet adjustment (minimum 3 characters).")
         if len(reason) > 500:
             reason = reason[:500]
-        
-        # Generate idempotency reference
-        reference = f"ADJ-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(4).upper()}"
+
+        idempotency_key = payload.get("idempotency_key")
+        if idempotency_key is None or idempotency_key == "":
+            reference = (
+                f"ADJ-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-"
+                f"{secrets.token_hex(4).upper()}"
+            )
+        else:
+            key = str(idempotency_key).strip()
+            if not IDEMPOTENCY_KEY_PATTERN.fullmatch(key):
+                raise ValueError(
+                    "idempotency_key must be 8–64 characters of letters, digits, underscore, or hyphen."
+                )
+            reference = f"ADJ-K-{key}"
+
         now = utc_now()
-        
+
+        def _result_from_ledger(row: sqlite3.Row) -> dict:
+            metadata = json.loads(row["metadata_json"] or "{}")
+            return {
+                "user_id": row["user_id"],
+                "reference": row["reference"],
+                "amount": round(int(row["amount_paise"]) / 100, 2),
+                "new_balance": round(int(row["balance_after_paise"]) / 100, 2),
+                "reason": str(metadata.get("reason") or reason),
+                "admin_actor": str(metadata.get("admin_actor") or admin_actor),
+                "timestamp": row["created_at"],
+            }
+
         with self.connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
-            
-            # Get current wallet state
+
+            # account_ledger.reference is UNIQUE — reuse an existing adjustment for this key.
+            existing = connection.execute(
+                "SELECT * FROM account_ledger WHERE reference=?",
+                (reference,),
+            ).fetchone()
+            if existing:
+                if existing["entry_type"] != "ADJUSTMENT":
+                    raise ConflictError("Idempotency key conflicts with an existing ledger entry.")
+                if existing["user_id"] != user_id or int(existing["amount_paise"]) != amount_paise:
+                    raise ConflictError(
+                        "Idempotency key was already used with a different user or amount."
+                    )
+                return _result_from_ledger(existing)
+
             wallet = connection.execute(
                 "SELECT balance_paise FROM user_wallets WHERE user_id=?",
-                (user_id,)
+                (user_id,),
             ).fetchone()
             if not wallet:
                 raise LookupError("User not found.")
-            
+
             current_balance = int(wallet["balance_paise"])
-            
-            # For debits, check available balance (balance minus holds and pending withdrawals)
+
             if not is_credit:
                 held = connection.execute(
-                    "SELECT COALESCE(SUM(amount_paise), 0) AS total FROM wallet_holds WHERE user_id=? AND status='ACTIVE'",
-                    (user_id,)
+                    "SELECT COALESCE(SUM(amount_paise), 0) AS total FROM wallet_holds "
+                    "WHERE user_id=? AND status='ACTIVE'",
+                    (user_id,),
                 ).fetchone()["total"]
-                
                 pending_withdrawals = connection.execute(
-                    "SELECT COALESCE(SUM(amount_paise), 0) AS total FROM payment_requests WHERE user_id=? AND request_type='WITHDRAWAL' AND status='PENDING'",
-                    (user_id,)
+                    "SELECT COALESCE(SUM(amount_paise), 0) AS total FROM payment_requests "
+                    "WHERE user_id=? AND request_type='WITHDRAWAL' AND status='PENDING'",
+                    (user_id,),
                 ).fetchone()["total"]
-                
                 available = current_balance - int(held) - int(pending_withdrawals)
-                
                 if available < abs_amount:
-                    raise ValueError(f"Insufficient available balance. User has ₹{round(available / 100, 2):,.2f} available after holds and pending withdrawals.")
-            
+                    raise ValueError(
+                        f"Insufficient available balance. User has ₹{round(available / 100, 2):,.2f} "
+                        "available after holds and pending withdrawals."
+                    )
+
             new_balance = current_balance + amount_paise
-            
-            # Update wallet balance
             connection.execute(
                 "UPDATE user_wallets SET balance_paise=?, updated_at=? WHERE user_id=?",
-                (new_balance, now, user_id)
+                (new_balance, now, user_id),
             )
-            
-            # Create wallet ledger entry
-            # Note: We're creating a wallet_ledger entry without a request_id foreign key.
-            # Since the schema requires request_id, we need to handle this differently.
-            # Let's use account_ledger instead, which is designed for admin adjustments
-            connection.execute(
-                "INSERT INTO account_ledger(user_id, reference, entry_type, amount_paise, balance_after_paise, metadata_json, created_at) VALUES(?,?,?,?,?,?,?)",
-                (user_id, reference, "ADJUSTMENT", amount_paise, new_balance, 
-                 json.dumps({"admin_actor": admin_actor, "reason": reason, "amount_rupees": amount_rupees}), now)
-            )
-            
-            # Audit log
+            try:
+                connection.execute(
+                    "INSERT INTO account_ledger(user_id, reference, entry_type, amount_paise, "
+                    "balance_after_paise, metadata_json, created_at) VALUES(?,?,?,?,?,?,?)",
+                    (
+                        user_id,
+                        reference,
+                        "ADJUSTMENT",
+                        amount_paise,
+                        new_balance,
+                        json.dumps(
+                            {
+                                "admin_actor": admin_actor,
+                                "reason": reason,
+                                "amount_rupees": amount_rupees,
+                                "idempotency_key": str(idempotency_key).strip() if idempotency_key else "",
+                            }
+                        ),
+                        now,
+                    ),
+                )
+            except self.database.integrity_error_types():
+                # Concurrent insert of the same unique reference — return the winner if compatible.
+                raced = connection.execute(
+                    "SELECT * FROM account_ledger WHERE reference=?",
+                    (reference,),
+                ).fetchone()
+                if not raced:
+                    raise
+                if raced["user_id"] != user_id or int(raced["amount_paise"]) != amount_paise:
+                    raise ConflictError(
+                        "Idempotency key was already used with a different user or amount."
+                    )
+                return _result_from_ledger(raced)
+
             action_type = "credit" if is_credit else "debit"
             self._audit(
-                connection, "Users", f"Wallet {action_type}",
-                user_id, f"₹{abs(amount_rupees):,.2f} - {reason[:100]}"
+                connection,
+                "Users",
+                f"Wallet {action_type}",
+                user_id,
+                f"₹{abs(amount_rupees):,.2f} - {reason[:100]}",
             )
-        
+
         return {
             "user_id": user_id,
             "reference": reference,
@@ -1165,7 +1250,7 @@ class PaymentService:
             "new_balance": round(new_balance / 100, 2),
             "reason": reason,
             "admin_actor": admin_actor,
-            "timestamp": now
+            "timestamp": now,
         }
 
     def admin_games(self) -> list[dict]:
@@ -1933,6 +2018,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         if path.startswith("/api/payments/admin/"):
             return "payments"
         if path.startswith("/api/admin/users"):
+            # Includes POST /api/admin/users/<id>/wallet/ — same permission as user management.
             return "users"
         if path.startswith("/api/admin/games") or path.startswith("/api/admin/game-categories") or path.startswith("/api/admin/streams") or path in {"/api/admin/risk/", "/api/admin/china-feed/", "/api/admin/china-feed/poll/", "/api/admin/china-feed/recover/", "/api/admin/moc-feed/"}:
             return "games"
@@ -1989,6 +2075,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_json(HTTPStatus.FORBIDDEN, {"detail": str(error)})
         elif isinstance(error, LookupError):
             self.send_json(HTTPStatus.NOT_FOUND, {"detail": str(error)})
+        elif isinstance(error, ConflictError):
+            self.send_json(HTTPStatus.CONFLICT, {"detail": str(error)})
         elif isinstance(error, ValueError):
             self.send_json(HTTPStatus.BAD_REQUEST, {"detail": str(error)})
         else:
