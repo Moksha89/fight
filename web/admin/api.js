@@ -77,7 +77,7 @@ export const api = {
   createAdmin:payload=>request('/api/admin/team/',{method:'POST',body:payload}),
   updateAdmin:(id,payload)=>request(`/api/admin/team/${id}/`,{method:'POST',body:payload}),
   health:()=>request('/api/admin/health/'), overview:()=>request('/api/admin/overview/'),
-  users:()=>request('/api/admin/users/'), updateUser:(id,payload)=>request(`/api/admin/users/${encodeURIComponent(id)}/`,{method:'POST',body:payload}),
+  users:()=>request('/api/admin/users/'), updateUser:(id,payload)=>request(`/api/admin/users/${encodeURIComponent(id)}/`,{method:'POST',body:payload}), adjustWallet:(id,payload)=>request(`/api/admin/users/${encodeURIComponent(id)}/wallet/`,{method:'POST',body:payload}),
   games:()=>request('/api/admin/games/'), saveGame:(id,payload)=>request(id?`/api/admin/games/${id}/`:'/api/admin/games/',{method:'POST',body:payload}),
   transitionGame:(id,status,reason='')=>request(`/api/admin/games/${id}/transition/`,{method:'POST',body:{status,reason}}),
   saveOdds:(id,payload)=>request(`/api/admin/games/${id}/odds/`,{method:'POST',body:payload}),
