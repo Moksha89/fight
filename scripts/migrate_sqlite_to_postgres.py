@@ -1,4 +1,18 @@
-"""One-time, checksum-reported SQLite to PostgreSQL migration."""
+"""One-time, checksum-reported SQLite to PostgreSQL migration.
+
+IMPORTANT: Foreign key dependencies require tables to be migrated in dependency order.
+Key FK relationships:
+  - moc_operators (no dependencies) → must be created before moc_matches, moc_audit_log, moc_api_keys
+  - moc_matches (depends on moc_operators via created_by, result_declared_by)
+  - moc_audit_log (depends on moc_operators via operator_id)
+  - moc_api_keys (depends on moc_operators via created_by, revoked_by)
+  - moc_api_key_usage (depends on moc_api_keys via api_key_id)
+  - moc_settings (depends on moc_operators via updated_by)
+  - schema_migrations (no dependencies) → can be created/migrated independently
+
+The script reads tables from sqlite_master in rootpage order, which typically aligns
+with creation order and respects FK dependencies.
+"""
 
 from __future__ import annotations
 

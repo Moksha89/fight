@@ -249,7 +249,7 @@ CREATE TABLE IF NOT EXISTS moc_settings (
 );
 
 -- Default settings
-INSERT OR IGNORE INTO moc_settings (key, value, description) VALUES
+INSERT INTO moc_settings (key, value, description) VALUES
     ('enabled', 'false', 'Enable/disable MOC system'),
     ('auto_increment_fight_number', 'true', 'Auto-increment fight numbers'),
     ('next_fight_number', '1', 'Next fight number to use'),
@@ -262,7 +262,8 @@ INSERT OR IGNORE INTO moc_settings (key, value, description) VALUES
     ('max_concurrent_matches', '5', 'Maximum concurrent live matches'),
     ('audit_log_retention_days', '365', 'Days to retain audit logs'),
     ('api_rate_limit_default', '100', 'Default API rate limit per minute'),
-    ('moc_category_slug', 'moc-feed', 'Category slug for MOC matches in main platform');
+    ('moc_category_slug', 'moc-feed', 'Category slug for MOC matches in main platform')
+ON CONFLICT (key) DO NOTHING;
 
 -- ============================================================================
 -- INITIAL DATA - Create default super admin operator
@@ -274,7 +275,7 @@ INSERT OR IGNORE INTO moc_settings (key, value, description) VALUES
 
 -- Generate password hash for MOCAdmin@2026
 -- Using PBKDF2-HMAC-SHA256 with 600,000 iterations
-INSERT OR IGNORE INTO moc_operators (
+INSERT INTO moc_operators (
     id,
     username,
     password_hash,
@@ -294,7 +295,8 @@ INSERT OR IGNORE INTO moc_operators (
     'admin@roosterrun.local',
     'super_admin',
     1
-);
+)
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
 -- END OF SCHEMA
