@@ -28,8 +28,14 @@
 
   window.addEventListener('message',event=>{
     if(event.origin!==location.origin||event.data?.type!=='roosterrun-broadcast-token')return;
-    authorize(String(event.data.sessionId||''),String(event.data.token||''));
-    if(window.opener)window.opener.postMessage({type:'roosterrun-broadcast-token-received',sessionId},location.origin);
+    const receivedSessionId=String(event.data.sessionId||'');
+    const receivedToken=String(event.data.token||'');
+    if(!receivedSessionId||!receivedToken){
+      document.getElementById('session-label').textContent='Invalid pairing data received. Please try again from the admin console.';
+      return;
+    }
+    authorize(receivedSessionId,receivedToken);
+    if(window.opener)window.opener.postMessage({type:'roosterrun-broadcast-token-received',sessionId:receivedSessionId},location.origin);
   });
 
   function constraints(){
@@ -49,10 +55,20 @@
   async function pairDevice(event){
     event.preventDefault();
     const form=new FormData(pairForm);
+    const sessionIdInput=String(form.get('session_id')||'').trim();
+    const pairingCodeInput=String(form.get('pairing_code')||'').trim();
+    if(!sessionIdInput||!pairingCodeInput){
+      document.getElementById('session-label').textContent='Enter both the session ID and pairing code.';
+      return;
+    }
+    document.getElementById('session-label').textContent='Verifying pairing code…';
     try{
-      const result=await request('/api/cockfight/broadcast/pair/',{body:{session_id:String(form.get('session_id')||'').trim(),pairing_code:String(form.get('pairing_code')||'').trim()},token:''});
+      const result=await request('/api/cockfight/broadcast/pair/',{body:{session_id:sessionIdInput,pairing_code:pairingCodeInput},token:''});
+      if(!result.session_id||!result.publisher_token){
+        throw new Error('Invalid pairing response from server.');
+      }
       authorize(result.session_id,result.publisher_token);
-    }catch(error){document.getElementById('session-label').textContent=error.message;}
+    }catch(error){document.getElementById('session-label').textContent=error.message||'Pairing failed. Check the session ID and code.';}
   }
 
   async function devices(){
@@ -115,8 +131,14 @@
   async function stop(){
     if(publisher){try{publisher.close();}catch{}publisher=null;}
     if(timer)clearInterval(timer);if(heartbeatTimer)clearInterval(heartbeatTimer);timer=null;heartbeatTimer=null;stopLocal();
-    document.getElementById('live').classList.remove('on');document.getElementById('stop').disabled=true;document.getElementById('start').disabled=true;document.getElementById('empty').style.display='grid';setStatus('Stream ended');
-    try{await request(`/api/cockfight/broadcast/sessions/${encodeURIComponent(sessionId)}/stop/`,{body:{reason:'Publisher ended stream'}});}catch(error){setStatus(error.message||'Stream ended locally','error');}
+    document.getElementById('live').classList.remove('on');document.getElementById('stop').disabled=true;document.getElementById('start').disabled=true;document.getElementById('empty').style.display='grid';setStatus('Ending stream…');
+    try{
+      await request(`/api/cockfight/broadcast/sessions/${encodeURIComponent(sessionId)}/stop/`,{body:{reason:'Publisher ended stream'}});
+      setStatus('Stream ended successfully');
+    }catch(error){
+      setStatus(error.message||'Stream ended locally, but the server notification failed','error');
+      console.error('Failed to notify server of stream end:', error);
+    }
   }
 
   pairForm.addEventListener('submit',pairDevice);document.getElementById('prepare').onclick=prepare;document.getElementById('start').onclick=start;document.getElementById('stop').onclick=stop;

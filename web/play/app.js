@@ -209,8 +209,12 @@ async function hydrateSiteConfig() {
     const nextSelected=selectedGame?selectedGame.id:null;
     if(current.selectedGameId!=null&&String(nextSelected)!==String(current.selectedGameId)){patch.selectedGameId=nextSelected;patch.quote=null;patch.selectedOutcome=null;}
     store.setState(patch);
+    applySiteConfig();
   }
-  catch { /* The legacy backend may not expose brand configuration yet. */ }
+  catch (error) {
+    // Silently retry on next poll; avoid spamming error toasts for connectivity issues
+    console.warn('Site config update failed:', error);
+  }
 }
 
 function arenaHomeView(state, { publicMode = false } = {}) {
@@ -640,19 +644,24 @@ async function hydrateAccount() {
   const state = store.getState();
   if (!state.authenticated && !state.previewMode) return;
   store.setState({loadingAccount:true});
-  const results = await Promise.allSettled([api.me(),api.bets(),api.statement(),api.autoHistory(20),api.compliance(),api.responsiblePlay(),api.notifications(),api.supportTickets()]);
-  const updates = {loadingAccount:false,servicesOnline:results.some(result=>result.status==='fulfilled')};
-  if (results[0].status==='fulfilled') updates.user=normalizeUser(results[0].value);
-  // In preview mode, a 401 for /api/user/me/ is expected; don't self-destruct the demo session
-  else if (results[0].reason instanceof ApiError&&results[0].reason.status===401 && !state.previewMode) return logout(false);
-  if (results[1].status==='fulfilled') updates.bets=(results[1].value.results||results[1].value||[]).map(normalizeBet);
-  if (results[2].status==='fulfilled') updates.transactions=results[2].value.results||results[2].value||[];
-  if (results[3].status==='fulfilled') updates.results=(results[3].value.results||results[3].value||[]).map(normalizeResult);
-  if (results[4].status==='fulfilled') updates.compliance=results[4].value;
-  if (results[5].status==='fulfilled') updates.responsible=results[5].value;
-  if (results[6].status==='fulfilled'){updates.notifications=results[6].value.results||[];updates.notificationUnread=Number(results[6].value.unread||0);}
-  if (results[7].status==='fulfilled') updates.supportTickets=results[7].value.results||results[7].value||[];
-  store.setState(updates);
+  try {
+    const results = await Promise.allSettled([api.me(),api.bets(),api.statement(),api.autoHistory(20),api.compliance(),api.responsiblePlay(),api.notifications(),api.supportTickets()]);
+    const updates = {loadingAccount:false,servicesOnline:results.some(result=>result.status==='fulfilled')};
+    if (results[0].status==='fulfilled') updates.user=normalizeUser(results[0].value);
+    // In preview mode, a 401 for /api/user/me/ is expected; don't self-destruct the demo session
+    else if (results[0].reason instanceof ApiError&&results[0].reason.status===401 && !state.previewMode) return logout(false);
+    if (results[1].status==='fulfilled') updates.bets=(results[1].value.results||results[1].value||[]).map(normalizeBet);
+    if (results[2].status==='fulfilled') updates.transactions=results[2].value.results||results[2].value||[];
+    if (results[3].status==='fulfilled') updates.results=(results[3].value.results||results[3].value||[]).map(normalizeResult);
+    if (results[4].status==='fulfilled') updates.compliance=results[4].value;
+    if (results[5].status==='fulfilled') updates.responsible=results[5].value;
+    if (results[6].status==='fulfilled'){updates.notifications=results[6].value.results||[];updates.notificationUnread=Number(results[6].value.unread||0);}
+    if (results[7].status==='fulfilled') updates.supportTickets=results[7].value.results||results[7].value||[];
+    store.setState(updates);
+  } catch (error) {
+    store.setState({loadingAccount:false});
+    console.error('Account hydration error:', error);
+  }
 }
 
 async function openNotifications(){store.setState({notificationOpen:true,notificationsLoading:true,dialog:null});try{const data=await api.notifications();store.setState({notifications:data.results||[],notificationUnread:Number(data.unread||0),notificationsLoading:false});}catch(error){store.setState({notificationsLoading:false});showToast(error.message||'Notifications could not be loaded.','error');}}
