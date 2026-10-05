@@ -1,18 +1,10 @@
-const CACHE_NAME = 'roosterrun-v75-light-polling';
+const CACHE_NAME = 'roosterrun-v76-tight-cache';
 const STATIC_ASSETS = [
   '/play/',
   '/play/manifest.json',
-  '/play/styles.css',
-  '/play/app.js',
-  '/play/api.js',
-  '/play/components.js',
-  '/play/data.js',
-  '/play/icons.js',
-  '/play/simulator.js',
-  '/play/store.js',
-  '/play/streaming.js',
-  '/play/ui.js',
-  '/play/srs.sdk.js',
+  '/play/styles.css?v=65',
+  '/static/design-tokens.css?v=1',
+  '/play/srs.sdk.js?v=41',
   '/static/ic_rooster.svg',
   '/static/arena-poster-v2.png',
   '/static/cockfight-home-hero-v1.png',
@@ -26,6 +18,19 @@ const STATIC_ASSETS = [
   '/static/pwa/icon-96x96.png',
   '/static/pwa/icon-512x512.png'
 ];
+
+// Predicate: should this request be cached at all?
+function isCacheable(url) {
+  // Never cache uploads, HLS segments, or media files
+  if (url.pathname.startsWith('/uploads/')) return false;
+  if (/\.(m3u8|ts|mp4|webm|mov)$/i.test(url.pathname)) return false;
+  
+  // Only cache same-origin requests
+  if (url.origin !== self.location.origin) return false;
+  
+  // Only cache /play/ and /static/ paths
+  return url.pathname.startsWith('/play/') || url.pathname.startsWith('/static/');
+}
 
 // Install — cache static assets
 self.addEventListener('install', event => {
@@ -54,12 +59,15 @@ self.addEventListener('fetch', event => {
 
   // API calls — network only (never cache dynamic data)
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/ws/')) return;
+  
+  // Skip uncacheable requests
+  if (!isCacheable(url)) return;
 
   // App shell / HTML navigations — network first so the latest UI always wins
   if (event.request.mode === 'navigate' || url.pathname === '/play/' || url.pathname.endsWith('index.html')) {
     event.respondWith(
       fetch(event.request).then(response => {
-        if (response && response.status === 200) {
+        if (response && response.status === 200 && response.type !== 'opaque') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
@@ -73,7 +81,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cached => {
       const fetched = fetch(event.request).then(response => {
-        if (response && response.status === 200) {
+        if (response && response.status === 200 && response.type !== 'opaque') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }

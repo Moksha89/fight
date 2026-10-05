@@ -81,16 +81,21 @@ export async function mountStream(container, stream = {}) {
     const connect = async (attempt = 0) => {
       if (controller.closed || activePlayer !== controller) return false;
       try { controller.player?.close?.(); } catch { /* replacing stale peer */ }
-      controller.player = new window.SrsRtcWhipWhepAsync();
-      video.srcObject = controller.player.stream;
-      await controller.player.play(url);
-      const peer = controller.player.pc;
-      peer?.addEventListener?.('connectionstatechange', () => {
-        if (!['failed', 'disconnected'].includes(peer.connectionState) || controller.closed) return;
-        if (controller.timer) clearTimeout(controller.timer);
-        controller.timer = setTimeout(() => connect(Math.min(attempt + 1, 5)), Math.min(10000, 750 * (2 ** attempt)));
-      });
-      return true;
+      try {
+        controller.player = new window.SrsRtcWhipWhepAsync();
+        video.srcObject = controller.player.stream;
+        await controller.player.play(url);
+        const peer = controller.player.pc;
+        peer?.addEventListener?.('connectionstatechange', () => {
+          if (!['failed', 'disconnected'].includes(peer.connectionState) || controller.closed) return;
+          if (controller.timer) clearTimeout(controller.timer);
+          controller.timer = setTimeout(() => connect(Math.min(attempt + 1, 5)).catch(() => {}), Math.min(10000, 750 * (2 ** attempt)));
+        });
+        return true;
+      } catch (error) {
+        console.error('WHEP connection error:', error);
+        throw error;
+      }
     };
     try {
       await connect();
@@ -99,7 +104,15 @@ export async function mountStream(container, stream = {}) {
       if (useFallback()) {
         return { status: 'fallback', type: 'hls' };
       }
-      controller.timer = setTimeout(() => connect(1), 1000);
+      controller.timer = setTimeout(() => connect(1).catch(() => {
+        // After retry fails, show unavailable state
+        if (!controller.closed && activePlayer === controller) {
+          const unavailable = document.createElement('div');
+          unavailable.className = 'arena-player__unavailable';
+          unavailable.innerHTML = '<span>Stream unavailable</span><small>Unable to connect to the live feed. Refresh to try again.</small>';
+          container.appendChild(unavailable);
+        }
+      }), 1000);
       return { status: 'recovering', type: 'whep' };
     }
   }
@@ -109,6 +122,27 @@ export async function mountStream(container, stream = {}) {
   video.playsInline = true;
   video.controls = true;
   video.preload = 'metadata';
+  
+  // HLS error recovery
+  video.addEventListener('error', (e) => {
+    console.error('Video playback error:', e);
+    const fallbackUrl = safeHttpUrl(stream.fallbackUrl || '');
+    if (fallbackUrl && video.src !== fallbackUrl) {
+      console.log('Attempting fallback URL:', fallbackUrl);
+      video.src = fallbackUrl;
+      video.load();
+      if (type === 'live' || type === 'hls' || stream.autoplay) {
+        video.play().catch(() => {});
+      }
+    } else {
+      // Show unavailable state in container
+      const unavailable = document.createElement('div');
+      unavailable.className = 'arena-player__unavailable';
+      unavailable.innerHTML = '<span>Stream unavailable</span><small>The live feed could not be loaded. Refresh to try again.</small>';
+      container.appendChild(unavailable);
+    }
+  }, { once: true });
+  
   if (type === 'live' || type === 'hls' || stream.autoplay) {
     video.autoplay = true;
     video.muted = true;
