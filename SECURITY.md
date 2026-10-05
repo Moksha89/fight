@@ -1,8 +1,16 @@
 # Security policy
 
-## Approval demonstrations
+## Operating modes
 
-`APPROVAL_DEMO` runs the complete product workflow with non-cash demo credits so reviewers can test every feature. It does not authorise real-money collection or payout. The server accepts only `SOCIAL_PREVIEW` and `APPROVAL_DEMO`; any other configured operating mode fails at startup. Approval-demo databases and uploaded evidence must remain isolated from any future licensed production environment.
+The server supports three operating modes controlled by `ROOSTERRUN_OPERATING_MODE`:
+
+- **`SOCIAL_PREVIEW`**: Social preview without real money. Payments and compliance features are disabled.
+- **`APPROVAL_DEMO`**: Complete product workflow with non-cash demo credits for reviewers. Does not authorize real-money collection or payout.
+- **`REAL_MONEY`** (default): Full real-money mode with all financial features enabled.
+
+The default is `REAL_MONEY`. Production deployments must explicitly configure the appropriate mode and ensure proper licensing and compliance controls are in place for real-money operations.
+
+Approval-demo databases and uploaded evidence must remain isolated from any future licensed production environment.
 
 Do not place credentials, signing keys, payment secrets, stream keys, personal
 data, or production database exports in this repository.

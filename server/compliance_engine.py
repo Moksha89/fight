@@ -394,6 +394,12 @@ class ComplianceEngine:
         path = (self.private_dir / row["private_filename"]).resolve()
         if path.parent != self.private_dir or not path.is_file():
             raise LookupError("Verification document file is unavailable.")
+        # A-03 fix: Audit document views
+        with self.connect() as connection:
+            self.platform._audit(
+                connection, "Compliance", "Document viewed",
+                f"User: {row['user_id']}, Doc: {row['document_type']}", f"ID: {document_id}"
+            )
         return path, row["content_type"]
 
     def _apply_pending(self, connection, user_id: str) -> None:
@@ -502,9 +508,33 @@ class ComplianceEngine:
         with self.connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             self._ensure_controls(connection, user_id)
+            # A-01 fix: Ensure restrictions only become stricter, never weaker
+            current = connection.execute("SELECT * FROM responsible_controls WHERE user_id=?", (user_id,)).fetchone()
             if normalized == "COOL_OFF":
+                # Keep the maximum cool-off period
+                existing_until = current["cool_off_until"]
+                if existing_until:
+                    try:
+                        existing_dt = datetime.fromisoformat(existing_until.replace("Z", "+00:00"))
+                        new_dt = datetime.fromisoformat(until.replace("Z", "+00:00"))
+                        if existing_dt > new_dt:
+                            until = existing_until
+                    except (ValueError, AttributeError):
+                        pass
                 connection.execute("UPDATE responsible_controls SET cool_off_until=?,updated_at=? WHERE user_id=?", (until, utc_now(), user_id))
             else:
+                # Never downgrade from permanent; keep the longer exclusion
+                if current["permanent_exclusion"]:
+                    raise ValueError("Cannot shorten or override a permanent self-exclusion from the player path.")
+                existing_until = current["exclusion_until"]
+                if existing_until and not permanent:
+                    try:
+                        existing_dt = datetime.fromisoformat(existing_until.replace("Z", "+00:00"))
+                        new_dt = datetime.fromisoformat(until.replace("Z", "+00:00"))
+                        if existing_dt > new_dt:
+                            until = existing_until
+                    except (ValueError, AttributeError):
+                        pass
                 connection.execute("UPDATE responsible_controls SET exclusion_until=?,permanent_exclusion=?,updated_at=? WHERE user_id=?", (until, permanent, utc_now(), user_id))
             connection.execute(
                 "INSERT INTO responsible_events(user_id,event_type,payload_json,actor,created_at) VALUES(?,?,?,?,?)",

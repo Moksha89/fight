@@ -305,7 +305,7 @@ class OperationsEngine:
         reference = f"REC-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(2).upper()}"
         started = utc_now()
         findings: list[dict] = []
-        check_count = 7
+        check_count = 8  # A-08: Incremented from 7 to include balance-vs-ledger drift check
         with self.connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
 
@@ -367,6 +367,28 @@ class OperationsEngine:
                     findings.append(self._finding(
                         "NEGATIVE_AVAILABLE_BALANCE", "CRITICAL", "USER", row["user_id"], ">= 0", available,
                         "Wallet holds exceed the player's authoritative balance.",
+                    ))
+
+            # A-08 fix: Check balance-vs-ledger drift
+            # Wallet balance should equal the sum of wallet_ledger + account_ledger entries
+            for row in connection.execute(
+                """SELECT w.user_id, w.balance_paise, w.created_at,
+                COALESCE((SELECT SUM(amount_paise) FROM wallet_ledger wl WHERE wl.user_id=w.user_id),0) AS wallet_ledger_sum,
+                COALESCE((SELECT SUM(amount_paise) FROM account_ledger al WHERE al.user_id=w.user_id),0) AS account_ledger_sum
+                FROM user_wallets w"""
+            ).fetchall():
+                expected_balance = int(row["wallet_ledger_sum"]) + int(row["account_ledger_sum"])
+                actual_balance = int(row["balance_paise"])
+                
+                # Handle demo/seeded accounts: if wallet is very new and has positive balance with no ledger entries,
+                # it's likely a demo grant not tracked through ledgers. Only flag as drift if there ARE ledger entries.
+                has_ledger_activity = (int(row["wallet_ledger_sum"]) != 0 or int(row["account_ledger_sum"]) != 0)
+                
+                if has_ledger_activity and expected_balance != actual_balance:
+                    findings.append(self._finding(
+                        "BALANCE_LEDGER_DRIFT", "CRITICAL", "USER", row["user_id"],
+                        expected_balance, actual_balance,
+                        "Wallet balance does not match the sum of wallet_ledger and account_ledger entries.",
                     ))
 
             integrity = str(connection.execute("PRAGMA quick_check").fetchone()[0])
@@ -513,6 +535,9 @@ class OperationsEngine:
                 info.size = len(raw_manifest)
                 info.mtime = int(datetime.now(UTC).timestamp())
                 archive.addfile(info, io.BytesIO(raw_manifest))
+            # A-02 fix: Set restrictive permissions on backup directory and archive
+            self.backup_dir.chmod(0o700)
+            archive_tmp.chmod(0o600)
             archive_tmp.replace(target)
             digest = hashlib.sha256()
             with target.open("rb") as handle:
@@ -576,6 +601,12 @@ class OperationsEngine:
         digest = checksum.hexdigest()
         if digest != row["sha256"]:
             raise RuntimeError("Backup checksum verification failed.")
+        # A-03 fix: Audit backup downloads
+        with self.connect() as connection:
+            self.platform._audit(
+                connection, "Operations", "Backup downloaded",
+                f"Backup: {row['reference']}", f"ID: {backup_id}, Size: {row['size_bytes']} bytes"
+            )
         return target
 
     def update_incident(self, incident_id: int, status: object, note: object, actor: str) -> dict:

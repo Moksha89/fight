@@ -76,10 +76,20 @@ def translate_postgres_sql(sql: str) -> str:
         flags=re.IGNORECASE,
     )
     translated = re.sub(r"\s+COLLATE\s+NOCASE\b", "", translated, flags=re.IGNORECASE)
-    ignore_insert = bool(re.match(r"^INSERT\s+OR\s+IGNORE\s+INTO\b", translated, re.IGNORECASE))
+    
+    # Strip leading SQL comments and blank lines when checking for INSERT OR IGNORE.
+    # This ensures "-- Comment\nINSERT OR IGNORE" is still translated correctly.
+    statement_start = translated.lstrip()
+    for line in translated.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("--"):
+            statement_start = translated[translated.find(line.lstrip()):]
+            break
+    
+    ignore_insert = bool(re.match(r"^INSERT\s+OR\s+IGNORE\s+INTO\b", statement_start, re.IGNORECASE))
     if ignore_insert:
         translated = re.sub(
-            r"^INSERT\s+OR\s+IGNORE\s+INTO\b",
+            r"INSERT\s+OR\s+IGNORE\s+INTO\b",
             "INSERT INTO",
             translated,
             count=1,
