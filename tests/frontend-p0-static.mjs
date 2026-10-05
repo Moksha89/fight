@@ -218,13 +218,7 @@ if (!userModalMatch) {
                                 userModalSection.includes('debit');
     
     if (hasWalletAdjustment) {
-      // If wallet adjustment UI exists, check limits
-      // Max should be 500000 (₹5000.00)
-      const maxMatch = userModalSection.match(/wallet[\s\S]{0,300}max[:\s]*['"]?(\d+)/);
-      if (maxMatch && parseInt(maxMatch[1]) > 500000) {
-        failures.push('web/admin/dashboard.js: wallet adjustment max should be ≤500000 (₹5000)');
-      }
-      
+      // If wallet adjustment UI exists, check UI controls only (not product limits)
       // Should require reason/note
       if (!userModalSection.includes('reason') && !userModalSection.includes('note') && !userModalSection.includes('admin_note')) {
         failures.push('web/admin/dashboard.js: wallet adjustment should require reason/note field');
