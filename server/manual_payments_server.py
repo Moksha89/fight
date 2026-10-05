@@ -1053,6 +1053,114 @@ class PaymentService:
             self._audit(connection, "Users", "Account updated", user_id, f"Status {status}; VIP {vip_tier}")
         return next(user for user in self.admin_users() if user["user_id"] == user_id)
 
+    def admin_adjust_wallet(self, user_id: str, payload: dict, admin_actor: str) -> dict:
+        """Admin credit or debit to user wallet with audit trail and safety checks."""
+        if not USER_ID_PATTERN.fullmatch(user_id):
+            raise ValueError("Invalid user identity.")
+        
+        # Parse and validate amount
+        try:
+            amount_rupees = float(payload.get("amount", 0))
+        except (TypeError, ValueError):
+            raise ValueError("Enter a valid adjustment amount.") from None
+        
+        if amount_rupees == 0:
+            raise ValueError("Adjustment amount cannot be zero.")
+        
+        amount_paise = int(round(amount_rupees * 100))
+        is_credit = amount_paise > 0
+        abs_amount = abs(amount_paise)
+        
+        # Check optional per-adjustment maximum
+        max_adjustment_env = os.environ.get("ROOSTERRUN_MAX_WALLET_ADJUSTMENT_PAISE")
+        if max_adjustment_env:
+            try:
+                max_paise = int(max_adjustment_env)
+                if abs_amount > max_paise:
+                    max_rupees = round(max_paise / 100, 2)
+                    raise ValueError(f"Adjustment amount exceeds maximum of ₹{max_rupees:,.2f}. Configure ROOSTERRUN_MAX_WALLET_ADJUSTMENT_PAISE to change this limit.")
+            except ValueError as e:
+                if "exceeds maximum" in str(e):
+                    raise
+                # Invalid env var value - ignore and proceed without limit
+        
+        # Require reason
+        reason = str(payload.get("reason", "")).strip()
+        if len(reason) < 3:
+            raise ValueError("Enter a reason for this wallet adjustment (minimum 3 characters).")
+        if len(reason) > 500:
+            reason = reason[:500]
+        
+        # Generate idempotency reference
+        import secrets
+        reference = f"ADJ-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(4).upper()}"
+        now = utc_now()
+        
+        with self.connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            
+            # Get current wallet state
+            wallet = connection.execute(
+                "SELECT balance_paise FROM user_wallets WHERE user_id=?",
+                (user_id,)
+            ).fetchone()
+            if not wallet:
+                raise LookupError("User not found.")
+            
+            current_balance = int(wallet["balance_paise"])
+            
+            # For debits, check available balance (balance minus holds and pending withdrawals)
+            if not is_credit:
+                held = connection.execute(
+                    "SELECT COALESCE(SUM(amount_paise), 0) AS total FROM wallet_holds WHERE user_id=? AND status='ACTIVE'",
+                    (user_id,)
+                ).fetchone()["total"]
+                
+                pending_withdrawals = connection.execute(
+                    "SELECT COALESCE(SUM(amount_paise), 0) AS total FROM payment_requests WHERE user_id=? AND request_type='WITHDRAWAL' AND status='PENDING'",
+                    (user_id,)
+                ).fetchone()["total"]
+                
+                available = current_balance - int(held) - int(pending_withdrawals)
+                
+                if available < abs_amount:
+                    raise ValueError(f"Insufficient available balance. User has ₹{round(available / 100, 2):,.2f} available after holds and pending withdrawals.")
+            
+            new_balance = current_balance + amount_paise
+            
+            # Update wallet balance
+            connection.execute(
+                "UPDATE user_wallets SET balance_paise=?, updated_at=? WHERE user_id=?",
+                (new_balance, now, user_id)
+            )
+            
+            # Create wallet ledger entry
+            # Note: We're creating a wallet_ledger entry without a request_id foreign key.
+            # Since the schema requires request_id, we need to handle this differently.
+            # Let's use account_ledger instead, which is designed for admin adjustments
+            connection.execute(
+                "INSERT INTO account_ledger(user_id, reference, entry_type, amount_paise, balance_after_paise, metadata_json, created_at) VALUES(?,?,?,?,?,?,?)",
+                (user_id, reference, "ADMIN_ADJUSTMENT", amount_paise, new_balance, 
+                 json.dumps({"admin_actor": admin_actor, "reason": reason, "amount_rupees": amount_rupees}), now)
+            )
+            
+            # Audit log
+            action_type = "credit" if is_credit else "debit"
+            self._audit(
+                connection, "Users", f"Wallet {action_type}",
+                user_id, f"₹{abs(amount_rupees):,.2f} - {reason[:100]}"
+            )
+        
+        return {
+            "user_id": user_id,
+            "reference": reference,
+            "amount": amount_rupees,
+            "new_balance": round(new_balance / 100, 2),
+            "reason": reason,
+            "admin_actor": admin_actor,
+            "timestamp": now
+        }
+
     def admin_games(self) -> list[dict]:
         with self.connect() as connection:
             rows = connection.execute("SELECT * FROM admin_games ORDER BY featured DESC,scheduled_at DESC,id DESC").fetchall()
@@ -2370,6 +2478,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                 user = re.fullmatch(r"/api/admin/users/([^/]+)/", path)
                 if user:
                     return self.send_json(HTTPStatus.OK, self.server.payments.admin_update_user(user.group(1), payload))
+                user_wallet = re.fullmatch(r"/api/admin/users/([^/]+)/wallet/", path)
+                if user_wallet:
+                    admin_actor = str(admin_identity.get("display_name") or admin_identity.get("id") or "ADMIN")
+                    return self.send_json(HTTPStatus.OK, self.server.payments.admin_adjust_wallet(user_wallet.group(1), payload, admin_actor))
                 if path == "/api/admin/config/":
                     return self.send_json(HTTPStatus.OK, self.server.payments.admin_update_config(payload))
                 if path == "/api/admin/risk/":
