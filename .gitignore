@@ -5,3 +5,4 @@ __pycache__/
 deploy/streaming/.env
 deploy/production/.env
 deploy/production/secrets/
+.venv/

@@ -248,8 +248,7 @@ CREATE TABLE IF NOT EXISTS moc_settings (
     FOREIGN KEY (updated_by) REFERENCES moc_operators(id)
 );
 
--- Default settings
-INSERT INTO moc_settings (key, value, description) VALUES
+INSERT OR IGNORE INTO moc_settings (key, value, description) VALUES
     ('enabled', 'false', 'Enable/disable MOC system'),
     ('auto_increment_fight_number', 'true', 'Auto-increment fight numbers'),
     ('next_fight_number', '1', 'Next fight number to use'),
@@ -262,42 +261,23 @@ INSERT INTO moc_settings (key, value, description) VALUES
     ('max_concurrent_matches', '5', 'Maximum concurrent live matches'),
     ('audit_log_retention_days', '365', 'Days to retain audit logs'),
     ('api_rate_limit_default', '100', 'Default API rate limit per minute'),
-    ('moc_category_slug', 'moc-feed', 'Category slug for MOC matches in main platform')
-ON CONFLICT (key) DO NOTHING;
+    ('moc_category_slug', 'moc-feed', 'Category slug for MOC matches in main platform');
 
 -- ============================================================================
--- INITIAL DATA - Create default super admin operator
--- ============================================================================
--- Default credentials:
--- Username: moc_admin
--- Password: MOCAdmin@2026
--- IMPORTANT: Change this password immediately after first login!
+-- Operator provisioning requires explicit bootstrap credentials.
 
--- Generate password hash for MOCAdmin@2026
--- Using PBKDF2-HMAC-SHA256 with 600,000 iterations
-INSERT INTO moc_operators (
-    id,
-    username,
-    password_hash,
-    password_salt,
-    password_iterations,
-    display_name,
-    email,
-    role,
-    active
-) VALUES (
-    1,
-    'moc_admin',
-    '5020b6fe4c2620ec4e41d1fdc3214286b55d026232844c58af126d4e62e0bfc2',
-    'b24abd90e97961437258170075fa4a936389578c0a06572c76ec85ae78b7bd5d',
-    600000,
-    'MOC Super Admin',
-    'admin@roosterrun.local',
-    'super_admin',
-    1
-)
-ON CONFLICT (id) DO NOTHING;
-
--- ============================================================================
--- END OF SCHEMA
--- ============================================================================
+CREATE TABLE IF NOT EXISTS moc_sessions (
+ token_hash TEXT PRIMARY KEY, operator_id INTEGER NOT NULL,
+ credential_hash TEXT NOT NULL, expires_at TEXT NOT NULL,
+ revoked_at TEXT NOT NULL DEFAULT '',
+ FOREIGN KEY(operator_id) REFERENCES moc_operators(id)
+);
+CREATE TABLE IF NOT EXISTS moc_rate_events (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ scope TEXT NOT NULL, created_at REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_moc_rate_events_scope ON moc_rate_events(scope,created_at);
+CREATE TABLE IF NOT EXISTS moc_game_links (
+ match_id TEXT PRIMARY KEY REFERENCES moc_matches(match_id),
+ game_id INTEGER NOT NULL UNIQUE REFERENCES admin_games(id)
+);

@@ -114,7 +114,8 @@ assert not ({replay["id"], live["id"]} & visible_ids())
 assert all(item["slug"] != custom["slug"] for item in service.public_site_config()["categories"])
 service.admin_save_game_category({"visible": True, "name": "Manila Derby"}, custom["id"])
 assert {replay["id"], live["id"]} <= visible_ids()
-assert service.admin_game_categories()[-1]["name"] in {"Manila Derby", "China 24/7"}
+manila = next(item for item in service.admin_game_categories() if item["slug"] == custom["slug"])
+assert manila["name"] == "Manila Derby"
 
 # Hidden games refuse bets even if betting is open.
 user = "category-player"

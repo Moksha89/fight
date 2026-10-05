@@ -461,7 +461,7 @@ class CockfightEngine:
         now = datetime.now(UTC)
         with self.connect() as connection:
             rows = connection.execute(
-                "SELECT * FROM admin_games WHERE status IN ('SCHEDULED','BETTING_OPEN','BETTING_CLOSED') ORDER BY id"
+                "SELECT * FROM admin_games WHERE status IN ('SCHEDULED','BETTING_OPEN','BETTING_CLOSED') AND source!='MOC_FEED' ORDER BY id"
             ).fetchall()
         for row in rows:
             current = dict(row)
@@ -594,6 +594,26 @@ class CockfightEngine:
             return bool(json.loads(row["setting_value"]).get("enabled")) if row else False
         return bool(category["visible"])
 
+
+    @staticmethod
+    def _assert_moc_market(connection, game) -> None:
+        if game['source'] != 'MOC_FEED':
+            return
+        intent = connection.execute(
+            'SELECT m.status,m.result,m.betting_closes_at FROM moc_game_links l JOIN moc_matches m ON m.match_id=l.match_id WHERE l.game_id=?',
+            (game['id'],),
+        ).fetchone()
+        settings = {row['key']: row['value'] for row in connection.execute(
+            "SELECT key,value FROM moc_settings WHERE key IN ('auto_mirror_matches')"
+        ).fetchall()}
+        # Background feed enabled is independent of player betting on an already-mirrored MOC match.
+        if settings.get('auto_mirror_matches', 'true') != 'true':
+            raise ValueError('MOC feed betting is disabled.')
+        if not intent or intent['status'] != 'BETTING_OPEN' or intent['result']:
+            raise ValueError('Betting has closed for this MOC match.')
+        if parse_timestamp(intent['betting_closes_at']) <= datetime.now(UTC):
+            raise ValueError('The MOC betting window has closed.')
+
     def quote_bet(self, user_id: str, payload: dict) -> dict:
         self.advance_due_matches()
         self.platform.ensure_user(user_id)
@@ -612,6 +632,7 @@ class CockfightEngine:
                 raise LookupError("Match not found.")
             if game["status"] != "BETTING_OPEN":
                 raise ValueError("Betting is not open for this match.")
+            self._assert_moc_market(connection, game)
             if not self._game_visible(connection, game):
                 raise ValueError("This match is not open to players.")
             odds = connection.execute("SELECT * FROM odds_snapshots WHERE game_id=? ORDER BY version DESC LIMIT 1", (game_id,)).fetchone()

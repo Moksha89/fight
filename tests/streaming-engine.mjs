@@ -10,7 +10,7 @@ async function json(base,path,{method='GET',body,admin=false,token='',expected=2
 
 const port=await freePort();
 const dataDir=mkdtempSync(join(tmpdir(),'roosterrun-streaming-'));
-const child=spawn('python',[resolve('server/manual_payments_server.py'),'--host','127.0.0.1','--port',String(port),'--data-dir',dataDir,'--preview'],{stdio:['ignore','pipe','pipe'],env:{...process.env,ROOSTERRUN_WHIP_BASE_URL:'http://127.0.0.1:1985',ROOSTERRUN_WHEP_BASE_URL:'http://127.0.0.1:1985',ROOSTERRUN_HLS_BASE_URL:'http://127.0.0.1:8080',ROOSTERRUN_RECORDING_BASE_URL:'http://127.0.0.1:8080/recordings',ROOSTERRUN_SRS_HOOK_SECRET:'stream-test-hook-secret-32-characters'}});
+const child=spawn('python3',[resolve('server/manual_payments_server.py'),'--host','127.0.0.1','--port',String(port),'--data-dir',dataDir,'--preview'],{stdio:['ignore','pipe','pipe'],env:{...process.env,ROOSTERRUN_WHIP_BASE_URL:'http://127.0.0.1:1985',ROOSTERRUN_WHEP_BASE_URL:'http://127.0.0.1:1985',ROOSTERRUN_HLS_BASE_URL:'http://127.0.0.1:8080',ROOSTERRUN_RECORDING_BASE_URL:'http://127.0.0.1:8080/recordings',ROOSTERRUN_SRS_HOOK_SECRET:'stream-test-hook-secret-32-characters'}});
 const base=`http://127.0.0.1:${port}`;
 
 try{
