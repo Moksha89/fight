@@ -55,6 +55,11 @@ try{
   const staff=(await json(base,'/api/admin/team/',{method:'POST',jar:adminJar,body:{username:'operator',display_name:'Arena Operator',password:'OperatorSecure123',role_id:2},expected:201})).data;assert.equal(staff.role,'Game Operator');
 
   const staffJar=new CookieJar();await json(base,'/api/admin/auth/login/',{method:'POST',jar:staffJar,body:{username:'operator',password:'OperatorSecure123'}});await json(base,'/api/admin/games/',{jar:staffJar});await json(base,'/api/admin/users/',{jar:staffJar,expected:403});await json(base,'/api/admin/config/',{jar:staffJar});
+  
+  // E-02 regression: Staff can enroll own MFA without team permission
+  const staffMfa=(await json(base,'/api/admin/auth/mfa/enroll/',{method:'POST',jar:staffJar,body:{}})).data;assert.match(staffMfa.secret,/^[A-Z2-7]+$/,'Operator without team permission should be able to enroll MFA');
+  await json(base,'/api/admin/auth/mfa/confirm/',{method:'POST',jar:staffJar,body:{code:totp(staffMfa.secret)}});
+  
   for(let attempt=0;attempt<5;attempt+=1)await json(base,'/api/admin/auth/login/',{method:'POST',body:{username:'operator',password:'WrongPassword999'},expected:401});
   await json(base,'/api/admin/auth/login/',{method:'POST',body:{username:'operator',password:'OperatorSecure123'},expected:429});
 
@@ -65,7 +70,7 @@ try{
   await json(base,'/api/admin/auth/mfa/verify/',{method:'POST',jar:mfaJar,body:{challenge_id:challenge.challenge_id,code:'000000'},expected:401});
   await json(base,'/api/admin/auth/mfa/verify/',{method:'POST',jar:mfaJar,body:{challenge_id:challenge.challenge_id,code:totp(enrollment.secret)}});await json(base,'/api/admin/team/',{jar:mfaJar});
   const audit=(await json(base,'/api/admin/audit/?limit=30',{jar:mfaJar})).data.results;assert.ok(audit.some(row=>row.action==='Administrator created'&&row.actor_role==='Super Admin'));
-  console.log('User sessions, OTP recovery, admin RBAC, CSRF, MFA, and audit checks passed.');
+  console.log('User sessions, OTP recovery, admin RBAC (E-02: staff MFA), CSRF, MFA, and audit checks passed.');
 }finally{
   child.kill();await new Promise(resolveWait=>child.once('exit',resolveWait));rmSync(dataDir,{recursive:true,force:true});
 }

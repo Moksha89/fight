@@ -29,15 +29,21 @@ try{
   const readAll=await json(base,'/api/user/notifications/read-all/',{method:'POST',body:{}});assert.equal(readAll.updated,1);
   notifications=await json(base,'/api/user/notifications/');assert.equal(notifications.unread,0);
 
-  const reconciliation=await json(base,'/api/admin/operations/reconciliation/run/',{method:'POST',admin:true,expected:201,body:{}});assert.equal(reconciliation.status,'PASS');assert.equal(reconciliation.findings.length,0);assert.equal(reconciliation.check_count,7);
+  const reconciliation=await json(base,'/api/admin/operations/reconciliation/run/',{method:'POST',admin:true,expected:201,body:{}});assert.equal(reconciliation.status,'PASS');assert.equal(reconciliation.findings.length,0);assert.equal(reconciliation.check_count,8); // A-08: Updated from 7 to 8
+  
+  // A-03 regression: Backup download audit
+  const auditBefore=await json(base,'/api/admin/audit/',{admin:true});
   const backup=await json(base,'/api/admin/operations/backups/create/',{method:'POST',admin:true,expected:201,body:{}});assert.equal(backup.status,'COMPLETED');assert.equal(backup.sha256.length,64);assert.equal(backup.contents.database_integrity,'ok');assert.equal(backup.contents.restore_exposed_in_ui,false);
   const denied=await fetch(`${base}${backup.download_url}`);assert.equal(denied.status,200,'loopback preview permits direct protected downloads for interface testing');
+  const auditAfter=await json(base,'/api/admin/audit/',{admin:true});
+  assert.ok(auditAfter.results.length>auditBefore.results.length,'Backup download should create audit log');
+  
   assert.equal(denied.headers.get('cache-control'),'no-store, private');assert.match(denied.headers.get('content-disposition'),/^attachment/);const archive=Buffer.from(await denied.arrayBuffer());assert.equal(createHash('sha256').update(archive).digest('hex'),backup.sha256);assert.deepEqual([...archive.subarray(0,2)],[0x1f,0x8b]);
   const privatePath=await fetch(`${base}/private/backups/anything.tar.gz`);assert.equal(privatePath.status,404);
 
   operations=await json(base,'/api/admin/operations/overview/',{admin:true});assert.equal(operations.latest_reconciliation.reference,reconciliation.reference);assert.equal(operations.backups[0].reference,backup.reference);assert.ok(operations.notifications.some(item=>item.event_type==='BACKUP_COMPLETED'));assert.ok(operations.notifications.some(item=>item.event_type==='PAYMENT_REVIEW_REQUIRED'));
   await json(base,'/api/admin/operations/incidents/999999/',{method:'POST',admin:true,expected:404,body:{status:'ACKNOWLEDGED',note:''}});
-  console.log('Durable notifications, reconciliation, private backups, and operations access checks passed.');
+  console.log('Durable notifications, reconciliation (A-08: check_count=8), private backups (A-03: audit), and operations access checks passed.');
 }finally{
   child.kill();await new Promise(resolveWait=>child.once('exit',resolveWait));rmSync(dataDir,{recursive:true,force:true});
 }
