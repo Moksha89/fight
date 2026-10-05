@@ -71,9 +71,11 @@ for schema_name, schema_content in all_schemas:
     statements = split_sql_script(schema_content)
     
     for stmt_idx, statement in enumerate(statements):
-        # Skip comments and empty statements
+        # Skip comments, empty statements, and non-SQL prose accidentally captured from docs.
         clean_stmt = statement.strip()
         if not clean_stmt or clean_stmt.startswith('--'):
+            continue
+        if not re.match(r'(CREATE|INSERT|ALTER|UPDATE|DROP|PRAGMA|WITH)\b', clean_stmt, re.IGNORECASE):
             continue
         
         translated = translate_postgres_sql(statement)

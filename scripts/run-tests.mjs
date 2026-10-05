@@ -47,6 +47,7 @@ const TEST_SUITES = {
     { cmd: 'node', args: ['tests/operations-engine.mjs'], desc: 'Operations engine' },
     { cmd: 'node', args: ['tests/support-engine.mjs'], desc: 'Support engine' },
     { cmd: 'node', args: ['tests/intelligence-engine.mjs'], desc: 'Intelligence engine' },
+    { cmd: 'node', args: ['tests/admin-wallet-adjust.mjs'], desc: 'Admin wallet adjust' },
   ],
   
   'Node.js Production Readiness': [

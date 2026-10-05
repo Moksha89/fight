@@ -111,16 +111,13 @@ try{
  await json(base,`/api/admin/users/${userId}/`,{method:'POST',admin:true,expected:400,body:{status:'ACTIVE',vip_tier:'Standard',wallet_adjustment:true}});
 
  // Test 14: Reconciliation counts account_ledger ADJUSTMENT rows in the balance-vs-ledger check.
- // Preview seeds arena-guest with an opening balance and no opening ledger row, so status may be
- // FAILED with BALANCE_LEDGER_MISMATCH. Prove ADJUSTMENTs are included: actual - expected must
- // equal the original seeded opening balance (in paise), not the full wallet.
+ // Preview now seeds arena-guest with a matching PREVIEW-OPENING account_ledger row, so a clean
+ // PASS is expected after wallet adjustments (credits/debits also write account_ledger).
  const recon=await json(base,'/api/admin/operations/reconciliation/run/',{method:'POST',admin:true,expected:201,body:{}});
- const mismatch=(recon.findings||[]).find(f=>f.check_code==='BALANCE_LEDGER_MISMATCH'&&f.entity_id===userId);
- assert.ok(mismatch,`Expected seed-related BALANCE_LEDGER_MISMATCH for preview guest: ${JSON.stringify(recon)}`);
- const expectedPaise=Number(mismatch.expected);
- const actualPaise=Number(mismatch.actual);
- assert.equal(actualPaise-expectedPaise,Math.round(initialBalance*100),'ADJUSTMENT rows must be included in the reconciliation ledger sum');
- assert.ok(expectedPaise!==0,'Ledger sum (expected) must include non-zero ADJUSTMENT activity');
+ assert.equal(recon.status,'PASS',`Expected PASS after ledgered preview seed + adjustments: ${JSON.stringify(recon)}`);
+ assert.equal((recon.findings||[]).length,0);
+ const guestMismatch=(recon.findings||[]).find(f=>f.check_code==='BALANCE_LEDGER_MISMATCH'&&f.entity_id===userId);
+ assert.equal(guestMismatch,undefined,'Ledgered preview guest must not produce BALANCE_LEDGER_MISMATCH');
 
  // Test 15: Role lacking users permission — not feasible in this preview harness.
  // Preview mode grants Super Admin via X-Preview-Admin. Creating a restricted Game Operator

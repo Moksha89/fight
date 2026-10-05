@@ -22,7 +22,7 @@ try{
   await Promise.all(Array.from({length:50},async()=>{for(let request=0;request<6;request+=1){const started=performance.now();const response=await fetch(`${base}/api/site/config/`);assert.equal(response.status,200);await response.arrayBuffer();timings.push(performance.now()-started);}}));
   timings.sort((a,b)=>a-b);const p95=timings[Math.floor(timings.length*.95)];assert.ok(p95<5000,`load smoke p95 was ${p95.toFixed(0)}ms`);
 
-  const games=await api(base,'/api/admin/games/',{admin:true});const game=games.results[0];
+  const games=await api(base,'/api/admin/games/',{admin:true});const game=games.results.find(item=>item.status==='BETTING_OPEN')||games.results[0];assert.ok(game&&game.status==='BETTING_OPEN','preview seed should expose a BETTING_OPEN match');
   const quotes=await Promise.all(Array.from({length:5},()=>api(base,'/api/cockfight/bets/quote/',{method:'POST',expected:201,body:{matchId:game.id,betTeam:1,amount:10}})));
   const tickets=await Promise.all(quotes.map(quote=>api(base,'/api/cockfight/bets/place-bet/',{method:'POST',expected:201,body:{quote_id:quote.quote_id}})));
   assert.equal(new Set(tickets.map(ticket=>ticket.id)).size,5,'concurrent accepted bets must remain distinct');

@@ -113,8 +113,16 @@ if (swContent.includes("'.m3u8'") || swContent.includes("'.ts'") ||
   failures.push('web/play/sw.js: should not cache streaming media (.m3u8, .ts, .mp4) in STATIC_ASSETS');
 }
 
+// /uploads/ may appear only as an exclusion predicate (never cache), not as a cache target.
 if (swContent.includes('/uploads/')) {
-  failures.push('web/play/sw.js: should not explicitly cache /uploads/ paths');
+  const excludesUploads = swContent.includes("startsWith('/uploads/')")
+    || swContent.includes('startsWith("/uploads/")')
+    || /Never cache uploads/i.test(swContent);
+  const staticBlock = swContent.match(/const\s+STATIC_ASSETS\s*=\s*\[([\s\S]*?)\]/);
+  const listedInStaticAssets = !!(staticBlock && staticBlock[1].includes('/uploads/'));
+  if (!excludesUploads || listedInStaticAssets) {
+    failures.push('web/play/sw.js: should exclude /uploads/ from caching (not list it as a cache target)');
+  }
 }
 
 // Check for versioned query parameter handling (?v=)

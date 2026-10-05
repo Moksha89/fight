@@ -176,6 +176,7 @@ class PaymentService:
         self.auth = AuthenticationEngine(self, preview_mode)
         self.compliance = ComplianceEngine(self)
         self.cockfight = CockfightEngine(self)
+        self._seed_preview_opening_ledger()
         self.streaming = StreamingEngine(self)
         self.operations = OperationsEngine(self)
         self.delivery = DeliveryEngine(self)
@@ -194,6 +195,26 @@ class PaymentService:
             moc_settings = self.moc_feed.settings()
             if not moc_settings.get("enabled"):
                 self.moc_feed.update_settings({"enabled": True}, actor="PREVIEW_INIT")
+
+
+    def _seed_preview_opening_ledger(self) -> None:
+        """Record the preview arena-guest opening balance so A-08 reconciliation stays PASS."""
+        if not self.preview_mode:
+            return
+        now = utc_now()
+        with self.connect() as connection:
+            wallet = connection.execute(
+                "SELECT balance_paise FROM user_wallets WHERE user_id=?",
+                ("arena-guest",),
+            ).fetchone()
+            if not wallet:
+                return
+            connection.execute(
+                """INSERT OR IGNORE INTO account_ledger
+                (user_id, reference, entry_type, amount_paise, balance_after_paise, metadata_json, created_at)
+                VALUES (?, 'PREVIEW-OPENING-ARENA-GUEST', 'ADJUSTMENT', ?, ?, '{}', ?)""",
+                ("arena-guest", int(wallet["balance_paise"]), int(wallet["balance_paise"]), now),
+            )
 
     def connect(self) -> sqlite3.Connection:
         return self.database.connect()
@@ -2219,14 +2240,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if path == "/api/moc/auth/login/":
                     return self.send_json(HTTPStatus.OK, {"message": "Use POST to login"})
                 
-                # All other endpoints require JWT authentication
+                # All other endpoints require a server-side bearer sessionentication
                 auth_header = self.headers.get("Authorization", "")
                 token = None
                 if auth_header.startswith("Bearer "):
                     token = auth_header[7:]
                 
                 if not token:
-                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "JWT token required."})
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "Operator session token required."})
                 
                 operator = self.server.payments.moc.verify_operator_token(token)
                 if not operator:
@@ -2250,6 +2271,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     return self.send_json(HTTPStatus.NOT_FOUND, {"detail": f"Match {match_id} not found."})
                 
                 if path == "/api/moc/audit-log/":
+                    if operator['role'] != 'super_admin':
+                        return self.send_json(HTTPStatus.FORBIDDEN, {"detail": "Only super admins can read the operator audit log."})
                     filters = {}
                     if 'match_id' in query:
                         filters['match_id'] = query['match_id'][0]
@@ -2269,7 +2292,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     identity = self.require_admin("overview")
                     return self.send_json(HTTPStatus.OK, {"authenticated": True, "admin": identity})
                 permission = "overview" if path in {"/api/admin/config/", "/api/admin/vip/"} else self.admin_permission(path)
-                self.require_admin(permission)
+                admin_identity = self.require_admin(permission)
                 if path == "/api/admin/health/":
                     return self.send_json(HTTPStatus.OK, {"status": "ok", "preview": self.server.preview_mode, "time": utc_now(), "cockfight": self.server.payments.cockfight.health(), "china_feed": self.server.payments.china_feed.health(), "streaming": self.server.payments.streaming.health(), "compliance": self.server.payments.compliance.health(), "operations": {"status": "ok"}, "support": self.server.payments.support.health(), "intelligence": self.server.payments.intelligence.health()})
                 if path == "/api/admin/overview/":
@@ -2488,33 +2511,39 @@ class RequestHandler(BaseHTTPRequestHandler):
             if path.startswith("/api/moc/"):
                 if path == "/api/moc/auth/login/":
                     # Public login endpoint
-                    ip_address = self.client_address[0] if self.client_address else None
+                    ip_address = self.client_ip()
                     result = self.server.payments.moc.operator_login(
                         payload.get("username", ""),
                         payload.get("password", ""),
-                        ip_address
+                        ip_address,
+                        payload.get('mfa_code')
                     )
                     return self.send_json(HTTPStatus.OK if result['success'] else HTTPStatus.UNAUTHORIZED, result)
                 
-                # All other endpoints require JWT auth
+                # All other endpoints require a server-side bearer session
                 auth_header = self.headers.get("Authorization", "")
                 token = None
                 if auth_header.startswith("Bearer "):
                     token = auth_header[7:]
                 
                 if not token:
-                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "JWT token required."})
+                    return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "Operator session token required."})
                 
                 operator = self.server.payments.moc.verify_operator_token(token)
                 if not operator:
                     return self.send_json(HTTPStatus.UNAUTHORIZED, {"detail": "Invalid or expired token."})
                 
                 # Create match
+                if path == "/api/moc/auth/logout/":
+                    self.server.payments.moc.revoke_operator_token(token)
+                    return self.send_json(HTTPStatus.OK, {"success": True})
+                if operator['role'] not in {'operator', 'super_admin'}:
+                    return self.send_json(HTTPStatus.FORBIDDEN, {"detail": "This operator role cannot change matches or partner credentials."})
                 if path == "/api/moc/matches/":
                     result = self.server.payments.moc.create_match(
                         operator['operator_id'],
                         operator['username'],
-                        payload
+                        payload, session_token=token
                     )
                     return self.send_json(HTTPStatus.CREATED if result['success'] else HTTPStatus.BAD_REQUEST, result)
                 
@@ -2527,7 +2556,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         operator['username'],
                         match_id,
                         payload.get('status', ''),
-                        payload.get('password_verify')
+                        payload.get('password_verify'), session_token=token
                     )
                     return self.send_json(HTTPStatus.OK if result['success'] else HTTPStatus.BAD_REQUEST, result)
                 
@@ -2540,10 +2569,23 @@ class RequestHandler(BaseHTTPRequestHandler):
                         operator['username'],
                         match_id,
                         payload.get('result', ''),
-                        payload.get('password_verify', '')
+                        payload.get('password_verify', ''), session_token=token
                     )
                     return self.send_json(HTTPStatus.OK if result['success'] else HTTPStatus.BAD_REQUEST, result)
                 
+                key_revoke = re.fullmatch(r"/api/moc/api-keys/(moc_key_[a-f0-9]+)/revoke/", path)
+                operator_update = re.fullmatch(r"/api/moc/operators/(\d+)/", path)
+                if operator_update:
+                    if operator['role'] != 'super_admin':
+                        return self.send_json(HTTPStatus.FORBIDDEN, {"detail": "Only super admins can manage operators."})
+                    result = self.server.payments.moc.update_operator(operator['operator_id'], operator['username'], int(operator_update.group(1)), payload, session_token=token)
+                    return self.send_json(HTTPStatus.OK, result)
+                if key_revoke:
+                    if operator['role'] != 'super_admin':
+                        return self.send_json(HTTPStatus.FORBIDDEN, {"detail": "Only super admins can revoke API keys."})
+                    result = self.server.payments.moc.revoke_api_key(operator['operator_id'], operator['username'], key_revoke.group(1), payload.get('reason', ''), session_token=token)
+                    return self.send_json(HTTPStatus.OK if result['success'] else HTTPStatus.NOT_FOUND, result)
+
                 # Create API key (for super admins)
                 if path == "/api/moc/api-keys/":
                     if operator['role'] != 'super_admin':
@@ -2556,7 +2598,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                         payload.get('platform_url'),
                         payload.get('contact_email'),
                         payload.get('permissions', ['read']),
-                        payload.get('rate_limit', 100)
+                        payload.get('rate_limit', 100),
+                        payload.get('allowed_ips'),
+                        payload.get('expires_at'), session_token=token
                     )
                     return self.send_json(HTTPStatus.CREATED if result['success'] else HTTPStatus.BAD_REQUEST, result)
                 

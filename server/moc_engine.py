@@ -20,9 +20,13 @@ import secrets
 import json
 import logging
 import time
-from datetime import datetime, timedelta
+import math
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple, Any
-import jwt
+import os
+import ipaddress
+from auth_engine import verify_totp, validate_password
 
 logger = logging.getLogger(__name__)
 
@@ -56,179 +60,123 @@ class MOCEngine:
         self.service = payment_service
         self.db_path = payment_service.db_path
         self._init_database()
-        self.jwt_secret = self._get_or_create_jwt_secret()
-        
-        # Rate limiting cache: {api_key_hash: [(timestamp, count), ...]}
-        self.rate_limit_cache = {}
+        self._secure_bootstrap()
         
         logger.info("MOC Engine initialized")
     
     def _init_database(self):
         """Initialize MOC database tables"""
-        schema_path = '/workspace/server/moc_database_schema.sql'
-        migrations_path = '/workspace/server/schema_migrations.sql'
-        try:
-            with open(schema_path, 'r') as f:
-                schema_sql = f.read()
-            
-            conn = self.service.connect()
-            try:
-                conn.executescript(schema_sql)
-                conn.commit()
-                logger.info("MOC database schema initialized")
-                
-                with open(migrations_path, 'r') as f:
-                    migrations_sql = f.read()
-                conn.executescript(migrations_sql)
-                conn.commit()
-                logger.info("Schema migrations table initialized")
-            finally:
-                conn.close()
-        except FileNotFoundError as e:
-            logger.error(f"Schema file not found: {e}")
-        except Exception as e:
-            logger.error(f"Error initializing MOC database: {e}")
-    
-    def _get_or_create_jwt_secret(self) -> str:
-        """Get or create JWT secret for operator sessions"""
-        conn = self.service.connect()
-        try:
-            cursor = conn.execute(
-                "SELECT value FROM moc_settings WHERE key = ?",
-                ('jwt_secret',)
-            )
-            row = cursor.fetchone()
-            
-            if row:
-                return row[0]
-            
-            # Generate new secret
-            secret = secrets.token_hex(32)
-            conn.execute(
-                "INSERT INTO moc_settings (key, value, description) VALUES (?, ?, ?)",
-                ('jwt_secret', secret, 'JWT secret for operator sessions')
-            )
-            conn.commit()
-            return secret
-        finally:
-            conn.close()
-    
+        schema_path = Path(__file__).with_name('moc_database_schema.sql')
+        with self.service.connect() as conn:
+            conn.executescript(schema_path.read_text(encoding='utf-8'))
+
+    @staticmethod
+    def _credential_hash(row):
+        return hashlib.sha256(f"{row['password_hash']}:{row['password_salt']}:{row['password_iterations']}:{row['mfa_enabled']}:{row['mfa_secret']}".encode()).hexdigest()
+
+    def _secure_bootstrap(self):
+        with self.service.connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            legacy = conn.execute("SELECT * FROM moc_operators WHERE username='moc_admin'").fetchone()
+            if legacy and verify_password('MOCAdmin@2026', legacy['password_hash'], legacy['password_salt'], legacy['password_iterations']):
+                conn.execute("UPDATE moc_operators SET active=0 WHERE id=?", (legacy['id'],))
+            conn.execute("DELETE FROM moc_settings WHERE key='jwt_secret'")
+            # Preserve digest verification and FK references without retaining bearer secrets.
+            conn.execute("UPDATE moc_api_keys SET api_key='redacted:' || key_id WHERE api_key NOT LIKE 'redacted:%'")
+            username = os.environ.get('ROOSTERRUN_MOC_BOOTSTRAP_USERNAME','').strip()
+            password = os.environ.get('ROOSTERRUN_MOC_BOOTSTRAP_PASSWORD','')
+            if username or password:
+                if not username or len(username)>80:
+                    raise ValueError('MOC bootstrap requires a valid username and password.')
+                validate_password(password)
+                if password == 'MOCAdmin@2026':
+                    raise ValueError('The published MOC password is prohibited.')
+                if not conn.execute("SELECT 1 FROM moc_operators WHERE active=1 AND role='super_admin' LIMIT 1").fetchone():
+                    digest,salt,iterations=hash_password(password)
+                    if legacy and legacy['username']==username and verify_password('MOCAdmin@2026',legacy['password_hash'],legacy['password_salt'],legacy['password_iterations']):
+                        conn.execute("UPDATE moc_operators SET password_hash=?,password_salt=?,password_iterations=?,active=1,role='super_admin',mfa_enabled=0,mfa_secret=NULL WHERE id=?",(digest,salt,iterations,legacy['id']))
+                    else:
+                        if conn.execute('SELECT 1 FROM moc_operators WHERE username=?',(username,)).fetchone():
+                            raise ValueError('MOC bootstrap username already belongs to an existing account; choose a new username or use authenticated operator management.')
+                        conn.execute("INSERT INTO moc_operators(username,password_hash,password_salt,password_iterations,display_name,role) VALUES(?,?,?,?,?,'super_admin')",(username,digest,salt,iterations,username))
+
+    def _authorize(self, conn, operator_id, username, roles, session_token=None):
+        row=conn.execute('SELECT * FROM moc_operators WHERE id=?',(operator_id,)).fetchone()
+        if not row or not row['active'] or row['username']!=username or row['role'] not in roles:
+            raise ValueError('Operator is not authorized for this action.')
+        if session_token is not None:
+            session=conn.execute("SELECT * FROM moc_sessions WHERE token_hash=? AND operator_id=? AND revoked_at='' AND expires_at>?",(hashlib.sha256(session_token.encode()).hexdigest(),operator_id,datetime.utcnow().isoformat())).fetchone()
+            if not session or not secrets.compare_digest(session['credential_hash'],self._credential_hash(row)):
+                raise ValueError('Operator session is no longer valid.')
+        return row
+
+    @staticmethod
+    def _reserve_rate(conn, scope, limit, window):
+        now=time.time()
+        conn.execute('DELETE FROM moc_rate_events WHERE created_at<?',(now-86400,))
+        count=conn.execute('SELECT COUNT(*) n FROM moc_rate_events WHERE scope=? AND created_at>?',(scope,now-window)).fetchone()['n']
+        if count>=limit:
+            return False
+        conn.execute('INSERT INTO moc_rate_events(scope,created_at) VALUES(?,?)',(scope,now))
+        return True
+
     # ========================================================================
     # OPERATOR AUTHENTICATION
     # ========================================================================
     
-    def operator_login(self, username: str, password: str, ip_address: str = None) -> Dict[str, Any]:
-        """Authenticate operator and return JWT token
-        
-        Args:
-            username: Operator username
-            password: Plain text password
-            ip_address: Client IP address for audit
-        
-        Returns:
-            {
-                'success': bool,
-                'token': str,  # JWT token
-                'operator': {...},
-                'message': str
-            }
-        """
-        conn = self.service.connect()
-        try:
-            cursor = conn.execute(
-                "SELECT id, username, password_hash, password_salt, password_iterations, "
-                "display_name, email, role, active, mfa_enabled "
-                "FROM moc_operators WHERE username = ?",
-                (username,)
-            )
-            row = cursor.fetchone()
-            
-            if not row:
-                return {'success': False, 'message': 'Invalid credentials'}
-            
-            op_id, op_username, password_hash, password_salt, password_iterations, display_name, email, role, active, mfa_enabled = row
-            
-            if not active:
-                return {'success': False, 'message': 'Account is disabled'}
-            
-            # Verify password
-            if not verify_password(password, password_hash, password_salt, password_iterations):
-                return {'success': False, 'message': 'Invalid credentials'}
-            
-            # TODO: MFA verification if enabled
-            if mfa_enabled:
-                # For now, skip MFA in initial implementation
-                pass
-            
-            # Update last login
-            conn.execute(
-                "UPDATE moc_operators SET last_login_at = ? WHERE id = ?",
-                (datetime.utcnow().isoformat(), op_id)
-            )
-            
-            # Log login
-            self._log_audit(conn, op_id, op_username, None, 'LOGIN', 
-                          json.dumps({'ip_address': ip_address}), ip_address)
-            
+    def operator_login(self, username: str, password: str, ip_address: str = None, mfa_code: str = None) -> Dict[str, Any]:
+        failure={'success':False,'message':'Invalid credentials or authentication temporarily unavailable'}
+        if not isinstance(username,str) or not isinstance(password,str) or not 1<=len(username)<=80 or not 1<=len(password)<=1024:
+            return failure
+        with self.service.connect() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            allowed=self._reserve_rate(conn,'login-ip:'+str(ip_address or 'unknown'),30,900)
+            account_allowed=self._reserve_rate(conn,'login-user:'+username.casefold(),8,900)
+            if not allowed or not account_allowed:
+                return failure
+            # Persist throttles even for a failed authentication.
             conn.commit()
-            
-            # Generate JWT token
-            token_payload = {
-                'operator_id': op_id,
-                'username': op_username,
-                'role': role,
-                'exp': datetime.utcnow() + timedelta(hours=8),
-                'iat': datetime.utcnow()
-            }
-            token = jwt.encode(token_payload, self.jwt_secret, algorithm='HS256')
-            
-            return {
-                'success': True,
-                'token': token,
-                'operator': {
-                    'id': op_id,
-                    'username': op_username,
-                    'display_name': display_name,
-                    'email': email,
-                    'role': role
-                },
-                'message': 'Login successful'
-            }
-        
-        except Exception as e:
-            logger.error(f"Operator login error: {e}")
-            return {'success': False, 'message': 'Login failed'}
-        finally:
-            conn.close()
-    
+            conn.execute('BEGIN IMMEDIATE')
+            row=conn.execute('SELECT * FROM moc_operators WHERE username=?',(username,)).fetchone()
+            if not row or not row['active'] or not verify_password(password,row['password_hash'],row['password_salt'],row['password_iterations']):
+                return failure
+            if row['mfa_enabled'] and (not row['mfa_secret'] or not verify_totp(row['mfa_secret'],mfa_code)):
+                return failure
+            token=secrets.token_urlsafe(48)
+            conn.execute('INSERT INTO moc_sessions(token_hash,operator_id,credential_hash,expires_at) VALUES(?,?,?,?)',
+                         (hashlib.sha256(token.encode()).hexdigest(),row['id'],self._credential_hash(row),(datetime.utcnow()+timedelta(hours=4)).isoformat()))
+            conn.execute('UPDATE moc_operators SET last_login_at=? WHERE id=?',(datetime.utcnow().isoformat(),row['id']))
+            self._log_audit(conn,row['id'],row['username'],None,'LOGIN',json.dumps({'ip_address':ip_address}),ip_address)
+            return {'success':True,'token':token,'operator':{'id':row['id'],'username':row['username'],'display_name':row['display_name'],'email':row['email'],'role':row['role']},'message':'Login successful'}
+
     def verify_operator_token(self, token: str) -> Optional[Dict[str, Any]]:
-        """Verify JWT token and return operator info
-        
-        Args:
-            token: JWT token string
-        
-        Returns:
-            Operator info dict or None if invalid
-        """
-        try:
-            payload = jwt.decode(token, self.jwt_secret, algorithms=['HS256'])
-            return {
-                'operator_id': payload['operator_id'],
-                'username': payload['username'],
-                'role': payload['role']
-            }
-        except jwt.ExpiredSignatureError:
-            logger.warning("Expired operator token")
+        if not isinstance(token,str) or not 20<=len(token)<=256:
             return None
-        except jwt.InvalidTokenError as e:
-            logger.warning(f"Invalid operator token: {e}")
-            return None
-    
+        with self.service.connect() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            session=conn.execute("SELECT * FROM moc_sessions WHERE token_hash=? AND revoked_at='' AND expires_at>?",(hashlib.sha256(token.encode()).hexdigest(),datetime.utcnow().isoformat())).fetchone()
+            if not session:
+                return None
+            row=conn.execute('SELECT * FROM moc_operators WHERE id=?',(session['operator_id'],)).fetchone()
+            if not row or not row['active'] or not secrets.compare_digest(session['credential_hash'],self._credential_hash(row)):
+                conn.execute('UPDATE moc_sessions SET revoked_at=? WHERE token_hash=?',(datetime.utcnow().isoformat(),session['token_hash']))
+                return None
+            return {'operator_id':row['id'],'username':row['username'],'role':row['role']}
+
+    def revoke_operator_token(self, token):
+        with self.service.connect() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            row=conn.execute("SELECT operator_id FROM moc_sessions WHERE token_hash=? AND revoked_at=''",(hashlib.sha256(token.encode()).hexdigest(),)).fetchone()
+            conn.execute('UPDATE moc_sessions SET revoked_at=? WHERE token_hash=?',(datetime.utcnow().isoformat(),hashlib.sha256(token.encode()).hexdigest()))
+            if row:
+                op=conn.execute('SELECT username FROM moc_operators WHERE id=?',(row['operator_id'],)).fetchone()
+                self._log_audit(conn,row['operator_id'],op['username'],None,'LOGOUT','{}')
+
     # ========================================================================
     # MATCH MANAGEMENT
     # ========================================================================
     
-    def create_match(self, operator_id: int, operator_username: str, match_data: Dict[str, Any]) -> Dict[str, Any]:
+    def create_match(self, operator_id: int, operator_username: str, match_data: Dict[str, Any], session_token=None) -> Dict[str, Any]:
         """Create new MOC match
         
         Args:
@@ -261,11 +209,42 @@ class MOCEngine:
         """
         conn = self.service.connect()
         try:
+            from manual_payments_server import clean_text, clean_media_url
+            from cockfight_engine import timestamp, parse_timestamp
+            match_data=dict(match_data)
+            for key,label,minimum,maximum,default in [('title','Game title',3,90,None),('arena','Arena',2,60,None),('red_name','Red corner name',1,50,'Meron'),('blue_name','Blue corner name',1,50,'Wala')]:
+                value=match_data.get(key,default)
+                if not isinstance(value,str): raise ValueError(f'{label} must be text.')
+                match_data[key]=clean_text(value,label,minimum,maximum)
+            status=match_data.get('status','SCHEDULED')
+            if status not in {'DRAFT','SCHEDULED'}: raise ValueError('A new match must begin as draft or scheduled.')
+            for key,default in [('red_odds',1.85),('blue_odds',1.85),('draw_odds',6)]:
+                raw=match_data.get(key,default)
+                if isinstance(raw,bool): raise ValueError('Enter valid decimal odds.')
+                value=float(raw)
+                if not math.isfinite(value) or not 1.01<=value<=100: raise ValueError('Odds must be finite and between 1.01 and 100.')
+                match_data[key]=round(value,2)
+            for key in ('scheduled_at','betting_opens_at','betting_closes_at'):
+                match_data[key]=timestamp(match_data.get(key),key)
+            if not parse_timestamp(match_data['betting_opens_at'])<=parse_timestamp(match_data['betting_closes_at'])<=parse_timestamp(match_data['scheduled_at']): raise ValueError('Betting must open and close before the match starts.')
+            stream=match_data.get('stream_type','OFFLINE')
+            if stream not in {'HLS','YOUTUBE','VIDEO','WHEP','OFFLINE'}: raise ValueError('Invalid stream type.')
+            match_data['stream_type']=stream
+            match_data['stream_url']=clean_media_url(match_data.get('stream_url',''),'Playback URL')
+            if stream!='OFFLINE' and not match_data['stream_url']: raise ValueError('Playback URL is required.')
+            for key in ('visible','featured'):
+                if key in match_data and not isinstance(match_data[key],bool): raise ValueError(f'{key} must be true or false.')
+            if match_data.get('description') is not None:
+                if not isinstance(match_data['description'],str) or len(match_data['description'])>1000: raise ValueError('Description must be text of at most 1000 characters.')
+            conn.execute("BEGIN IMMEDIATE")
+            operator = self._authorize(conn, operator_id, operator_username, {'operator','super_admin'}, session_token)
             # Get next fight number
             cursor = conn.execute(
                 "SELECT value FROM moc_settings WHERE key = 'next_fight_number'"
             )
-            fight_number = int(cursor.fetchone()[0])
+            counter=cursor.fetchone()
+            highest=conn.execute('SELECT COALESCE(MAX(fight_number),0) AS n FROM moc_matches').fetchone()['n']
+            fight_number = max(int(counter[0]) if counter else 1,int(highest)+1)
             match_id = f"MOC-{fight_number}"
             
             # Prepare match data
@@ -302,8 +281,9 @@ class MOCEngine:
             ))
             
             # Increment fight number
+            conn.execute('UPDATE moc_matches SET visible=?,featured=? WHERE match_id=?',(int(match_data.get('visible',True)),int(match_data.get('featured',False)),match_id))
             conn.execute(
-                "UPDATE moc_settings SET value = ?, updated_at = ? WHERE key = 'next_fight_number'",
+                "INSERT INTO moc_settings(value,updated_at,key) VALUES(?,?,'next_fight_number') ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at",
                 (str(fight_number + 1), now)
             )
             
@@ -315,6 +295,8 @@ class MOCEngine:
             
             # Fetch created match
             match = self.get_match(match_id)
+            if hasattr(self.service,'moc_feed'):
+                self.service.moc_feed.poll_once()
             
             return {
                 'success': True,
@@ -330,7 +312,7 @@ class MOCEngine:
             conn.close()
     
     def update_match_status(self, operator_id: int, operator_username: str, match_id: str, 
-                           new_status: str, password_verify: str = None) -> Dict[str, Any]:
+                           new_status: str, password_verify: str = None, session_token=None) -> Dict[str, Any]:
         """Update match status (lifecycle control)
         
         Args:
@@ -349,6 +331,10 @@ class MOCEngine:
         """
         conn = self.service.connect()
         try:
+            conn.execute("BEGIN IMMEDIATE")
+            operator = self._authorize(conn, operator_id, operator_username, {'operator','super_admin'}, session_token)
+            if new_status in {'CANCELLED','COMPLETED'} and not verify_password(str(password_verify or ''),operator['password_hash'],operator['password_salt'],operator['password_iterations']):
+                raise ValueError('Password confirmation is required.')
             # Verify match exists
             cursor = conn.execute(
                 "SELECT status FROM moc_matches WHERE match_id = ?",
@@ -359,6 +345,14 @@ class MOCEngine:
                 return {'success': False, 'message': f'Match {match_id} not found'}
             
             old_status = row[0]
+            if new_status=='COMPLETED':
+                result_row=conn.execute('SELECT result FROM moc_matches WHERE match_id=?',(match_id,)).fetchone()
+                if not result_row['result']: raise ValueError('Completion requires an official result.')
+                # Completion is an authoritative settlement outcome, never an operator flag.
+                conn.commit()
+                self.service.moc_feed.poll_once()
+                match=self.get_match(match_id)
+                return {'success':match['status']=='COMPLETED','match':match,'message':'Settlement completed' if match['status']=='COMPLETED' else 'Settlement remains pending'}
             
             # Validate status transition
             valid_transitions = {
@@ -397,6 +391,7 @@ class MOCEngine:
                 f"UPDATE moc_matches SET {set_clause} WHERE match_id = ?",
                 values
             )
+            if new_status=='CANCELLED': conn.execute("UPDATE moc_matches SET result='cancelled',result_declared_at=? WHERE match_id=?",(now,match_id))
             
             # Log action
             action_name = {
@@ -413,6 +408,7 @@ class MOCEngine:
             conn.commit()
             
             # Fetch updated match
+            self.service.moc_feed.poll_once()
             match = self.get_match(match_id)
             
             return {
@@ -429,7 +425,7 @@ class MOCEngine:
             conn.close()
     
     def declare_result(self, operator_id: int, operator_username: str, match_id: str, 
-                      result: str, password_verify: str) -> Dict[str, Any]:
+                      result: str, password_verify: str, session_token=None) -> Dict[str, Any]:
         """Declare match result
         
         Args:
@@ -449,6 +445,8 @@ class MOCEngine:
         """
         conn = self.service.connect()
         try:
+            conn.execute("BEGIN IMMEDIATE")
+            operator = self._authorize(conn, operator_id, operator_username, {'operator','super_admin'}, session_token)
             # Verify operator password
             cursor = conn.execute(
                 "SELECT password_hash, password_salt, password_iterations FROM moc_operators WHERE id = ?",
@@ -460,7 +458,7 @@ class MOCEngine:
             
             # Verify match status
             cursor = conn.execute(
-                "SELECT status FROM moc_matches WHERE match_id = ?",
+                "SELECT status,result FROM moc_matches WHERE match_id = ?",
                 (match_id,)
             )
             row = cursor.fetchone()
@@ -468,6 +466,11 @@ class MOCEngine:
                 return {'success': False, 'message': f'Match {match_id} not found'}
             
             status = row[0]
+            if row[1] and row[1]!=result: raise ValueError('An official result is immutable.')
+            if row[1]==result:
+                conn.commit()
+                self.service.moc_feed.poll_once()
+                return {'success':True,'match':self.get_match(match_id),'message':'Official result already recorded.'}
             if status not in ['LIVE', 'AWAITING_RESULT']:
                 return {'success': False, 'message': f'Cannot declare result for match in {status} status'}
             
@@ -491,11 +494,11 @@ class MOCEngine:
             conn.commit()
             
             # Fetch updated match
+            self.service.moc_feed.poll_once()
             match = self.get_match(match_id)
             
-            # MOC cleanup: Settlement is handled by MOCFeedEngine.poll_once() which detects
-            # AWAITING_RESULT status and calls CockfightEngine.settle_game()
-            # (see moc_feed_engine.py lines 251-253)
+            # TODO: Trigger settlement in main platform
+            # The MOCFeedEngine will pick this up and settle bets
             
             return {
                 'success': True,
@@ -673,11 +676,14 @@ class MOCEngine:
         Returns:
             API key info dict or None if invalid/rate limited
         """
+        if not isinstance(api_key, str) or not 20 <= len(api_key) <= 256:
+            return None
         # Hash the provided key
         key_hash = hashlib.sha256(api_key.encode('utf-8')).hexdigest()
         
         conn = self.service.connect()
         try:
+            conn.execute("BEGIN IMMEDIATE")
             cursor = conn.execute("""
                 SELECT id, key_id, platform_name, permissions, rate_limit, 
                        rate_window_seconds, active, expires_at, allowed_ips
@@ -698,38 +704,24 @@ class MOCEngine:
             
             # Check expiration
             if expires_at:
-                if datetime.fromisoformat(expires_at) < datetime.utcnow():
+                expiry = datetime.fromisoformat(expires_at)
+                if expiry.tzinfo is None:
+                    expiry = expiry.replace(tzinfo=timezone.utc)
+                if expiry.astimezone(timezone.utc) <= datetime.now(timezone.utc):
                     logger.warning(f"Expired API key used: {key_id_str}")
                     return None
             
             # Check IP whitelist
-            if allowed_ips_json and ip_address:
+            if allowed_ips_json:
                 allowed_ips = json.loads(allowed_ips_json)
-                if ip_address not in allowed_ips:
+                if allowed_ips and ip_address not in allowed_ips:
                     logger.warning(f"API key {key_id_str} used from unauthorized IP: {ip_address}")
                     return None
             
-            # Check rate limit
-            now = time.time()
-            if key_hash not in self.rate_limit_cache:
-                self.rate_limit_cache[key_hash] = []
-            
-            # Clean old entries
-            self.rate_limit_cache[key_hash] = [
-                (ts, count) for ts, count in self.rate_limit_cache[key_hash]
-                if now - ts < rate_window
-            ]
-            
-            # Count requests in window
-            total_requests = sum(count for ts, count in self.rate_limit_cache[key_hash])
-            
-            if total_requests >= rate_limit:
-                logger.warning(f"Rate limit exceeded for API key: {key_id_str}")
+            # Durable, transactionally serialized partner request quota.
+            if not self._reserve_rate(conn,'api:'+key_hash,int(rate_limit),int(rate_window)):
                 return None
-            
-            # Add current request
-            self.rate_limit_cache[key_hash].append((now, 1))
-            
+
             # Update usage
             conn.execute("""
                 UPDATE moc_api_keys 
@@ -764,6 +756,9 @@ class MOCEngine:
         """
         conn = self.service.connect()
         try:
+            retention = conn.execute("SELECT value FROM moc_settings WHERE key='audit_log_retention_days'").fetchone()
+            days = max(1,min(3650,int(retention[0] if retention else 365)))
+            conn.execute('DELETE FROM moc_api_key_usage WHERE created_at<?',((datetime.utcnow()-timedelta(days=days)).isoformat(),))
             conn.execute("""
                 INSERT INTO moc_api_key_usage (
                     api_key_id, endpoint, method, status_code, response_time_ms,
@@ -835,7 +830,7 @@ class MOCEngine:
     def create_api_key(self, operator_id: int, operator_username: str, 
                       platform_name: str, platform_url: str = None,
                       contact_email: str = None, permissions: List[str] = None,
-                      rate_limit: int = 100) -> Dict[str, Any]:
+                      rate_limit: int = 100, allowed_ips=None, expires_at=None, session_token=None) -> Dict[str, Any]:
         """Create new API key for external platform
         
         Args:
@@ -857,6 +852,27 @@ class MOCEngine:
         """
         conn = self.service.connect()
         try:
+            conn.execute("BEGIN IMMEDIATE")
+            operator = self._authorize(conn, operator_id, operator_username, {'super_admin'}, session_token)
+            if not isinstance(rate_limit,int) or isinstance(rate_limit,bool) or not 1<=rate_limit<=10000:
+                raise ValueError('Rate limit must be an integer between 1 and 10000.')
+            if permissions is not None and (not isinstance(permissions,list) or not permissions or any(p!='read' for p in permissions)):
+                raise ValueError('Only read permission is supported.')
+            if not isinstance(platform_name, str) or not 1 <= len(platform_name.strip()) <= 100:
+                raise ValueError('A bounded platform name is required.')
+            if allowed_ips is None:
+                allowed_ips = []
+            if not isinstance(allowed_ips, list) or len(allowed_ips) > 100:
+                raise ValueError('Allowed IPs must be a bounded list.')
+            allowed_ips = [str(ipaddress.ip_address(value)) for value in allowed_ips]
+            if expires_at:
+                expiry = datetime.fromisoformat(str(expires_at).replace('Z', '+00:00'))
+                if expiry.tzinfo is None:
+                    expiry = expiry.replace(tzinfo=timezone.utc)
+                expiry = expiry.astimezone(timezone.utc)
+                if expiry <= datetime.now(timezone.utc):
+                    raise ValueError('Expiry must be in the future.')
+                expires_at = expiry.isoformat()
             # Generate API key
             key_id = f"moc_key_{secrets.token_hex(8)}"
             api_key = f"moc_sk_{secrets.token_hex(32)}"
@@ -875,11 +891,13 @@ class MOCEngine:
                     active, created_by, created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                key_id, api_key, key_hash, platform_name, platform_url,
+                key_id, "redacted:"+key_id, key_hash, platform_name, platform_url,
                 contact_email, permissions_json, rate_limit, 60,
                 1, operator_id, datetime.utcnow().isoformat()
             ))
             
+            conn.execute('UPDATE moc_api_keys SET allowed_ips=?,expires_at=? WHERE key_id=?',(json.dumps(allowed_ips),expires_at,key_id))
+
             # Log action
             self._log_audit(conn, operator_id, operator_username, None, 'CREATE_API_KEY',
                           json.dumps({'key_id': key_id, 'platform_name': platform_name}))
@@ -904,7 +922,48 @@ class MOCEngine:
     # AUDIT LOGGING
     # ========================================================================
     
-    def _log_audit(self, conn: sqlite3.Connection, operator_id: int, 
+    def revoke_api_key(self, operator_id, operator_username, key_id, reason, session_token=None):
+        with self.service.connect() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            self._authorize(conn,operator_id,operator_username,{'super_admin'},session_token)
+            if not isinstance(reason,str) or not 3<=len(reason)<=300:
+                raise ValueError('A revocation reason is required.')
+            row=conn.execute('SELECT id FROM moc_api_keys WHERE key_id=?',(key_id,)).fetchone()
+            if not row:
+                return {'success':False,'message':'Key not found'}
+            conn.execute('UPDATE moc_api_keys SET active=0,revoked_at=?,revoked_by=?,revoked_reason=? WHERE id=?',(datetime.utcnow().isoformat(),operator_id,reason,row['id']))
+            self._log_audit(conn,operator_id,operator_username,None,'REVOKE_API_KEY',json.dumps({'key_id':key_id,'reason':reason}))
+            return {'success':True}
+
+    def update_operator(self, operator_id, operator_username, target_id, payload, session_token=None):
+        """Authorized account changes revoke every target session in the same transaction."""
+        with self.service.connect() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            self._authorize(conn,operator_id,operator_username,{'super_admin'},session_token)
+            target=conn.execute('SELECT * FROM moc_operators WHERE id=?',(target_id,)).fetchone()
+            if not target:
+                raise ValueError('Operator not found.')
+            active=payload.get('active',bool(target['active']))
+            role=payload.get('role',target['role'])
+            if not isinstance(active,bool) or role not in {'super_admin','operator','monitor','technician'}:
+                raise ValueError('Invalid operator status or role.')
+            if target['active'] and target['role']=='super_admin' and (not active or role!='super_admin'):
+                others=conn.execute("SELECT COUNT(*) n FROM moc_operators WHERE active=1 AND role='super_admin' AND id<>?",(target_id,)).fetchone()['n']
+                if not others:
+                    raise ValueError('The last active super admin must be preserved.')
+            digest,salt,iterations=target['password_hash'],target['password_salt'],target['password_iterations']
+            if 'password' in payload:
+                password=validate_password(payload['password'])
+                if password=='MOCAdmin@2026':
+                    raise ValueError('The published MOC password is prohibited.')
+                digest,salt,iterations=hash_password(password)
+            now=datetime.utcnow().isoformat()
+            conn.execute('UPDATE moc_operators SET active=?,role=?,password_hash=?,password_salt=?,password_iterations=?,updated_at=? WHERE id=?',(int(active),role,digest,salt,iterations,now,target_id))
+            conn.execute("UPDATE moc_sessions SET revoked_at=? WHERE operator_id=? AND revoked_at=''",(now,target_id))
+            self._log_audit(conn,operator_id,operator_username,None,'UPDATE_OPERATOR',json.dumps({'target_id':target_id,'active':active,'role':role,'password_changed':'password' in payload}))
+            return {'success':True}
+
+    def _log_audit(self, conn: sqlite3.Connection, operator_id: int,
                    operator_username: str, match_id: str, action: str, 
                    details: str = None, ip_address: str = None, 
                    user_agent: str = None):
@@ -932,6 +991,7 @@ class MOCEngine:
             ))
         except Exception as e:
             logger.error(f"Error logging audit: {e}")
+            raise
     
     def get_audit_log(self, filters: Dict[str, Any] = None, limit: int = 100) -> List[Dict[str, Any]]:
         """Get audit log entries
