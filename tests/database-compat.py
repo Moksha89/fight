@@ -10,6 +10,8 @@ from database import CompatibleRow, Database, split_sql_script, translate_postgr
 
 translated = translate_postgres_sql("INSERT OR IGNORE INTO sample(id,label) VALUES(?, '?')")
 assert translated == "INSERT INTO sample(id,label) VALUES(%s, '?') ON CONFLICT DO NOTHING"
+commented = translate_postgres_sql("-- seed data\nINSERT OR IGNORE INTO defaults(key,value) VALUES(?, ?)")
+assert "ON CONFLICT DO NOTHING" in commented and "INSERT INTO" in commented
 assert translate_postgres_sql("id INTEGER PRIMARY KEY AUTOINCREMENT") == "id BIGSERIAL PRIMARY KEY"
 assert translate_postgres_sql("username=? COLLATE NOCASE") == "LOWER(username)=LOWER(%s)"
 assert len(split_sql_script("CREATE TABLE a(v TEXT DEFAULT ';'); CREATE TABLE b(id INTEGER);")) == 2
