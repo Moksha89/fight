@@ -24,4 +24,18 @@ with tempfile.TemporaryDirectory(prefix="roosterrun-db-") as directory:
         assert cursor.lastrowid == 1
         assert connection.execute("SELECT label FROM test WHERE id=?", (1,)).fetchone()["label"] == "one"
 
+# Verify MOC schema translation (B-03): leading comments must not prevent OR IGNORE translation
+moc_schema_path = ROOT / "server" / "moc_database_schema.sql"
+if moc_schema_path.exists():
+    moc_schema = moc_schema_path.read_text(encoding="utf-8")
+    statements = split_sql_script(moc_schema)
+    untranslated_count = 0
+    for statement in statements:
+        translated = translate_postgres_sql(statement)
+        if "OR IGNORE" in translated.upper():
+            print(f"ERROR: Untranslated OR IGNORE found in statement:\n{statement[:200]}...")
+            untranslated_count += 1
+    assert untranslated_count == 0, f"Found {untranslated_count} untranslated 'OR IGNORE' in MOC schema"
+    print(f"MOC schema translation verified: all {len(statements)} statements translated correctly.")
+
 print("SQLite/PostgreSQL SQL compatibility and local connection checks passed.")

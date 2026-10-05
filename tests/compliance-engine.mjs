@@ -45,7 +45,19 @@ try{
 
   const queue=await json(base,'/api/admin/compliance/',{admin:true});assert.ok(queue.results.some(item=>item.user_id==='arena-guest'&&item.status==='VERIFIED'));
   const audit=await json(base,'/api/admin/audit/',{admin:true});assert.ok(audit.results.some(item=>item.module==='Compliance'));
-  console.log('Identity review, private documents, limits, legal mode, and self-exclusion checks passed.');
+  
+  // A-01 regression: Self-exclusion monotonicity (restrictions can only get stricter)
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',body:{kind:'SELF_EXCLUDE',duration_days:365}});
+  await json(base,'/api/user/responsible-play/restrict/',{method:'POST',expected:400,body:{kind:'SELF_EXCLUDE',duration_days:180}}); // Downgrade rejected
+  controls=await json(base,'/api/user/responsible-play/');assert.ok(controls.exclusion_until); // Still has exclusion
+  
+  // A-03 regression: Document view audit
+  const auditBefore=await json(base,'/api/admin/audit/',{admin:true});
+  await fetch(`${base}/api/admin/compliance/documents/${submitted.documents[0].id}/`,{headers:{'X-Preview-Admin':'1'}});
+  const auditAfter=await json(base,'/api/admin/audit/',{admin:true});
+  assert.ok(auditAfter.results.length>auditBefore.results.length,'Document view should create audit log');
+  
+  console.log('Identity review, private documents, limits, legal mode, self-exclusion checks, A-01 monotonicity, and A-03 document audit passed.');
 }finally{
   child.kill();await new Promise(resolveWait=>child.once('exit',resolveWait));rmSync(dataDir,{recursive:true,force:true});
 }

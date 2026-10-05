@@ -1838,6 +1838,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         if path.startswith("/api/admin/assets"):
             return "assets"
         if path.startswith("/api/admin/team") or path.startswith("/api/admin/auth/mfa"):
+            # E-02 fix: MFA enrollment/confirm are for own identity, not team management
+            # Only team routes require the team permission; MFA routes require only authentication
+            if path.startswith("/api/admin/auth/mfa"):
+                return None  # No specific permission; authenticated admin can manage own MFA
             return "team"
         if path.startswith("/api/admin/audit"):
             return "audit"
@@ -2125,6 +2129,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                     return self.send_private_bytes(self.server.payments.intelligence.export_csv(), "text/csv; charset=utf-8", filename)
                 backup_download = re.fullmatch(r"/api/admin/operations/backups/(\d+)/download/", path)
                 if backup_download:
+                    # A-02 fix: Backup downloads require stricter permission than general operations
+                    # Check for 'backups' permission or super-admin status
+                    permissions = admin_identity.get("permissions", [])
+                    if "*" not in permissions and "backups" not in permissions:
+                        # If no explicit backups permission, require super-admin role
+                        if admin_identity.get("role", "").lower() not in {"super admin", "super_admin"}:
+                            raise PermissionError("Backup downloads require the 'backups' permission or Super Admin role.")
                     backup_path = self.server.payments.operations.backup_file(int(backup_download.group(1)))
                     return self.send_private_file(backup_path, "application/gzip", backup_path.name, attachment=True)
                 document = re.fullmatch(r"/api/admin/compliance/documents/(\d+)/", path)

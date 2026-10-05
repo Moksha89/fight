@@ -493,8 +493,9 @@ class MOCEngine:
             # Fetch updated match
             match = self.get_match(match_id)
             
-            # TODO: Trigger settlement in main platform
-            # The MOCFeedEngine will pick this up and settle bets
+            # MOC cleanup: Settlement is handled by MOCFeedEngine.poll_once() which detects
+            # AWAITING_RESULT status and calls CockfightEngine.settle_game()
+            # (see moc_feed_engine.py lines 251-253)
             
             return {
                 'success': True,
