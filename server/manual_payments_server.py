@@ -1092,8 +1092,7 @@ class PaymentService:
             reason = reason[:500]
         
         # Generate idempotency reference
-        import secrets
-        reference = f"ADJ-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(4).upper()}"
+        reference = f"ADJ-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(4).upper()}"
         now = utc_now()
         
         with self.connect() as connection:
@@ -1140,7 +1139,7 @@ class PaymentService:
             # Let's use account_ledger instead, which is designed for admin adjustments
             connection.execute(
                 "INSERT INTO account_ledger(user_id, reference, entry_type, amount_paise, balance_after_paise, metadata_json, created_at) VALUES(?,?,?,?,?,?,?)",
-                (user_id, reference, "ADMIN_ADJUSTMENT", amount_paise, new_balance, 
+                (user_id, reference, "ADJUSTMENT", amount_paise, new_balance, 
                  json.dumps({"admin_actor": admin_actor, "reason": reason, "amount_rupees": amount_rupees}), now)
             )
             
