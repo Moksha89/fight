@@ -249,6 +249,17 @@ if (!userModalMatch) {
 // Note about server-side wallet_adjustment handling
 console.log('ℹ Note: wallet_adjustment_* server handling is pending Backend credit/debit feature (expected)');
 
+// Additional check: user update form should use form submission (not direct API bypass)
+const userFormHandler = dashboardContent.substring(
+  Math.max(0, dashboardContent.indexOf('user-form') - 500),
+  dashboardContent.indexOf('user-form') + 1000
+);
+
+if (userFormHandler.includes('user-form') && !userFormHandler.includes('FormData')) {
+  // Form should use FormData for proper submission
+  console.log('ℹ Note: user-form may need FormData handling verification');
+}
+
 // =============================================================================
 // P0-7: web/admin/_size_probe.txt should be absent
 // =============================================================================
@@ -268,6 +279,18 @@ const sidebarCheck = dashboardContent.includes('admin-sidebar') ||
                      dashboardContent.includes('nav-item');
 if (!sidebarCheck) {
   console.log('ℹ Note: admin sidebar navigation not clearly identifiable (verify D-17 manually)');
+}
+
+// Verify operations/intelligence/support modules present
+const requiredModules = ['operations', 'intelligence', 'support', 'users', 'games', 'payments'];
+const missingModules = requiredModules.filter(mod => !dashboardContent.includes(mod));
+if (missingModules.length > 0) {
+  failures.push(`web/admin/dashboard.js: missing required modules: ${missingModules.join(', ')}`);
+}
+
+// Check that modal close handlers exist (prevent accidental data loss)
+if (dashboardContent.includes('modal') && !dashboardContent.includes('close-modal')) {
+  failures.push('web/admin/dashboard.js: modals should have close-modal action handlers');
 }
 
 // =============================================================================
